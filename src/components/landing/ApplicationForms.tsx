@@ -95,7 +95,7 @@ function SuccessCard({ onReset }: { onReset: () => void }) {
   );
 }
 
-function FieldRunnerForm() {
+export function FieldRunnerForm() {
   const submit = useServerFn(submitFieldRunner);
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
@@ -240,7 +240,7 @@ function FieldRunnerForm() {
   );
 }
 
-function ProForm() {
+export function ProForm() {
   const submit = useServerFn(submitPro);
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
