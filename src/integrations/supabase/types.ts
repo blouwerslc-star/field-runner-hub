@@ -14,7 +14,108 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      field_runner_applications: {
+        Row: {
+          availability: string
+          city: string
+          created_at: string
+          disclaimer_agreed: boolean
+          email: string
+          experience: string | null
+          full_name: string
+          has_smartphone: string
+          has_transportation: string
+          id: string
+          phone: string
+          sample_url: string | null
+          services: string[]
+          state: string
+        }
+        Insert: {
+          availability: string
+          city: string
+          created_at?: string
+          disclaimer_agreed?: boolean
+          email: string
+          experience?: string | null
+          full_name: string
+          has_smartphone: string
+          has_transportation: string
+          id?: string
+          phone: string
+          sample_url?: string | null
+          services?: string[]
+          state: string
+        }
+        Update: {
+          availability?: string
+          city?: string
+          created_at?: string
+          disclaimer_agreed?: boolean
+          email?: string
+          experience?: string | null
+          full_name?: string
+          has_smartphone?: string
+          has_transportation?: string
+          id?: string
+          phone?: string
+          sample_url?: string | null
+          services?: string[]
+          state?: string
+        }
+        Relationships: []
+      }
+      real_estate_pro_applications: {
+        Row: {
+          budget: string | null
+          company_name: string | null
+          created_at: string
+          details: string | null
+          email: string
+          frequency: string
+          full_name: string
+          id: string
+          market_city: string
+          market_state: string
+          phone: string
+          role: string
+          services_needed: string[]
+          urgency: string
+        }
+        Insert: {
+          budget?: string | null
+          company_name?: string | null
+          created_at?: string
+          details?: string | null
+          email: string
+          frequency: string
+          full_name: string
+          id?: string
+          market_city: string
+          market_state: string
+          phone: string
+          role: string
+          services_needed?: string[]
+          urgency: string
+        }
+        Update: {
+          budget?: string | null
+          company_name?: string | null
+          created_at?: string
+          details?: string | null
+          email?: string
+          frequency?: string
+          full_name?: string
+          id?: string
+          market_city?: string
+          market_state?: string
+          phone?: string
+          role?: string
+          services_needed?: string[]
+          urgency?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
