@@ -46,6 +46,9 @@
   --color-input: var(--input);
   --color-ring: var(--ring);
   --color-ring-offset-background: var(--background);
+  --color-primary-glow: var(--primary-glow);
+  --shadow-glow: var(--shadow-glow);
+  --shadow-card: var(--shadow-card);
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);
   --color-chart-3: var(--chart-3);
@@ -62,26 +65,44 @@
 }
 
 :root {
-  --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.129 0.042 264.695);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.129 0.042 264.695);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.129 0.042 264.695);
-  --primary: oklch(0.208 0.042 265.755);
-  --primary-foreground: oklch(0.984 0.003 247.858);
-  --secondary: oklch(0.968 0.007 247.896);
-  --secondary-foreground: oklch(0.208 0.042 265.755);
-  --muted: oklch(0.968 0.007 247.896);
-  --muted-foreground: oklch(0.554 0.046 257.417);
-  --accent: oklch(0.968 0.007 247.896);
-  --accent-foreground: oklch(0.208 0.042 265.755);
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.984 0.003 247.858);
-  --border: oklch(0.929 0.013 255.508);
-  --input: oklch(0.929 0.013 255.508);
-  --ring: oklch(0.704 0.04 256.788);
+  --radius: 0.875rem;
+
+  /* REI Runner — dark navy / electric blue */
+  --background: oklch(0.16 0.04 260);
+  --foreground: oklch(0.98 0.005 250);
+
+  --card: oklch(0.21 0.045 262);
+  --card-foreground: oklch(0.98 0.005 250);
+
+  --popover: oklch(0.21 0.045 262);
+  --popover-foreground: oklch(0.98 0.005 250);
+
+  --primary: oklch(0.72 0.18 245);
+  --primary-foreground: oklch(0.14 0.04 260);
+  --primary-glow: oklch(0.78 0.18 230);
+
+  --secondary: oklch(0.26 0.04 260);
+  --secondary-foreground: oklch(0.98 0.005 250);
+
+  --muted: oklch(0.24 0.035 260);
+  --muted-foreground: oklch(0.72 0.02 255);
+
+  --accent: oklch(0.72 0.18 245);
+  --accent-foreground: oklch(0.14 0.04 260);
+
+  --destructive: oklch(0.65 0.22 27);
+  --destructive-foreground: oklch(0.98 0.005 250);
+
+  --border: oklch(0.32 0.04 260 / 60%);
+  --input: oklch(0.26 0.04 260);
+  --ring: oklch(0.72 0.18 245);
+
+  --gradient-hero: radial-gradient(80% 60% at 50% 0%, oklch(0.32 0.12 250 / 65%), transparent 60%),
+    linear-gradient(180deg, oklch(0.14 0.04 260) 0%, oklch(0.10 0.03 260) 100%);
+  --gradient-primary: linear-gradient(135deg, oklch(0.72 0.18 245), oklch(0.62 0.20 260));
+  --shadow-glow: 0 20px 60px -20px oklch(0.72 0.18 245 / 45%);
+  --shadow-card: 0 10px 40px -20px oklch(0 0 0 / 60%);
+
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
@@ -140,5 +161,47 @@
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
+    font-family: "Inter", ui-sans-serif, system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
   }
+
+  h1, h2, h3, h4 {
+    font-family: "Space Grotesk", "Inter", system-ui, sans-serif;
+    letter-spacing: -0.02em;
+  }
+}
+
+@layer utilities {
+  .bg-hero {
+    background-image: var(--gradient-hero);
+  }
+  .bg-gradient-primary {
+    background-image: var(--gradient-primary);
+  }
+  .text-gradient {
+    background: linear-gradient(135deg, oklch(0.98 0.005 250), oklch(0.78 0.18 230));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+  }
+  .shadow-glow { box-shadow: var(--shadow-glow); }
+  .shadow-card { box-shadow: var(--shadow-card); }
+  .grid-bg {
+    background-image:
+      linear-gradient(oklch(0.72 0.18 245 / 8%) 1px, transparent 1px),
+      linear-gradient(90deg, oklch(0.72 0.18 245 / 8%) 1px, transparent 1px);
+    background-size: 48px 48px;
+    mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
+  }
+  @keyframes fade-up {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .animate-fade-up { animation: fade-up 0.7s ease-out both; }
+  @keyframes float-blob {
+    0%, 100% { transform: translate(0,0) scale(1); }
+    50% { transform: translate(20px,-30px) scale(1.05); }
+  }
+  .animate-blob { animation: float-blob 12s ease-in-out infinite; }
 }
