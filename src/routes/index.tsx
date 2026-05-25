@@ -32,7 +32,7 @@ import {
   CalendarClock,
   ArrowRight,
 } from "lucide-react";
-import { ApplicationForms } from "@/components/landing/ApplicationForms";
+import { FieldRunnerForm, ProForm } from "@/components/landing/ApplicationForms";
 import heroBg from "@/assets/hero-bg.jpg";
 
 export const Route = createFileRoute("/")({
@@ -479,7 +479,7 @@ function ApplicationFormsControlled({
         </button>
       </div>
       <div className="rounded-2xl border border-border bg-card/60 backdrop-blur p-6 md:p-8 shadow-card">
-        {tab === "runner" ? <ApplicationForms defaultTab="runner" key="r" /> : <ApplicationForms defaultTab="pro" key="p" />}
+        {tab === "runner" ? <FieldRunnerForm key="r" /> : <ProForm key="p" />}
       </div>
     </div>
   );
