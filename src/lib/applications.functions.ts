@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import { appendFieldRunner, appendPro } from "./sheets.server";
 
 const yesNo = z.enum(["yes", "no"]);
 
@@ -61,6 +62,20 @@ export const submitFieldRunner = createServerFn({ method: "POST" })
       console.error("field_runner insert failed", error);
       throw new Error("Could not save your application. Please try again.");
     }
+    await appendFieldRunner({
+      full_name: row.full_name,
+      email: row.email,
+      phone: row.phone,
+      city: row.city,
+      state: row.state,
+      has_transportation: row.has_transportation,
+      has_smartphone: row.has_smartphone,
+      services: row.services,
+      availability: row.availability,
+      experience: row.experience || "",
+      sample_url: row.sample_url || "",
+      disclaimer_agreed: row.disclaimer_agreed,
+    });
     return { ok: true };
   });
 
@@ -88,5 +103,19 @@ export const submitPro = createServerFn({ method: "POST" })
       console.error("pro insert failed", error);
       throw new Error("Could not save your application. Please try again.");
     }
+    await appendPro({
+      full_name: row.full_name,
+      email: row.email,
+      phone: row.phone,
+      company_name: row.company_name || "",
+      role: row.role,
+      market_city: row.market_city,
+      market_state: row.market_state,
+      services_needed: row.services_needed,
+      frequency: row.frequency,
+      budget: row.budget || "",
+      urgency: row.urgency,
+      details: row.details || "",
+    });
     return { ok: true };
   });
