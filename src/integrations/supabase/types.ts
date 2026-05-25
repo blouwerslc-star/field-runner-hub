@@ -35,51 +35,87 @@ export type Database = {
       field_runner_applications: {
         Row: {
           availability: string
+          background_check_consent: boolean | null
           city: string
           created_at: string
+          date_of_birth: string | null
           disclaimer_agreed: boolean
           email: string
           experience: string | null
           full_name: string
+          has_drivers_license: string | null
           has_smartphone: string
           has_transportation: string
+          heard_about: string | null
+          hours_per_week: string | null
           id: string
           phone: string
+          preferred_payout: string | null
+          referral_code: string | null
           sample_url: string | null
           services: string[]
+          social_links: string | null
           state: string
+          street_address: string | null
+          travel_radius_miles: string | null
+          vehicle_type: string | null
+          zip_code: string | null
         }
         Insert: {
           availability: string
+          background_check_consent?: boolean | null
           city: string
           created_at?: string
+          date_of_birth?: string | null
           disclaimer_agreed?: boolean
           email: string
           experience?: string | null
           full_name: string
+          has_drivers_license?: string | null
           has_smartphone: string
           has_transportation: string
+          heard_about?: string | null
+          hours_per_week?: string | null
           id?: string
           phone: string
+          preferred_payout?: string | null
+          referral_code?: string | null
           sample_url?: string | null
           services?: string[]
+          social_links?: string | null
           state: string
+          street_address?: string | null
+          travel_radius_miles?: string | null
+          vehicle_type?: string | null
+          zip_code?: string | null
         }
         Update: {
           availability?: string
+          background_check_consent?: boolean | null
           city?: string
           created_at?: string
+          date_of_birth?: string | null
           disclaimer_agreed?: boolean
           email?: string
           experience?: string | null
           full_name?: string
+          has_drivers_license?: string | null
           has_smartphone?: string
           has_transportation?: string
+          heard_about?: string | null
+          hours_per_week?: string | null
           id?: string
           phone?: string
+          preferred_payout?: string | null
+          referral_code?: string | null
           sample_url?: string | null
           services?: string[]
+          social_links?: string | null
           state?: string
+          street_address?: string | null
+          travel_radius_miles?: string | null
+          vehicle_type?: string | null
+          zip_code?: string | null
         }
         Relationships: []
       }
