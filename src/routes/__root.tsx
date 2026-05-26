@@ -9,6 +9,7 @@ import {
 } from "@tanstack/react-router";
 
 import appCss from "../styles.css?url";
+import { META_PIXEL_ID, GA4_MEASUREMENT_ID } from "@/lib/tracking";
 
 function NotFoundComponent() {
   return (
