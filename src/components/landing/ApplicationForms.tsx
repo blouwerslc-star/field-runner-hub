@@ -104,6 +104,13 @@ export function FieldRunnerForm() {
   const [hasTransport, setHasTransport] = useState("");
   const [hasPhone, setHasPhone] = useState("");
   const [agreed, setAgreed] = useState(false);
+  const [hasLicense, setHasLicense] = useState("");
+  const [vehicleType, setVehicleType] = useState("");
+  const [travelRadius, setTravelRadius] = useState("");
+  const [hoursPerWeek, setHoursPerWeek] = useState("");
+  const [payout, setPayout] = useState("");
+  const [heardAbout, setHeardAbout] = useState("");
+  const [bgConsent, setBgConsent] = useState(false);
   const [reset, setReset] = useState(0);
 
   const toggle = (s: string) =>
@@ -118,6 +125,13 @@ export function FieldRunnerForm() {
     setHasTransport("");
     setHasPhone("");
     setAgreed(false);
+    setHasLicense("");
+    setVehicleType("");
+    setTravelRadius("");
+    setHoursPerWeek("");
+    setPayout("");
+    setHeardAbout("");
+    setBgConsent(false);
     setReset((n) => n + 1);
   };
 
@@ -130,10 +144,22 @@ export function FieldRunnerForm() {
       phone: String(f.get("phone") || ""),
       city: String(f.get("city") || ""),
       state: String(f.get("state") || ""),
+      street_address: String(f.get("street_address") || ""),
+      zip_code: String(f.get("zip_code") || ""),
+      date_of_birth: String(f.get("date_of_birth") || ""),
       has_transportation: hasTransport,
+      has_drivers_license: hasLicense,
+      vehicle_type: vehicleType,
+      travel_radius_miles: travelRadius,
       has_smartphone: hasPhone,
       services,
       availability,
+      hours_per_week: hoursPerWeek,
+      preferred_payout: payout,
+      background_check_consent: bgConsent,
+      heard_about: heardAbout,
+      referral_code: String(f.get("referral_code") || ""),
+      social_links: String(f.get("social_links") || ""),
       experience: String(f.get("experience") || ""),
       sample_url: String(f.get("sample_url") || ""),
       disclaimer_agreed: agreed,
@@ -143,11 +169,18 @@ export function FieldRunnerForm() {
       toast.error("Please agree to the disclaimer.");
       return;
     }
+    if (!bgConsent) {
+      toast.error("Please consent to a background check to continue.");
+      return;
+    }
     if (!services.length) {
       toast.error("Pick at least one service you can perform.");
       return;
     }
-    if (!availability || !hasTransport || !hasPhone) {
+    if (
+      !availability || !hasTransport || !hasPhone || !hasLicense ||
+      !vehicleType || !travelRadius || !hoursPerWeek || !payout || !heardAbout
+    ) {
       toast.error("Please complete all dropdowns.");
       return;
     }
@@ -180,14 +213,46 @@ export function FieldRunnerForm() {
         <Field label="Full Name"><Input name="full_name" required maxLength={100} /></Field>
         <Field label="Email Address"><Input name="email" type="email" required maxLength={200} /></Field>
         <Field label="Phone Number"><Input name="phone" required maxLength={30} /></Field>
+        <Field label="Date of Birth"><Input name="date_of_birth" type="date" required /></Field>
+        <Field label="Street Address"><Input name="street_address" required maxLength={200} /></Field>
         <Field label="City"><Input name="city" required maxLength={100} /></Field>
         <Field label="State"><Input name="state" required maxLength={50} /></Field>
+        <Field label="Zip Code"><Input name="zip_code" required maxLength={20} /></Field>
         <Field label="Reliable transportation?">
           <Select value={hasTransport} onValueChange={setHasTransport}>
             <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
             <SelectContent>
               <SelectItem value="yes">Yes</SelectItem>
               <SelectItem value="no">No</SelectItem>
+            </SelectContent>
+          </Select>
+        </Field>
+        <Field label="Valid driver's license?">
+          <Select value={hasLicense} onValueChange={setHasLicense}>
+            <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="yes">Yes</SelectItem>
+              <SelectItem value="no">No</SelectItem>
+            </SelectContent>
+          </Select>
+        </Field>
+        <Field label="Vehicle type">
+          <Select value={vehicleType} onValueChange={setVehicleType}>
+            <SelectTrigger><SelectValue placeholder="Select vehicle" /></SelectTrigger>
+            <SelectContent>
+              {["Car","SUV","Truck","Van","Motorcycle","Bicycle","None"].map((o) => (
+                <SelectItem key={o} value={o}>{o}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </Field>
+        <Field label="Willing to travel">
+          <Select value={travelRadius} onValueChange={setTravelRadius}>
+            <SelectTrigger><SelectValue placeholder="Travel radius" /></SelectTrigger>
+            <SelectContent>
+              {["Up to 10 miles","Up to 25 miles","Up to 50 miles","50+ miles"].map((o) => (
+                <SelectItem key={o} value={o}>{o}</SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </Field>
@@ -210,6 +275,36 @@ export function FieldRunnerForm() {
             </SelectContent>
           </Select>
         </Field>
+        <Field label="Hours per week">
+          <Select value={hoursPerWeek} onValueChange={setHoursPerWeek}>
+            <SelectTrigger><SelectValue placeholder="Select hours" /></SelectTrigger>
+            <SelectContent>
+              {["Under 5","5–10","10–20","20–40","40+"].map((o) => (
+                <SelectItem key={o} value={o}>{o}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </Field>
+        <Field label="Preferred payout method">
+          <Select value={payout} onValueChange={setPayout}>
+            <SelectTrigger><SelectValue placeholder="How do you want to be paid?" /></SelectTrigger>
+            <SelectContent>
+              {["Direct Deposit","PayPal","Venmo","Cash App","Zelle","Check"].map((o) => (
+                <SelectItem key={o} value={o}>{o}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </Field>
+        <Field label="How did you hear about us?">
+          <Select value={heardAbout} onValueChange={setHeardAbout}>
+            <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
+            <SelectContent>
+              {["Google search","Facebook","Instagram","TikTok","YouTube","Friend / Referral","Real estate group","Other"].map((o) => (
+                <SelectItem key={o} value={o}>{o}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </Field>
       </div>
 
       <Field label="Services you can perform">
@@ -223,6 +318,23 @@ export function FieldRunnerForm() {
       <Field label="Sample photos or videos (URL)">
         <Input name="sample_url" placeholder="Link to Google Drive, Dropbox, portfolio…" maxLength={500} />
       </Field>
+
+      <div className="grid sm:grid-cols-2 gap-4">
+        <Field label="Referral code (optional)">
+          <Input name="referral_code" placeholder="Who sent you?" maxLength={50} />
+        </Field>
+        <Field label="Social profile link (optional)">
+          <Input name="social_links" placeholder="LinkedIn, Instagram, etc." maxLength={500} />
+        </Field>
+      </div>
+
+      <label className="flex items-start gap-3 text-sm text-muted-foreground">
+        <Checkbox checked={bgConsent} onCheckedChange={(v) => setBgConsent(v === true)} className="mt-0.5" />
+        <span>
+          I consent to a basic background check if selected for the REI Runner field
+          runner network.
+        </span>
+      </label>
 
       <label className="flex items-start gap-3 text-sm text-muted-foreground">
         <Checkbox checked={agreed} onCheckedChange={(v) => setAgreed(v === true)} className="mt-0.5" />

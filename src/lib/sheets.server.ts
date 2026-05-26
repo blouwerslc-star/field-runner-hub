@@ -7,7 +7,11 @@ const PRO_SHEET = "Real Estate Pros";
 
 const FIELD_RUNNER_HEADERS = [
   "Submitted At", "Full Name", "Email", "Phone", "City", "State",
-  "Has Transportation", "Has Smartphone", "Services", "Availability",
+  "Street Address", "Zip", "Date of Birth",
+  "Has Transportation", "Driver's License", "Vehicle Type",
+  "Travel Radius (mi)", "Has Smartphone", "Services", "Availability",
+  "Hours / Week", "Preferred Payout", "Background Check Consent",
+  "Heard About", "Referral Code", "Social Links",
   "Experience", "Sample URL", "Disclaimer Agreed",
 ];
 
@@ -93,15 +97,24 @@ async function getOrCreateSpreadsheetId(): Promise<string> {
 
 export async function appendFieldRunner(row: {
   full_name: string; email: string; phone: string; city: string; state: string;
-  has_transportation: string; has_smartphone: string; services: string[];
-  availability: string; experience: string; sample_url: string; disclaimer_agreed: boolean;
+  street_address: string; zip_code: string; date_of_birth: string;
+  has_transportation: string; has_drivers_license: string; vehicle_type: string;
+  travel_radius_miles: string; has_smartphone: string; services: string[];
+  availability: string; hours_per_week: string; preferred_payout: string;
+  background_check_consent: boolean; heard_about: string; referral_code: string;
+  social_links: string; experience: string; sample_url: string; disclaimer_agreed: boolean;
 }) {
   try {
     const id = await getOrCreateSpreadsheetId();
     await appendValues(id, FIELD_RUNNER_SHEET, [[
       new Date().toISOString(), row.full_name, row.email, row.phone, row.city, row.state,
-      row.has_transportation, row.has_smartphone, row.services.join(", "),
-      row.availability, row.experience, row.sample_url, row.disclaimer_agreed ? "Yes" : "No",
+      row.street_address, row.zip_code, row.date_of_birth,
+      row.has_transportation, row.has_drivers_license, row.vehicle_type,
+      row.travel_radius_miles, row.has_smartphone, row.services.join(", "),
+      row.availability, row.hours_per_week, row.preferred_payout,
+      row.background_check_consent ? "Yes" : "No",
+      row.heard_about, row.referral_code, row.social_links,
+      row.experience, row.sample_url, row.disclaimer_agreed ? "Yes" : "No",
     ]]);
   } catch (err) {
     console.error("appendFieldRunner to Sheets failed:", err);

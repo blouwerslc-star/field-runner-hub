@@ -141,8 +141,8 @@ function Index() {
             <button onClick={() => scrollToId("pros")} className="hover:text-foreground transition">For Pros</button>
             <button onClick={() => scrollToId("faq")} className="hover:text-foreground transition">FAQ</button>
           </nav>
-          <Button onClick={() => goApply("pro")} size="sm" className="bg-gradient-primary shadow-glow">
-            Get Early Access
+          <Button onClick={() => goApply("runner")} size="sm" className="bg-gradient-primary shadow-glow">
+            Become a Runner
           </Button>
         </div>
       </header>
@@ -171,25 +171,28 @@ function Index() {
             Launching soon · Early access open
           </div>
           <h1 className="mt-6 text-4xl sm:text-6xl md:text-7xl font-bold leading-[1.05] animate-fade-up" style={{ animationDelay: "0.1s" }}>
-            Boots on the Ground for
+            Get Paid to Run
             <br />
-            <span className="text-gradient">Real Estate Investors</span>
+            <span className="text-gradient">Real Estate Tasks</span>
           </h1>
           <p className="mt-6 max-w-2xl mx-auto text-base md:text-lg text-muted-foreground animate-fade-up" style={{ animationDelay: "0.2s" }}>
-            REI Runner connects investors, wholesalers, agents, landlords, and
-            property managers with local field runners who can complete property
-            photos, walkthrough videos, occupancy checks, and more.
+            Use your phone, your car, and your local knowledge. Field runners earn money
+            doing simple, non-licensed real estate tasks — property photos, walkthrough
+            videos, occupancy checks, lockbox installs, and more.
           </p>
           <div className="mt-9 flex flex-col sm:flex-row gap-3 justify-center animate-fade-up" style={{ animationDelay: "0.3s" }}>
-            <Button size="lg" onClick={() => goApply("runner")} className="bg-gradient-primary shadow-glow text-base h-12 px-6">
+            <Button size="lg" onClick={() => goApply("runner")} className="bg-gradient-primary shadow-glow text-base h-14 px-8">
               Apply as a Field Runner <ArrowRight className="size-4 ml-1" />
-            </Button>
-            <Button size="lg" variant="outline" onClick={() => goApply("pro")} className="h-12 px-6 text-base border-border/80 bg-card/40 backdrop-blur hover:bg-card">
-              Join as a Real Estate Pro
             </Button>
           </div>
           <p className="mt-6 text-xs text-muted-foreground animate-fade-up" style={{ animationDelay: "0.4s" }}>
-            Launching soon in select markets. Early applicants receive priority access.
+            Launching soon in select markets. Early applicants get priority access and first pick of tasks.
+          </p>
+          <p className="mt-3 text-xs text-muted-foreground animate-fade-up" style={{ animationDelay: "0.5s" }}>
+            Real estate pro instead?{" "}
+            <button onClick={() => goApply("pro")} className="text-primary underline-offset-4 hover:underline">
+              Join the early-access list →
+            </button>
           </p>
         </div>
       </section>
@@ -387,13 +390,13 @@ function Index() {
           <p className="mt-4 text-muted-foreground max-w-2xl mx-auto">
             Be among the first real estate professionals and field runners to join the REI Runner network.
           </p>
-          <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
-            <Button size="lg" onClick={() => goApply("runner")} className="bg-gradient-primary shadow-glow h-12 px-6 text-base">
-              Apply as a Field Runner
+          <div className="mt-8 flex flex-col items-center gap-3">
+            <Button size="lg" onClick={() => goApply("runner")} className="bg-gradient-primary shadow-glow h-14 px-8 text-base">
+              Apply as a Field Runner <ArrowRight className="size-4 ml-1" />
             </Button>
-            <Button size="lg" variant="outline" onClick={() => goApply("pro")} className="h-12 px-6 text-base border-border/80 bg-card/40 backdrop-blur hover:bg-card">
-              Join as a Real Estate Pro
-            </Button>
+            <button onClick={() => goApply("pro")} className="text-sm text-muted-foreground hover:text-foreground underline-offset-4 hover:underline">
+              Or join as a real estate pro →
+            </button>
           </div>
         </div>
       </section>
