@@ -1,6 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { CheckCircle2, Mail } from "lucide-react";
+import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import { trackLead } from "@/lib/tracking";
 
 export const Route = createFileRoute("/waitlist")({
   head: () => ({
@@ -16,6 +18,9 @@ export const Route = createFileRoute("/waitlist")({
 });
 
 function WaitlistPage() {
+  useEffect(() => {
+    trackLead();
+  }, []);
   return (
     <main className="min-h-screen flex items-center justify-center px-4 py-16 bg-background">
       <div className="max-w-xl w-full text-center space-y-6 rounded-2xl border border-border bg-card p-8 sm:p-12 shadow-sm">
