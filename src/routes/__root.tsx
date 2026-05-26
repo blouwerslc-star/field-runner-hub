@@ -72,6 +72,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
+      { name: "google-site-verification", content: "NGP78xtvCvmgujpyIxbatu0zmRquvaB1lfStvuMUV64" },
       { title: "REI Runner | Real Estate Field Services Marketplace" },
       {
         name: "description",
