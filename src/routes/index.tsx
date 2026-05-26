@@ -371,12 +371,12 @@ function Index() {
               Hire vetted local runners for photos, walkthrough videos, drive-bys, and occupancy checks — on demand, in any market we serve.
             </p>
           </div>
-          <a
-            href="mailto:investors@reirunner.com?subject=Investor%20Waitlist"
+          <Link
+            to="/investors"
             className="inline-flex items-center gap-2 h-12 px-6 rounded-md bg-gradient-primary shadow-glow text-sm font-medium text-primary-foreground hover:opacity-90 transition"
           >
-            Join Investor Waitlist <ArrowRight className="size-4" />
-          </a>
+            Apply as an Investor <ArrowRight className="size-4" />
+          </Link>
         </div>
       </section>
 
