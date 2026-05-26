@@ -482,7 +482,7 @@ export function ProForm() {
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   const id = useId();
-  const child = isValidElement(children) && (children.type as { displayName?: string })?.displayName !== "ServicesGrid"
+  const child = isValidElement(children)
     ? cloneElement(children as React.ReactElement<{ id?: string }>, { id })
     : children;
   return (
