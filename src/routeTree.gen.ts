@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WaitlistRouteImport } from './routes/waitlist'
 import { Route as TermsRouteImport } from './routes/terms'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as FaqRouteImport } from './routes/faq'
 import { Route as ApplyRouteImport } from './routes/apply'
@@ -25,6 +26,11 @@ const WaitlistRoute = WaitlistRouteImport.update({
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
   path: '/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PrivacyRoute = PrivacyRouteImport.update({
@@ -59,6 +65,7 @@ export interface FileRoutesByFullPath {
   '/apply': typeof ApplyRoute
   '/faq': typeof FaqRoute
   '/privacy': typeof PrivacyRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/waitlist': typeof WaitlistRoute
 }
@@ -68,6 +75,7 @@ export interface FileRoutesByTo {
   '/apply': typeof ApplyRoute
   '/faq': typeof FaqRoute
   '/privacy': typeof PrivacyRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/waitlist': typeof WaitlistRoute
 }
@@ -78,6 +86,7 @@ export interface FileRoutesById {
   '/apply': typeof ApplyRoute
   '/faq': typeof FaqRoute
   '/privacy': typeof PrivacyRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/waitlist': typeof WaitlistRoute
 }
@@ -89,10 +98,19 @@ export interface FileRouteTypes {
     | '/apply'
     | '/faq'
     | '/privacy'
+    | '/sitemap.xml'
     | '/terms'
     | '/waitlist'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/$' | '/apply' | '/faq' | '/privacy' | '/terms' | '/waitlist'
+  to:
+    | '/'
+    | '/$'
+    | '/apply'
+    | '/faq'
+    | '/privacy'
+    | '/sitemap.xml'
+    | '/terms'
+    | '/waitlist'
   id:
     | '__root__'
     | '/'
@@ -100,6 +118,7 @@ export interface FileRouteTypes {
     | '/apply'
     | '/faq'
     | '/privacy'
+    | '/sitemap.xml'
     | '/terms'
     | '/waitlist'
   fileRoutesById: FileRoutesById
@@ -110,6 +129,7 @@ export interface RootRouteChildren {
   ApplyRoute: typeof ApplyRoute
   FaqRoute: typeof FaqRoute
   PrivacyRoute: typeof PrivacyRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TermsRoute: typeof TermsRoute
   WaitlistRoute: typeof WaitlistRoute
 }
@@ -128,6 +148,13 @@ declare module '@tanstack/react-router' {
       path: '/terms'
       fullPath: '/terms'
       preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/privacy': {
@@ -174,9 +201,20 @@ const rootRouteChildren: RootRouteChildren = {
   ApplyRoute: ApplyRoute,
   FaqRoute: FaqRoute,
   PrivacyRoute: PrivacyRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
   TermsRoute: TermsRoute,
   WaitlistRoute: WaitlistRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
