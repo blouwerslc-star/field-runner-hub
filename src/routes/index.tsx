@@ -20,7 +20,6 @@ import {
   Network,
   PlayCircle,
   Mail,
-  Flag,
   Sparkles,
   Camera,
   Video,
@@ -28,7 +27,7 @@ import {
   Clock,
   Smartphone,
 } from "lucide-react";
-import { FieldRunnerForm } from "@/components/landing/ApplicationForms";
+import { useNavigate } from "@tanstack/react-router";
 import heroBg from "@/assets/hero-bg.jpg";
 
 export const Route = createFileRoute("/")({
@@ -160,7 +159,8 @@ function StatCounter({ value, suffix, label }: { value: number; suffix: string; 
 }
 
 function Index() {
-  const goApply = () => scrollToId("apply");
+  const navigate = useNavigate();
+  const goApply = () => navigate({ to: "/apply" });
 
   return (
     <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
