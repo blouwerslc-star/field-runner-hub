@@ -75,18 +75,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { name: "google-site-verification", content: "NGP78xtvCvmgujpyIxbatu0zmRquvaB1lfStvuMUV64" },
       { title: "REI Runner | Real Estate Field Services Marketplace" },
-      {
-        name: "description",
-        content:
-          "REI Runner connects real estate investors, wholesalers, agents, and property managers with local field runners for property photos, walkthrough videos, occupancy checks, and more.",
-      },
       { name: "author", content: "REI Runner" },
       { property: "og:title", content: "REI Runner | Real Estate Field Services Marketplace" },
-      {
-        property: "og:description",
-        content:
-          "Uber + Fiverr for real estate field services. Get boots on the ground for your deals or get paid completing local field tasks.",
-      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:title", content: "REI Runner | Real Estate Field Services Marketplace" },
