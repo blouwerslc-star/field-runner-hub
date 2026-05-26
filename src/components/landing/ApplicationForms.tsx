@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useId, cloneElement, isValidElement } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
@@ -84,7 +84,7 @@ function SuccessCard({ onReset }: { onReset: () => void }) {
       <div className="mx-auto mb-4 size-14 rounded-full bg-primary/15 grid place-items-center">
         <CheckCircle2 className="size-7 text-primary" />
       </div>
-      <h3 className="text-xl font-semibold mb-2">Application received</h3>
+      <h2 className="text-xl font-semibold mb-2">Application received</h2>
       <p className="text-muted-foreground max-w-md mx-auto">
         Your application has been received. We&apos;ll contact you as REI Runner
         launches in your market.
@@ -481,10 +481,14 @@ export function ProForm() {
 }
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  const id = useId();
+  const child = isValidElement(children)
+    ? cloneElement(children as React.ReactElement<{ id?: string }>, { id })
+    : children;
   return (
     <div className="space-y-1.5">
-      <Label className="text-sm text-muted-foreground">{label}</Label>
-      {children}
+      <Label htmlFor={id} className="text-sm text-muted-foreground">{label}</Label>
+      {child}
     </div>
   );
 }
