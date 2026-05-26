@@ -15,15 +15,18 @@ import {
   Wallet,
   CalendarClock,
   ArrowRight,
-  Search,
   DollarSign,
   TrendingUp,
-  GraduationCap,
   Network,
   PlayCircle,
   Mail,
   Flag,
   Sparkles,
+  Camera,
+  Video,
+  ClipboardList,
+  Clock,
+  Smartphone,
 } from "lucide-react";
 import { FieldRunnerForm } from "@/components/landing/ApplicationForms";
 import heroBg from "@/assets/hero-bg.jpg";
@@ -32,17 +35,17 @@ export const Route = createFileRoute("/")({
   component: Index,
   head: () => ({
     meta: [
-      { title: "REI Runner | Get Paid Finding Real Estate Opportunities" },
+      { title: "REI Runner | On-Demand Field Services for Real Estate Investors" },
       {
         name: "description",
         content:
-          "Join the nationwide REI Runner network. Local field agents connect investors with distressed and off-market properties — and get paid when leads close.",
+          "REI Runner is the marketplace where real estate investors hire local runners for property photos, walkthrough videos, occupancy checks, drive-bys, sign placement, and more — on demand.",
       },
-      { property: "og:title", content: "REI Runner | Get Paid Finding Real Estate Opportunities" },
+      { property: "og:title", content: "REI Runner | On-Demand Field Services for Real Estate Investors" },
       {
         property: "og:description",
         content:
-          "Become a Founding Runner. Earn money helping investors find distressed and off-market properties in your city.",
+          "Hire local boots-on-the-ground for photos, videos, walkthroughs, and property checks — or get paid completing tasks in your city.",
       },
       { property: "og:url", content: "https://reirunner.com/" },
     ],
@@ -55,7 +58,7 @@ export const Route = createFileRoute("/")({
           "@type": "Organization",
           name: "REI Runner",
           description:
-            "Nationwide field acquisition network connecting local runners with real estate investors looking for distressed and off-market properties.",
+            "On-demand marketplace connecting real estate investors with local independent contractors for property field services like photos, videos, walkthroughs, and occupancy checks.",
           url: "https://reirunner.com/",
         }),
       },
@@ -69,37 +72,46 @@ const MARKETS = [
 ];
 
 const STATS = [
-  { value: 240, suffix: "+", label: "Applications Submitted" },
+  { value: 240, suffix: "+", label: "Runner Applications" },
   { value: 12, suffix: "", label: "Cities Covered" },
-  { value: 38, suffix: "", label: "Active Investors" },
-  { value: 410, suffix: "+", label: "Leads Reviewed" },
+  { value: 38, suffix: "", label: "Investors Onboarding" },
+  { value: 8, suffix: "", label: "Service Types" },
 ];
 
 const STEPS = [
-  { n: "01", icon: Search, title: "Find Opportunities", body: "Spot distressed, vacant, or off-market properties in your neighborhood." },
-  { n: "02", icon: Send, title: "Submit Leads", body: "Share addresses, photos, and notes through REI Runner." },
-  { n: "03", icon: ShieldCheck, title: "Investors Review", body: "Verified investors actively review your leads for off-market deals." },
-  { n: "04", icon: DollarSign, title: "Get Paid", body: "Earn when your submitted leads turn into closed deals." },
+  { n: "01", icon: ClipboardList, title: "Investor Posts a Task", body: "An investor needs photos, a walkthrough video, an occupancy check, or a drive-by at a specific address." },
+  { n: "02", icon: Send, title: "Local Runner Accepts", body: "A vetted runner in that city claims the task and heads to the property." },
+  { n: "03", icon: Camera, title: "Runner Completes & Uploads", body: "Photos, video, and notes are uploaded directly through REI Runner — usually same-day." },
+  { n: "04", icon: DollarSign, title: "Runner Gets Paid", body: "Payment is released per completed task. No quotas, no long-term commitment." },
 ];
 
 const BENEFITS = [
-  { icon: Wallet, title: "Flexible side income", body: "Work nights, weekends, or whenever you want." },
-  { icon: GraduationCap, title: "Learn real estate", body: "Real experience finding off-market opportunities." },
-  { icon: Network, title: "Build investor relationships", body: "Connect directly with active local investors." },
-  { icon: ShieldCheck, title: "No license required", body: "Anyone can become a runner — no real estate license needed." },
-  { icon: CalendarClock, title: "Your own schedule", body: "Set your own pace. No quotas, no managers." },
-  { icon: TrendingUp, title: "Nationwide opportunities", body: "We're expanding to every major US market." },
+  { icon: Wallet, title: "Get paid per task", body: "Clear pricing on every job. Accept the work you want — skip what you don't." },
+  { icon: CalendarClock, title: "Work on your schedule", body: "Tasks are independent jobs. No shifts, no quotas, no managers." },
+  { icon: ShieldCheck, title: "No license required", body: "Field tasks like photos, videos, and drive-bys don't require a real estate license." },
+  { icon: Network, title: "Repeat investor clients", body: "Build a reputation with active investors who post recurring tasks in your city." },
+  { icon: Smartphone, title: "Everything in one place", body: "Accept jobs, upload deliverables, and get paid through one mobile-friendly platform." },
+  { icon: TrendingUp, title: "Growing nationwide", body: "More investors and more task volume every week, in every major US market." },
+];
+
+const SERVICES = [
+  { icon: Camera, title: "Property Photos", body: "Exterior and interior photo sets for listings, inspections, and underwriting." },
+  { icon: Video, title: "Walkthrough Videos", body: "Full interior walkthrough videos so investors can underwrite remotely." },
+  { icon: MapPin, title: "Drive-By Reports", body: "Quick exterior check with photos and condition notes." },
+  { icon: ShieldCheck, title: "Occupancy Checks", body: "Verify whether a property is vacant, occupied, or abandoned." },
+  { icon: ClipboardList, title: "Sign & Lockbox Placement", body: "Install or retrieve signs, lockboxes, and other property items." },
+  { icon: Clock, title: "Custom Field Tasks", body: "Meet a contractor, take a measurement, check on a tenant turn — investors set the scope." },
 ];
 
 const FAQS = [
-  { q: "What is REI Runner?", a: "REI Runner is a nationwide field acquisition network connecting local people who spot distressed and off-market properties with real estate investors actively looking to buy them." },
-  { q: "How do runners make money?", a: "Runners earn when the leads they submit are reviewed and turned into closed deals by investors in the network. You're paid for finding opportunities." },
-  { q: "Do I need real estate experience?", a: "No experience required. If you can drive your city and spot vacant, neglected, or for-sale-by-owner properties, you can be a runner." },
-  { q: "What kinds of properties qualify?", a: "Vacant, distressed, fire-damaged, code violations, abandoned, hoarder homes, FSBO signs, and other off-market properties investors can't easily find on the MLS." },
-  { q: "Is this available nationwide?", a: "We're launching first in Detroit, Atlanta, Dallas, Phoenix, Tampa, Indianapolis, Cleveland, and Chicago — then expanding nationwide. Apply now to be a Founding Runner in your city." },
-  { q: "How often are payouts made?", a: "Payouts are issued as deals close. Approved runners receive full onboarding details with payout schedules and methods (Direct Deposit, PayPal, Venmo, Zelle)." },
-  { q: "Is there a mobile app coming?", a: "Yes. The REI Runner mobile app is in active development for iOS and Android. Founding Runners get early access." },
-  { q: "How do investors use the platform?", a: "Verified investors get a live feed of qualified leads in their target markets, complete with photos, notes, and location data — so they can move on the right deals fast." },
+  { q: "What is REI Runner?", a: "REI Runner is an on-demand marketplace that connects real estate investors with local independent contractors (runners) for property field services — photos, walkthrough videos, drive-by reports, occupancy checks, sign and lockbox placement, and other on-site tasks." },
+  { q: "How do runners get paid?", a: "Runners are paid per completed task. Each job has a set price posted up front. Once your deliverables are uploaded and approved, payment is released to your account." },
+  { q: "Do I need real estate experience or a license?", a: "No. Runners are independent contractors performing non-licensed field work — taking photos, recording videos, and reporting on what they observe. No real estate license required." },
+  { q: "What kinds of tasks can investors post?", a: "Property photos, interior walkthrough videos, drive-by condition reports, occupancy checks, sign and lockbox installs, meeting a contractor on-site, measurements, and other simple on-site tasks." },
+  { q: "What cities is REI Runner available in?", a: "We're launching first in Detroit, Atlanta, Dallas, Phoenix, Tampa, Indianapolis, Cleveland, and Chicago — then expanding nationwide. Apply now to be a Founding Runner in your city." },
+  { q: "How fast are tasks completed?", a: "Most tasks are accepted within hours and completed same-day or next-day, depending on the runner's schedule and the task type." },
+  { q: "Is there a mobile app?", a: "Yes. The REI Runner mobile app is in active development for iOS and Android. Founding Runners and early investors get first access." },
+  { q: "How do investors use the platform?", a: "Investors post a task with the address, task type, and any special instructions. A local runner accepts it, completes the work, and uploads photos/video/notes — usually within 24 hours." },
 ];
 
 function scrollToId(id: string) {
@@ -165,6 +177,7 @@ function Index() {
           </a>
           <nav className="hidden md:flex items-center gap-7 text-sm text-muted-foreground">
             <button onClick={() => scrollToId("how")} className="hover:text-foreground transition">How it works</button>
+            <button onClick={() => scrollToId("services")} className="hover:text-foreground transition">Services</button>
             <button onClick={() => scrollToId("why")} className="hover:text-foreground transition">Why join</button>
             <button onClick={() => scrollToId("markets")} className="hover:text-foreground transition">Markets</button>
             <button onClick={() => scrollToId("faq")} className="hover:text-foreground transition">FAQ</button>
@@ -214,12 +227,12 @@ function Index() {
             Founding Runner Beta · Now accepting applications
           </div>
           <h1 className="mt-6 text-4xl sm:text-6xl md:text-7xl font-bold leading-[1.05] animate-fade-up" style={{ animationDelay: "0.1s" }}>
-            Get Paid Finding
+            Boots on the Ground
             <br />
-            <span className="text-gradient">Real Estate Opportunities</span>
+            <span className="text-gradient">for Real Estate Investors</span>
           </h1>
           <p className="mt-6 max-w-2xl mx-auto text-base md:text-lg text-muted-foreground animate-fade-up" style={{ animationDelay: "0.2s" }}>
-            Join the nationwide REI Runner network connecting local field agents with real estate investors actively looking for distressed properties and off-market deals.
+            REI Runner is the on-demand marketplace where investors hire local runners for property photos, walkthrough videos, drive-bys, occupancy checks, and other field tasks — completed in hours, not days.
           </p>
           <div className="mt-9 flex flex-col sm:flex-row gap-3 justify-center animate-fade-up" style={{ animationDelay: "0.3s" }}>
             <Button size="lg" onClick={goApply} className="bg-gradient-primary shadow-glow text-base h-14 px-8">
@@ -246,7 +259,7 @@ function Index() {
 
       {/* HOW IT WORKS */}
       <Section id="how">
-        <SectionHeader eyebrow="How It Works" title="From Sidewalk to Payday in 4 Steps" subtitle="A simple loop: find, submit, get reviewed, and earn when deals close." />
+        <SectionHeader eyebrow="How It Works" title="On-Demand Field Work in 4 Steps" subtitle="Investors post a task. A local runner accepts, completes it, and gets paid." />
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
           {STEPS.map((s, i) => (
             <div key={s.n} className="relative rounded-2xl border border-border bg-card/60 backdrop-blur p-6 shadow-card hover:border-primary/40 hover:-translate-y-1 transition-all duration-300 group">
@@ -266,7 +279,7 @@ function Index() {
 
       {/* WHY JOIN */}
       <Section id="why">
-        <SectionHeader eyebrow="Why People Join" title="Built for Hustlers, Side-Hustlers, and Future Investors" />
+        <SectionHeader eyebrow="Why Runners Join" title="Flexible Field Work, Per-Task Pay" subtitle="Built for independent contractors who want to earn on their own schedule." />
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {BENEFITS.map((b) => (
             <div key={b.title} className="rounded-2xl border border-border bg-card/60 backdrop-blur p-6 shadow-card hover:border-primary/40 hover:-translate-y-1 transition-all duration-300">
@@ -280,9 +293,25 @@ function Index() {
         </div>
       </Section>
 
+      {/* SERVICES */}
+      <Section id="services">
+        <SectionHeader eyebrow="What Runners Do" title="Tasks You Can Get Paid For" subtitle="Every task on REI Runner is a simple, non-licensed field job." />
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          {SERVICES.map((s) => (
+            <div key={s.title} className="rounded-2xl border border-border bg-card/60 backdrop-blur p-6 shadow-card hover:border-primary/40 hover:-translate-y-1 transition-all duration-300">
+              <div className="size-11 rounded-xl bg-primary/10 grid place-items-center mb-4">
+                <s.icon className="size-5 text-primary" />
+              </div>
+              <h3 className="text-lg font-semibold mb-1">{s.title}</h3>
+              <p className="text-sm text-muted-foreground">{s.body}</p>
+            </div>
+          ))}
+        </div>
+      </Section>
+
       {/* MARKETS */}
       <Section id="markets">
-        <SectionHeader eyebrow="Nationwide Launch" title="Launching in Major Markets" subtitle="We're starting in 8 high-opportunity cities and expanding fast. Don't see your city? Apply anyway — we open new markets weekly." />
+        <SectionHeader eyebrow="Nationwide Launch" title="Launching in Major Markets" subtitle="Starting in 8 high-volume investor markets and expanding fast. Don't see your city? Apply anyway — we open new markets weekly." />
         <div className="flex flex-wrap justify-center gap-3 max-w-3xl mx-auto">
           {MARKETS.map((m) => (
             <div key={m} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-border bg-card/60 backdrop-blur text-sm hover:border-primary/60 hover:shadow-glow transition">
@@ -316,15 +345,15 @@ function Index() {
             <div className="text-xs font-semibold tracking-widest text-primary uppercase flex items-center gap-2">
               <Sparkles className="size-3.5" /> About REI Runner
             </div>
-            <h2 className="mt-3 text-3xl md:text-5xl font-bold">A Nationwide Field Acquisition Network for Real Estate Investors</h2>
+            <h2 className="mt-3 text-3xl md:text-5xl font-bold">The On-Demand Field Services Marketplace for Real Estate</h2>
             <p className="mt-5 text-muted-foreground text-base md:text-lg">
-              We're building the modern infrastructure for off-market real estate. Local runners surface the properties that never hit Zillow. Investors get a live, verified feed of opportunities in their target cities. Everyone gets paid when deals close.
+              Investing in property you can't physically visit is hard. REI Runner gives investors a vetted network of local runners they can hire on demand — for photos, videos, walkthroughs, drive-bys, and other on-site tasks — without flying out, hiring an agent, or chasing down contractors.
             </p>
             <p className="mt-3 text-muted-foreground text-base md:text-lg">
-              No license required. No middlemen. No outdated lead lists. Just boots-on-the-ground intelligence built for hustlers and the investors who need them.
+              For runners, it's a way to earn per-task income with no license, no quotas, and no middlemen. Think Uber meets Fiverr — built specifically for real estate field work.
             </p>
             <div className="mt-6 flex flex-wrap gap-2">
-              {["Founding Members", "Early Access Beta", "Nationwide Launch", "Built for Hustlers"].map((t) => (
+              {["On-Demand Marketplace", "Per-Task Pay", "Nationwide Launch", "Early Access Beta"].map((t) => (
                 <span key={t} className="text-xs px-3 py-1 rounded-full border border-border bg-background/40">{t}</span>
               ))}
             </div>
@@ -337,9 +366,9 @@ function Index() {
         <div className="mx-auto max-w-6xl px-5 py-12 flex flex-col md:flex-row items-center justify-between gap-6">
           <div>
             <div className="text-xs font-semibold tracking-widest text-primary uppercase">For Investors</div>
-            <h3 className="mt-2 text-2xl md:text-3xl font-bold">Are you an investor looking for deal flow?</h3>
+            <h3 className="mt-2 text-2xl md:text-3xl font-bold">Need boots on the ground in another city?</h3>
             <p className="mt-2 text-sm md:text-base text-muted-foreground max-w-xl">
-              Get a live feed of verified off-market leads from runners in your target markets.
+              Hire vetted local runners for photos, walkthrough videos, drive-bys, and occupancy checks — on demand, in any market we serve.
             </p>
           </div>
           <a
@@ -392,7 +421,7 @@ function Index() {
       <section className="mx-auto max-w-5xl px-5 py-10">
         <div className="rounded-xl border border-border bg-muted/30 p-5 text-xs text-muted-foreground leading-relaxed">
           <strong className="text-foreground">Disclaimer:</strong> REI Runner is not a real estate brokerage, inspection company, appraisal company,
-          property management company, or legal service. Runners only perform approved non-licensed activity — spotting, photographing, and submitting publicly observable property information. They do not negotiate contracts, represent buyers or sellers, provide real estate advice, or perform any activity requiring a professional license.
+          property management company, or legal service. Runners are independent contractors who perform approved non-licensed field tasks — taking photos and videos, recording observations, and reporting on visible property conditions. Runners do not negotiate contracts, represent buyers or sellers, provide real estate advice, perform inspections, or perform any activity requiring a professional license.
         </div>
       </section>
 
@@ -407,7 +436,7 @@ function Index() {
               REI <span className="text-primary">Runner</span>
             </div>
             <p className="mt-4 text-sm text-muted-foreground max-w-md">
-              Building a nationwide field acquisition network for real estate investors. Local hustlers, real opportunities, real payouts.
+              The on-demand field services marketplace for real estate investors. Local runners, real tasks, per-job payouts.
             </p>
             <a href="mailto:hello@reirunner.com" className="mt-4 inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
               <Mail className="size-4" /> hello@reirunner.com
@@ -417,6 +446,7 @@ function Index() {
             <div className="text-xs font-semibold uppercase tracking-widest text-foreground mb-3">Platform</div>
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li><button onClick={() => scrollToId("how")} className="hover:text-foreground">How it works</button></li>
+              <li><button onClick={() => scrollToId("services")} className="hover:text-foreground">Services</button></li>
               <li><button onClick={() => scrollToId("why")} className="hover:text-foreground">Why join</button></li>
               <li><button onClick={() => scrollToId("markets")} className="hover:text-foreground">Markets</button></li>
               <li><button onClick={goApply} className="hover:text-foreground">Apply</button></li>
