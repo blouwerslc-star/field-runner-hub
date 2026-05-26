@@ -13,6 +13,7 @@ import { Route as WaitlistRouteImport } from './routes/waitlist'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as InvestorsRouteImport } from './routes/investors'
 import { Route as FaqRouteImport } from './routes/faq'
 import { Route as ApplyRouteImport } from './routes/apply'
 import { Route as SplatRouteImport } from './routes/$'
@@ -36,6 +37,11 @@ const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
 const PrivacyRoute = PrivacyRouteImport.update({
   id: '/privacy',
   path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InvestorsRoute = InvestorsRouteImport.update({
+  id: '/investors',
+  path: '/investors',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FaqRoute = FaqRouteImport.update({
@@ -64,6 +70,7 @@ export interface FileRoutesByFullPath {
   '/$': typeof SplatRoute
   '/apply': typeof ApplyRoute
   '/faq': typeof FaqRoute
+  '/investors': typeof InvestorsRoute
   '/privacy': typeof PrivacyRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
@@ -74,6 +81,7 @@ export interface FileRoutesByTo {
   '/$': typeof SplatRoute
   '/apply': typeof ApplyRoute
   '/faq': typeof FaqRoute
+  '/investors': typeof InvestorsRoute
   '/privacy': typeof PrivacyRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
@@ -85,6 +93,7 @@ export interface FileRoutesById {
   '/$': typeof SplatRoute
   '/apply': typeof ApplyRoute
   '/faq': typeof FaqRoute
+  '/investors': typeof InvestorsRoute
   '/privacy': typeof PrivacyRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
@@ -97,6 +106,7 @@ export interface FileRouteTypes {
     | '/$'
     | '/apply'
     | '/faq'
+    | '/investors'
     | '/privacy'
     | '/sitemap.xml'
     | '/terms'
@@ -107,6 +117,7 @@ export interface FileRouteTypes {
     | '/$'
     | '/apply'
     | '/faq'
+    | '/investors'
     | '/privacy'
     | '/sitemap.xml'
     | '/terms'
@@ -117,6 +128,7 @@ export interface FileRouteTypes {
     | '/$'
     | '/apply'
     | '/faq'
+    | '/investors'
     | '/privacy'
     | '/sitemap.xml'
     | '/terms'
@@ -128,6 +140,7 @@ export interface RootRouteChildren {
   SplatRoute: typeof SplatRoute
   ApplyRoute: typeof ApplyRoute
   FaqRoute: typeof FaqRoute
+  InvestorsRoute: typeof InvestorsRoute
   PrivacyRoute: typeof PrivacyRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TermsRoute: typeof TermsRoute
@@ -162,6 +175,13 @@ declare module '@tanstack/react-router' {
       path: '/privacy'
       fullPath: '/privacy'
       preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/investors': {
+      id: '/investors'
+      path: '/investors'
+      fullPath: '/investors'
+      preLoaderRoute: typeof InvestorsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/faq': {
@@ -200,6 +220,7 @@ const rootRouteChildren: RootRouteChildren = {
   SplatRoute: SplatRoute,
   ApplyRoute: ApplyRoute,
   FaqRoute: FaqRoute,
+  InvestorsRoute: InvestorsRoute,
   PrivacyRoute: PrivacyRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TermsRoute: TermsRoute,
