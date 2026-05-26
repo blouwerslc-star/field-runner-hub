@@ -98,6 +98,7 @@ function SuccessCard({ onReset }: { onReset: () => void }) {
 
 export function FieldRunnerForm() {
   const submit = useServerFn(submitFieldRunner);
+  const navigate = useNavigate();
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
   const [services, setServices] = useState<string[]>([]);
@@ -189,6 +190,7 @@ export function FieldRunnerForm() {
     try {
       await submit({ data: payload as never });
       setDone(true);
+      navigate({ to: "/waitlist" });
     } catch (err) {
       console.error(err);
       toast.error("Submission failed. Please review your info and try again.");
@@ -355,6 +357,7 @@ export function FieldRunnerForm() {
 
 export function ProForm() {
   const submit = useServerFn(submitPro);
+  const navigate = useNavigate();
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
   const [services, setServices] = useState<string[]>([]);
@@ -408,6 +411,7 @@ export function ProForm() {
         } as never,
       });
       setDone(true);
+      navigate({ to: "/waitlist" });
     } catch (err) {
       console.error(err);
       toast.error("Submission failed. Please review your info and try again.");
