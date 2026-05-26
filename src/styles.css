@@ -204,4 +204,19 @@
     50% { transform: translate(20px,-30px) scale(1.05); }
   }
   .animate-blob { animation: float-blob 12s ease-in-out infinite; }
+  @keyframes pin-bob {
+    0%, 100% { transform: translateY(0); opacity: .85; }
+    50% { transform: translateY(-6px); opacity: 1; }
+  }
+  .animate-pin { animation: pin-bob 4s ease-in-out infinite; }
+  @keyframes pulse-ring {
+    0% { transform: scale(0.6); opacity: .8; }
+    100% { transform: scale(2.4); opacity: 0; }
+  }
+  .animate-pulse-ring { animation: pulse-ring 2.6s ease-out infinite; }
+  .glass {
+    background: color-mix(in oklab, var(--card) 60%, transparent);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--color-border);
+  }
 }
