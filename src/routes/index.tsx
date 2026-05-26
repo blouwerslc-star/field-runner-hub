@@ -34,13 +34,13 @@ export const Route = createFileRoute("/")({
   component: Index,
   head: () => ({
     meta: [
-      { title: "REI Runner | On-Demand Field Services for Real Estate Investors" },
+      { title: "REI Runner | On-Demand Real Estate Field Services" },
       {
         name: "description",
         content:
-          "REI Runner is the marketplace where real estate investors hire local runners for property photos, walkthrough videos, occupancy checks, drive-bys, sign placement, and more — on demand.",
+          "Hire local runners for property photos, walkthrough videos, occupancy checks, drive-bys, and sign placement — on demand, nationwide.",
       },
-      { property: "og:title", content: "REI Runner | On-Demand Field Services for Real Estate Investors" },
+      { property: "og:title", content: "REI Runner | On-Demand Real Estate Field Services" },
       {
         property: "og:description",
         content:
