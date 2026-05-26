@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { Button } from "@/components/ui/button";
 import {
@@ -9,51 +9,48 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import {
-  Camera,
-  Video,
-  Home,
-  KeyRound,
-  Signpost,
-  Hammer,
-  Car,
-  Plug,
-  DoorOpen,
-  Handshake,
-  Ruler,
-  Trash2,
   MapPin,
   Send,
   CheckCircle2,
-  Building2,
-  Users,
   Zap,
   ShieldCheck,
   Wallet,
   CalendarClock,
   ArrowRight,
+  Search,
+  DollarSign,
+  TrendingUp,
+  GraduationCap,
+  Network,
+  Smartphone,
+  PlayCircle,
+  Mail,
+  Flag,
+  Sparkles,
 } from "lucide-react";
 import { FieldRunnerForm, ProForm } from "@/components/landing/ApplicationForms";
+import { Link } from "@tanstack/react-router";
 import heroBg from "@/assets/hero-bg.jpg";
 
 export const Route = createFileRoute("/")({
   component: Index,
   head: () => ({
     meta: [
-      { title: "REI Runner | Real Estate Field Services Marketplace" },
+      { title: "REI Runner | Get Paid Finding Real Estate Opportunities" },
       {
         name: "description",
         content:
-          "REI Runner connects real estate investors, wholesalers, agents, and property managers with local field runners for property photos, walkthrough videos, occupancy checks, and more.",
+          "Join the nationwide REI Runner network. Local field agents connect investors with distressed properties and off-market deals — and get paid when leads close.",
       },
-      { property: "og:title", content: "REI Runner | Real Estate Field Services Marketplace" },
+      { property: "og:title", content: "REI Runner | Get Paid Finding Real Estate Opportunities" },
       {
         property: "og:description",
         content:
-          "Uber + Fiverr for real estate field services. Boots on the ground for investors, wholesalers, agents, landlords, and property managers.",
+          "Become a Founding Runner. Earn money helping investors find distressed and off-market properties in your city.",
       },
-      { property: "og:url", content: "/" },
+      { property: "og:url", content: "https://reirunner.com/" },
     ],
-    links: [{ rel: "canonical", href: "/" }],
+    links: [{ rel: "canonical", href: "https://reirunner.com/" }],
     scripts: [
       {
         type: "application/ld+json",
@@ -62,30 +59,119 @@ export const Route = createFileRoute("/")({
           "@type": "Organization",
           name: "REI Runner",
           description:
-            "Marketplace connecting real estate professionals with local field runners for non-licensed real estate support services.",
-          url: "/",
+            "Nationwide field acquisition network connecting local runners with real estate investors looking for distressed and off-market properties.",
+          url: "https://reirunner.com/",
         }),
       },
     ],
   }),
 });
 
-const SERVICES = [
-  { icon: Camera, label: "Property Photos" },
-  { icon: Video, label: "Walkthrough Videos" },
-  { icon: Home, label: "Occupancy Checks" },
-  { icon: KeyRound, label: "Lockbox Installation" },
-  { icon: Signpost, label: "Yard Sign Placement" },
-  { icon: Hammer, label: "Rehab Progress Photos" },
-  { icon: Car, label: "Drive-By Inspections" },
-  { icon: Plug, label: "Utility Status Checks" },
-  { icon: DoorOpen, label: "Open House Support" },
-  { icon: Handshake, label: "Contractor Meetup Assistance" },
-  { icon: Ruler, label: "Basic Measurements" },
-  { icon: Trash2, label: "Trash-Out Coordination" },
+const MARKETS = [
+  "Detroit", "Atlanta", "Dallas", "Phoenix",
+  "Tampa", "Indianapolis", "Cleveland", "Chicago",
+];
+
+const STATS = [
+  { value: 240, suffix: "+", label: "Applications Submitted" },
+  { value: 12, suffix: "", label: "Cities Covered" },
+  { value: 38, suffix: "", label: "Active Investors" },
+  { value: 410, suffix: "+", label: "Leads Reviewed" },
+];
+
+const STEPS = [
+  { n: "01", icon: Search, title: "Find Opportunities", body: "Spot distressed, vacant, or off-market properties in your neighborhood." },
+  { n: "02", icon: Send, title: "Submit Leads", body: "Share addresses, photos, and notes through the REI Runner app." },
+  { n: "03", icon: ShieldCheck, title: "Investors Review", body: "Verified investors actively review your leads for off-market deals." },
+  { n: "04", icon: DollarSign, title: "Get Paid", body: "Earn when your submitted leads turn into closed deals." },
+];
+
+const BENEFITS = [
+  { icon: Wallet, title: "Flexible side income", body: "Work nights, weekends, or whenever you want." },
+  { icon: GraduationCap, title: "Learn real estate", body: "Get real experience finding off-market opportunities." },
+  { icon: Network, title: "Build investor relationships", body: "Connect directly with active local investors." },
+  { icon: ShieldCheck, title: "No license required", body: "Anyone can become a runner — no real estate license needed." },
+  { icon: CalendarClock, title: "Your own schedule", body: "Set your own pace. No quotas, no managers." },
+  { icon: TrendingUp, title: "Nationwide opportunities", body: "We're expanding to every major US market." },
 ];
 
 const FAQS = [
+  {
+    q: "What is REI Runner?",
+    a: "REI Runner is a nationwide field acquisition network that connects local people who spot distressed and off-market properties with real estate investors actively looking to buy them.",
+  },
+  {
+    q: "How do runners make money?",
+    a: "Runners earn when the leads they submit are reviewed and turned into closed deals by investors in the network. You're paid for finding opportunities, not for filling out paperwork.",
+  },
+  {
+    q: "Do I need real estate experience?",
+    a: "No experience required. If you can drive around your city and spot vacant, neglected, or for-sale-by-owner properties, you can be a runner.",
+  },
+  {
+    q: "What kinds of properties qualify?",
+    a: "Vacant, distressed, fire-damaged, code violations, abandoned, hoarder homes, FSBO signs, and other off-market properties investors typically can't find on the MLS.",
+  },
+  {
+    q: "Is this available nationwide?",
+    a: "We're launching first in Detroit, Atlanta, Dallas, Phoenix, Tampa, Indianapolis, Cleveland, and Chicago — then expanding nationwide based on demand. Apply now to be a Founding Runner in your city.",
+  },
+  {
+    q: "How often are payouts made?",
+    a: "Payouts are issued as deals close. Approved runners receive full onboarding details with payout schedules, methods (Direct Deposit, PayPal, Venmo, Zelle), and tracking.",
+  },
+  {
+    q: "Is there a mobile app coming?",
+    a: "Yes. The REI Runner mobile app is in active development for both iOS and Android. Founding Runners get early access.",
+  },
+  {
+    q: "How do investors use the platform?",
+    a: "Verified investors get a live feed of qualified leads in their target markets, complete with photos, notes, and location data — so they can move on the right deals fast.",
+  },
+];
+
+// Tiny in-view + count-up hook (no deps)
+function useCountUp(target: number, duration = 1600) {
+  const ref = useRef<HTMLDivElement | null>(null);
+  const [val, setVal] = useState(0);
+  const started = useRef(false);
+  useEffect(() => {
+    if (!ref.current) return;
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting && !started.current) {
+          started.current = true;
+          const start = performance.now();
+          const step = (now: number) => {
+            const t = Math.min(1, (now - start) / duration);
+            const eased = 1 - Math.pow(1 - t, 3);
+            setVal(Math.floor(eased * target));
+            if (t < 1) requestAnimationFrame(step);
+            else setVal(target);
+          };
+          requestAnimationFrame(step);
+        }
+      });
+    }, { threshold: 0.4 });
+    io.observe(ref.current);
+    return () => io.disconnect();
+  }, [target, duration]);
+  return { ref, val };
+}
+
+function StatCounter({ value, suffix, label }: { value: number; suffix: string; label: string }) {
+  const { ref, val } = useCountUp(value);
+  return (
+    <div ref={ref} className="text-center">
+      <div className="text-3xl md:text-5xl font-bold text-gradient tabular-nums">
+        {val.toLocaleString()}{suffix}
+      </div>
+      <div className="mt-2 text-xs md:text-sm text-muted-foreground uppercase tracking-wider">{label}</div>
+    </div>
+  );
+}
+
+const OLD_FAQS_UNUSED = [
   {
     q: "Do field runners need a real estate license?",
     a: "No. REI Runner is designed only for non-licensed support tasks such as photos, videos, drive-by checks, and property updates.",
