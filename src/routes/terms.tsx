@@ -5,9 +5,9 @@ export const Route = createFileRoute("/terms")({
   head: () => ({
     meta: [
       { title: "Terms of Service | REI Runner" },
-      { name: "description", content: "REI Runner terms of service." },
+      { name: "description", content: "REI Runner Terms of Service — the rules and conditions for runners, investors, and visitors using our platform." },
       { property: "og:title", content: "Terms of Service | REI Runner" },
-      { property: "og:description", content: "REI Runner terms of service." },
+      { property: "og:description", content: "REI Runner Terms of Service — the rules and conditions for runners, investors, and visitors using our platform." },
       { property: "og:url", content: "https://reirunner.com/terms" },
     ],
     links: [{ rel: "canonical", href: "https://reirunner.com/terms" }],
