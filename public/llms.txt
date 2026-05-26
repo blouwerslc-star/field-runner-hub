@@ -1,0 +1,11 @@
+# REI Runner
+
+> Nationwide marketplace connecting real estate investors with local field runners for on-demand property tasks like photos, walkthrough videos, occupancy checks, and drive-bys.
+
+## Pages
+
+- [Home](/): Overview of REI Runner and how the marketplace works.
+- [Apply](/apply): Application to become a Founding Runner.
+- [FAQ](/faq): Common questions about runners, payouts, and how investors use the platform.
+- [Privacy Policy](/privacy): How REI Runner collects, uses, and protects information.
+- [Terms of Service](/terms): Rules and conditions for using REI Runner.
