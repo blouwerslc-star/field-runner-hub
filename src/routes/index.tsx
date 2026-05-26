@@ -177,6 +177,7 @@ function Index() {
           </a>
           <nav className="hidden md:flex items-center gap-7 text-sm text-muted-foreground">
             <button onClick={() => scrollToId("how")} className="hover:text-foreground transition">How it works</button>
+            <button onClick={() => scrollToId("services")} className="hover:text-foreground transition">Services</button>
             <button onClick={() => scrollToId("why")} className="hover:text-foreground transition">Why join</button>
             <button onClick={() => scrollToId("markets")} className="hover:text-foreground transition">Markets</button>
             <button onClick={() => scrollToId("faq")} className="hover:text-foreground transition">FAQ</button>
