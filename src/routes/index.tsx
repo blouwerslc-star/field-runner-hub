@@ -20,7 +20,6 @@ import {
   Network,
   PlayCircle,
   Mail,
-  Flag,
   Sparkles,
   Camera,
   Video,
@@ -28,7 +27,7 @@ import {
   Clock,
   Smartphone,
 } from "lucide-react";
-import { FieldRunnerForm } from "@/components/landing/ApplicationForms";
+import { useNavigate } from "@tanstack/react-router";
 import heroBg from "@/assets/hero-bg.jpg";
 
 export const Route = createFileRoute("/")({
@@ -160,7 +159,8 @@ function StatCounter({ value, suffix, label }: { value: number; suffix: string; 
 }
 
 function Index() {
-  const goApply = () => scrollToId("apply");
+  const navigate = useNavigate();
+  const goApply = () => navigate({ to: "/apply" });
 
   return (
     <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
@@ -380,21 +380,17 @@ function Index() {
         </div>
       </section>
 
-      {/* APPLY */}
-      <Section id="apply">
+      {/* APPLY CTA */}
+      <Section>
         <SectionHeader
           eyebrow="Apply Now"
           title="Become a Founding Runner"
           subtitle="Limited spots during beta launch. Applications reviewed weekly."
         />
-        <div className="max-w-3xl mx-auto">
-          <div className="mb-5 rounded-xl border border-primary/30 bg-primary/5 px-5 py-3 text-sm text-center text-foreground">
-            <Flag className="size-4 text-primary inline-block mr-2 -mt-0.5" />
-            Founding Runners get priority access, first pick of leads, and lifetime perks.
-          </div>
-          <div className="rounded-2xl border border-border bg-card/60 backdrop-blur p-6 md:p-8 shadow-card">
-            <FieldRunnerForm />
-          </div>
+        <div className="flex justify-center">
+          <Button size="lg" onClick={goApply} className="bg-gradient-primary shadow-glow text-base h-14 px-8">
+            Start Your Application <ArrowRight className="size-4 ml-1" />
+          </Button>
         </div>
       </Section>
 
