@@ -2,7 +2,7 @@
 // Meta Pixel ID — a long number, e.g. "1234567890123456"
 export const META_PIXEL_ID = "1916193709038747";
 // GA4 Measurement ID — starts with "G-", e.g. "G-XXXXXXXXXX"
-export const GA4_MEASUREMENT_ID = "";
+export const GA4_MEASUREMENT_ID = "G-G8HR1RLMKV";
 
 declare global {
   interface Window {
