@@ -209,6 +209,66 @@ export type Database = {
         }
         Relationships: []
       }
+      tasks: {
+        Row: {
+          admin_notes: string | null
+          city: string
+          created_at: string
+          deliverable_url: string | null
+          description: string | null
+          due_date: string | null
+          id: string
+          investor_id: string | null
+          payout_amount: number | null
+          property_address: string
+          runner_id: string | null
+          state: string
+          status: string
+          task_type: string
+          title: string
+          updated_at: string
+          zip_code: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          city: string
+          created_at?: string
+          deliverable_url?: string | null
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          investor_id?: string | null
+          payout_amount?: number | null
+          property_address: string
+          runner_id?: string | null
+          state: string
+          status?: string
+          task_type: string
+          title: string
+          updated_at?: string
+          zip_code?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          city?: string
+          created_at?: string
+          deliverable_url?: string | null
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          investor_id?: string | null
+          payout_amount?: number | null
+          property_address?: string
+          runner_id?: string | null
+          state?: string
+          status?: string
+          task_type?: string
+          title?: string
+          updated_at?: string
+          zip_code?: string | null
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
