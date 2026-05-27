@@ -699,6 +699,40 @@ function Index() {
         </div>
       </Section>
 
+      {/* FOUNDER / MISSION */}
+      <Section id="mission">
+        <div className="grid lg:grid-cols-5 gap-8 items-start">
+          <div className="lg:col-span-2">
+            <div className="text-xs font-mono text-primary uppercase tracking-widest mb-3 flex items-center gap-2">
+              <HeartHandshake className="size-3.5" /> Our Mission
+            </div>
+            <h2 className="text-3xl md:text-4xl font-bold leading-tight">
+              Building the nationwide field operations layer for real estate.
+            </h2>
+            <p className="mt-5 text-muted-foreground">
+              Real estate runs on people who show up to properties. Today that's a fragmented mess of agents, wholesalers, contractors, and favors. REI Runner replaces it with a single, vetted, on-demand network — so investors can operate in any market without flying out, and locals can earn real income without a license or a long-term commitment.
+            </p>
+          </div>
+          <div className="lg:col-span-3">
+            <div className="relative rounded-3xl border border-border bg-card/60 backdrop-blur p-7 md:p-9 shadow-card">
+              <Quote className="absolute -top-3 -left-3 size-8 text-primary bg-background rounded-full p-1.5 border border-border" />
+              <p className="text-base md:text-lg leading-relaxed text-foreground/90">
+                "We built REI Runner because we lived the problem. Buying a property in another city used to mean calling a friend of a friend to drive by. That doesn't scale — and it shouldn't be how a trillion-dollar industry operates. Our job is to make local field work as reliable as ordering a ride."
+              </p>
+              <div className="mt-6 flex items-center gap-4">
+                <div className="size-12 rounded-full bg-gradient-primary grid place-items-center shadow-glow">
+                  <span className="text-primary-foreground font-bold">RR</span>
+                </div>
+                <div>
+                  <div className="font-semibold">The REI Runner Team</div>
+                  <div className="text-xs text-muted-foreground">Real estate operators &amp; technology builders · United States</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Section>
+
       {/* INVESTOR STRIP */}
       <section className="border-y border-border/60 bg-card/40 backdrop-blur">
         <div className="mx-auto max-w-6xl px-5 py-12 flex flex-col md:flex-row items-center justify-between gap-6">
