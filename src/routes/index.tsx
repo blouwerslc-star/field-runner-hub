@@ -30,6 +30,14 @@ import {
   CheckCircle2,
   Users,
   Zap,
+  Lock,
+  BadgeCheck,
+  FileText,
+  HeartHandshake,
+  Building2,
+  Phone,
+  HelpCircle,
+  Quote,
 } from "lucide-react";
 import { useNavigate } from "@tanstack/react-router";
 import { BrandLogo } from "@/components/brand/BrandLogo";
