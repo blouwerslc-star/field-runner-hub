@@ -171,11 +171,8 @@ function Index() {
       {/* NAV */}
       <header className="sticky top-0 z-40 backdrop-blur bg-background/70 border-b border-border/60">
         <div className="mx-auto max-w-7xl px-5 h-16 flex items-center justify-between">
-          <a href="#top" className="flex items-center gap-2 font-semibold tracking-tight">
-            <span className="size-7 rounded-lg bg-gradient-primary grid place-items-center shadow-glow">
-              <MapPin className="size-4 text-primary-foreground" />
-            </span>
-            REI <span className="text-primary">Runner</span>
+          <a href="#top" aria-label="REI Runner home">
+            <BrandLogo />
           </a>
           <nav className="hidden md:flex items-center gap-7 text-sm text-muted-foreground">
             <button onClick={() => scrollToId("how")} className="hover:text-foreground transition">How it works</button>
@@ -457,12 +454,7 @@ function Index() {
       <footer className="border-t border-border/60 mt-4 bg-card/40 backdrop-blur">
         <div className="mx-auto max-w-7xl px-5 py-12 grid gap-10 md:grid-cols-4">
           <div className="md:col-span-2">
-            <div className="flex items-center gap-2 font-semibold">
-              <span className="size-7 rounded-lg bg-gradient-primary grid place-items-center shadow-glow">
-                <MapPin className="size-4 text-primary-foreground" />
-              </span>
-              REI <span className="text-primary">Runner</span>
-            </div>
+            <BrandLogo size="md" />
             <p className="mt-4 text-sm text-muted-foreground max-w-md">
               The on-demand field services marketplace for real estate investors. Local runners, real tasks, per-job payouts.
             </p>
