@@ -262,6 +262,33 @@ function Index() {
         </div>
       </section>
 
+      {/* TWO-PATH CTA */}
+      <section className="mx-auto max-w-6xl px-5 py-16 md:py-24">
+        <div className="text-center mb-10">
+          <div className="text-xs font-mono text-primary uppercase tracking-wider mb-3">Get Started</div>
+          <h2 className="text-3xl md:text-5xl font-bold tracking-tight">Pick your side of the marketplace</h2>
+          <p className="mt-3 text-muted-foreground max-w-2xl mx-auto">Create a free account in under 60 seconds.</p>
+        </div>
+        <div className="grid md:grid-cols-2 gap-5">
+          <button onClick={goSignupRunner} className="group text-left rounded-2xl border border-border bg-card/60 backdrop-blur p-8 shadow-card hover:border-primary/60 hover:-translate-y-1 transition-all duration-300">
+            <div className="text-xs font-mono text-primary mb-2">FOR RUNNERS</div>
+            <h3 className="text-2xl font-bold">I'm a Runner</h3>
+            <p className="mt-2 text-sm text-muted-foreground">Get paid completing property tasks in your city — photos, videos, drive-bys, occupancy checks.</p>
+            <div className="mt-6 inline-flex items-center gap-2 text-primary font-medium">
+              Apply as a Runner <ArrowRight className="size-4 group-hover:translate-x-1 transition-transform" />
+            </div>
+          </button>
+          <button onClick={goSignupInvestor} className="group text-left rounded-2xl border border-border bg-card/60 backdrop-blur p-8 shadow-card hover:border-primary/60 hover:-translate-y-1 transition-all duration-300">
+            <div className="text-xs font-mono text-primary mb-2">FOR INVESTORS</div>
+            <h3 className="text-2xl font-bold">I'm an Investor</h3>
+            <p className="mt-2 text-sm text-muted-foreground">Post property tasks and get boots-on-the-ground in any major US market — usually same-day.</p>
+            <div className="mt-6 inline-flex items-center gap-2 text-primary font-medium">
+              Join Investor Early Access <ArrowRight className="size-4 group-hover:translate-x-1 transition-transform" />
+            </div>
+          </button>
+        </div>
+      </section>
+
       {/* HOW IT WORKS */}
       <Section id="how">
         <SectionHeader eyebrow="How It Works" title="On-Demand Field Work in 4 Steps" subtitle="Investors post a task. A local runner accepts, completes it, and gets paid." />
