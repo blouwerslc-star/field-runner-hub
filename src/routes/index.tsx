@@ -30,6 +30,14 @@ import {
   CheckCircle2,
   Users,
   Zap,
+  Lock,
+  BadgeCheck,
+  FileText,
+  HeartHandshake,
+  Building2,
+  Phone,
+  HelpCircle,
+  Quote,
 } from "lucide-react";
 import { useNavigate } from "@tanstack/react-router";
 import { BrandLogo } from "@/components/brand/BrandLogo";
@@ -165,6 +173,31 @@ const SERVICES = [
   { icon: ShieldCheck, title: "Occupancy Checks", body: "Verify whether a property is vacant, occupied, or abandoned." },
   { icon: ClipboardList, title: "Sign & Lockbox Placement", body: "Install or retrieve signs, lockboxes, and other property items." },
   { icon: Clock, title: "Custom Field Tasks", body: "Meet a contractor, take a measurement, check on a tenant turn — investors set the scope." },
+];
+
+// Trust signals shown across the top of the marketplace
+const TRUST_BADGES = [
+  { icon: BadgeCheck, label: "ID-Verified Runners", detail: "Every Founding Runner completes identity verification before activation." },
+  { icon: Lock, label: "Escrow-Protected Payments", detail: "Investor funds are held until deliverables are uploaded and approved." },
+  { icon: ShieldCheck, label: "Background-Checked", detail: "Optional background checks available for higher-trust task tiers." },
+  { icon: FileText, label: "Signed IC Agreement", detail: "Every runner signs an independent contractor agreement before working." },
+  { icon: Building2, label: "US-Registered Business", detail: "REI Runner is a US-based platform with US-based support." },
+];
+
+// Plain-English payment flow for both sides of the marketplace
+const PAYMENT_FLOW = [
+  { step: "01", icon: Wallet, title: "Investor funds the task", body: "When a task is posted, the payout amount is authorized and held in escrow — not released to anyone yet." },
+  { step: "02", icon: Send, title: "Runner accepts & completes", body: "A local runner claims the task, completes it on-site, and uploads deliverables through the app." },
+  { step: "03", icon: CheckCircle2, title: "Investor reviews", body: "The investor reviews the photos, video, and notes. Approval typically happens within 24 hours." },
+  { step: "04", icon: DollarSign, title: "Runner gets paid", body: "Once approved, the payout is released directly to the runner. No invoices, no chasing, no payroll." },
+];
+
+// How runners are vetted — operational transparency
+const VETTING_STEPS = [
+  { icon: FileText, title: "Application Review", body: "Every applicant is screened by the REI Runner team before they're invited to onboard." },
+  { icon: BadgeCheck, title: "Identity Verification", body: "Government-ID verification is required before a runner can accept their first task." },
+  { icon: Smartphone, title: "Mobile Onboarding", body: "Runners complete a short training inside the app covering deliverable standards and conduct." },
+  { icon: ShieldCheck, title: "Performance Tracking", body: "Ratings, response times, and approval rates are tracked. Underperformers are removed." },
 ];
 
 const FAQS = [
@@ -409,6 +442,25 @@ function Index() {
       {/* LIVE PLATFORM INDICATORS */}
       <LivePlatformStats />
 
+      {/* TRUST BADGES STRIP */}
+      <section aria-label="Platform trust signals" className="mx-auto max-w-7xl px-5 pt-8 md:pt-10">
+        <div className="rounded-2xl border border-border bg-card/40 backdrop-blur p-5 md:p-6">
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-5">
+            {TRUST_BADGES.map((b) => (
+              <div key={b.label} className="flex items-start gap-3">
+                <div className="size-9 rounded-lg bg-primary/10 grid place-items-center shrink-0">
+                  <b.icon className="size-4 text-primary" />
+                </div>
+                <div className="min-w-0">
+                  <div className="text-sm font-semibold leading-tight">{b.label}</div>
+                  <div className="mt-1 text-[11px] text-muted-foreground leading-snug">{b.detail}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* STATS */}
       <section className="border-y border-border/60 bg-card/30 backdrop-blur">
         <div className="mx-auto max-w-6xl px-5 py-12 grid grid-cols-2 md:grid-cols-4 gap-8">
@@ -466,6 +518,54 @@ function Index() {
         <p className="text-center text-xs text-muted-foreground mt-8">
           Payouts vary by market and task complexity. Investors set the final price per task.
         </p>
+      </Section>
+
+      {/* HOW PAYMENTS WORK */}
+      <Section id="payments">
+        <SectionHeader
+          eyebrow="How Payments Work"
+          title="Escrow-Protected. Pay on Delivery."
+          subtitle="Investors fund tasks up front. Runners get paid the moment deliverables are approved. No invoices, no waiting, no chargebacks."
+        />
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          {PAYMENT_FLOW.map((p, i) => (
+            <div key={p.step} className="relative rounded-2xl border border-border bg-card/60 backdrop-blur p-6 shadow-card">
+              <div className="text-xs font-mono text-primary mb-3">STEP {p.step}</div>
+              <div className="size-11 rounded-xl bg-primary/10 grid place-items-center mb-4">
+                <p.icon className="size-5 text-primary" />
+              </div>
+              <h3 className="text-lg font-semibold mb-1">{p.title}</h3>
+              <p className="text-sm text-muted-foreground">{p.body}</p>
+              {i < PAYMENT_FLOW.length - 1 && (
+                <ArrowRight className="hidden lg:block absolute -right-4 top-1/2 -translate-y-1/2 size-4 text-primary/60" />
+              )}
+            </div>
+          ))}
+        </div>
+        <div className="mt-8 max-w-3xl mx-auto rounded-xl border border-border bg-muted/30 p-5 text-xs md:text-sm text-muted-foreground leading-relaxed text-center">
+          <Lock className="inline size-4 text-primary mr-1.5 -mt-0.5" />
+          Payments are processed through a regulated US payments partner. Investor funds are held in escrow and never touched by REI Runner staff.
+        </div>
+      </Section>
+
+      {/* HOW WE VET RUNNERS */}
+      <Section id="trust">
+        <SectionHeader
+          eyebrow="Vetted Network"
+          title="How We Vet Every Runner"
+          subtitle="REI Runner isn't an open gig board. Every runner is reviewed, verified, and held to a deliverable standard."
+        />
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          {VETTING_STEPS.map((v) => (
+            <div key={v.title} className="rounded-2xl border border-border bg-card/60 backdrop-blur p-6 shadow-card hover:border-primary/40 transition">
+              <div className="size-11 rounded-xl bg-primary/10 grid place-items-center mb-4">
+                <v.icon className="size-5 text-primary" />
+              </div>
+              <h3 className="text-lg font-semibold mb-1">{v.title}</h3>
+              <p className="text-sm text-muted-foreground">{v.body}</p>
+            </div>
+          ))}
+        </div>
       </Section>
 
       {/* TWO-PATH CTA */}
@@ -599,6 +699,40 @@ function Index() {
         </div>
       </Section>
 
+      {/* FOUNDER / MISSION */}
+      <Section id="mission">
+        <div className="grid lg:grid-cols-5 gap-8 items-start">
+          <div className="lg:col-span-2">
+            <div className="text-xs font-mono text-primary uppercase tracking-widest mb-3 flex items-center gap-2">
+              <HeartHandshake className="size-3.5" /> Our Mission
+            </div>
+            <h2 className="text-3xl md:text-4xl font-bold leading-tight">
+              Building the nationwide field operations layer for real estate.
+            </h2>
+            <p className="mt-5 text-muted-foreground">
+              Real estate runs on people who show up to properties. Today that's a fragmented mess of agents, wholesalers, contractors, and favors. REI Runner replaces it with a single, vetted, on-demand network — so investors can operate in any market without flying out, and locals can earn real income without a license or a long-term commitment.
+            </p>
+          </div>
+          <div className="lg:col-span-3">
+            <div className="relative rounded-3xl border border-border bg-card/60 backdrop-blur p-7 md:p-9 shadow-card">
+              <Quote className="absolute -top-3 -left-3 size-8 text-primary bg-background rounded-full p-1.5 border border-border" />
+              <p className="text-base md:text-lg leading-relaxed text-foreground/90">
+                "We built REI Runner because we lived the problem. Buying a property in another city used to mean calling a friend of a friend to drive by. That doesn't scale — and it shouldn't be how a trillion-dollar industry operates. Our job is to make local field work as reliable as ordering a ride."
+              </p>
+              <div className="mt-6 flex items-center gap-4">
+                <div className="size-12 rounded-full bg-gradient-primary grid place-items-center shadow-glow">
+                  <span className="text-primary-foreground font-bold">RR</span>
+                </div>
+                <div>
+                  <div className="font-semibold">The REI Runner Team</div>
+                  <div className="text-xs text-muted-foreground">Real estate operators &amp; technology builders · United States</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Section>
+
       {/* INVESTOR STRIP */}
       <section className="border-y border-border/60 bg-card/40 backdrop-blur">
         <div className="mx-auto max-w-6xl px-5 py-12 flex flex-col md:flex-row items-center justify-between gap-6">
@@ -667,14 +801,27 @@ function Index() {
             <p className="mt-4 text-sm text-muted-foreground max-w-md">
               The on-demand field services marketplace for real estate investors. Local runners, real tasks, per-job payouts.
             </p>
-            <a href="mailto:hello@reirunner.com" className="mt-4 inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
-              <Mail className="size-4" /> hello@reirunner.com
-            </a>
+            <div className="mt-5 space-y-2.5 text-sm text-muted-foreground">
+              <a href="mailto:support@reirunner.com" className="flex items-center gap-2 hover:text-foreground transition">
+                <Mail className="size-4 text-primary" /> support@reirunner.com
+              </a>
+              <a href="tel:+18338734786" className="flex items-center gap-2 hover:text-foreground transition">
+                <Phone className="size-4 text-primary" /> (833) 873-RUNR
+              </a>
+              <div className="flex items-center gap-2">
+                <Clock className="size-4 text-primary" /> Support hours: Mon–Fri, 8am–6pm CT
+              </div>
+              <div className="flex items-center gap-2">
+                <Building2 className="size-4 text-primary" /> US-registered platform · Operating nationwide
+              </div>
+            </div>
           </div>
           <div>
             <div className="text-xs font-semibold uppercase tracking-widest text-foreground mb-3">Platform</div>
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li><button onClick={() => scrollToId("how")} className="hover:text-foreground">How it works</button></li>
+              <li><button onClick={() => scrollToId("payments")} className="hover:text-foreground">How payments work</button></li>
+              <li><button onClick={() => scrollToId("trust")} className="hover:text-foreground">How we vet runners</button></li>
               <li><button onClick={() => scrollToId("services")} className="hover:text-foreground">Services</button></li>
               <li><button onClick={() => scrollToId("why")} className="hover:text-foreground">Why join</button></li>
               <li><button onClick={() => scrollToId("markets")} className="hover:text-foreground">Markets</button></li>
@@ -684,7 +831,10 @@ function Index() {
           <div>
             <div className="text-xs font-semibold uppercase tracking-widest text-foreground mb-3">Company</div>
             <ul className="space-y-2 text-sm text-muted-foreground">
+              <li><button onClick={() => scrollToId("mission")} className="hover:text-foreground">Our mission</button></li>
+              <li><Link to="/investors" className="hover:text-foreground">For investors</Link></li>
               <li><Link to="/faq" className="hover:text-foreground">FAQ</Link></li>
+              <li><a href="mailto:support@reirunner.com" className="hover:text-foreground inline-flex items-center gap-1.5"><HelpCircle className="size-3.5" /> Contact support</a></li>
               <li><Link to="/terms" className="hover:text-foreground">Terms</Link></li>
               <li><Link to="/privacy" className="hover:text-foreground">Privacy</Link></li>
             </ul>
@@ -692,7 +842,7 @@ function Index() {
         </div>
         <div className="border-t border-border/60">
           <div className="mx-auto max-w-7xl px-5 py-5 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-muted-foreground">
-            <div>© {new Date().getFullYear()} REI Runner. All rights reserved.</div>
+            <div>© {new Date().getFullYear()} REI Runner, Inc. · A nationwide real estate field operations marketplace.</div>
             <div>Built in the USA 🇺🇸</div>
           </div>
         </div>
