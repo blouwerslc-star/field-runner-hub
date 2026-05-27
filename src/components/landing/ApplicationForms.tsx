@@ -101,6 +101,7 @@ export function FieldRunnerForm() {
   const navigate = useNavigate();
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
+  const [step, setStep] = useState(0);
   const [services, setServices] = useState<string[]>([]);
   const [availability, setAvailability] = useState("");
   const [hasTransport, setHasTransport] = useState("");
@@ -122,6 +123,7 @@ export function FieldRunnerForm() {
 
   const onReset = () => {
     setDone(false);
+    setStep(0);
     setServices([]);
     setAvailability("");
     setHasTransport("");
