@@ -442,6 +442,25 @@ function Index() {
       {/* LIVE PLATFORM INDICATORS */}
       <LivePlatformStats />
 
+      {/* TRUST BADGES STRIP */}
+      <section aria-label="Platform trust signals" className="mx-auto max-w-7xl px-5 pt-8 md:pt-10">
+        <div className="rounded-2xl border border-border bg-card/40 backdrop-blur p-5 md:p-6">
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-5">
+            {TRUST_BADGES.map((b) => (
+              <div key={b.label} className="flex items-start gap-3">
+                <div className="size-9 rounded-lg bg-primary/10 grid place-items-center shrink-0">
+                  <b.icon className="size-4.5 text-primary" />
+                </div>
+                <div className="min-w-0">
+                  <div className="text-sm font-semibold leading-tight">{b.label}</div>
+                  <div className="mt-1 text-[11px] text-muted-foreground leading-snug">{b.detail}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* STATS */}
       <section className="border-y border-border/60 bg-card/30 backdrop-blur">
         <div className="mx-auto max-w-6xl px-5 py-12 grid grid-cols-2 md:grid-cols-4 gap-8">
