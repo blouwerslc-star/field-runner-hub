@@ -83,14 +83,16 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "description", content: "REI Runner is a marketplace connecting real estate pros with local field runners for property tasks." },
       { property: "og:description", content: "REI Runner is a marketplace connecting real estate pros with local field runners for property tasks." },
       { name: "twitter:description", content: "REI Runner is a marketplace connecting real estate pros with local field runners for property tasks." },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/86ca1c29-0e76-4a0d-b12e-c3b998afc075/id-preview-9d21d5cb--9e7a2da0-3a6b-4d0d-ae89-c5b56e8e6594.lovable.app-1779726610757.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/86ca1c29-0e76-4a0d-b12e-c3b998afc075/id-preview-9d21d5cb--9e7a2da0-3a6b-4d0d-ae89-c5b56e8e6594.lovable.app-1779726610757.png" },
+      { property: "og:image", content: "https://reirunner.com/rei-runner-logo.png" },
+      { name: "twitter:image", content: "https://reirunner.com/rei-runner-logo.png" },
     ],
     links: [
       {
         rel: "stylesheet",
         href: appCss,
       },
+      { rel: "icon", type: "image/x-icon", href: "/favicon.ico" },
+      { rel: "apple-touch-icon", href: "/rei-runner-logo.png" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
