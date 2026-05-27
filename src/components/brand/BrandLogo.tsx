@@ -1,4 +1,4 @@
-import iconUrl from "@/assets/rei-runner-icon.png";
+import iconUrl from "@/assets/rei-runner-icon-clean.png";
 import logoUrl from "@/assets/rei-runner-logo.png";
 import { cn } from "@/lib/utils";
 
