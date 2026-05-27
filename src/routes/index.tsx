@@ -28,6 +28,7 @@ import {
   Smartphone,
 } from "lucide-react";
 import { useNavigate } from "@tanstack/react-router";
+import { BrandLogo } from "@/components/brand/BrandLogo";
 import heroBg from "@/assets/hero-bg.jpg";
 
 export const Route = createFileRoute("/")({
