@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as WaitlistRouteImport } from './routes/waitlist'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as SignupRouteImport } from './routes/signup'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as InvestorsRouteImport } from './routes/investors'
 import { Route as FaqRouteImport } from './routes/faq'
@@ -32,6 +33,11 @@ const TermsRoute = TermsRouteImport.update({
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
   path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SignupRoute = SignupRouteImport.update({
+  id: '/signup',
+  path: '/signup',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PrivacyRoute = PrivacyRouteImport.update({
@@ -72,6 +78,7 @@ export interface FileRoutesByFullPath {
   '/faq': typeof FaqRoute
   '/investors': typeof InvestorsRoute
   '/privacy': typeof PrivacyRoute
+  '/signup': typeof SignupRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/waitlist': typeof WaitlistRoute
@@ -83,6 +90,7 @@ export interface FileRoutesByTo {
   '/faq': typeof FaqRoute
   '/investors': typeof InvestorsRoute
   '/privacy': typeof PrivacyRoute
+  '/signup': typeof SignupRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/waitlist': typeof WaitlistRoute
@@ -95,6 +103,7 @@ export interface FileRoutesById {
   '/faq': typeof FaqRoute
   '/investors': typeof InvestorsRoute
   '/privacy': typeof PrivacyRoute
+  '/signup': typeof SignupRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/waitlist': typeof WaitlistRoute
@@ -108,6 +117,7 @@ export interface FileRouteTypes {
     | '/faq'
     | '/investors'
     | '/privacy'
+    | '/signup'
     | '/sitemap.xml'
     | '/terms'
     | '/waitlist'
@@ -119,6 +129,7 @@ export interface FileRouteTypes {
     | '/faq'
     | '/investors'
     | '/privacy'
+    | '/signup'
     | '/sitemap.xml'
     | '/terms'
     | '/waitlist'
@@ -130,6 +141,7 @@ export interface FileRouteTypes {
     | '/faq'
     | '/investors'
     | '/privacy'
+    | '/signup'
     | '/sitemap.xml'
     | '/terms'
     | '/waitlist'
@@ -142,6 +154,7 @@ export interface RootRouteChildren {
   FaqRoute: typeof FaqRoute
   InvestorsRoute: typeof InvestorsRoute
   PrivacyRoute: typeof PrivacyRoute
+  SignupRoute: typeof SignupRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TermsRoute: typeof TermsRoute
   WaitlistRoute: typeof WaitlistRoute
@@ -168,6 +181,13 @@ declare module '@tanstack/react-router' {
       path: '/sitemap.xml'
       fullPath: '/sitemap.xml'
       preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/signup': {
+      id: '/signup'
+      path: '/signup'
+      fullPath: '/signup'
+      preLoaderRoute: typeof SignupRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/privacy': {
@@ -222,6 +242,7 @@ const rootRouteChildren: RootRouteChildren = {
   FaqRoute: FaqRoute,
   InvestorsRoute: InvestorsRoute,
   PrivacyRoute: PrivacyRoute,
+  SignupRoute: SignupRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TermsRoute: TermsRoute,
   WaitlistRoute: WaitlistRoute,
