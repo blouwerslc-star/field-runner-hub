@@ -23,6 +23,7 @@ import { Route as SplatRouteImport } from './routes/$'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedDashboardRunnerRouteImport } from './routes/_authenticated/dashboard.runner'
+import { Route as AuthenticatedDashboardInvestorRouteImport } from './routes/_authenticated/dashboard.investor'
 
 const WaitlistRoute = WaitlistRouteImport.update({
   id: '/waitlist',
@@ -94,6 +95,12 @@ const AuthenticatedDashboardRunnerRoute =
     path: '/runner',
     getParentRoute: () => AuthenticatedDashboardRoute,
   } as any)
+const AuthenticatedDashboardInvestorRoute =
+  AuthenticatedDashboardInvestorRouteImport.update({
+    id: '/investor',
+    path: '/investor',
+    getParentRoute: () => AuthenticatedDashboardRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -108,6 +115,7 @@ export interface FileRoutesByFullPath {
   '/terms': typeof TermsRoute
   '/waitlist': typeof WaitlistRoute
   '/dashboard': typeof AuthenticatedDashboardRouteWithChildren
+  '/dashboard/investor': typeof AuthenticatedDashboardInvestorRoute
   '/dashboard/runner': typeof AuthenticatedDashboardRunnerRoute
 }
 export interface FileRoutesByTo {
@@ -123,6 +131,7 @@ export interface FileRoutesByTo {
   '/terms': typeof TermsRoute
   '/waitlist': typeof WaitlistRoute
   '/dashboard': typeof AuthenticatedDashboardRouteWithChildren
+  '/dashboard/investor': typeof AuthenticatedDashboardInvestorRoute
   '/dashboard/runner': typeof AuthenticatedDashboardRunnerRoute
 }
 export interface FileRoutesById {
@@ -140,6 +149,7 @@ export interface FileRoutesById {
   '/terms': typeof TermsRoute
   '/waitlist': typeof WaitlistRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRouteWithChildren
+  '/_authenticated/dashboard/investor': typeof AuthenticatedDashboardInvestorRoute
   '/_authenticated/dashboard/runner': typeof AuthenticatedDashboardRunnerRoute
 }
 export interface FileRouteTypes {
@@ -157,6 +167,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/waitlist'
     | '/dashboard'
+    | '/dashboard/investor'
     | '/dashboard/runner'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -172,6 +183,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/waitlist'
     | '/dashboard'
+    | '/dashboard/investor'
     | '/dashboard/runner'
   id:
     | '__root__'
@@ -188,6 +200,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/waitlist'
     | '/_authenticated/dashboard'
+    | '/_authenticated/dashboard/investor'
     | '/_authenticated/dashboard/runner'
   fileRoutesById: FileRoutesById
 }
@@ -306,15 +319,24 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardRunnerRouteImport
       parentRoute: typeof AuthenticatedDashboardRoute
     }
+    '/_authenticated/dashboard/investor': {
+      id: '/_authenticated/dashboard/investor'
+      path: '/investor'
+      fullPath: '/dashboard/investor'
+      preLoaderRoute: typeof AuthenticatedDashboardInvestorRouteImport
+      parentRoute: typeof AuthenticatedDashboardRoute
+    }
   }
 }
 
 interface AuthenticatedDashboardRouteChildren {
+  AuthenticatedDashboardInvestorRoute: typeof AuthenticatedDashboardInvestorRoute
   AuthenticatedDashboardRunnerRoute: typeof AuthenticatedDashboardRunnerRoute
 }
 
 const AuthenticatedDashboardRouteChildren: AuthenticatedDashboardRouteChildren =
   {
+    AuthenticatedDashboardInvestorRoute: AuthenticatedDashboardInvestorRoute,
     AuthenticatedDashboardRunnerRoute: AuthenticatedDashboardRunnerRoute,
   }
 
