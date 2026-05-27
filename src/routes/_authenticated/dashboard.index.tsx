@@ -21,7 +21,9 @@ function DashboardRouter() {
         .eq("user_id", userData.user.id);
       if (cancelled) return;
       const roleList = (roles ?? []).map((r) => r.role);
-      if (roleList.includes("investor")) {
+      if (roleList.includes("admin")) {
+        navigate({ to: "/admin", replace: true });
+      } else if (roleList.includes("investor")) {
         navigate({ to: "/dashboard/investor", replace: true });
       } else if (roleList.includes("runner")) {
         navigate({ to: "/dashboard/runner", replace: true });
