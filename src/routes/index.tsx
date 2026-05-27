@@ -3,6 +3,14 @@ import { useState, useEffect, useRef } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { Button } from "@/components/ui/button";
 import {
+  Sheet,
+  SheetContent,
+  SheetTrigger,
+  SheetHeader,
+  SheetTitle,
+  SheetClose,
+} from "@/components/ui/sheet";
+import {
   Accordion,
   AccordionContent,
   AccordionItem,
@@ -38,6 +46,7 @@ import {
   Phone,
   HelpCircle,
   Quote,
+  Menu,
 } from "lucide-react";
 import { useNavigate } from "@tanstack/react-router";
 import { BrandLogo } from "@/components/brand/BrandLogo";
@@ -349,6 +358,32 @@ function Index() {
   const goApply = () => navigate({ to: "/apply" });
   const goSignupRunner = () => navigate({ to: "/signup", search: { role: "runner", redirect: "/dashboard" } });
   const goSignupInvestor = () => navigate({ to: "/signup", search: { role: "investor", redirect: "/dashboard" } });
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const [showStickyCta, setShowStickyCta] = useState(false);
+
+  useEffect(() => {
+    // Show sticky mobile CTA only after the hero is scrolled past
+    const onScroll = () => setShowStickyCta(window.scrollY > 520);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  const closeNavThen = (fn: () => void) => () => {
+    setMobileNavOpen(false);
+    setTimeout(fn, 80);
+  };
+
+  const mobileNavLinks: { label: string; id: string }[] = [
+    { label: "How it works", id: "how" },
+    { label: "How payments work", id: "payments" },
+    { label: "How we vet runners", id: "trust" },
+    { label: "Services", id: "services" },
+    { label: "Why join", id: "why" },
+    { label: "Markets", id: "markets" },
+    { label: "Our mission", id: "mission" },
+    { label: "FAQ", id: "faq" },
+  ];
 
   return (
     <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
@@ -372,6 +407,50 @@ function Index() {
             <Button onClick={goApply} size="sm" className="bg-gradient-primary shadow-glow">
               Apply Now
             </Button>
+            <Sheet open={mobileNavOpen} onOpenChange={setMobileNavOpen}>
+              <SheetTrigger asChild>
+                <button
+                  aria-label="Open menu"
+                  className="md:hidden inline-flex items-center justify-center size-10 -mr-2 rounded-md text-foreground/80 hover:text-foreground hover:bg-card/60 active:scale-95 transition"
+                >
+                  <Menu className="size-5" />
+                </button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-[85vw] sm:max-w-sm bg-background/95 backdrop-blur-xl border-l border-border/60 p-0 flex flex-col">
+                <SheetHeader className="px-6 pt-6 pb-4 border-b border-border/60 text-left">
+                  <SheetTitle>
+                    <BrandLogo />
+                  </SheetTitle>
+                </SheetHeader>
+                <nav className="flex-1 overflow-y-auto px-3 py-4">
+                  {mobileNavLinks.map((l) => (
+                    <button
+                      key={l.id}
+                      onClick={closeNavThen(() => scrollToId(l.id))}
+                      className="w-full text-left flex items-center justify-between px-3 py-4 rounded-lg text-base text-foreground/90 hover:bg-card/60 active:bg-card transition"
+                    >
+                      <span>{l.label}</span>
+                      <ArrowRight className="size-4 text-muted-foreground" />
+                    </button>
+                  ))}
+                </nav>
+                <div className="border-t border-border/60 p-5 space-y-3">
+                  <SheetClose asChild>
+                    <Button onClick={goApply} className="w-full h-12 bg-gradient-primary shadow-glow text-base">
+                      Apply Now <ArrowRight className="size-4 ml-1" />
+                    </Button>
+                  </SheetClose>
+                  <SheetClose asChild>
+                    <Link
+                      to="/login"
+                      className="block w-full text-center h-12 leading-[3rem] rounded-md border border-border bg-card/60 text-sm font-medium text-foreground/90 hover:bg-card transition"
+                    >
+                      Sign in
+                    </Link>
+                  </SheetClose>
+                </div>
+              </SheetContent>
+            </Sheet>
           </div>
         </div>
       </header>
@@ -849,19 +928,34 @@ function Index() {
       </footer>
 
       {/* STICKY MOBILE CTA */}
-      <div className="md:hidden fixed bottom-4 inset-x-4 z-50">
-        <Button onClick={goApply} className="w-full h-12 bg-gradient-primary shadow-glow text-base">
-          Apply Now <ArrowRight className="size-4 ml-1" />
-        </Button>
+      <div
+        className={`md:hidden fixed bottom-0 inset-x-0 z-50 px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-3 bg-gradient-to-t from-background via-background/95 to-transparent transition-all duration-300 ${
+          showStickyCta ? "translate-y-0 opacity-100" : "translate-y-full opacity-0 pointer-events-none"
+        }`}
+      >
+        <div className="flex gap-2">
+          <Button
+            onClick={goApply}
+            className="flex-1 h-12 bg-gradient-primary shadow-glow text-base active:scale-[0.98] transition-transform"
+          >
+            Apply Now <ArrowRight className="size-4 ml-1" />
+          </Button>
+          <Link
+            to="/login"
+            className="inline-flex items-center justify-center h-12 px-4 rounded-md border border-border bg-card/80 backdrop-blur text-sm font-medium text-foreground/90 active:scale-[0.98] transition-transform"
+          >
+            Sign in
+          </Link>
+        </div>
       </div>
-      <div className="md:hidden h-20" aria-hidden />
+      <div className="md:hidden h-24" aria-hidden />
     </div>
   );
 }
 
 function Section({ id, children }: { id?: string; children: React.ReactNode }) {
   return (
-    <section id={id} className="mx-auto max-w-7xl px-5 py-20 md:py-28">
+    <section id={id} className="mx-auto max-w-7xl px-5 py-14 md:py-28">
       {children}
     </section>
   );
@@ -869,12 +963,12 @@ function Section({ id, children }: { id?: string; children: React.ReactNode }) {
 
 function SectionHeader({ eyebrow, title, subtitle }: { eyebrow?: string; title: string; subtitle?: string }) {
   return (
-    <div className="text-center mb-12 max-w-3xl mx-auto">
+    <div className="text-center mb-10 md:mb-12 max-w-3xl mx-auto">
       {eyebrow && (
         <div className="text-xs font-semibold tracking-widest text-primary uppercase">{eyebrow}</div>
       )}
-      <h2 className="mt-3 text-3xl md:text-5xl font-bold">{title}</h2>
-      {subtitle && <p className="mt-4 text-muted-foreground text-base md:text-lg">{subtitle}</p>}
+      <h2 className="mt-3 text-[1.75rem] leading-tight sm:text-3xl md:text-5xl font-bold">{title}</h2>
+      {subtitle && <p className="mt-4 text-muted-foreground text-sm md:text-lg">{subtitle}</p>}
     </div>
   );
 }
