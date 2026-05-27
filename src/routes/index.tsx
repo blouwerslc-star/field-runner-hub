@@ -175,6 +175,31 @@ const SERVICES = [
   { icon: Clock, title: "Custom Field Tasks", body: "Meet a contractor, take a measurement, check on a tenant turn — investors set the scope." },
 ];
 
+// Trust signals shown across the top of the marketplace
+const TRUST_BADGES = [
+  { icon: BadgeCheck, label: "ID-Verified Runners", detail: "Every Founding Runner completes identity verification before activation." },
+  { icon: Lock, label: "Escrow-Protected Payments", detail: "Investor funds are held until deliverables are uploaded and approved." },
+  { icon: ShieldCheck, label: "Background-Checked", detail: "Optional background checks available for higher-trust task tiers." },
+  { icon: FileText, label: "Signed IC Agreement", detail: "Every runner signs an independent contractor agreement before working." },
+  { icon: Building2, label: "US-Registered Business", detail: "REI Runner is a US-based platform with US-based support." },
+];
+
+// Plain-English payment flow for both sides of the marketplace
+const PAYMENT_FLOW = [
+  { step: "01", icon: Wallet, title: "Investor funds the task", body: "When a task is posted, the payout amount is authorized and held in escrow — not released to anyone yet." },
+  { step: "02", icon: Send, title: "Runner accepts & completes", body: "A local runner claims the task, completes it on-site, and uploads deliverables through the app." },
+  { step: "03", icon: CheckCircle2, title: "Investor reviews", body: "The investor reviews the photos, video, and notes. Approval typically happens within 24 hours." },
+  { step: "04", icon: DollarSign, title: "Runner gets paid", body: "Once approved, the payout is released directly to the runner. No invoices, no chasing, no payroll." },
+];
+
+// How runners are vetted — operational transparency
+const VETTING_STEPS = [
+  { icon: FileText, title: "Application Review", body: "Every applicant is screened by the REI Runner team before they're invited to onboard." },
+  { icon: BadgeCheck, title: "Identity Verification", body: "Government-ID verification is required before a runner can accept their first task." },
+  { icon: Smartphone, title: "Mobile Onboarding", body: "Runners complete a short training inside the app covering deliverable standards and conduct." },
+  { icon: ShieldCheck, title: "Performance Tracking", body: "Ratings, response times, and approval rates are tracked. Underperformers are removed." },
+];
+
 const FAQS = [
   { q: "What is REI Runner?", a: "REI Runner is an on-demand marketplace that connects real estate investors with local independent contractors (runners) for property field services — photos, walkthrough videos, drive-by reports, occupancy checks, sign and lockbox placement, and other on-site tasks." },
   { q: "How do runners get paid?", a: "Runners are paid per completed task. Each job has a set price posted up front. Once your deliverables are uploaded and approved, payment is released to your account." },
