@@ -449,7 +449,7 @@ function Index() {
             {TRUST_BADGES.map((b) => (
               <div key={b.label} className="flex items-start gap-3">
                 <div className="size-9 rounded-lg bg-primary/10 grid place-items-center shrink-0">
-                  <b.icon className="size-4.5 text-primary" />
+                  <b.icon className="size-4 text-primary" />
                 </div>
                 <div className="min-w-0">
                   <div className="text-sm font-semibold leading-tight">{b.label}</div>
