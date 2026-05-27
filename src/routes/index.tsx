@@ -801,14 +801,27 @@ function Index() {
             <p className="mt-4 text-sm text-muted-foreground max-w-md">
               The on-demand field services marketplace for real estate investors. Local runners, real tasks, per-job payouts.
             </p>
-            <a href="mailto:hello@reirunner.com" className="mt-4 inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
-              <Mail className="size-4" /> hello@reirunner.com
-            </a>
+            <div className="mt-5 space-y-2.5 text-sm text-muted-foreground">
+              <a href="mailto:support@reirunner.com" className="flex items-center gap-2 hover:text-foreground transition">
+                <Mail className="size-4 text-primary" /> support@reirunner.com
+              </a>
+              <a href="tel:+18338734786" className="flex items-center gap-2 hover:text-foreground transition">
+                <Phone className="size-4 text-primary" /> (833) 873-RUNR
+              </a>
+              <div className="flex items-center gap-2">
+                <Clock className="size-4 text-primary" /> Support hours: Mon–Fri, 8am–6pm CT
+              </div>
+              <div className="flex items-center gap-2">
+                <Building2 className="size-4 text-primary" /> US-registered platform · Operating nationwide
+              </div>
+            </div>
           </div>
           <div>
             <div className="text-xs font-semibold uppercase tracking-widest text-foreground mb-3">Platform</div>
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li><button onClick={() => scrollToId("how")} className="hover:text-foreground">How it works</button></li>
+              <li><button onClick={() => scrollToId("payments")} className="hover:text-foreground">How payments work</button></li>
+              <li><button onClick={() => scrollToId("trust")} className="hover:text-foreground">How we vet runners</button></li>
               <li><button onClick={() => scrollToId("services")} className="hover:text-foreground">Services</button></li>
               <li><button onClick={() => scrollToId("why")} className="hover:text-foreground">Why join</button></li>
               <li><button onClick={() => scrollToId("markets")} className="hover:text-foreground">Markets</button></li>
@@ -818,7 +831,10 @@ function Index() {
           <div>
             <div className="text-xs font-semibold uppercase tracking-widest text-foreground mb-3">Company</div>
             <ul className="space-y-2 text-sm text-muted-foreground">
+              <li><button onClick={() => scrollToId("mission")} className="hover:text-foreground">Our mission</button></li>
+              <li><Link to="/investors" className="hover:text-foreground">For investors</Link></li>
               <li><Link to="/faq" className="hover:text-foreground">FAQ</Link></li>
+              <li><a href="mailto:support@reirunner.com" className="hover:text-foreground inline-flex items-center gap-1.5"><HelpCircle className="size-3.5" /> Contact support</a></li>
               <li><Link to="/terms" className="hover:text-foreground">Terms</Link></li>
               <li><Link to="/privacy" className="hover:text-foreground">Privacy</Link></li>
             </ul>
@@ -826,7 +842,7 @@ function Index() {
         </div>
         <div className="border-t border-border/60">
           <div className="mx-auto max-w-7xl px-5 py-5 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-muted-foreground">
-            <div>© {new Date().getFullYear()} REI Runner. All rights reserved.</div>
+            <div>© {new Date().getFullYear()} REI Runner, Inc. · A nationwide real estate field operations marketplace.</div>
             <div>Built in the USA 🇺🇸</div>
           </div>
         </div>
