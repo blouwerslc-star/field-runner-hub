@@ -7,7 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
-import { Loader2, MapPin } from "lucide-react";
+import { Loader2 } from "lucide-react";
+import { BrandLogo } from "@/components/brand/BrandLogo";
 
 export const Route = createFileRoute("/login")({
   validateSearch: (s: Record<string, unknown>) => ({
@@ -64,11 +65,8 @@ function LoginPage() {
     <div className="min-h-screen bg-background text-foreground grid place-items-center px-5 py-12">
       <Toaster richColors closeButton position="top-center" theme="dark" />
       <div className="w-full max-w-md">
-        <Link to="/" className="flex items-center gap-2 font-semibold mb-8 justify-center">
-          <span className="size-7 rounded-lg bg-gradient-primary grid place-items-center shadow-glow">
-            <MapPin className="size-4 text-primary-foreground" />
-          </span>
-          REI <span className="text-primary">Runner</span>
+        <Link to="/" aria-label="REI Runner home" className="flex justify-center mb-8">
+          <BrandLogo size="md" />
         </Link>
         <div className="rounded-2xl border border-border bg-card/60 backdrop-blur p-6 md:p-8 shadow-card">
           <h1 className="text-2xl font-bold tracking-tight">Welcome back</h1>
