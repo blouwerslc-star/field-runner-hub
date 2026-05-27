@@ -58,6 +58,7 @@ export type Database = {
           state: string
           street_address: string | null
           travel_radius_miles: string | null
+          user_id: string | null
           vehicle_type: string | null
           zip_code: string | null
         }
@@ -86,6 +87,7 @@ export type Database = {
           state: string
           street_address?: string | null
           travel_radius_miles?: string | null
+          user_id?: string | null
           vehicle_type?: string | null
           zip_code?: string | null
         }
@@ -114,8 +116,42 @@ export type Database = {
           state?: string
           street_address?: string | null
           travel_radius_miles?: string | null
+          user_id?: string | null
           vehicle_type?: string | null
           zip_code?: string | null
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          city: string | null
+          created_at: string
+          full_name: string | null
+          id: string
+          phone: string | null
+          state: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          city?: string | null
+          created_at?: string
+          full_name?: string | null
+          id?: string
+          phone?: string | null
+          state?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          city?: string | null
+          created_at?: string
+          full_name?: string | null
+          id?: string
+          phone?: string | null
+          state?: string | null
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -135,6 +171,7 @@ export type Database = {
           role: string
           services_needed: string[]
           urgency: string
+          user_id: string | null
         }
         Insert: {
           budget?: string | null
@@ -151,6 +188,7 @@ export type Database = {
           role: string
           services_needed?: string[]
           urgency: string
+          user_id?: string | null
         }
         Update: {
           budget?: string | null
@@ -167,6 +205,28 @@ export type Database = {
           role?: string
           services_needed?: string[]
           urgency?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
         }
         Relationships: []
       }
@@ -175,10 +235,16 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "runner" | "investor" | "admin"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -305,6 +371,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["runner", "investor", "admin"],
+    },
   },
 } as const

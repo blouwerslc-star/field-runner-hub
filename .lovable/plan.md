@@ -1,56 +1,64 @@
-## REI Runner Landing Page Overhaul — Phased Plan
+## REI Runner Marketplace — Phased Buildout Plan
 
-This is a large brief (15 sections). I'll ship it in 3 phases so we can review progress and avoid one giant unreviewable change. You can approve phase 1 now; phases 2 & 3 follow automatically after.
+You sent a 12-phase brief. That's a multi-month build (auth, dashboards, Stripe Connect escrow, admin tools, notifications, blog, ratings, etc.). I will **not** try to ship all of it in one turn — that would produce a broken, unreviewable mess. Instead I'll break it into milestones we ship and validate one at a time.
 
----
-
-### Phase 1 — Landing page rebuild (core visual + content)
-
-Rebuild `src/routes/index.tsx` as a modular landing page with these sections, in order:
-
-1. **Sticky top nav** — logo, How It Works, Why Join, FAQ, "Apply Now" CTA
-2. **Hero** — new headline "Get Paid Finding Real Estate Opportunities", subhead, Apply Now + See How It Works CTAs, animated background (CSS map grid + glowing city nodes + floating property pins, no heavy libs)
-3. **Stats bar** — animated counters: Applications Submitted, Cities Covered, Active Investors, Leads Reviewed (founding beta numbers, count-up on scroll)
-4. **How It Works** — 4-step cards with icons (Find → Submit → Investors Review → Earn)
-5. **Why People Join** — 6 benefit cards
-6. **Markets** — "Launching in major markets" chips: Detroit, Atlanta, Dallas, Phoenix, Tampa, Indianapolis, Cleveland, Chicago
-7. **Video section** — "What Is REI Runner?" placeholder embed slot (YouTube iframe ready, swap URL later)
-8. **About / Mission** — dark glassmorphism panel with founder mission statement
-9. **Investor waitlist strip** — "Are you an investor?" with Join Investor Waitlist CTA (opens email mailto for now)
-10. **Application form** — keep existing `<ApplicationForms />`, add "Applications reviewed weekly • Founding Runner spots limited" urgency banner above
-11. **FAQ** — accordion with 8 questions from brief
-12. **Footer** — logo, mission, contact email, Terms/Privacy/FAQ links, "Built in the USA", copyright
-
-Components created in `src/components/landing/`: `Nav.tsx`, `Hero.tsx`, `StatsBar.tsx`, `HowItWorks.tsx`, `WhyJoin.tsx`, `Markets.tsx`, `VideoSection.tsx`, `About.tsx`, `InvestorStrip.tsx`, `FAQ.tsx`, `Footer.tsx`.
-
-Design tokens (`src/styles.css`): add subtle gradient + glow utilities to support the dark proptech aesthetic. Keep existing palette.
-
-### Phase 2 — Engagement & trust
-
-- **Sticky mobile CTA bar** — fixed bottom "Apply Now" on mobile only
-- **Exit-intent email popup** — "Join the Founding Runner Waitlist", captures email to new `waitlist_signups` table + appends to Google Sheet (new tab "Waitlist")
-- **Routes**: `/terms`, `/privacy`, `/faq` (basic standalone pages so footer links work)
-- **Investor waitlist** — promote from mailto to same popup form with a `type` field (`runner` | `investor`)
-
-### Phase 3 — Analytics & polish
-
-- **Analytics**: GA4, Meta Pixel, TikTok Pixel, Microsoft Clarity — added via `<script>` tags in `__root.tsx` head, gated by env vars so they only fire when IDs are set. I'll ask you for the tracking IDs before wiring them.
-- **SEO**: tighten `<head>` title/description/OG tags on home + new routes
-- **Mobile pass**: spacing, type scale, tap targets, image sizes
+Right now the live site is the marketing landing + two application forms (Runner / Investor) writing to Supabase + Google Sheets. That's working and running paid Facebook traffic. The next responsible step is to add the **account layer** underneath it, not to jump straight to Stripe Connect.
 
 ---
 
-### Out of scope / needs your input
+### What I propose to build first (Milestone 1 — Accounts & Two-Sided Entry)
 
-- **Real video** — I'll wire an empty 16:9 slot; you provide YouTube/Vimeo URL later
-- **Real stats numbers** — I'll seed plausible founding-beta numbers (e.g. 240 applications, 12 cities, 38 investors, 410 leads). Tell me if you have real ones.
-- **Tracking IDs** — needed before Phase 3
-- **Founder photo / name** — using a generic "From the Founder" block unless you share one
+This is the foundation everything else in your brief depends on. Roughly 1 build session.
 
-### Technical notes
+1. **Auth** — email/password + Google sign-in via Lovable Cloud. Adds `/login` and `/signup`.
+2. **Profiles + roles** — `profiles` table, `user_roles` table (`runner` | `investor` | `admin`), trigger to auto-create profile on signup. Role chosen on signup ("I'm a Runner" / "I'm an Investor").
+3. **Homepage two-path CTA** — keep existing landing, but make the primary choice "I'm a Runner" vs "I'm an Investor" route into the signup flow (which then routes into onboarding, which is your existing application forms but tied to the logged-in user).
+4. **Account shell** — `/dashboard` route that redirects to `/dashboard/runner` or `/dashboard/investor` based on role. Both initially show a "You're on the founding waitlist — here's your status" placeholder. This lets us start collecting real accounts without faking a working marketplace.
+5. **Existing application forms** — wired to the logged-in user so submissions populate `profiles` instead of being anonymous rows.
 
-- All new components are presentation-only React + Tailwind + lucide-react icons (already installed). No new deps for Phase 1.
-- Animated counters use a tiny `useInView` + `requestAnimationFrame` hook — no library.
-- Hero background animation is pure CSS (radial gradients + keyframe-animated pins). No canvas/three.
-- Form submission flow stays unchanged — still flows through `submitFieldRunner` → DB → Google Sheets.
-- Footer links to `/terms`, `/privacy`, `/faq` will 404 until Phase 2; I'll temporarily anchor them to `#` in Phase 1 to avoid broken links.
+### Milestone 2 — Tasks (manual marketplace)
+- `tasks` table (address, type, instructions, due date, payout, status)
+- Investor dashboard: post a task, view own tasks
+- Runner dashboard: browse open tasks in their city, accept, upload deliverables (Supabase Storage)
+- Investor approves submission → task marked complete
+- No money movement yet — payout is tracked as a number only
+
+### Milestone 3 — Admin
+- `/admin` route gated by `admin` role
+- Approve runners, view all users/tasks, manually assign runners, basic metrics
+
+### Milestone 4 — Payments (Stripe Connect escrow)
+- Stripe Connect Express onboarding for runners
+- Investor pays on task post → funds held → released on approval, 20% platform fee
+- This is its own large milestone; I'll re-plan it when we get here
+
+### Milestone 5 — Notifications
+- Transactional email via Lovable Email (Resend under the hood) for: task posted, accepted, submitted, approved, paid
+- SMS via Twilio later
+
+### Milestone 6+ — Trust/safety, ratings, blog, content
+- Ratings, reviews, ID verification, ToS/ICA/Investor Terms pages, blog
+
+---
+
+### Things I will NOT do from your brief, and why
+
+- **"Use Next.js / Vercel"** — this project is already on TanStack Start + Lovable Cloud (Supabase). Migrating frameworks would throw away your live site, your Facebook ad landing page, your Google Sheets pipe, and your SEO work. The current stack supports everything in the brief.
+- **Google Maps API, Twilio, Stripe Connect upfront** — these need your accounts/keys and real money flowing. We add them when the milestone calls for them, not as scaffolding.
+- **Mobile apps (Phase 9)** — out of scope for web build. The Supabase backend is already mobile-ready when you want it.
+- **Blog / content system (Phase 8)** — defer until accounts + tasks work. Easy to add later.
+
+---
+
+### Technical notes (skip if not technical)
+
+- DB additions for Milestone 1: `profiles` (user_id FK to auth.users, full_name, phone, city, state, type), `user_roles` (user_id, role enum), `has_role()` security-definer function, RLS scoped to `auth.uid()` on profiles, RLS using `has_role()` on user_roles. Existing `field_runner_applications` and `real_estate_pro_applications` tables stay as-is and get an optional `user_id` column.
+- Auth: Lovable Cloud email/password + Google. `configure_social_auth` with `["google"]` in the same turn. `attachSupabaseAuth` already wired in `src/start.ts`.
+- New routes: `/login`, `/signup`, `/dashboard`, `/_authenticated/dashboard/runner`, `/_authenticated/dashboard/investor`. Logout from header when signed in.
+- Existing `/apply` and `/investors` pages keep working for cold ad traffic that doesn't want an account yet. Form submission optionally links to the user if they happen to be logged in.
+
+---
+
+### What I need from you to start Milestone 1
+
+Just a yes. Once approved I'll ship auth + roles + the two-path entry + dashboard shell in the next turn. Everything after that we plan milestone-by-milestone so you can review and course-correct.

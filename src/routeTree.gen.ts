@@ -12,12 +12,18 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as WaitlistRouteImport } from './routes/waitlist'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as SignupRouteImport } from './routes/signup'
 import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as InvestorsRouteImport } from './routes/investors'
 import { Route as FaqRouteImport } from './routes/faq'
 import { Route as ApplyRouteImport } from './routes/apply'
+import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as SplatRouteImport } from './routes/$'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedDashboardRunnerRouteImport } from './routes/_authenticated/dashboard.runner'
+import { Route as AuthenticatedDashboardInvestorRouteImport } from './routes/_authenticated/dashboard.investor'
 
 const WaitlistRoute = WaitlistRouteImport.update({
   id: '/waitlist',
@@ -34,9 +40,19 @@ const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SignupRoute = SignupRouteImport.update({
+  id: '/signup',
+  path: '/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PrivacyRoute = PrivacyRouteImport.update({
   id: '/privacy',
   path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const InvestorsRoute = InvestorsRouteImport.update({
@@ -54,6 +70,10 @@ const ApplyRoute = ApplyRouteImport.update({
   path: '/apply',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedRoute = AuthenticatedRouteImport.update({
+  id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SplatRoute = SplatRouteImport.update({
   id: '/$',
   path: '/$',
@@ -64,6 +84,23 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedDashboardRunnerRoute =
+  AuthenticatedDashboardRunnerRouteImport.update({
+    id: '/runner',
+    path: '/runner',
+    getParentRoute: () => AuthenticatedDashboardRoute,
+  } as any)
+const AuthenticatedDashboardInvestorRoute =
+  AuthenticatedDashboardInvestorRouteImport.update({
+    id: '/investor',
+    path: '/investor',
+    getParentRoute: () => AuthenticatedDashboardRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -71,10 +108,15 @@ export interface FileRoutesByFullPath {
   '/apply': typeof ApplyRoute
   '/faq': typeof FaqRoute
   '/investors': typeof InvestorsRoute
+  '/login': typeof LoginRoute
   '/privacy': typeof PrivacyRoute
+  '/signup': typeof SignupRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/waitlist': typeof WaitlistRoute
+  '/dashboard': typeof AuthenticatedDashboardRouteWithChildren
+  '/dashboard/investor': typeof AuthenticatedDashboardInvestorRoute
+  '/dashboard/runner': typeof AuthenticatedDashboardRunnerRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -82,22 +124,33 @@ export interface FileRoutesByTo {
   '/apply': typeof ApplyRoute
   '/faq': typeof FaqRoute
   '/investors': typeof InvestorsRoute
+  '/login': typeof LoginRoute
   '/privacy': typeof PrivacyRoute
+  '/signup': typeof SignupRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/waitlist': typeof WaitlistRoute
+  '/dashboard': typeof AuthenticatedDashboardRouteWithChildren
+  '/dashboard/investor': typeof AuthenticatedDashboardInvestorRoute
+  '/dashboard/runner': typeof AuthenticatedDashboardRunnerRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/$': typeof SplatRoute
+  '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/apply': typeof ApplyRoute
   '/faq': typeof FaqRoute
   '/investors': typeof InvestorsRoute
+  '/login': typeof LoginRoute
   '/privacy': typeof PrivacyRoute
+  '/signup': typeof SignupRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/waitlist': typeof WaitlistRoute
+  '/_authenticated/dashboard': typeof AuthenticatedDashboardRouteWithChildren
+  '/_authenticated/dashboard/investor': typeof AuthenticatedDashboardInvestorRoute
+  '/_authenticated/dashboard/runner': typeof AuthenticatedDashboardRunnerRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -107,10 +160,15 @@ export interface FileRouteTypes {
     | '/apply'
     | '/faq'
     | '/investors'
+    | '/login'
     | '/privacy'
+    | '/signup'
     | '/sitemap.xml'
     | '/terms'
     | '/waitlist'
+    | '/dashboard'
+    | '/dashboard/investor'
+    | '/dashboard/runner'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -118,30 +176,44 @@ export interface FileRouteTypes {
     | '/apply'
     | '/faq'
     | '/investors'
+    | '/login'
     | '/privacy'
+    | '/signup'
     | '/sitemap.xml'
     | '/terms'
     | '/waitlist'
+    | '/dashboard'
+    | '/dashboard/investor'
+    | '/dashboard/runner'
   id:
     | '__root__'
     | '/'
     | '/$'
+    | '/_authenticated'
     | '/apply'
     | '/faq'
     | '/investors'
+    | '/login'
     | '/privacy'
+    | '/signup'
     | '/sitemap.xml'
     | '/terms'
     | '/waitlist'
+    | '/_authenticated/dashboard'
+    | '/_authenticated/dashboard/investor'
+    | '/_authenticated/dashboard/runner'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   SplatRoute: typeof SplatRoute
+  AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
   ApplyRoute: typeof ApplyRoute
   FaqRoute: typeof FaqRoute
   InvestorsRoute: typeof InvestorsRoute
+  LoginRoute: typeof LoginRoute
   PrivacyRoute: typeof PrivacyRoute
+  SignupRoute: typeof SignupRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TermsRoute: typeof TermsRoute
   WaitlistRoute: typeof WaitlistRoute
@@ -170,11 +242,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/signup': {
+      id: '/signup'
+      path: '/signup'
+      fullPath: '/signup'
+      preLoaderRoute: typeof SignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/privacy': {
       id: '/privacy'
       path: '/privacy'
       fullPath: '/privacy'
       preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/investors': {
@@ -198,6 +284,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApplyRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/$': {
       id: '/$'
       path: '/$'
@@ -212,16 +305,68 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/dashboard': {
+      id: '/_authenticated/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof AuthenticatedDashboardRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/dashboard/runner': {
+      id: '/_authenticated/dashboard/runner'
+      path: '/runner'
+      fullPath: '/dashboard/runner'
+      preLoaderRoute: typeof AuthenticatedDashboardRunnerRouteImport
+      parentRoute: typeof AuthenticatedDashboardRoute
+    }
+    '/_authenticated/dashboard/investor': {
+      id: '/_authenticated/dashboard/investor'
+      path: '/investor'
+      fullPath: '/dashboard/investor'
+      preLoaderRoute: typeof AuthenticatedDashboardInvestorRouteImport
+      parentRoute: typeof AuthenticatedDashboardRoute
+    }
   }
 }
+
+interface AuthenticatedDashboardRouteChildren {
+  AuthenticatedDashboardInvestorRoute: typeof AuthenticatedDashboardInvestorRoute
+  AuthenticatedDashboardRunnerRoute: typeof AuthenticatedDashboardRunnerRoute
+}
+
+const AuthenticatedDashboardRouteChildren: AuthenticatedDashboardRouteChildren =
+  {
+    AuthenticatedDashboardInvestorRoute: AuthenticatedDashboardInvestorRoute,
+    AuthenticatedDashboardRunnerRoute: AuthenticatedDashboardRunnerRoute,
+  }
+
+const AuthenticatedDashboardRouteWithChildren =
+  AuthenticatedDashboardRoute._addFileChildren(
+    AuthenticatedDashboardRouteChildren,
+  )
+
+interface AuthenticatedRouteChildren {
+  AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRouteWithChildren
+}
+
+const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
+  AuthenticatedDashboardRoute: AuthenticatedDashboardRouteWithChildren,
+}
+
+const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
+  AuthenticatedRouteChildren,
+)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   SplatRoute: SplatRoute,
+  AuthenticatedRoute: AuthenticatedRouteWithChildren,
   ApplyRoute: ApplyRoute,
   FaqRoute: FaqRoute,
   InvestorsRoute: InvestorsRoute,
+  LoginRoute: LoginRoute,
   PrivacyRoute: PrivacyRoute,
+  SignupRoute: SignupRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TermsRoute: TermsRoute,
   WaitlistRoute: WaitlistRoute,
@@ -229,13 +374,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
