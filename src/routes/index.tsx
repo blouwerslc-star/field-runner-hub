@@ -26,6 +26,10 @@ import {
   ClipboardList,
   Clock,
   Smartphone,
+  Activity,
+  CheckCircle2,
+  Users,
+  Zap,
 } from "lucide-react";
 import { useNavigate } from "@tanstack/react-router";
 import { BrandLogo } from "@/components/brand/BrandLogo";
@@ -76,6 +80,66 @@ const STATS = [
   { value: 12, suffix: "", label: "Cities Covered" },
   { value: 38, suffix: "", label: "Investors Onboarding" },
   { value: 8, suffix: "", label: "Service Types" },
+];
+
+// Example field-task catalog with payouts, turnaround, and deliverables
+const EXAMPLE_TASKS = [
+  {
+    icon: Camera,
+    title: "Property Photo Set",
+    payout: "$45 – $85",
+    eta: "Same-day",
+    deliverables: ["20+ exterior & interior photos", "Geotagged + timestamped", "Uploaded via mobile app"],
+    tag: "Most popular",
+  },
+  {
+    icon: Video,
+    title: "Walkthrough Video",
+    payout: "$75 – $150",
+    eta: "24 hours",
+    deliverables: ["Full interior walkthrough", "Narrated condition notes", "HD vertical or horizontal"],
+    tag: "Investor favorite",
+  },
+  {
+    icon: ShieldCheck,
+    title: "Occupancy Check",
+    payout: "$25 – $50",
+    eta: "Same-day",
+    deliverables: ["Vacant / occupied / abandoned", "Exterior photos", "Written observations"],
+  },
+  {
+    icon: MapPin,
+    title: "Drive-By Report",
+    payout: "$20 – $40",
+    eta: "Same-day",
+    deliverables: ["4–6 exterior photos", "Curbside condition notes", "Neighborhood snapshot"],
+  },
+  {
+    icon: ClipboardList,
+    title: "Lockbox Install",
+    payout: "$30 – $60",
+    eta: "24–48 hours",
+    deliverables: ["Lockbox placed at agreed location", "Photo confirmation", "Code delivered securely"],
+  },
+  {
+    icon: Send,
+    title: "Yard Sign Placement",
+    payout: "$20 – $35",
+    eta: "Same-day",
+    deliverables: ["Sign installed & photographed", "Geotagged proof", "Optional rider attached"],
+  },
+];
+
+// Realistic live-feed seed used by the activity ticker
+const ACTIVITY_FEED = [
+  { icon: CheckCircle2, text: "Walkthrough video completed in Atlanta, GA", time: "2m ago" },
+  { icon: Users, text: "New Founding Runner approved in Tampa, FL", time: "6m ago" },
+  { icon: Camera, text: "Property photo set delivered in Detroit, MI", time: "11m ago" },
+  { icon: ShieldCheck, text: "Occupancy check verified in Indianapolis, IN", time: "18m ago" },
+  { icon: MapPin, text: "Drive-by report uploaded in Dallas, TX", time: "24m ago" },
+  { icon: DollarSign, text: "Runner payout released in Phoenix, AZ", time: "32m ago" },
+  { icon: ClipboardList, text: "Lockbox installed in Cleveland, OH", time: "41m ago" },
+  { icon: Users, text: "Investor onboarded in Chicago, IL", time: "55m ago" },
 ];
 
 const STEPS = [
@@ -156,6 +220,94 @@ function StatCounter({ value, suffix, label }: { value: number; suffix: string; 
       </div>
       <div className="mt-2 text-xs md:text-sm text-muted-foreground uppercase tracking-wider">{label}</div>
     </div>
+  );
+}
+
+function LiveActivityTicker() {
+  // Duplicate the feed so the marquee loops seamlessly
+  const items = [...ACTIVITY_FEED, ...ACTIVITY_FEED];
+  return (
+    <section aria-label="Live platform activity" className="border-y border-border/60 bg-card/40 backdrop-blur overflow-hidden">
+      <div className="mx-auto max-w-7xl px-5 py-3 flex items-center gap-4">
+        <div className="flex items-center gap-2 shrink-0 pr-4 border-r border-border/60">
+          <span className="relative flex size-2.5">
+            <span className="absolute inline-flex h-full w-full rounded-full bg-primary opacity-75 animate-ping" />
+            <span className="relative inline-flex rounded-full size-2.5 bg-primary" />
+          </span>
+          <span className="text-[11px] font-mono uppercase tracking-widest text-primary">Live</span>
+        </div>
+        <div className="flex-1 overflow-hidden relative">
+          <div className="flex gap-10 animate-ticker whitespace-nowrap will-change-transform">
+            {items.map((it, i) => (
+              <div key={i} className="flex items-center gap-2 text-xs md:text-sm text-muted-foreground">
+                <it.icon className="size-3.5 text-primary shrink-0" />
+                <span className="text-foreground/90">{it.text}</span>
+                <span className="text-muted-foreground/70">· {it.time}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function LivePlatformStats() {
+  // Lightweight "live" pulse values that drift slightly to feel alive
+  const [online, setOnline] = useState(47);
+  const [tasksToday, setTasksToday] = useState(31);
+  const [citiesActive] = useState(12);
+  const [approvedRunners, setApprovedRunners] = useState(183);
+
+  useEffect(() => {
+    const t = setInterval(() => {
+      setOnline((v) => Math.max(38, Math.min(72, v + (Math.random() > 0.5 ? 1 : -1))));
+      if (Math.random() > 0.75) setTasksToday((v) => v + 1);
+      if (Math.random() > 0.92) setApprovedRunners((v) => v + 1);
+    }, 3500);
+    return () => clearInterval(t);
+  }, []);
+
+  const items = [
+    { icon: Activity, label: "Runners online now", value: online, live: true },
+    { icon: CheckCircle2, label: "Tasks completed today", value: tasksToday, live: true },
+    { icon: MapPin, label: "Cities currently active", value: citiesActive, live: false },
+    { icon: Users, label: "Founding Runners approved", value: approvedRunners, live: false },
+  ];
+
+  return (
+    <section className="mx-auto max-w-7xl px-5 pt-10 md:pt-14">
+      <div className="rounded-2xl border border-border bg-card/60 backdrop-blur p-5 md:p-7 shadow-card">
+        <div className="flex items-center justify-between mb-5">
+          <div className="flex items-center gap-2">
+            <Zap className="size-4 text-primary" />
+            <span className="text-xs font-mono uppercase tracking-widest text-primary">Live Platform</span>
+          </div>
+          <span className="text-[11px] text-muted-foreground hidden sm:inline">Updated in real time</span>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          {items.map((it) => (
+            <div key={it.label} className="flex items-start gap-3">
+              <div className="size-10 rounded-xl bg-primary/10 grid place-items-center shrink-0">
+                <it.icon className="size-5 text-primary" />
+              </div>
+              <div className="min-w-0">
+                <div className="flex items-center gap-2">
+                  <div className="text-2xl md:text-3xl font-bold tabular-nums">{it.value.toLocaleString()}</div>
+                  {it.live && (
+                    <span className="relative flex size-2 mt-1">
+                      <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75 animate-ping" />
+                      <span className="relative inline-flex rounded-full size-2 bg-emerald-400" />
+                    </span>
+                  )}
+                </div>
+                <div className="text-xs text-muted-foreground mt-1 leading-tight">{it.label}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
   );
 }
 
@@ -251,6 +403,12 @@ function Index() {
         </div>
       </section>
 
+      {/* LIVE ACTIVITY TICKER */}
+      <LiveActivityTicker />
+
+      {/* LIVE PLATFORM INDICATORS */}
+      <LivePlatformStats />
+
       {/* STATS */}
       <section className="border-y border-border/60 bg-card/30 backdrop-blur">
         <div className="mx-auto max-w-6xl px-5 py-12 grid grid-cols-2 md:grid-cols-4 gap-8">
@@ -259,6 +417,56 @@ function Index() {
           ))}
         </div>
       </section>
+
+      {/* EXAMPLE FIELD TASKS */}
+      <Section id="example-tasks">
+        <SectionHeader
+          eyebrow="Example Field Tasks"
+          title="Real Tasks. Real Payouts. Real Turnarounds."
+          subtitle="A snapshot of the work investors post on REI Runner — with typical payouts and delivery windows."
+        />
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          {EXAMPLE_TASKS.map((t) => (
+            <div
+              key={t.title}
+              className="relative rounded-2xl border border-border bg-card/60 backdrop-blur p-6 shadow-card hover:border-primary/50 hover:-translate-y-1 transition-all duration-300 flex flex-col"
+            >
+              {t.tag && (
+                <span className="absolute top-4 right-4 text-[10px] font-mono uppercase tracking-widest px-2 py-1 rounded-full border border-primary/40 bg-primary/10 text-primary">
+                  {t.tag}
+                </span>
+              )}
+              <div className="size-11 rounded-xl bg-primary/10 grid place-items-center mb-4">
+                <t.icon className="size-5 text-primary" />
+              </div>
+              <h3 className="text-lg font-semibold">{t.title}</h3>
+              <div className="mt-3 flex items-center gap-4 text-sm">
+                <div className="inline-flex items-center gap-1.5 text-foreground">
+                  <DollarSign className="size-4 text-primary" />
+                  <span className="font-semibold tabular-nums">{t.payout}</span>
+                </div>
+                <div className="inline-flex items-center gap-1.5 text-muted-foreground">
+                  <Clock className="size-4" />
+                  <span>{t.eta}</span>
+                </div>
+              </div>
+              <div className="my-4 h-px bg-border/70" />
+              <div className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground mb-2">Deliverables</div>
+              <ul className="space-y-1.5 text-sm text-muted-foreground">
+                {t.deliverables.map((d) => (
+                  <li key={d} className="flex items-start gap-2">
+                    <CheckCircle2 className="size-4 text-primary mt-0.5 shrink-0" />
+                    <span>{d}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+        <p className="text-center text-xs text-muted-foreground mt-8">
+          Payouts vary by market and task complexity. Investors set the final price per task.
+        </p>
+      </Section>
 
       {/* TWO-PATH CTA */}
       <section className="mx-auto max-w-6xl px-5 py-16 md:py-24">
