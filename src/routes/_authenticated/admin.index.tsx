@@ -1,0 +1,595 @@
+import { createFileRoute } from "@tanstack/react-router";
+import { useEffect, useMemo, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { DashboardShell } from "@/components/dashboard/DashboardShell";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { toast } from "sonner";
+import { Loader2, Users, ClipboardList, UserCog, Plus } from "lucide-react";
+
+export const Route = createFileRoute("/_authenticated/admin/")({
+  component: AdminDashboard,
+  head: () => ({ meta: [{ title: "Admin — REI Runner" }] }),
+});
+
+type FieldRunner = {
+  id: string;
+  full_name: string;
+  email: string;
+  phone: string;
+  city: string;
+  state: string;
+  services: string[];
+  user_id: string | null;
+  created_at: string;
+};
+
+type Investor = {
+  id: string;
+  full_name: string;
+  email: string;
+  phone: string;
+  market_city: string;
+  market_state: string;
+  role: string;
+  services_needed: string[];
+  user_id: string | null;
+  created_at: string;
+};
+
+type Task = {
+  id: string;
+  title: string;
+  task_type: string;
+  property_address: string;
+  city: string;
+  state: string;
+  status: string;
+  payout_amount: number | null;
+  due_date: string | null;
+  investor_id: string | null;
+  runner_id: string | null;
+  created_at: string;
+};
+
+function statusColor(status: string) {
+  switch (status) {
+    case "open":
+      return "bg-yellow-500/15 text-yellow-300 border-yellow-500/30";
+    case "assigned":
+      return "bg-blue-500/15 text-blue-300 border-blue-500/30";
+    case "in_progress":
+      return "bg-purple-500/15 text-purple-300 border-purple-500/30";
+    case "submitted":
+      return "bg-cyan-500/15 text-cyan-300 border-cyan-500/30";
+    case "completed":
+      return "bg-emerald-500/15 text-emerald-300 border-emerald-500/30";
+    case "cancelled":
+      return "bg-red-500/15 text-red-300 border-red-500/30";
+    default:
+      return "bg-muted text-muted-foreground";
+  }
+}
+
+function AdminDashboard() {
+  const [loading, setLoading] = useState(true);
+  const [runners, setRunners] = useState<FieldRunner[]>([]);
+  const [investors, setInvestors] = useState<Investor[]>([]);
+  const [tasks, setTasks] = useState<Task[]>([]);
+
+  async function loadAll() {
+    setLoading(true);
+    const [r, i, t] = await Promise.all([
+      supabase
+        .from("field_runner_applications")
+        .select("id, full_name, email, phone, city, state, services, user_id, created_at")
+        .order("created_at", { ascending: false }),
+      supabase
+        .from("real_estate_pro_applications")
+        .select("id, full_name, email, phone, market_city, market_state, role, services_needed, user_id, created_at")
+        .order("created_at", { ascending: false }),
+      supabase
+        .from("tasks")
+        .select("*")
+        .order("created_at", { ascending: false }),
+    ]);
+    if (r.error) toast.error("Failed to load runners");
+    if (i.error) toast.error("Failed to load investors");
+    if (t.error) toast.error("Failed to load tasks");
+    setRunners((r.data ?? []) as FieldRunner[]);
+    setInvestors((i.data ?? []) as Investor[]);
+    setTasks((t.data ?? []) as Task[]);
+    setLoading(false);
+  }
+
+  useEffect(() => {
+    loadAll();
+  }, []);
+
+  const runnersWithAccount = useMemo(
+    () => runners.filter((r) => r.user_id),
+    [runners],
+  );
+
+  return (
+    <DashboardShell
+      title="Admin Dashboard"
+      subtitle="Manage signups, post tasks on behalf of investors, and assign runners."
+    >
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
+        <StatTile icon={Users} label="Runners" value={runners.length} />
+        <StatTile icon={UserCog} label="Investors" value={investors.length} />
+        <StatTile icon={ClipboardList} label="Tasks" value={tasks.length} />
+        <StatTile
+          icon={ClipboardList}
+          label="Open"
+          value={tasks.filter((t) => t.status === "open").length}
+        />
+      </div>
+
+      <Tabs defaultValue="tasks">
+        <TabsList className="mb-6">
+          <TabsTrigger value="tasks">Tasks</TabsTrigger>
+          <TabsTrigger value="runners">Runners ({runners.length})</TabsTrigger>
+          <TabsTrigger value="investors">Investors ({investors.length})</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="tasks">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-lg font-semibold">All Tasks</h2>
+            <CreateTaskDialog onCreated={loadAll} />
+          </div>
+          {loading ? (
+            <Loader2 className="size-5 animate-spin text-primary" />
+          ) : tasks.length === 0 ? (
+            <EmptyState message="No tasks yet. Create one to get started." />
+          ) : (
+            <div className="space-y-3">
+              {tasks.map((task) => (
+                <TaskRow
+                  key={task.id}
+                  task={task}
+                  runners={runnersWithAccount}
+                  onChanged={loadAll}
+                />
+              ))}
+            </div>
+          )}
+        </TabsContent>
+
+        <TabsContent value="runners">
+          {loading ? (
+            <Loader2 className="size-5 animate-spin text-primary" />
+          ) : runners.length === 0 ? (
+            <EmptyState message="No runner signups yet." />
+          ) : (
+            <div className="overflow-x-auto rounded-2xl border border-border bg-card/40">
+              <table className="w-full text-sm">
+                <thead className="bg-muted/40 text-left text-xs uppercase tracking-wider text-muted-foreground">
+                  <tr>
+                    <th className="px-4 py-3">Name</th>
+                    <th className="px-4 py-3">Contact</th>
+                    <th className="px-4 py-3">Market</th>
+                    <th className="px-4 py-3">Services</th>
+                    <th className="px-4 py-3">Account</th>
+                    <th className="px-4 py-3">Applied</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {runners.map((r) => (
+                    <tr key={r.id} className="border-t border-border/60">
+                      <td className="px-4 py-3 font-medium">{r.full_name}</td>
+                      <td className="px-4 py-3 text-muted-foreground">
+                        <div>{r.email}</div>
+                        <div className="text-xs">{r.phone}</div>
+                      </td>
+                      <td className="px-4 py-3 text-muted-foreground">
+                        {r.city}, {r.state}
+                      </td>
+                      <td className="px-4 py-3 text-xs text-muted-foreground">
+                        {(r.services ?? []).join(", ") || "—"}
+                      </td>
+                      <td className="px-4 py-3">
+                        {r.user_id ? (
+                          <Badge variant="outline" className="border-emerald-500/30 text-emerald-300">
+                            Linked
+                          </Badge>
+                        ) : (
+                          <Badge variant="outline" className="text-muted-foreground">
+                            Anonymous
+                          </Badge>
+                        )}
+                      </td>
+                      <td className="px-4 py-3 text-xs text-muted-foreground">
+                        {new Date(r.created_at).toLocaleDateString()}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </TabsContent>
+
+        <TabsContent value="investors">
+          {loading ? (
+            <Loader2 className="size-5 animate-spin text-primary" />
+          ) : investors.length === 0 ? (
+            <EmptyState message="No investor signups yet." />
+          ) : (
+            <div className="overflow-x-auto rounded-2xl border border-border bg-card/40">
+              <table className="w-full text-sm">
+                <thead className="bg-muted/40 text-left text-xs uppercase tracking-wider text-muted-foreground">
+                  <tr>
+                    <th className="px-4 py-3">Name</th>
+                    <th className="px-4 py-3">Contact</th>
+                    <th className="px-4 py-3">Market</th>
+                    <th className="px-4 py-3">Role</th>
+                    <th className="px-4 py-3">Needs</th>
+                    <th className="px-4 py-3">Applied</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {investors.map((i) => (
+                    <tr key={i.id} className="border-t border-border/60">
+                      <td className="px-4 py-3 font-medium">{i.full_name}</td>
+                      <td className="px-4 py-3 text-muted-foreground">
+                        <div>{i.email}</div>
+                        <div className="text-xs">{i.phone}</div>
+                      </td>
+                      <td className="px-4 py-3 text-muted-foreground">
+                        {i.market_city}, {i.market_state}
+                      </td>
+                      <td className="px-4 py-3 text-xs text-muted-foreground">{i.role}</td>
+                      <td className="px-4 py-3 text-xs text-muted-foreground">
+                        {(i.services_needed ?? []).join(", ") || "—"}
+                      </td>
+                      <td className="px-4 py-3 text-xs text-muted-foreground">
+                        {new Date(i.created_at).toLocaleDateString()}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </TabsContent>
+      </Tabs>
+    </DashboardShell>
+  );
+}
+
+function StatTile({
+  icon: Icon,
+  label,
+  value,
+}: {
+  icon: React.ComponentType<{ className?: string }>;
+  label: string;
+  value: number;
+}) {
+  return (
+    <div className="rounded-2xl border border-border bg-card/60 backdrop-blur p-4">
+      <div className="flex items-center gap-2 text-muted-foreground text-xs uppercase tracking-wider mb-2">
+        <Icon className="size-4" /> {label}
+      </div>
+      <div className="text-2xl font-bold">{value}</div>
+    </div>
+  );
+}
+
+function EmptyState({ message }: { message: string }) {
+  return (
+    <div className="rounded-2xl border border-dashed border-border bg-card/30 p-10 text-center text-sm text-muted-foreground">
+      {message}
+    </div>
+  );
+}
+
+function TaskRow({
+  task,
+  runners,
+  onChanged,
+}: {
+  task: Task;
+  runners: FieldRunner[];
+  onChanged: () => void;
+}) {
+  const [assigning, setAssigning] = useState(false);
+  const assignedRunner = runners.find((r) => r.user_id === task.runner_id);
+
+  async function assign(runnerUserId: string) {
+    setAssigning(true);
+    const { error } = await supabase
+      .from("tasks")
+      .update({
+        runner_id: runnerUserId,
+        status: task.status === "open" ? "assigned" : task.status,
+      })
+      .eq("id", task.id);
+    setAssigning(false);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    toast.success("Runner assigned");
+    onChanged();
+  }
+
+  async function setStatus(status: string) {
+    const { error } = await supabase.from("tasks").update({ status }).eq("id", task.id);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    toast.success("Task updated");
+    onChanged();
+  }
+
+  return (
+    <div className="rounded-2xl border border-border bg-card/50 p-5">
+      <div className="flex flex-wrap items-start justify-between gap-3 mb-3">
+        <div>
+          <div className="flex items-center gap-2 flex-wrap">
+            <h3 className="font-semibold">{task.title}</h3>
+            <Badge variant="outline" className={statusColor(task.status)}>
+              {task.status.replace("_", " ")}
+            </Badge>
+            <Badge variant="outline" className="text-xs">
+              {task.task_type}
+            </Badge>
+          </div>
+          <p className="text-sm text-muted-foreground mt-1">
+            {task.property_address}, {task.city}, {task.state}
+          </p>
+        </div>
+        <div className="text-right text-sm">
+          {task.payout_amount != null && (
+            <div className="font-semibold text-primary">
+              ${Number(task.payout_amount).toFixed(2)}
+            </div>
+          )}
+          {task.due_date && (
+            <div className="text-xs text-muted-foreground">
+              Due {new Date(task.due_date).toLocaleDateString()}
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div className="flex flex-wrap items-center gap-2 pt-3 border-t border-border/60">
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-muted-foreground">Runner:</span>
+          <Select
+            value={task.runner_id ?? ""}
+            onValueChange={(v) => assign(v)}
+            disabled={assigning}
+          >
+            <SelectTrigger className="w-[220px] h-8 text-xs">
+              <SelectValue placeholder="Assign runner…">
+                {assignedRunner ? assignedRunner.full_name : "Assign runner…"}
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              {runners.length === 0 && (
+                <div className="px-2 py-1.5 text-xs text-muted-foreground">
+                  No runners have signed up yet
+                </div>
+              )}
+              {runners.map((r) => (
+                <SelectItem key={r.id} value={r.user_id as string}>
+                  {r.full_name} — {r.city}, {r.state}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="flex items-center gap-2 ml-auto">
+          <Select value={task.status} onValueChange={setStatus}>
+            <SelectTrigger className="w-[140px] h-8 text-xs">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="open">Open</SelectItem>
+              <SelectItem value="assigned">Assigned</SelectItem>
+              <SelectItem value="in_progress">In progress</SelectItem>
+              <SelectItem value="submitted">Submitted</SelectItem>
+              <SelectItem value="completed">Completed</SelectItem>
+              <SelectItem value="cancelled">Cancelled</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function CreateTaskDialog({ onCreated }: { onCreated: () => void }) {
+  const [open, setOpen] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [form, setForm] = useState({
+    title: "",
+    task_type: "photos",
+    property_address: "",
+    city: "",
+    state: "",
+    zip_code: "",
+    payout_amount: "",
+    due_date: "",
+    description: "",
+  });
+
+  async function submit() {
+    if (!form.title || !form.property_address || !form.city || !form.state) {
+      toast.error("Title, address, city and state are required");
+      return;
+    }
+    setSaving(true);
+    const { error } = await supabase.from("tasks").insert({
+      title: form.title,
+      task_type: form.task_type,
+      property_address: form.property_address,
+      city: form.city,
+      state: form.state,
+      zip_code: form.zip_code || null,
+      payout_amount: form.payout_amount ? Number(form.payout_amount) : null,
+      due_date: form.due_date || null,
+      description: form.description || null,
+      status: "open",
+    });
+    setSaving(false);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    toast.success("Task created");
+    setOpen(false);
+    setForm({
+      title: "",
+      task_type: "photos",
+      property_address: "",
+      city: "",
+      state: "",
+      zip_code: "",
+      payout_amount: "",
+      due_date: "",
+      description: "",
+    });
+    onCreated();
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button className="bg-gradient-primary shadow-glow">
+          <Plus className="size-4 mr-1.5" /> New task
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="max-w-lg">
+        <DialogHeader>
+          <DialogTitle>Create task</DialogTitle>
+        </DialogHeader>
+        <div className="grid gap-3">
+          <div>
+            <Label>Title</Label>
+            <Input
+              value={form.title}
+              onChange={(e) => setForm({ ...form, title: e.target.value })}
+              placeholder="Drive-by photos at 123 Main St"
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label>Type</Label>
+              <Select
+                value={form.task_type}
+                onValueChange={(v) => setForm({ ...form, task_type: v })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="photos">Drive-by photos</SelectItem>
+                  <SelectItem value="inspection">Property inspection</SelectItem>
+                  <SelectItem value="occupancy">Occupancy check</SelectItem>
+                  <SelectItem value="sign_install">Sign install</SelectItem>
+                  <SelectItem value="lockbox">Lockbox install</SelectItem>
+                  <SelectItem value="documents">Document delivery</SelectItem>
+                  <SelectItem value="other">Other</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Payout ($)</Label>
+              <Input
+                type="number"
+                value={form.payout_amount}
+                onChange={(e) => setForm({ ...form, payout_amount: e.target.value })}
+                placeholder="50"
+              />
+            </div>
+          </div>
+          <div>
+            <Label>Property address</Label>
+            <Input
+              value={form.property_address}
+              onChange={(e) => setForm({ ...form, property_address: e.target.value })}
+              placeholder="123 Main St"
+            />
+          </div>
+          <div className="grid grid-cols-3 gap-3">
+            <div className="col-span-2">
+              <Label>City</Label>
+              <Input
+                value={form.city}
+                onChange={(e) => setForm({ ...form, city: e.target.value })}
+              />
+            </div>
+            <div>
+              <Label>State</Label>
+              <Input
+                value={form.state}
+                onChange={(e) => setForm({ ...form, state: e.target.value })}
+                maxLength={2}
+              />
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label>Zip</Label>
+              <Input
+                value={form.zip_code}
+                onChange={(e) => setForm({ ...form, zip_code: e.target.value })}
+              />
+            </div>
+            <div>
+              <Label>Due date</Label>
+              <Input
+                type="date"
+                value={form.due_date}
+                onChange={(e) => setForm({ ...form, due_date: e.target.value })}
+              />
+            </div>
+          </div>
+          <div>
+            <Label>Instructions</Label>
+            <Textarea
+              value={form.description}
+              onChange={(e) => setForm({ ...form, description: e.target.value })}
+              rows={3}
+              placeholder="What does the runner need to do?"
+            />
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="ghost" onClick={() => setOpen(false)}>
+            Cancel
+          </Button>
+          <Button onClick={submit} disabled={saving} className="bg-gradient-primary">
+            {saving ? <Loader2 className="size-4 animate-spin" /> : "Create task"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
