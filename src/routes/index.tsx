@@ -161,6 +161,8 @@ function StatCounter({ value, suffix, label }: { value: number; suffix: string; 
 function Index() {
   const navigate = useNavigate();
   const goApply = () => navigate({ to: "/apply" });
+  const goSignupRunner = () => navigate({ to: "/signup", search: { role: "runner", redirect: "/dashboard" } });
+  const goSignupInvestor = () => navigate({ to: "/signup", search: { role: "investor", redirect: "/dashboard" } });
 
   return (
     <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
@@ -182,9 +184,12 @@ function Index() {
             <button onClick={() => scrollToId("markets")} className="hover:text-foreground transition">Markets</button>
             <button onClick={() => scrollToId("faq")} className="hover:text-foreground transition">FAQ</button>
           </nav>
-          <Button onClick={goApply} size="sm" className="bg-gradient-primary shadow-glow">
-            Apply Now
-          </Button>
+          <div className="flex items-center gap-2">
+            <Link to="/login" className="hidden sm:inline text-sm text-muted-foreground hover:text-foreground transition">Sign in</Link>
+            <Button onClick={goApply} size="sm" className="bg-gradient-primary shadow-glow">
+              Apply Now
+            </Button>
+          </div>
         </div>
       </header>
 
