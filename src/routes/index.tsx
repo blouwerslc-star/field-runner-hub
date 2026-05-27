@@ -520,6 +520,54 @@ function Index() {
         </p>
       </Section>
 
+      {/* HOW PAYMENTS WORK */}
+      <Section id="payments">
+        <SectionHeader
+          eyebrow="How Payments Work"
+          title="Escrow-Protected. Pay on Delivery."
+          subtitle="Investors fund tasks up front. Runners get paid the moment deliverables are approved. No invoices, no waiting, no chargebacks."
+        />
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          {PAYMENT_FLOW.map((p, i) => (
+            <div key={p.step} className="relative rounded-2xl border border-border bg-card/60 backdrop-blur p-6 shadow-card">
+              <div className="text-xs font-mono text-primary mb-3">STEP {p.step}</div>
+              <div className="size-11 rounded-xl bg-primary/10 grid place-items-center mb-4">
+                <p.icon className="size-5 text-primary" />
+              </div>
+              <h3 className="text-lg font-semibold mb-1">{p.title}</h3>
+              <p className="text-sm text-muted-foreground">{p.body}</p>
+              {i < PAYMENT_FLOW.length - 1 && (
+                <ArrowRight className="hidden lg:block absolute -right-4 top-1/2 -translate-y-1/2 size-4 text-primary/60" />
+              )}
+            </div>
+          ))}
+        </div>
+        <div className="mt-8 max-w-3xl mx-auto rounded-xl border border-border bg-muted/30 p-5 text-xs md:text-sm text-muted-foreground leading-relaxed text-center">
+          <Lock className="inline size-4 text-primary mr-1.5 -mt-0.5" />
+          Payments are processed through a regulated US payments partner. Investor funds are held in escrow and never touched by REI Runner staff.
+        </div>
+      </Section>
+
+      {/* HOW WE VET RUNNERS */}
+      <Section id="trust">
+        <SectionHeader
+          eyebrow="Vetted Network"
+          title="How We Vet Every Runner"
+          subtitle="REI Runner isn't an open gig board. Every runner is reviewed, verified, and held to a deliverable standard."
+        />
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          {VETTING_STEPS.map((v) => (
+            <div key={v.title} className="rounded-2xl border border-border bg-card/60 backdrop-blur p-6 shadow-card hover:border-primary/40 transition">
+              <div className="size-11 rounded-xl bg-primary/10 grid place-items-center mb-4">
+                <v.icon className="size-5 text-primary" />
+              </div>
+              <h3 className="text-lg font-semibold mb-1">{v.title}</h3>
+              <p className="text-sm text-muted-foreground">{v.body}</p>
+            </div>
+          ))}
+        </div>
+      </Section>
+
       {/* TWO-PATH CTA */}
       <section className="mx-auto max-w-6xl px-5 py-16 md:py-24">
         <div className="text-center mb-10">
