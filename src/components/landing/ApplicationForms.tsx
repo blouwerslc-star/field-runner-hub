@@ -19,7 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { CheckCircle2, Loader2 } from "lucide-react";
+import { CheckCircle2, Loader2, ChevronLeft, ChevronRight } from "lucide-react";
 
 const RUNNER_SERVICES = [
   "Property photos",
