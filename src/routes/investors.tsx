@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { MapPin, Building2, ArrowLeft } from "lucide-react";
+import { Building2, ArrowLeft } from "lucide-react";
+import { BrandLogo } from "@/components/brand/BrandLogo";
 import { Toaster } from "@/components/ui/sonner";
 import { ProForm } from "@/components/landing/ApplicationForms";
 
@@ -32,11 +33,8 @@ function InvestorsPage() {
 
       <header className="sticky top-0 z-40 backdrop-blur bg-background/70 border-b border-border/60">
         <div className="mx-auto max-w-7xl px-5 h-16 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2 font-semibold tracking-tight">
-            <span className="size-7 rounded-lg bg-gradient-primary grid place-items-center shadow-glow">
-              <MapPin className="size-4 text-primary-foreground" />
-            </span>
-            REI <span className="text-primary">Runner</span>
+          <Link to="/" aria-label="REI Runner home">
+            <BrandLogo />
           </Link>
           <Link
             to="/"
