@@ -1,3 +1,4 @@
+import iconUrl from "@/assets/rei-runner-icon.png";
 import logoUrl from "@/assets/rei-runner-logo.png";
 import { cn } from "@/lib/utils";
 
@@ -19,10 +20,9 @@ export function BrandLogo({
   return (
     <span className={cn("inline-flex items-center gap-2 font-semibold tracking-tight", className)}>
       <img
-        src={logoUrl}
+        src={iconUrl}
         alt="REI Runner"
-        className={cn(dims, "object-contain object-top shrink-0")}
-        style={{ objectPosition: "center 20%" }}
+        className={cn(dims, "object-contain shrink-0")}
       />
       {showWordmark && (
         <span>
@@ -33,4 +33,4 @@ export function BrandLogo({
   );
 }
 
-export { logoUrl };
+export { logoUrl, iconUrl };
