@@ -19,7 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { CheckCircle2, Loader2 } from "lucide-react";
+import { CheckCircle2, Loader2, ChevronLeft, ChevronRight } from "lucide-react";
 
 const RUNNER_SERVICES = [
   "Property photos",
@@ -101,6 +101,7 @@ export function FieldRunnerForm() {
   const navigate = useNavigate();
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
+  const [step, setStep] = useState(0);
   const [services, setServices] = useState<string[]>([]);
   const [availability, setAvailability] = useState("");
   const [hasTransport, setHasTransport] = useState("");
@@ -122,6 +123,7 @@ export function FieldRunnerForm() {
 
   const onReset = () => {
     setDone(false);
+    setStep(0);
     setServices([]);
     setAvailability("");
     setHasTransport("");
@@ -201,8 +203,43 @@ export function FieldRunnerForm() {
 
   if (done) return <SuccessCard onReset={onReset} />;
 
+  const STEPS = ["About you", "Logistics", "Work prefs", "Experience"];
+  const progressPct = ((step + 1) / STEPS.length) * 100;
+
+  function validateStep(): string | null {
+    if (step === 0) {
+      const form = document.querySelector<HTMLFormElement>("form[data-runner-form]");
+      if (!form) return null;
+      const required = ["full_name", "email", "phone", "date_of_birth", "street_address", "city", "state", "zip_code"];
+      for (const name of required) {
+        const el = form.elements.namedItem(name) as HTMLInputElement | null;
+        if (!el || !el.value.trim()) return "Please complete all fields in this step.";
+      }
+    }
+    if (step === 1) {
+      if (!hasTransport || !hasLicense || !vehicleType || !travelRadius || !hasPhone)
+        return "Please complete all logistics questions.";
+    }
+    if (step === 2) {
+      if (!availability || !hoursPerWeek || !payout || !heardAbout)
+        return "Please complete all work preference questions.";
+      if (!services.length) return "Pick at least one service you can perform.";
+    }
+    return null;
+  }
+
+  function goNext() {
+    const err = validateStep();
+    if (err) {
+      toast.error(err);
+      return;
+    }
+    setStep((s) => Math.min(s + 1, STEPS.length - 1));
+    if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
   return (
-    <form key={reset} onSubmit={handleSubmit} className="space-y-5">
+    <form key={reset} data-runner-form onSubmit={handleSubmit} className="space-y-6">
       {/* honeypot */}
       <input
         type="text"
@@ -212,7 +249,37 @@ export function FieldRunnerForm() {
         className="hidden"
         aria-hidden="true"
       />
-      <div className="grid sm:grid-cols-2 gap-4">
+
+      {/* Progress */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between text-xs">
+          <span className="font-semibold text-foreground">
+            Step {step + 1} of {STEPS.length}
+          </span>
+          <span className="text-muted-foreground">{STEPS[step]}</span>
+        </div>
+        <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden">
+          <div
+            className="h-full bg-gradient-primary transition-all duration-500 ease-out"
+            style={{ width: `${progressPct}%` }}
+          />
+        </div>
+        <div className="hidden sm:flex items-center justify-between gap-2">
+          {STEPS.map((label, i) => (
+            <div
+              key={label}
+              className={`flex-1 text-center text-[11px] uppercase tracking-wider transition ${
+                i <= step ? "text-primary font-semibold" : "text-muted-foreground/60"
+              }`}
+            >
+              {label}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Step 1: About you */}
+      <div className={step === 0 ? "grid sm:grid-cols-2 gap-4 animate-fade-up" : "hidden"}>
         <Field label="Full Name"><Input name="full_name" required maxLength={100} /></Field>
         <Field label="Email Address"><Input name="email" type="email" required maxLength={200} /></Field>
         <Field label="Phone Number"><Input name="phone" required maxLength={30} /></Field>
@@ -221,6 +288,10 @@ export function FieldRunnerForm() {
         <Field label="City"><Input name="city" required maxLength={100} /></Field>
         <Field label="State"><Input name="state" required maxLength={50} /></Field>
         <Field label="Zip Code"><Input name="zip_code" required maxLength={20} /></Field>
+      </div>
+
+      {/* Step 2: Logistics */}
+      <div className={step === 1 ? "grid sm:grid-cols-2 gap-4 animate-fade-up" : "hidden"}>
         <Field label="Reliable transportation?">
           <Select value={hasTransport} onValueChange={setHasTransport}>
             <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
@@ -268,6 +339,11 @@ export function FieldRunnerForm() {
             </SelectContent>
           </Select>
         </Field>
+      </div>
+
+      {/* Step 3: Work preferences */}
+      <div className={step === 2 ? "space-y-5 animate-fade-up" : "hidden"}>
+      <div className="grid sm:grid-cols-2 gap-4">
         <Field label="Availability">
           <Select value={availability} onValueChange={setAvailability}>
             <SelectTrigger><SelectValue placeholder="Select availability" /></SelectTrigger>
@@ -309,11 +385,13 @@ export function FieldRunnerForm() {
           </Select>
         </Field>
       </div>
+        <Field label="Services you can perform">
+          <ServicesGrid options={RUNNER_SERVICES} selected={services} onToggle={toggle} />
+        </Field>
+      </div>
 
-      <Field label="Services you can perform">
-        <ServicesGrid options={RUNNER_SERVICES} selected={services} onToggle={toggle} />
-      </Field>
-
+      {/* Step 4: Experience & consent */}
+      <div className={step === 3 ? "space-y-5 animate-fade-up" : "hidden"}>
       <Field label="Tell us about your experience">
         <Textarea name="experience" rows={4} maxLength={2000} placeholder="Real estate, photography, gig work, etc." />
       </Field>
@@ -347,10 +425,46 @@ export function FieldRunnerForm() {
           sellers, perform inspections, or conduct licensed real estate activity.
         </span>
       </label>
+      </div>
 
-      <Button type="submit" size="lg" disabled={submitting} className="w-full bg-gradient-primary shadow-glow">
-        {submitting ? <><Loader2 className="size-4 mr-2 animate-spin" /> Submitting…</> : "Submit Application"}
-      </Button>
+      {/* Sticky nav */}
+      <div className="sticky bottom-0 -mx-6 md:-mx-8 px-6 md:px-8 pt-4 pb-4 bg-gradient-to-t from-card via-card/95 to-transparent border-t border-border/40 flex items-center gap-3">
+        {step > 0 ? (
+          <Button
+            type="button"
+            variant="outline"
+            size="lg"
+            onClick={() => setStep((s) => Math.max(0, s - 1))}
+            className="h-12"
+          >
+            <ChevronLeft className="size-4 mr-1" /> Back
+          </Button>
+        ) : (
+          <div className="text-xs text-muted-foreground hidden sm:block">
+            Takes ~3 minutes
+          </div>
+        )}
+        <div className="flex-1" />
+        {step < STEPS.length - 1 ? (
+          <Button
+            type="button"
+            size="lg"
+            onClick={goNext}
+            className="h-12 min-w-[140px] bg-gradient-primary shadow-glow"
+          >
+            Continue <ChevronRight className="size-4 ml-1" />
+          </Button>
+        ) : (
+          <Button
+            type="submit"
+            size="lg"
+            disabled={submitting}
+            className="h-12 min-w-[180px] bg-gradient-primary shadow-glow"
+          >
+            {submitting ? <><Loader2 className="size-4 mr-2 animate-spin" /> Submitting…</> : "Submit Application"}
+          </Button>
+        )}
+      </div>
     </form>
   );
 }
