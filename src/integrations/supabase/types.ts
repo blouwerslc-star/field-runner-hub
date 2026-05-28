@@ -162,6 +162,10 @@ export type Database = {
           currency: string
           id: string
           investor_id: string | null
+          paid_at: string | null
+          paid_by: string | null
+          payout_method: string | null
+          payout_reference: string | null
           platform_fee_cents: number
           runner_id: string | null
           runner_payout_cents: number
@@ -178,6 +182,10 @@ export type Database = {
           currency?: string
           id?: string
           investor_id?: string | null
+          paid_at?: string | null
+          paid_by?: string | null
+          payout_method?: string | null
+          payout_reference?: string | null
           platform_fee_cents?: number
           runner_id?: string | null
           runner_payout_cents?: number
@@ -194,6 +202,10 @@ export type Database = {
           currency?: string
           id?: string
           investor_id?: string | null
+          paid_at?: string | null
+          paid_by?: string | null
+          payout_method?: string | null
+          payout_reference?: string | null
           platform_fee_cents?: number
           runner_id?: string | null
           runner_payout_cents?: number
