@@ -25,6 +25,9 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { Loader2, Users, ClipboardList, UserCog, Plus } from "lucide-react";
+import { useServerFn } from "@tanstack/react-start";
+import { listPayouts, markPayoutPaid } from "@/lib/payments.functions";
+import { useQuery } from "@tanstack/react-query";
 
 export const Route = createFileRoute("/_authenticated/admin/")({
   component: AdminDashboard,
@@ -151,6 +154,7 @@ function AdminDashboard() {
           <TabsTrigger value="tasks">Tasks</TabsTrigger>
           <TabsTrigger value="runners">Runners ({runners.length})</TabsTrigger>
           <TabsTrigger value="investors">Investors ({investors.length})</TabsTrigger>
+          <TabsTrigger value="payouts">Payouts</TabsTrigger>
         </TabsList>
 
         <TabsContent value="tasks">
@@ -272,6 +276,10 @@ function AdminDashboard() {
               </table>
             </div>
           )}
+        </TabsContent>
+
+        <TabsContent value="payouts">
+          <PayoutsTab />
         </TabsContent>
       </Tabs>
     </DashboardShell>
@@ -591,5 +599,176 @@ function CreateTaskDialog({ onCreated }: { onCreated: () => void }) {
         </DialogFooter>
       </DialogContent>
     </Dialog>
+  );
+}
+function PayoutsTab() {
+  const fetchPayouts = useServerFn(listPayouts);
+  const markPaid = useServerFn(markPayoutPaid);
+  const { data, isLoading, refetch } = useQuery({
+    queryKey: ["admin-payouts"],
+    queryFn: () => fetchPayouts({}),
+  });
+  const [busyId, setBusyId] = useState<string | null>(null);
+  const [method, setMethod] = useState<Record<string, string>>({});
+  const [reference, setReference] = useState<Record<string, string>>({});
+
+  if (isLoading) return <Loader2 className="size-5 animate-spin text-primary" />;
+  const payments = (data?.payments ?? []) as any[];
+  if (payments.length === 0) {
+    return <EmptyState message="No payments yet. Funded tasks will appear here." />;
+  }
+
+  const queue = payments.filter((p) => p.status === "funded");
+  const history = payments.filter((p) => p.status !== "funded");
+
+  async function handlePay(p: any) {
+    const m = method[p.id] || "manual";
+    setBusyId(p.id);
+    try {
+      await markPaid({ data: { paymentId: p.id, method: m, reference: reference[p.id] } });
+      toast.success("Payout recorded");
+      refetch();
+    } catch (e: any) {
+      toast.error(e?.message ?? "Failed to mark paid");
+    } finally {
+      setBusyId(null);
+    }
+  }
+
+  return (
+    <div className="space-y-8">
+      <section>
+        <h2 className="text-lg font-semibold mb-3">Pending Payouts ({queue.length})</h2>
+        {queue.length === 0 ? (
+          <EmptyState message="No pending payouts. All caught up." />
+        ) : (
+          <div className="space-y-3">
+            {queue.map((p) => (
+              <div key={p.id} className="rounded-2xl border border-border bg-card/60 p-4">
+                <div className="flex flex-wrap items-start justify-between gap-3 mb-3">
+                  <div>
+                    <div className="font-semibold">{p.task?.title ?? "Task"}</div>
+                    <div className="text-xs text-muted-foreground">
+                      {p.task?.city}, {p.task?.state} · Funded{" "}
+                      {new Date(p.created_at).toLocaleDateString()}
+                    </div>
+                    <div className="text-sm mt-1">
+                      Runner:{" "}
+                      <span className="font-medium">
+                        {p.runner?.full_name ?? "Unassigned"}
+                      </span>
+                      {p.runner?.phone && (
+                        <span className="text-muted-foreground"> · {p.runner.phone}</span>
+                      )}
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                      Investor: {p.investor?.full_name ?? "—"}
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-2xl font-bold">
+                      ${(p.runner_payout_cents / 100).toFixed(2)}
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      Fee ${(p.platform_fee_cents / 100).toFixed(2)} · Total $
+                      {(p.amount_cents / 100).toFixed(2)}
+                    </div>
+                  </div>
+                </div>
+                <div className="grid sm:grid-cols-[160px_1fr_auto] gap-2 items-end">
+                  <div>
+                    <Label className="text-xs">Method</Label>
+                    <Select
+                      value={method[p.id] ?? "manual"}
+                      onValueChange={(v) => setMethod((s) => ({ ...s, [p.id]: v }))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="manual">Manual</SelectItem>
+                        <SelectItem value="venmo">Venmo</SelectItem>
+                        <SelectItem value="cashapp">Cash App</SelectItem>
+                        <SelectItem value="zelle">Zelle</SelectItem>
+                        <SelectItem value="ach">ACH / Bank</SelectItem>
+                        <SelectItem value="paypal">PayPal</SelectItem>
+                        <SelectItem value="check">Check</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label className="text-xs">Reference / Note</Label>
+                    <Input
+                      placeholder="Confirmation #, memo, etc."
+                      value={reference[p.id] ?? ""}
+                      onChange={(e) =>
+                        setReference((s) => ({ ...s, [p.id]: e.target.value }))
+                      }
+                    />
+                  </div>
+                  <Button onClick={() => handlePay(p)} disabled={busyId === p.id}>
+                    {busyId === p.id ? (
+                      <Loader2 className="size-4 animate-spin" />
+                    ) : (
+                      "Mark paid"
+                    )}
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
+
+      <section>
+        <h2 className="text-lg font-semibold mb-3">History ({history.length})</h2>
+        {history.length === 0 ? (
+          <EmptyState message="No completed payouts yet." />
+        ) : (
+          <div className="overflow-x-auto rounded-2xl border border-border bg-card/40">
+            <table className="w-full text-sm">
+              <thead className="bg-muted/40 text-left text-xs uppercase tracking-wider text-muted-foreground">
+                <tr>
+                  <th className="px-4 py-3">Task</th>
+                  <th className="px-4 py-3">Runner</th>
+                  <th className="px-4 py-3">Amount</th>
+                  <th className="px-4 py-3">Status</th>
+                  <th className="px-4 py-3">Method</th>
+                  <th className="px-4 py-3">Paid</th>
+                </tr>
+              </thead>
+              <tbody>
+                {history.map((p) => (
+                  <tr key={p.id} className="border-t border-border/60">
+                    <td className="px-4 py-3 font-medium">{p.task?.title ?? "—"}</td>
+                    <td className="px-4 py-3 text-muted-foreground">
+                      {p.runner?.full_name ?? "—"}
+                    </td>
+                    <td className="px-4 py-3">
+                      ${(p.runner_payout_cents / 100).toFixed(2)}
+                    </td>
+                    <td className="px-4 py-3">
+                      <Badge
+                        variant="outline"
+                        className="border-emerald-500/30 text-emerald-300"
+                      >
+                        {p.status}
+                      </Badge>
+                    </td>
+                    <td className="px-4 py-3 text-xs text-muted-foreground">
+                      {p.payout_method ?? "—"}
+                      {p.payout_reference ? ` · ${p.payout_reference}` : ""}
+                    </td>
+                    <td className="px-4 py-3 text-xs text-muted-foreground">
+                      {p.paid_at ? new Date(p.paid_at).toLocaleDateString() : "—"}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
+    </div>
   );
 }
