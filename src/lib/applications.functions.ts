@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { appendFieldRunner, appendPro } from "./sheets.server";
+import { sendTransactionalEmail } from "./email-sender.server";
 
 const yesNo = z.enum(["yes", "no"]);
 
@@ -112,6 +113,16 @@ export const submitFieldRunner = createServerFn({ method: "POST" })
       sample_url: row.sample_url || "",
       disclaimer_agreed: row.disclaimer_agreed,
     });
+    // Fire-and-forget welcome email — never block the form on email errors.
+    sendTransactionalEmail({
+      templateName: "applicant_welcome",
+      recipientEmail: row.email,
+      templateData: {
+        fullName: row.full_name,
+        role: "runner",
+        signupUrl: "https://reirunner.com/signup?role=runner",
+      },
+    }).catch((e) => console.error("applicant welcome email failed", e));
     return { ok: true };
   });
 
@@ -153,5 +164,14 @@ export const submitPro = createServerFn({ method: "POST" })
       urgency: row.urgency,
       details: row.details || "",
     });
+    sendTransactionalEmail({
+      templateName: "applicant_welcome",
+      recipientEmail: row.email,
+      templateData: {
+        fullName: row.full_name,
+        role: "investor",
+        signupUrl: "https://reirunner.com/signup?role=investor",
+      },
+    }).catch((e) => console.error("applicant welcome email failed", e));
     return { ok: true };
   });
