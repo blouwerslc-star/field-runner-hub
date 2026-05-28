@@ -23,6 +23,8 @@ import { Route as SplatRouteImport } from './routes/$'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
 import { Route as CheckoutReturnRouteImport } from './routes/checkout.return'
+import { Route as AuthenticatedRunnerDashboardRouteImport } from './routes/_authenticated/runner-dashboard'
+import { Route as AuthenticatedInvestorDashboardRouteImport } from './routes/_authenticated/investor-dashboard'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedDashboardIndexRouteImport } from './routes/_authenticated/dashboard.index'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
@@ -103,6 +105,18 @@ const CheckoutReturnRoute = CheckoutReturnRouteImport.update({
   path: '/checkout/return',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedRunnerDashboardRoute =
+  AuthenticatedRunnerDashboardRouteImport.update({
+    id: '/runner-dashboard',
+    path: '/runner-dashboard',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedInvestorDashboardRoute =
+  AuthenticatedInvestorDashboardRouteImport.update({
+    id: '/investor-dashboard',
+    path: '/investor-dashboard',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   id: '/admin',
   path: '/admin',
@@ -174,6 +188,8 @@ export interface FileRoutesByFullPath {
   '/terms': typeof TermsRoute
   '/waitlist': typeof WaitlistRoute
   '/admin': typeof AuthenticatedAdminRouteWithChildren
+  '/investor-dashboard': typeof AuthenticatedInvestorDashboardRoute
+  '/runner-dashboard': typeof AuthenticatedRunnerDashboardRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/dashboard/investor': typeof AuthenticatedDashboardInvestorRoute
@@ -198,6 +214,8 @@ export interface FileRoutesByTo {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/waitlist': typeof WaitlistRoute
+  '/investor-dashboard': typeof AuthenticatedInvestorDashboardRoute
+  '/runner-dashboard': typeof AuthenticatedRunnerDashboardRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/dashboard/investor': typeof AuthenticatedDashboardInvestorRoute
@@ -225,6 +243,8 @@ export interface FileRoutesById {
   '/terms': typeof TermsRoute
   '/waitlist': typeof WaitlistRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
+  '/_authenticated/investor-dashboard': typeof AuthenticatedInvestorDashboardRoute
+  '/_authenticated/runner-dashboard': typeof AuthenticatedRunnerDashboardRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/_authenticated/dashboard/investor': typeof AuthenticatedDashboardInvestorRoute
@@ -252,6 +272,8 @@ export interface FileRouteTypes {
     | '/terms'
     | '/waitlist'
     | '/admin'
+    | '/investor-dashboard'
+    | '/runner-dashboard'
     | '/checkout/return'
     | '/email/unsubscribe'
     | '/dashboard/investor'
@@ -276,6 +298,8 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/terms'
     | '/waitlist'
+    | '/investor-dashboard'
+    | '/runner-dashboard'
     | '/checkout/return'
     | '/email/unsubscribe'
     | '/dashboard/investor'
@@ -302,6 +326,8 @@ export interface FileRouteTypes {
     | '/terms'
     | '/waitlist'
     | '/_authenticated/admin'
+    | '/_authenticated/investor-dashboard'
+    | '/_authenticated/runner-dashboard'
     | '/checkout/return'
     | '/email/unsubscribe'
     | '/_authenticated/dashboard/investor'
@@ -437,6 +463,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CheckoutReturnRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/runner-dashboard': {
+      id: '/_authenticated/runner-dashboard'
+      path: '/runner-dashboard'
+      fullPath: '/runner-dashboard'
+      preLoaderRoute: typeof AuthenticatedRunnerDashboardRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/investor-dashboard': {
+      id: '/_authenticated/investor-dashboard'
+      path: '/investor-dashboard'
+      fullPath: '/investor-dashboard'
+      preLoaderRoute: typeof AuthenticatedInvestorDashboardRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/admin': {
       id: '/_authenticated/admin'
       path: '/admin'
@@ -523,6 +563,8 @@ const AuthenticatedAdminRouteWithChildren =
 
 interface AuthenticatedRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRouteWithChildren
+  AuthenticatedInvestorDashboardRoute: typeof AuthenticatedInvestorDashboardRoute
+  AuthenticatedRunnerDashboardRoute: typeof AuthenticatedRunnerDashboardRoute
   AuthenticatedDashboardInvestorRoute: typeof AuthenticatedDashboardInvestorRoute
   AuthenticatedDashboardRunnerRoute: typeof AuthenticatedDashboardRunnerRoute
   AuthenticatedDashboardIndexRoute: typeof AuthenticatedDashboardIndexRoute
@@ -530,6 +572,8 @@ interface AuthenticatedRouteChildren {
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRouteWithChildren,
+  AuthenticatedInvestorDashboardRoute: AuthenticatedInvestorDashboardRoute,
+  AuthenticatedRunnerDashboardRoute: AuthenticatedRunnerDashboardRoute,
   AuthenticatedDashboardInvestorRoute: AuthenticatedDashboardInvestorRoute,
   AuthenticatedDashboardRunnerRoute: AuthenticatedDashboardRunnerRoute,
   AuthenticatedDashboardIndexRoute: AuthenticatedDashboardIndexRoute,
