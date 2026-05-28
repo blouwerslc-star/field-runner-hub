@@ -28,6 +28,8 @@ import { Loader2, Plus, MapPin, Calendar, DollarSign, CheckCircle2, XCircle, Fil
 import { toast } from "sonner";
 import { listMyTasks, getTaskDetail, createInvestorTask, reviewSubmission } from "@/lib/tasks.functions";
 import { getSignedDownloadUrl } from "@/lib/storage.functions";
+import { TaskFundingCheckout } from "@/components/payments/TaskFundingCheckout";
+import { PaymentTestModeBanner } from "@/components/payments/PaymentTestModeBanner";
 
 export const Route = createFileRoute("/_authenticated/dashboard/investor")({
   component: InvestorDashboard,
@@ -63,6 +65,7 @@ function InvestorDashboard() {
 
   return (
     <DashboardShell title="Investor Dashboard" subtitle="Post tasks, review submissions, release payments.">
+      <div className="-mx-6 mb-6"><PaymentTestModeBanner /></div>
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
         <StatTile label="Open" value={buckets.open.length.toString()} />
         <StatTile label="In progress" value={buckets.in_progress.length.toString()} />
