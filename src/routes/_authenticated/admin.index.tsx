@@ -277,6 +277,10 @@ function AdminDashboard() {
             </div>
           )}
         </TabsContent>
+
+        <TabsContent value="payouts">
+          <PayoutsTab />
+        </TabsContent>
       </Tabs>
     </DashboardShell>
   );
