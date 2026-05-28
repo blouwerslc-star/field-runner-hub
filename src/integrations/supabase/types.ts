@@ -122,34 +122,132 @@ export type Database = {
         }
         Relationships: []
       }
+      notifications: {
+        Row: {
+          body: string | null
+          created_at: string
+          id: string
+          link: string | null
+          read_at: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          link?: string | null
+          read_at?: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          link?: string | null
+          read_at?: string | null
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      payments: {
+        Row: {
+          amount_cents: number
+          created_at: string
+          currency: string
+          id: string
+          investor_id: string | null
+          platform_fee_cents: number
+          runner_id: string | null
+          runner_payout_cents: number
+          status: string
+          stripe_checkout_session_id: string | null
+          stripe_payment_intent_id: string | null
+          stripe_transfer_id: string | null
+          task_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          amount_cents: number
+          created_at?: string
+          currency?: string
+          id?: string
+          investor_id?: string | null
+          platform_fee_cents?: number
+          runner_id?: string | null
+          runner_payout_cents?: number
+          status?: string
+          stripe_checkout_session_id?: string | null
+          stripe_payment_intent_id?: string | null
+          stripe_transfer_id?: string | null
+          task_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          amount_cents?: number
+          created_at?: string
+          currency?: string
+          id?: string
+          investor_id?: string | null
+          platform_fee_cents?: number
+          runner_id?: string | null
+          runner_payout_cents?: number
+          status?: string
+          stripe_checkout_session_id?: string | null
+          stripe_payment_intent_id?: string | null
+          stripe_transfer_id?: string | null
+          task_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payments_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
+          avatar_url: string | null
           city: string | null
           created_at: string
           full_name: string | null
           id: string
           phone: string | null
           state: string | null
+          stripe_customer_id: string | null
           updated_at: string
           user_id: string
         }
         Insert: {
+          avatar_url?: string | null
           city?: string | null
           created_at?: string
           full_name?: string | null
           id?: string
           phone?: string | null
           state?: string | null
+          stripe_customer_id?: string | null
           updated_at?: string
           user_id: string
         }
         Update: {
+          avatar_url?: string | null
           city?: string | null
           created_at?: string
           full_name?: string | null
           id?: string
           phone?: string | null
           state?: string | null
+          stripe_customer_id?: string | null
           updated_at?: string
           user_id?: string
         }
@@ -209,6 +307,137 @@ export type Database = {
         }
         Relationships: []
       }
+      runner_profiles: {
+        Row: {
+          created_at: string
+          id: string
+          onboarding_completed: boolean
+          payouts_enabled: boolean
+          stripe_account_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          onboarding_completed?: boolean
+          payouts_enabled?: boolean
+          stripe_account_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          onboarding_completed?: boolean
+          payouts_enabled?: boolean
+          stripe_account_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      task_files: {
+        Row: {
+          bucket: string
+          created_at: string
+          id: string
+          kind: string
+          mime_type: string | null
+          path: string
+          size_bytes: number | null
+          submission_id: string | null
+          task_id: string | null
+          uploader_id: string
+        }
+        Insert: {
+          bucket: string
+          created_at?: string
+          id?: string
+          kind?: string
+          mime_type?: string | null
+          path: string
+          size_bytes?: number | null
+          submission_id?: string | null
+          task_id?: string | null
+          uploader_id: string
+        }
+        Update: {
+          bucket?: string
+          created_at?: string
+          id?: string
+          kind?: string
+          mime_type?: string | null
+          path?: string
+          size_bytes?: number | null
+          submission_id?: string | null
+          task_id?: string | null
+          uploader_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "task_files_submission_id_fkey"
+            columns: ["submission_id"]
+            isOneToOne: false
+            referencedRelation: "task_submissions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "task_files_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      task_submissions: {
+        Row: {
+          created_at: string
+          id: string
+          notes: string | null
+          rejection_reason: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          runner_id: string
+          status: string
+          task_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          runner_id: string
+          status?: string
+          task_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          runner_id?: string
+          status?: string
+          task_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "task_submissions_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tasks: {
         Row: {
           admin_notes: string | null
@@ -217,6 +446,8 @@ export type Database = {
           deliverable_url: string | null
           description: string | null
           due_date: string | null
+          funded: boolean
+          funding_payment_id: string | null
           id: string
           investor_id: string | null
           payout_amount: number | null
@@ -236,6 +467,8 @@ export type Database = {
           deliverable_url?: string | null
           description?: string | null
           due_date?: string | null
+          funded?: boolean
+          funding_payment_id?: string | null
           id?: string
           investor_id?: string | null
           payout_amount?: number | null
@@ -255,6 +488,8 @@ export type Database = {
           deliverable_url?: string | null
           description?: string | null
           due_date?: string | null
+          funded?: boolean
+          funding_payment_id?: string | null
           id?: string
           investor_id?: string | null
           payout_amount?: number | null
