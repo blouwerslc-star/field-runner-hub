@@ -28,6 +28,8 @@ import { Loader2, Plus, MapPin, Calendar, DollarSign, CheckCircle2, XCircle, Fil
 import { toast } from "sonner";
 import { listMyTasks, getTaskDetail, createInvestorTask, reviewSubmission } from "@/lib/tasks.functions";
 import { getSignedDownloadUrl } from "@/lib/storage.functions";
+import { TaskFundingCheckout } from "@/components/payments/TaskFundingCheckout";
+import { PaymentTestModeBanner } from "@/components/payments/PaymentTestModeBanner";
 
 export const Route = createFileRoute("/_authenticated/dashboard/investor")({
   component: InvestorDashboard,
@@ -63,6 +65,7 @@ function InvestorDashboard() {
 
   return (
     <DashboardShell title="Investor Dashboard" subtitle="Post tasks, review submissions, release payments.">
+      <div className="-mx-6 mb-6"><PaymentTestModeBanner /></div>
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
         <StatTile label="Open" value={buckets.open.length.toString()} />
         <StatTile label="In progress" value={buckets.in_progress.length.toString()} />
@@ -131,10 +134,13 @@ type Task = {
   payout_amount: number | null;
   due_date: string | null;
   description: string | null;
+  funded?: boolean;
 };
 
 function InvestorTaskCard({ task }: { task: Task }) {
   const [open, setOpen] = useState(false);
+  const [fundOpen, setFundOpen] = useState(false);
+  const needsFunding = !task.funded && task.payout_amount != null && Number(task.payout_amount) > 0;
   return (
     <div className="rounded-2xl border border-border bg-card/50 p-5">
       <div className="flex flex-wrap items-start justify-between gap-3">
@@ -145,6 +151,11 @@ function InvestorTaskCard({ task }: { task: Task }) {
               {task.status.replace("_", " ")}
             </Badge>
             <Badge variant="outline" className="text-xs">{task.task_type}</Badge>
+            {task.funded ? (
+              <Badge variant="outline" className="text-xs border-emerald-500/30 text-emerald-300">Funded</Badge>
+            ) : needsFunding ? (
+              <Badge variant="outline" className="text-xs border-amber-500/30 text-amber-300">Unfunded</Badge>
+            ) : null}
           </div>
           <p className="text-sm text-muted-foreground mt-1 flex items-center gap-1.5">
             <MapPin className="size-3.5" />
@@ -163,7 +174,29 @@ function InvestorTaskCard({ task }: { task: Task }) {
             )}
           </div>
         </div>
-        <Dialog open={open} onOpenChange={setOpen}>
+        <div className="flex flex-col gap-2 items-end">
+          {needsFunding && (
+            <Dialog open={fundOpen} onOpenChange={setFundOpen}>
+              <DialogTrigger asChild>
+                <Button size="sm" className="bg-gradient-primary shadow-glow">
+                  <DollarSign className="size-4 mr-1" /> Fund task
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle>Fund “{task.title}”</DialogTitle>
+                </DialogHeader>
+                <p className="text-sm text-muted-foreground mb-2">
+                  Escrow ${Number(task.payout_amount).toFixed(2)} payout + 20% platform fee. Funds are released to the runner only after you approve their work.
+                </p>
+                <TaskFundingCheckout
+                  taskId={task.id}
+                  returnUrl={`${window.location.origin}/checkout/return?session_id={CHECKOUT_SESSION_ID}`}
+                />
+              </DialogContent>
+            </Dialog>
+          )}
+          <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
             <Button size="sm" variant={task.status === "submitted" ? "default" : "outline"}>
               {task.status === "submitted" ? "Review" : "View"}
@@ -173,7 +206,8 @@ function InvestorTaskCard({ task }: { task: Task }) {
             <DialogHeader><DialogTitle>{task.title}</DialogTitle></DialogHeader>
             <InvestorTaskPanel task={task} onDone={() => setOpen(false)} />
           </DialogContent>
-        </Dialog>
+          </Dialog>
+        </div>
       </div>
     </div>
   );
