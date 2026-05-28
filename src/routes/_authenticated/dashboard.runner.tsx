@@ -1,62 +1,321 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
+import { useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
-import { CheckCircle2, Clock, MapPin, Wallet } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Loader2, Upload, FileImage, MapPin, Calendar, DollarSign } from "lucide-react";
+import { toast } from "sonner";
+import { listMyTasks, getTaskDetail, startTask, submitTaskWork } from "@/lib/tasks.functions";
+import { createUploadUrl, recordTaskFile } from "@/lib/storage.functions";
 
 export const Route = createFileRoute("/_authenticated/dashboard/runner")({
   component: RunnerDashboard,
   head: () => ({ meta: [{ title: "Runner Dashboard — REI Runner" }] }),
 });
 
-function StatCard({ icon: Icon, label, value }: { icon: React.ComponentType<{ className?: string }>; label: string; value: string }) {
+function statusColor(status: string) {
+  switch (status) {
+    case "assigned": return "bg-blue-500/15 text-blue-300 border-blue-500/30";
+    case "in_progress": return "bg-purple-500/15 text-purple-300 border-purple-500/30";
+    case "submitted": return "bg-cyan-500/15 text-cyan-300 border-cyan-500/30";
+    case "completed": return "bg-emerald-500/15 text-emerald-300 border-emerald-500/30";
+    default: return "bg-muted text-muted-foreground";
+  }
+}
+
+function RunnerDashboard() {
+  const fetchTasks = useServerFn(listMyTasks);
+  const { data, isLoading } = useQuery({ queryKey: ["my-tasks"], queryFn: () => fetchTasks() });
+  const tasks = data?.tasks ?? [];
+
+  const buckets = {
+    assigned: tasks.filter((t) => t.status === "assigned"),
+    in_progress: tasks.filter((t) => t.status === "in_progress"),
+    submitted: tasks.filter((t) => t.status === "submitted"),
+    completed: tasks.filter((t) => t.status === "completed"),
+  };
+
   return (
-    <div className="rounded-2xl border border-border bg-card/60 backdrop-blur p-5">
-      <div className="size-10 rounded-lg bg-primary/10 grid place-items-center mb-3">
-        <Icon className="size-5 text-primary" />
+    <DashboardShell title="Runner Dashboard" subtitle="Your assigned tasks. Complete the work, upload deliverables, and get paid.">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
+        <StatTile label="Assigned" value={buckets.assigned.length} />
+        <StatTile label="In progress" value={buckets.in_progress.length} />
+        <StatTile label="Submitted" value={buckets.submitted.length} />
+        <StatTile label="Completed" value={buckets.completed.length} />
       </div>
+
+      {isLoading ? (
+        <Loader2 className="size-5 animate-spin text-primary" />
+      ) : tasks.length === 0 ? (
+        <EmptyState message="No tasks assigned yet. An admin will assign tasks from your market here." />
+      ) : (
+        <Tabs defaultValue="active">
+          <TabsList className="mb-6">
+            <TabsTrigger value="active">Active ({buckets.assigned.length + buckets.in_progress.length})</TabsTrigger>
+            <TabsTrigger value="submitted">Submitted ({buckets.submitted.length})</TabsTrigger>
+            <TabsTrigger value="completed">Completed ({buckets.completed.length})</TabsTrigger>
+          </TabsList>
+          <TabsContent value="active" className="space-y-3">
+            {[...buckets.assigned, ...buckets.in_progress].map((t) => (
+              <RunnerTaskCard key={t.id} task={t} />
+            ))}
+            {buckets.assigned.length + buckets.in_progress.length === 0 && (
+              <EmptyState message="No active tasks." />
+            )}
+          </TabsContent>
+          <TabsContent value="submitted" className="space-y-3">
+            {buckets.submitted.map((t) => <RunnerTaskCard key={t.id} task={t} />)}
+            {buckets.submitted.length === 0 && <EmptyState message="Nothing waiting on review." />}
+          </TabsContent>
+          <TabsContent value="completed" className="space-y-3">
+            {buckets.completed.map((t) => <RunnerTaskCard key={t.id} task={t} />)}
+            {buckets.completed.length === 0 && <EmptyState message="No completed tasks yet." />}
+          </TabsContent>
+        </Tabs>
+      )}
+    </DashboardShell>
+  );
+}
+
+function StatTile({ label, value }: { label: string; value: number }) {
+  return (
+    <div className="rounded-2xl border border-border bg-card/60 backdrop-blur p-4">
+      <div className="text-xs text-muted-foreground uppercase tracking-wider mb-2">{label}</div>
       <div className="text-2xl font-bold">{value}</div>
-      <div className="text-xs text-muted-foreground uppercase tracking-wider mt-1">{label}</div>
     </div>
   );
 }
 
-function RunnerDashboard() {
+function EmptyState({ message }: { message: string }) {
   return (
-    <DashboardShell
-      title="Runner Dashboard"
-      subtitle="You're on the Founding Runner waitlist. We're activating runners city by city — here's where you stand."
-    >
-      <div className="rounded-2xl border border-primary/40 bg-gradient-to-br from-primary/10 to-transparent p-6 md:p-8 mb-8 shadow-glow">
-        <div className="flex items-start gap-4">
-          <div className="size-12 rounded-xl bg-primary/20 grid place-items-center shrink-0">
-            <CheckCircle2 className="size-6 text-primary" />
+    <div className="rounded-2xl border border-dashed border-border bg-card/30 p-10 text-center text-sm text-muted-foreground">
+      {message}
+    </div>
+  );
+}
+
+type Task = {
+  id: string;
+  title: string;
+  status: string;
+  task_type: string;
+  property_address: string;
+  city: string;
+  state: string;
+  payout_amount: number | null;
+  due_date: string | null;
+  description: string | null;
+};
+
+function RunnerTaskCard({ task }: { task: Task }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="rounded-2xl border border-border bg-card/50 p-5">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <div className="flex items-center gap-2 flex-wrap">
+            <h3 className="font-semibold">{task.title}</h3>
+            <Badge variant="outline" className={statusColor(task.status)}>
+              {task.status.replace("_", " ")}
+            </Badge>
+            <Badge variant="outline" className="text-xs">{task.task_type}</Badge>
           </div>
-          <div>
-            <h2 className="text-xl font-semibold">Founding Runner — Waitlisted</h2>
-            <p className="mt-1 text-sm text-muted-foreground">
-              You'll get an email the moment paid tasks open in your market. Make sure your application is complete to move up the list.
-            </p>
-            <Link to="/apply">
-              <Button className="mt-4 bg-gradient-primary shadow-glow">Complete your application</Button>
-            </Link>
+          <p className="text-sm text-muted-foreground mt-1 flex items-center gap-1.5">
+            <MapPin className="size-3.5" />
+            {task.property_address}, {task.city}, {task.state}
+          </p>
+          <div className="flex items-center gap-4 text-xs text-muted-foreground mt-2">
+            {task.payout_amount != null && (
+              <span className="flex items-center gap-1 text-primary font-semibold">
+                <DollarSign className="size-3" /> ${Number(task.payout_amount).toFixed(2)}
+              </span>
+            )}
+            {task.due_date && (
+              <span className="flex items-center gap-1">
+                <Calendar className="size-3" /> Due {new Date(task.due_date).toLocaleDateString()}
+              </span>
+            )}
           </div>
         </div>
+        <Dialog open={open} onOpenChange={setOpen}>
+          <DialogTrigger asChild>
+            <Button size="sm">Open</Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>{task.title}</DialogTitle>
+            </DialogHeader>
+            <TaskWorkPanel task={task} onDone={() => setOpen(false)} />
+          </DialogContent>
+        </Dialog>
+      </div>
+    </div>
+  );
+}
+
+function TaskWorkPanel({ task, onDone }: { task: Task; onDone: () => void }) {
+  const qc = useQueryClient();
+  const fetchDetail = useServerFn(getTaskDetail);
+  const startFn = useServerFn(startTask);
+  const submitFn = useServerFn(submitTaskWork);
+  const uploadUrlFn = useServerFn(createUploadUrl);
+  const recordFn = useServerFn(recordTaskFile);
+
+  const { data, isLoading, refetch } = useQuery({
+    queryKey: ["task-detail", task.id],
+    queryFn: () => fetchDetail({ data: { taskId: task.id } }),
+  });
+
+  const [notes, setNotes] = useState("");
+  const [uploading, setUploading] = useState(false);
+
+  const start = useMutation({
+    mutationFn: () => startFn({ data: { taskId: task.id } }),
+    onSuccess: () => {
+      toast.success("Marked as in progress");
+      qc.invalidateQueries({ queryKey: ["my-tasks"] });
+      refetch();
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const submit = useMutation({
+    mutationFn: () => submitFn({ data: { taskId: task.id, notes } }),
+    onSuccess: () => {
+      toast.success("Submitted for review");
+      qc.invalidateQueries({ queryKey: ["my-tasks"] });
+      onDone();
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  async function onFiles(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(e.target.files ?? []);
+    if (!files.length) return;
+    setUploading(true);
+    try {
+      for (const file of files) {
+        const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+        const isVideo = file.type.startsWith("video/");
+        const bucket = "task-photos";
+        const { signedUrl, path } = await uploadUrlFn({
+          data: { bucket, taskId: task.id, filename: safeName },
+        });
+        const put = await fetch(signedUrl, { method: "PUT", body: file, headers: { "Content-Type": file.type } });
+        if (!put.ok) throw new Error(`Upload failed for ${file.name}`);
+        await recordFn({
+          data: {
+            taskId: task.id,
+            bucket,
+            path,
+            mimeType: file.type,
+            sizeBytes: file.size,
+            kind: isVideo ? "video" : "photo",
+          },
+        });
+      }
+      toast.success(`Uploaded ${files.length} file(s)`);
+      refetch();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Upload failed");
+    } finally {
+      setUploading(false);
+      e.target.value = "";
+    }
+  }
+
+  if (isLoading) return <Loader2 className="size-5 animate-spin text-primary" />;
+  const files = data?.files ?? [];
+  const submissions = data?.submissions ?? [];
+  const lastSub = submissions[0];
+
+  return (
+    <div className="space-y-5">
+      <div className="rounded-xl border border-border bg-muted/20 p-4 text-sm">
+        <div className="font-medium">{task.property_address}</div>
+        <div className="text-muted-foreground">{task.city}, {task.state}</div>
+        {task.description && <p className="mt-2 text-muted-foreground whitespace-pre-wrap">{task.description}</p>}
+        {task.payout_amount != null && (
+          <div className="mt-2 text-primary font-semibold">Payout: ${Number(task.payout_amount).toFixed(2)}</div>
+        )}
       </div>
 
-      <div className="grid sm:grid-cols-3 gap-4">
-        <StatCard icon={Clock} label="Status" value="Waitlisted" />
-        <StatCard icon={MapPin} label="Active Markets" value="8" />
-        <StatCard icon={Wallet} label="Tasks Completed" value="0" />
+      {task.status === "assigned" && (
+        <Button onClick={() => start.mutate()} disabled={start.isPending} className="w-full">
+          {start.isPending ? <Loader2 className="size-4 mr-2 animate-spin" /> : null}
+          Start task
+        </Button>
+      )}
+
+      {lastSub?.status === "rejected" && (
+        <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-sm">
+          <div className="font-semibold text-red-300">Changes requested</div>
+          <div className="text-muted-foreground mt-1">{lastSub.rejection_reason || "Please revise and resubmit."}</div>
+        </div>
+      )}
+
+      <div>
+        <Label>Photos / video</Label>
+        <div className="mt-2 rounded-xl border border-dashed border-border p-4 text-center">
+          <input
+            id="file-input"
+            type="file"
+            multiple
+            accept="image/*,video/*"
+            className="hidden"
+            onChange={onFiles}
+            disabled={uploading}
+          />
+          <label htmlFor="file-input">
+            <Button asChild variant="outline" disabled={uploading}>
+              <span>
+                {uploading ? <Loader2 className="size-4 mr-2 animate-spin" /> : <Upload className="size-4 mr-2" />}
+                Upload files
+              </span>
+            </Button>
+          </label>
+          <p className="text-xs text-muted-foreground mt-2">JPG, PNG, MP4. Up to 2 GB each.</p>
+        </div>
+        {files.length > 0 && (
+          <div className="mt-3 grid grid-cols-3 gap-2">
+            {files.map((f) => (
+              <div key={f.id} className="aspect-square rounded-lg bg-muted/30 border border-border grid place-items-center text-xs text-muted-foreground p-2 text-center">
+                <FileImage className="size-5 mb-1" />
+                {f.kind}
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
-      <div className="mt-10 rounded-2xl border border-border bg-card/60 backdrop-blur p-6">
-        <h3 className="font-semibold text-lg mb-2">What's next</h3>
-        <ul className="space-y-2 text-sm text-muted-foreground list-disc pl-5">
-          <li>Paid tasks will appear here as soon as investors in your market post jobs.</li>
-          <li>You'll be notified by email and SMS when a job matches your service area.</li>
-          <li>Founding Runners get first access to every task posted in their city for the first 30 days.</li>
-        </ul>
+      <div>
+        <Label htmlFor="notes">Notes for investor (optional)</Label>
+        <Textarea id="notes" value={notes} onChange={(e) => setNotes(e.target.value)} rows={3} placeholder="Anything they should know about the property…" />
       </div>
-    </DashboardShell>
+
+      <DialogFooter>
+        <Button
+          onClick={() => submit.mutate()}
+          disabled={submit.isPending || files.length === 0 || task.status === "completed" || task.status === "submitted"}
+          className="bg-gradient-primary shadow-glow"
+        >
+          {submit.isPending ? <Loader2 className="size-4 mr-2 animate-spin" /> : null}
+          Submit for review
+        </Button>
+      </DialogFooter>
+    </div>
   );
 }
