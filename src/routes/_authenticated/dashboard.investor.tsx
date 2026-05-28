@@ -26,7 +26,6 @@ import {
 } from "@/components/ui/dialog";
 import { Loader2, Plus, MapPin, Calendar, DollarSign, CheckCircle2, XCircle, FileImage } from "lucide-react";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
 import { listMyTasks, getTaskDetail, createInvestorTask, reviewSubmission } from "@/lib/tasks.functions";
 import { getSignedDownloadUrl } from "@/lib/storage.functions";
 
