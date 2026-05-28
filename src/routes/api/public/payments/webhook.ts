@@ -20,7 +20,7 @@ async function handleCheckoutCompleted(session: any) {
   const feeCents = Number(session.metadata?.platform_fee_cents ?? 0);
   if (!taskId || !investorId) return;
 
-  const supabase = getSupabase();
+  const supabase = getSupabase() as any;
   const { data: existing } = await supabase
     .from("payments")
     .select("id")
