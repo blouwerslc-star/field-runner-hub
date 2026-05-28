@@ -20,6 +20,7 @@ import { Loader2, Upload, FileImage, MapPin, Calendar, DollarSign } from "lucide
 import { toast } from "sonner";
 import { listMyTasks, getTaskDetail, startTask, submitTaskWork } from "@/lib/tasks.functions";
 import { createUploadUrl, recordTaskFile } from "@/lib/storage.functions";
+import { RunnerVerificationCard } from "@/components/dashboard/RunnerVerificationCard";
 
 export const Route = createFileRoute("/_authenticated/dashboard/runner")({
   component: RunnerDashboard,
@@ -50,6 +51,7 @@ function RunnerDashboard() {
 
   return (
     <DashboardShell title="Runner Dashboard" subtitle="Your assigned tasks. Complete the work, upload deliverables, and get paid.">
+      <RunnerVerificationCard />
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
         <StatTile label="Assigned" value={buckets.assigned.length} />
         <StatTile label="In progress" value={buckets.in_progress.length} />
