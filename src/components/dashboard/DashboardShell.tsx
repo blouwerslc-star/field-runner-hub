@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { LogOut } from "lucide-react";
 import { BrandLogo } from "@/components/brand/BrandLogo";
 import { Toaster } from "@/components/ui/sonner";
+import { NotificationBell } from "@/components/dashboard/NotificationBell";
 
 export function DashboardShell({
   title,
@@ -29,9 +30,12 @@ export function DashboardShell({
           <Link to="/" aria-label="REI Runner home">
             <BrandLogo />
           </Link>
-          <Button variant="ghost" size="sm" onClick={signOut}>
-            <LogOut className="size-4 mr-1.5" /> Sign out
-          </Button>
+          <div className="flex items-center gap-1">
+            <NotificationBell />
+            <Button variant="ghost" size="sm" onClick={signOut}>
+              <LogOut className="size-4 mr-1.5" /> Sign out
+            </Button>
+          </div>
         </div>
       </header>
       <main className="mx-auto max-w-5xl px-5 py-10 md:py-14">
