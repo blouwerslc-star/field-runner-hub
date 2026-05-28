@@ -154,6 +154,7 @@ function AdminDashboard() {
           <TabsTrigger value="tasks">Tasks</TabsTrigger>
           <TabsTrigger value="runners">Runners ({runners.length})</TabsTrigger>
           <TabsTrigger value="investors">Investors ({investors.length})</TabsTrigger>
+          <TabsTrigger value="payouts">Payouts</TabsTrigger>
         </TabsList>
 
         <TabsContent value="tasks">
