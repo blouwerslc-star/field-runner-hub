@@ -1,7 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { createClient } from "@supabase/supabase-js";
 import { verifyWebhook, type StripeEnv } from "@/lib/stripe.server";
-import { createCandidate, createInvitation } from "@/lib/checkr.server";
 
 let _supabase: ReturnType<typeof createClient> | null = null;
 function getSupabase() {
@@ -73,51 +72,41 @@ async function handleBackgroundCheckPaid(session: any) {
   }
   const supabase = getSupabase() as any;
 
-  // Idempotency: skip if we already invited this candidate
-  const { data: existing } = await supabase
-    .from("profiles")
-    .select("checkr_candidate_id, checkr_invitation_url")
-    .eq("user_id", userId)
-    .maybeSingle();
-
-  let candidateId = (existing as any)?.checkr_candidate_id as string | undefined;
-  let invitationUrl = (existing as any)?.checkr_invitation_url as string | undefined;
-
-  try {
-    if (!candidateId) {
-      const candidate = await createCandidate({ email, fullName });
-      candidateId = candidate.id;
-    }
-    if (!invitationUrl) {
-      const invite = await createInvitation(candidateId);
-      invitationUrl = invite.invitation_url;
-    }
-  } catch (e) {
-    console.error("Checkr invitation failed", e);
-    // Still record payment so we can retry from admin
-  }
-
   await supabase
     .from("profiles")
     .update({
       background_check_paid_at: new Date().toISOString(),
-      checkr_candidate_id: candidateId ?? null,
-      checkr_invitation_url: invitationUrl ?? null,
-      checkr_status: invitationUrl ? "invitation_sent" : "payment_received",
+      checkr_status: "pending",
       verification_status: "pending_review",
       verification_requested_at: new Date().toISOString(),
     })
     .eq("user_id", userId);
 
+  // Notify the runner
   await supabase.from("notifications").insert({
     user_id: userId,
-    type: "background_check_invite",
-    title: invitationUrl ? "Complete your background check" : "Background check payment received",
-    body: invitationUrl
-      ? "Click to finish your Checkr background check."
-      : "We received your payment. We'll email you a Checkr link shortly.",
-    link: "/profile/verification",
+    type: "background_check_paid",
+    title: "Background check payment received",
+    body: "Thanks! Our team will start your background check within 1 business day.",
+    link: "/profile/background-check",
   });
+
+  // Notify all admins so they can manually start the check in Checkr's dashboard
+  const { data: admins } = await supabase
+    .from("user_roles")
+    .select("user_id")
+    .eq("role", "admin");
+  if (admins?.length) {
+    await supabase.from("notifications").insert(
+      admins.map((a: any) => ({
+        user_id: a.user_id,
+        type: "background_check_requested",
+        title: "New background check to run",
+        body: `${fullName || email} paid for a background check. Run it in Checkr's dashboard.`,
+        link: "/admin/background-checks",
+      })),
+    );
+  }
 }
 
 export const Route = createFileRoute("/api/public/payments/webhook")({
