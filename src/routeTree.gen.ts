@@ -42,6 +42,7 @@ import { Route as AuthenticatedSettingsPrivacyRouteImport } from './routes/_auth
 import { Route as AuthenticatedSettingsPreferencesRouteImport } from './routes/_authenticated/settings.preferences'
 import { Route as AuthenticatedSettingsPaymentsRouteImport } from './routes/_authenticated/settings.payments'
 import { Route as AuthenticatedSettingsNotificationsRouteImport } from './routes/_authenticated/settings.notifications'
+import { Route as AuthenticatedSettingsAdminRouteImport } from './routes/_authenticated/settings.admin'
 import { Route as AuthenticatedSettingsAccountRouteImport } from './routes/_authenticated/settings.account'
 import { Route as AuthenticatedProfileEditRouteImport } from './routes/_authenticated/profile.edit'
 import { Route as AuthenticatedDashboardRunnerRouteImport } from './routes/_authenticated/dashboard.runner'
@@ -230,6 +231,12 @@ const AuthenticatedSettingsNotificationsRoute =
     path: '/notifications',
     getParentRoute: () => AuthenticatedSettingsRoute,
   } as any)
+const AuthenticatedSettingsAdminRoute =
+  AuthenticatedSettingsAdminRouteImport.update({
+    id: '/admin',
+    path: '/admin',
+    getParentRoute: () => AuthenticatedSettingsRoute,
+  } as any)
 const AuthenticatedSettingsAccountRoute =
   AuthenticatedSettingsAccountRouteImport.update({
     id: '/account',
@@ -322,6 +329,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/runner': typeof AuthenticatedDashboardRunnerRoute
   '/profile/edit': typeof AuthenticatedProfileEditRoute
   '/settings/account': typeof AuthenticatedSettingsAccountRoute
+  '/settings/admin': typeof AuthenticatedSettingsAdminRoute
   '/settings/notifications': typeof AuthenticatedSettingsNotificationsRoute
   '/settings/payments': typeof AuthenticatedSettingsPaymentsRoute
   '/settings/preferences': typeof AuthenticatedSettingsPreferencesRoute
@@ -365,6 +373,7 @@ export interface FileRoutesByTo {
   '/dashboard/runner': typeof AuthenticatedDashboardRunnerRoute
   '/profile/edit': typeof AuthenticatedProfileEditRoute
   '/settings/account': typeof AuthenticatedSettingsAccountRoute
+  '/settings/admin': typeof AuthenticatedSettingsAdminRoute
   '/settings/notifications': typeof AuthenticatedSettingsNotificationsRoute
   '/settings/payments': typeof AuthenticatedSettingsPaymentsRoute
   '/settings/preferences': typeof AuthenticatedSettingsPreferencesRoute
@@ -412,6 +421,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard/runner': typeof AuthenticatedDashboardRunnerRoute
   '/_authenticated/profile/edit': typeof AuthenticatedProfileEditRoute
   '/_authenticated/settings/account': typeof AuthenticatedSettingsAccountRoute
+  '/_authenticated/settings/admin': typeof AuthenticatedSettingsAdminRoute
   '/_authenticated/settings/notifications': typeof AuthenticatedSettingsNotificationsRoute
   '/_authenticated/settings/payments': typeof AuthenticatedSettingsPaymentsRoute
   '/_authenticated/settings/preferences': typeof AuthenticatedSettingsPreferencesRoute
@@ -459,6 +469,7 @@ export interface FileRouteTypes {
     | '/dashboard/runner'
     | '/profile/edit'
     | '/settings/account'
+    | '/settings/admin'
     | '/settings/notifications'
     | '/settings/payments'
     | '/settings/preferences'
@@ -502,6 +513,7 @@ export interface FileRouteTypes {
     | '/dashboard/runner'
     | '/profile/edit'
     | '/settings/account'
+    | '/settings/admin'
     | '/settings/notifications'
     | '/settings/payments'
     | '/settings/preferences'
@@ -548,6 +560,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard/runner'
     | '/_authenticated/profile/edit'
     | '/_authenticated/settings/account'
+    | '/_authenticated/settings/admin'
     | '/_authenticated/settings/notifications'
     | '/_authenticated/settings/payments'
     | '/_authenticated/settings/preferences'
@@ -827,6 +840,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSettingsNotificationsRouteImport
       parentRoute: typeof AuthenticatedSettingsRoute
     }
+    '/_authenticated/settings/admin': {
+      id: '/_authenticated/settings/admin'
+      path: '/admin'
+      fullPath: '/settings/admin'
+      preLoaderRoute: typeof AuthenticatedSettingsAdminRouteImport
+      parentRoute: typeof AuthenticatedSettingsRoute
+    }
     '/_authenticated/settings/account': {
       id: '/_authenticated/settings/account'
       path: '/account'
@@ -922,6 +942,7 @@ const AuthenticatedAdminRouteWithChildren =
 
 interface AuthenticatedSettingsRouteChildren {
   AuthenticatedSettingsAccountRoute: typeof AuthenticatedSettingsAccountRoute
+  AuthenticatedSettingsAdminRoute: typeof AuthenticatedSettingsAdminRoute
   AuthenticatedSettingsNotificationsRoute: typeof AuthenticatedSettingsNotificationsRoute
   AuthenticatedSettingsPaymentsRoute: typeof AuthenticatedSettingsPaymentsRoute
   AuthenticatedSettingsPreferencesRoute: typeof AuthenticatedSettingsPreferencesRoute
@@ -934,6 +955,7 @@ interface AuthenticatedSettingsRouteChildren {
 
 const AuthenticatedSettingsRouteChildren: AuthenticatedSettingsRouteChildren = {
   AuthenticatedSettingsAccountRoute: AuthenticatedSettingsAccountRoute,
+  AuthenticatedSettingsAdminRoute: AuthenticatedSettingsAdminRoute,
   AuthenticatedSettingsNotificationsRoute:
     AuthenticatedSettingsNotificationsRoute,
   AuthenticatedSettingsPaymentsRoute: AuthenticatedSettingsPaymentsRoute,
