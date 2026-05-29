@@ -228,10 +228,12 @@ function SuccessCard({
 
 export function FieldRunnerForm() {
   const navigate = useNavigate();
+  const finalizeProfile = useServerFn(finalizeSignupProfile);
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
   const [needsEmailVerification, setNeedsEmailVerification] = useState(false);
   const [submittedEmail, setSubmittedEmail] = useState("");
+  const [signupDebug, setSignupDebug] = useState<SignupDebug | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
   const [serviceRadius, setServiceRadius] = useState("");
   const [transportation, setTransportation] = useState("");
@@ -248,6 +250,7 @@ export function FieldRunnerForm() {
     setDone(false);
     setNeedsEmailVerification(false);
     setSubmittedEmail("");
+    setSignupDebug(null);
     setFormError(null);
     setServiceRadius("");
     setTransportation("");
@@ -285,12 +288,13 @@ export function FieldRunnerForm() {
 
     setSubmitting(true);
     try {
-      const { hasSession } = await createAccount({
+      const { hasSession, debug } = await createAccount({
         email,
         password,
         full_name,
         phone,
         role: "runner",
+        finalizeProfile,
         extra: {
           city,
           state,
@@ -300,6 +304,7 @@ export function FieldRunnerForm() {
         },
       });
       setSubmittedEmail(email);
+      setSignupDebug(debug);
       setNeedsEmailVerification(!hasSession);
       setDone(true);
       if (hasSession) {
@@ -324,6 +329,7 @@ export function FieldRunnerForm() {
         onReset={onReset}
         needsEmailVerification={needsEmailVerification}
         email={submittedEmail}
+        debug={signupDebug}
       />
     );
 
@@ -389,10 +395,12 @@ export function FieldRunnerForm() {
 
 export function ProForm() {
   const navigate = useNavigate();
+  const finalizeProfile = useServerFn(finalizeSignupProfile);
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
   const [needsEmailVerification, setNeedsEmailVerification] = useState(false);
   const [submittedEmail, setSubmittedEmail] = useState("");
+  const [signupDebug, setSignupDebug] = useState<SignupDebug | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
   const [dealVolume, setDealVolume] = useState("");
   const [password, setPassword] = useState("");
@@ -402,6 +410,7 @@ export function ProForm() {
     setDone(false);
     setNeedsEmailVerification(false);
     setSubmittedEmail("");
+    setSignupDebug(null);
     setFormError(null);
     setDealVolume("");
     setPassword("");
@@ -433,12 +442,13 @@ export function ProForm() {
 
     setSubmitting(true);
     try {
-      const { hasSession } = await createAccount({
+      const { hasSession, debug } = await createAccount({
         email,
         password,
         full_name,
         phone,
         role: "investor",
+        finalizeProfile,
         extra: {
           company_name,
           markets_served,
@@ -446,6 +456,7 @@ export function ProForm() {
         },
       });
       setSubmittedEmail(email);
+      setSignupDebug(debug);
       setNeedsEmailVerification(!hasSession);
       setDone(true);
       if (hasSession) {
@@ -470,6 +481,7 @@ export function ProForm() {
         onReset={onReset}
         needsEmailVerification={needsEmailVerification}
         email={submittedEmail}
+        debug={signupDebug}
       />
     );
 
