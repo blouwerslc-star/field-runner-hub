@@ -132,3 +132,44 @@ export async function sendTransactionalEmail(opts: {
     return { ok: false, reason: 'exception' }
   }
 }
+
+/**
+ * Fire-and-forget notification email to a user by user_id.
+ * Looks up the user's email + name from profiles and respects their
+ * `notification_prefs.email` toggle (defaults to true).
+ * Always returns; errors are logged but never thrown.
+ */
+export async function notifyUserByEmail(opts: {
+  userId: string
+  title: string
+  body?: string
+  link?: string
+  ctaLabel?: string
+}): Promise<void> {
+  try {
+    const { data: profile } = await supabaseAdmin
+      .from('profiles')
+      .select('email, full_name, notification_prefs')
+      .eq('user_id', opts.userId)
+      .maybeSingle()
+    if (!profile?.email) return
+    const prefs = (profile.notification_prefs ?? {}) as Record<string, unknown>
+    if (prefs.email === false) return
+    const ctaUrl = opts.link
+      ? (opts.link.startsWith('http') ? opts.link : `${PUBLIC_BASE_URL}${opts.link}`)
+      : undefined
+    await sendTransactionalEmail({
+      templateName: 'notification',
+      recipientEmail: profile.email,
+      templateData: {
+        recipientName: profile.full_name ?? 'there',
+        title: opts.title,
+        body: opts.body,
+        ctaUrl,
+        ctaLabel: opts.ctaLabel ?? 'Open REI Runner',
+      },
+    })
+  } catch (err) {
+    console.error('notifyUserByEmail failed', err)
+  }
+}
