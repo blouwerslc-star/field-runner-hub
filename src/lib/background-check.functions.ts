@@ -28,7 +28,8 @@ export const startBackgroundCheckCheckout = createServerFn({ method: "POST" })
       if ((profile as any).background_check_verified) {
         throw new Error("Background check is already verified");
       }
-      const email = (profile as any).email as string | null;
+      const claimsEmail = (context as any).claims?.email as string | undefined;
+      const email = ((profile as any).email as string | null) || claimsEmail || null;
       if (!email) throw new Error("Please add an email to your profile first");
 
       const stripe = createStripeClient(data.environment as StripeEnv);
