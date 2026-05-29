@@ -42,7 +42,9 @@ function statusColor(status: string) {
     case "assigned": return "bg-blue-500/15 text-blue-300 border-blue-500/30";
     case "in_progress": return "bg-purple-500/15 text-purple-300 border-purple-500/30";
     case "submitted": return "bg-cyan-500/15 text-cyan-300 border-cyan-500/30";
-    case "completed": return "bg-emerald-500/15 text-emerald-300 border-emerald-500/30";
+    case "approved": return "bg-emerald-500/15 text-emerald-300 border-emerald-500/30";
+    case "rejected": return "bg-red-500/15 text-red-300 border-red-500/30";
+    case "paid": return "bg-emerald-600/20 text-emerald-200 border-emerald-500/40";
     default: return "bg-muted text-muted-foreground";
   }
 }
@@ -54,13 +56,13 @@ function InvestorDashboard() {
 
   const buckets = {
     open: tasks.filter((t) => t.status === "open" || t.status === "assigned"),
-    in_progress: tasks.filter((t) => t.status === "in_progress"),
+    in_progress: tasks.filter((t) => t.status === "in_progress" || t.status === "rejected"),
     submitted: tasks.filter((t) => t.status === "submitted"),
-    completed: tasks.filter((t) => t.status === "completed"),
+    completed: tasks.filter((t) => t.status === "approved" || t.status === "paid"),
   };
 
   const totalSpent = tasks
-    .filter((t) => t.status === "completed")
+    .filter((t) => t.status === "approved" || t.status === "paid")
     .reduce((s, t) => s + Number(t.payout_amount ?? 0), 0);
 
   return (

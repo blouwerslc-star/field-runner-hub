@@ -32,7 +32,9 @@ function statusColor(status: string) {
     case "assigned": return "bg-blue-500/15 text-blue-300 border-blue-500/30";
     case "in_progress": return "bg-purple-500/15 text-purple-300 border-purple-500/30";
     case "submitted": return "bg-cyan-500/15 text-cyan-300 border-cyan-500/30";
-    case "completed": return "bg-emerald-500/15 text-emerald-300 border-emerald-500/30";
+    case "approved": return "bg-emerald-500/15 text-emerald-300 border-emerald-500/30";
+    case "rejected": return "bg-red-500/15 text-red-300 border-red-500/30";
+    case "paid": return "bg-emerald-600/20 text-emerald-200 border-emerald-500/40";
     default: return "bg-muted text-muted-foreground";
   }
 }
@@ -43,10 +45,10 @@ function RunnerDashboard() {
   const tasks = data?.tasks ?? [];
 
   const buckets = {
-    assigned: tasks.filter((t) => t.status === "assigned"),
+    assigned: tasks.filter((t) => t.status === "assigned" || t.status === "rejected"),
     in_progress: tasks.filter((t) => t.status === "in_progress"),
     submitted: tasks.filter((t) => t.status === "submitted"),
-    completed: tasks.filter((t) => t.status === "completed"),
+    completed: tasks.filter((t) => t.status === "approved" || t.status === "paid"),
   };
 
   return (
@@ -311,7 +313,7 @@ function TaskWorkPanel({ task, onDone }: { task: Task; onDone: () => void }) {
       <DialogFooter>
         <Button
           onClick={() => submit.mutate()}
-          disabled={submit.isPending || files.length === 0 || task.status === "completed" || task.status === "submitted"}
+          disabled={submit.isPending || files.length === 0 || task.status === "approved" || task.status === "paid" || task.status === "submitted"}
           className="bg-gradient-primary shadow-glow"
         >
           {submit.isPending ? <Loader2 className="size-4 mr-2 animate-spin" /> : null}
