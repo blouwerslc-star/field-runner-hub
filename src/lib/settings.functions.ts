@@ -67,13 +67,17 @@ export const updatePrivacyPrefs = createServerFn({ method: "POST" })
   )
   .handler(async ({ context, data }) => {
     const { supabase, userId } = context;
-    const update: Record<string, unknown> = {
-      privacy_prefs: data.prefs,
-      updated_at: new Date().toISOString(),
-    };
-    if (typeof data.public_profile_enabled === "boolean") update.public_profile_enabled = data.public_profile_enabled;
-    if (typeof data.phone_public === "boolean") update.phone_public = data.phone_public;
-    const { error } = await supabase.from("profiles").update(update).eq("user_id", userId);
+    const { error } = await supabase
+      .from("profiles")
+      .update({
+        privacy_prefs: data.prefs,
+        ...(typeof data.public_profile_enabled === "boolean"
+          ? { public_profile_enabled: data.public_profile_enabled }
+          : {}),
+        ...(typeof data.phone_public === "boolean" ? { phone_public: data.phone_public } : {}),
+        updated_at: new Date().toISOString(),
+      })
+      .eq("user_id", userId);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
