@@ -60,6 +60,7 @@ import { Route as AuthenticatedMessagesConversationIdRouteImport } from './route
 import { Route as AuthenticatedDashboardRunnerRouteImport } from './routes/_authenticated/dashboard.runner'
 import { Route as AuthenticatedDashboardInvestorRouteImport } from './routes/_authenticated/dashboard.investor'
 import { Route as AuthenticatedAdminProfilesRouteImport } from './routes/_authenticated/admin.profiles'
+import { Route as AuthenticatedAdminAnalyticsRouteImport } from './routes/_authenticated/admin.analytics'
 import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
@@ -343,6 +344,12 @@ const AuthenticatedAdminProfilesRoute =
     path: '/profiles',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminAnalyticsRoute =
+  AuthenticatedAdminAnalyticsRouteImport.update({
+    id: '/analytics',
+    path: '/analytics',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const LovableEmailTransactionalSendRoute =
   LovableEmailTransactionalSendRouteImport.update({
     id: '/lovable/email/transactional/send',
@@ -409,6 +416,7 @@ export interface FileRoutesByFullPath {
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/profile/$slug': typeof ProfileSlugRoute
   '/tasks/$taskId': typeof TasksTaskIdRoute
+  '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
   '/admin/profiles': typeof AuthenticatedAdminProfilesRoute
   '/dashboard/investor': typeof AuthenticatedDashboardInvestorRoute
   '/dashboard/runner': typeof AuthenticatedDashboardRunnerRoute
@@ -464,6 +472,7 @@ export interface FileRoutesByTo {
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/profile/$slug': typeof ProfileSlugRoute
   '/tasks/$taskId': typeof TasksTaskIdRoute
+  '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
   '/admin/profiles': typeof AuthenticatedAdminProfilesRoute
   '/dashboard/investor': typeof AuthenticatedDashboardInvestorRoute
   '/dashboard/runner': typeof AuthenticatedDashboardRunnerRoute
@@ -524,6 +533,7 @@ export interface FileRoutesById {
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/profile/$slug': typeof ProfileSlugRoute
   '/tasks/$taskId': typeof TasksTaskIdRoute
+  '/_authenticated/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
   '/_authenticated/admin/profiles': typeof AuthenticatedAdminProfilesRoute
   '/_authenticated/dashboard/investor': typeof AuthenticatedDashboardInvestorRoute
   '/_authenticated/dashboard/runner': typeof AuthenticatedDashboardRunnerRoute
@@ -584,6 +594,7 @@ export interface FileRouteTypes {
     | '/email/unsubscribe'
     | '/profile/$slug'
     | '/tasks/$taskId'
+    | '/admin/analytics'
     | '/admin/profiles'
     | '/dashboard/investor'
     | '/dashboard/runner'
@@ -639,6 +650,7 @@ export interface FileRouteTypes {
     | '/email/unsubscribe'
     | '/profile/$slug'
     | '/tasks/$taskId'
+    | '/admin/analytics'
     | '/admin/profiles'
     | '/dashboard/investor'
     | '/dashboard/runner'
@@ -698,6 +710,7 @@ export interface FileRouteTypes {
     | '/email/unsubscribe'
     | '/profile/$slug'
     | '/tasks/$taskId'
+    | '/_authenticated/admin/analytics'
     | '/_authenticated/admin/profiles'
     | '/_authenticated/dashboard/investor'
     | '/_authenticated/dashboard/runner'
@@ -1113,6 +1126,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminProfilesRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/analytics': {
+      id: '/_authenticated/admin/analytics'
+      path: '/analytics'
+      fullPath: '/admin/analytics'
+      preLoaderRoute: typeof AuthenticatedAdminAnalyticsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/lovable/email/transactional/send': {
       id: '/lovable/email/transactional/send'
       path: '/lovable/email/transactional/send'
@@ -1159,11 +1179,13 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedAdminRouteChildren {
+  AuthenticatedAdminAnalyticsRoute: typeof AuthenticatedAdminAnalyticsRoute
   AuthenticatedAdminProfilesRoute: typeof AuthenticatedAdminProfilesRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
 }
 
 const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
+  AuthenticatedAdminAnalyticsRoute: AuthenticatedAdminAnalyticsRoute,
   AuthenticatedAdminProfilesRoute: AuthenticatedAdminProfilesRoute,
   AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
 }
