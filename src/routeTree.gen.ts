@@ -54,6 +54,7 @@ import { Route as AuthenticatedSettingsPaymentsRouteImport } from './routes/_aut
 import { Route as AuthenticatedSettingsNotificationsRouteImport } from './routes/_authenticated/settings.notifications'
 import { Route as AuthenticatedSettingsAdminRouteImport } from './routes/_authenticated/settings.admin'
 import { Route as AuthenticatedSettingsAccountRouteImport } from './routes/_authenticated/settings.account'
+import { Route as AuthenticatedProfileIdVerificationRouteImport } from './routes/_authenticated/profile.id-verification'
 import { Route as AuthenticatedProfileEditRouteImport } from './routes/_authenticated/profile.edit'
 import { Route as AuthenticatedMessagesNewRouteImport } from './routes/_authenticated/messages.new'
 import { Route as AuthenticatedMessagesConversationIdRouteImport } from './routes/_authenticated/messages.$conversationId'
@@ -310,6 +311,12 @@ const AuthenticatedSettingsAccountRoute =
     path: '/account',
     getParentRoute: () => AuthenticatedSettingsRoute,
   } as any)
+const AuthenticatedProfileIdVerificationRoute =
+  AuthenticatedProfileIdVerificationRouteImport.update({
+    id: '/profile/id-verification',
+    path: '/profile/id-verification',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedProfileEditRoute =
   AuthenticatedProfileEditRouteImport.update({
     id: '/profile/edit',
@@ -439,6 +446,7 @@ export interface FileRoutesByFullPath {
   '/messages/$conversationId': typeof AuthenticatedMessagesConversationIdRoute
   '/messages/new': typeof AuthenticatedMessagesNewRoute
   '/profile/edit': typeof AuthenticatedProfileEditRoute
+  '/profile/id-verification': typeof AuthenticatedProfileIdVerificationRoute
   '/settings/account': typeof AuthenticatedSettingsAccountRoute
   '/settings/admin': typeof AuthenticatedSettingsAdminRoute
   '/settings/notifications': typeof AuthenticatedSettingsNotificationsRoute
@@ -497,6 +505,7 @@ export interface FileRoutesByTo {
   '/messages/$conversationId': typeof AuthenticatedMessagesConversationIdRoute
   '/messages/new': typeof AuthenticatedMessagesNewRoute
   '/profile/edit': typeof AuthenticatedProfileEditRoute
+  '/profile/id-verification': typeof AuthenticatedProfileIdVerificationRoute
   '/settings/account': typeof AuthenticatedSettingsAccountRoute
   '/settings/admin': typeof AuthenticatedSettingsAdminRoute
   '/settings/notifications': typeof AuthenticatedSettingsNotificationsRoute
@@ -560,6 +569,7 @@ export interface FileRoutesById {
   '/_authenticated/messages/$conversationId': typeof AuthenticatedMessagesConversationIdRoute
   '/_authenticated/messages/new': typeof AuthenticatedMessagesNewRoute
   '/_authenticated/profile/edit': typeof AuthenticatedProfileEditRoute
+  '/_authenticated/profile/id-verification': typeof AuthenticatedProfileIdVerificationRoute
   '/_authenticated/settings/account': typeof AuthenticatedSettingsAccountRoute
   '/_authenticated/settings/admin': typeof AuthenticatedSettingsAdminRoute
   '/_authenticated/settings/notifications': typeof AuthenticatedSettingsNotificationsRoute
@@ -623,6 +633,7 @@ export interface FileRouteTypes {
     | '/messages/$conversationId'
     | '/messages/new'
     | '/profile/edit'
+    | '/profile/id-verification'
     | '/settings/account'
     | '/settings/admin'
     | '/settings/notifications'
@@ -681,6 +692,7 @@ export interface FileRouteTypes {
     | '/messages/$conversationId'
     | '/messages/new'
     | '/profile/edit'
+    | '/profile/id-verification'
     | '/settings/account'
     | '/settings/admin'
     | '/settings/notifications'
@@ -743,6 +755,7 @@ export interface FileRouteTypes {
     | '/_authenticated/messages/$conversationId'
     | '/_authenticated/messages/new'
     | '/_authenticated/profile/edit'
+    | '/_authenticated/profile/id-verification'
     | '/_authenticated/settings/account'
     | '/_authenticated/settings/admin'
     | '/_authenticated/settings/notifications'
@@ -1110,6 +1123,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSettingsAccountRouteImport
       parentRoute: typeof AuthenticatedSettingsRoute
     }
+    '/_authenticated/profile/id-verification': {
+      id: '/_authenticated/profile/id-verification'
+      path: '/profile/id-verification'
+      fullPath: '/profile/id-verification'
+      preLoaderRoute: typeof AuthenticatedProfileIdVerificationRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/profile/edit': {
       id: '/_authenticated/profile/edit'
       path: '/profile/edit'
@@ -1304,6 +1324,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedDashboardInvestorRoute: typeof AuthenticatedDashboardInvestorRoute
   AuthenticatedDashboardRunnerRoute: typeof AuthenticatedDashboardRunnerRoute
   AuthenticatedProfileEditRoute: typeof AuthenticatedProfileEditRoute
+  AuthenticatedProfileIdVerificationRoute: typeof AuthenticatedProfileIdVerificationRoute
   AuthenticatedDashboardIndexRoute: typeof AuthenticatedDashboardIndexRoute
 }
 
@@ -1323,6 +1344,8 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedDashboardInvestorRoute: AuthenticatedDashboardInvestorRoute,
   AuthenticatedDashboardRunnerRoute: AuthenticatedDashboardRunnerRoute,
   AuthenticatedProfileEditRoute: AuthenticatedProfileEditRoute,
+  AuthenticatedProfileIdVerificationRoute:
+    AuthenticatedProfileIdVerificationRoute,
   AuthenticatedDashboardIndexRoute: AuthenticatedDashboardIndexRoute,
 }
 
