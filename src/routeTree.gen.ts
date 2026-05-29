@@ -31,6 +31,7 @@ import { Route as CheckoutReturnRouteImport } from './routes/checkout.return'
 import { Route as AuthenticatedTemplatesRouteImport } from './routes/_authenticated/templates'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedRunnerDashboardRouteImport } from './routes/_authenticated/runner-dashboard'
+import { Route as AuthenticatedReviewsRouteImport } from './routes/_authenticated/reviews'
 import { Route as AuthenticatedMessagesRouteImport } from './routes/_authenticated/messages'
 import { Route as AuthenticatedInvestorDashboardRouteImport } from './routes/_authenticated/investor-dashboard'
 import { Route as AuthenticatedBillingRouteImport } from './routes/_authenticated/billing'
@@ -174,6 +175,11 @@ const AuthenticatedRunnerDashboardRoute =
     path: '/runner-dashboard',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const AuthenticatedReviewsRoute = AuthenticatedReviewsRouteImport.update({
+  id: '/reviews',
+  path: '/reviews',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedMessagesRoute = AuthenticatedMessagesRouteImport.update({
   id: '/messages',
   path: '/messages',
@@ -381,6 +387,7 @@ export interface FileRoutesByFullPath {
   '/billing': typeof AuthenticatedBillingRoute
   '/investor-dashboard': typeof AuthenticatedInvestorDashboardRoute
   '/messages': typeof AuthenticatedMessagesRouteWithChildren
+  '/reviews': typeof AuthenticatedReviewsRoute
   '/runner-dashboard': typeof AuthenticatedRunnerDashboardRoute
   '/settings': typeof AuthenticatedSettingsRouteWithChildren
   '/templates': typeof AuthenticatedTemplatesRoute
@@ -434,6 +441,7 @@ export interface FileRoutesByTo {
   '/applications': typeof AuthenticatedApplicationsRoute
   '/billing': typeof AuthenticatedBillingRoute
   '/investor-dashboard': typeof AuthenticatedInvestorDashboardRoute
+  '/reviews': typeof AuthenticatedReviewsRoute
   '/runner-dashboard': typeof AuthenticatedRunnerDashboardRoute
   '/templates': typeof AuthenticatedTemplatesRoute
   '/checkout/return': typeof CheckoutReturnRoute
@@ -490,6 +498,7 @@ export interface FileRoutesById {
   '/_authenticated/billing': typeof AuthenticatedBillingRoute
   '/_authenticated/investor-dashboard': typeof AuthenticatedInvestorDashboardRoute
   '/_authenticated/messages': typeof AuthenticatedMessagesRouteWithChildren
+  '/_authenticated/reviews': typeof AuthenticatedReviewsRoute
   '/_authenticated/runner-dashboard': typeof AuthenticatedRunnerDashboardRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRouteWithChildren
   '/_authenticated/templates': typeof AuthenticatedTemplatesRoute
@@ -547,6 +556,7 @@ export interface FileRouteTypes {
     | '/billing'
     | '/investor-dashboard'
     | '/messages'
+    | '/reviews'
     | '/runner-dashboard'
     | '/settings'
     | '/templates'
@@ -600,6 +610,7 @@ export interface FileRouteTypes {
     | '/applications'
     | '/billing'
     | '/investor-dashboard'
+    | '/reviews'
     | '/runner-dashboard'
     | '/templates'
     | '/checkout/return'
@@ -655,6 +666,7 @@ export interface FileRouteTypes {
     | '/_authenticated/billing'
     | '/_authenticated/investor-dashboard'
     | '/_authenticated/messages'
+    | '/_authenticated/reviews'
     | '/_authenticated/runner-dashboard'
     | '/_authenticated/settings'
     | '/_authenticated/templates'
@@ -872,6 +884,13 @@ declare module '@tanstack/react-router' {
       path: '/runner-dashboard'
       fullPath: '/runner-dashboard'
       preLoaderRoute: typeof AuthenticatedRunnerDashboardRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/reviews': {
+      id: '/_authenticated/reviews'
+      path: '/reviews'
+      fullPath: '/reviews'
+      preLoaderRoute: typeof AuthenticatedReviewsRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/messages': {
@@ -1171,6 +1190,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedBillingRoute: typeof AuthenticatedBillingRoute
   AuthenticatedInvestorDashboardRoute: typeof AuthenticatedInvestorDashboardRoute
   AuthenticatedMessagesRoute: typeof AuthenticatedMessagesRouteWithChildren
+  AuthenticatedReviewsRoute: typeof AuthenticatedReviewsRoute
   AuthenticatedRunnerDashboardRoute: typeof AuthenticatedRunnerDashboardRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRouteWithChildren
   AuthenticatedTemplatesRoute: typeof AuthenticatedTemplatesRoute
@@ -1187,6 +1207,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedBillingRoute: AuthenticatedBillingRoute,
   AuthenticatedInvestorDashboardRoute: AuthenticatedInvestorDashboardRoute,
   AuthenticatedMessagesRoute: AuthenticatedMessagesRouteWithChildren,
+  AuthenticatedReviewsRoute: AuthenticatedReviewsRoute,
   AuthenticatedRunnerDashboardRoute: AuthenticatedRunnerDashboardRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRouteWithChildren,
   AuthenticatedTemplatesRoute: AuthenticatedTemplatesRoute,
