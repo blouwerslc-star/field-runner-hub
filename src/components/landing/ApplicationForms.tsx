@@ -544,6 +544,7 @@ export function ProForm() {
   const [role, setRole] = useState("");
   const [frequency, setFrequency] = useState("");
   const [urgency, setUrgency] = useState("");
+  const [password, setPassword] = useState("");
   const [reset, setReset] = useState(0);
 
   const toggle = (s: string) =>
@@ -571,13 +572,27 @@ export function ProForm() {
       toast.error("Please complete all dropdowns.");
       return;
     }
+    if (password.length < 8) {
+      toast.error("Please choose a password of at least 8 characters.");
+      return;
+    }
     setSubmitting(true);
     try {
+      const email = String(f.get("email") || "");
+      const fullName = String(f.get("full_name") || "");
+      const phone = String(f.get("phone") || "");
+      const { hasSession } = await createAccount({
+        email,
+        password,
+        full_name: fullName,
+        phone,
+        role: "investor",
+      });
       await submit({
         data: {
-          full_name: String(f.get("full_name") || ""),
-          email: String(f.get("email") || ""),
-          phone: String(f.get("phone") || ""),
+          full_name: fullName,
+          email,
+          phone,
           company_name: String(f.get("company_name") || ""),
           role,
           market_city: String(f.get("market_city") || ""),
@@ -591,10 +606,16 @@ export function ProForm() {
         } as never,
       });
       setDone(true);
-      navigate({ to: "/waitlist" });
+      if (hasSession) {
+        toast.success("Application submitted. Welcome aboard!");
+        navigate({ to: "/dashboard/investor" });
+      } else {
+        toast.success("Application received. Check your email to verify your account.");
+        navigate({ to: "/login", search: { redirect: "/dashboard/investor" } });
+      }
     } catch (err) {
       console.error(err);
-      toast.error("Submission failed. Please review your info and try again.");
+      toast.error(err instanceof Error ? err.message : "Submission failed. Please review your info and try again.");
     } finally {
       setSubmitting(false);
     }
