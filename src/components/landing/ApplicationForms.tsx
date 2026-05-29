@@ -2,6 +2,7 @@ import { useState, useId, cloneElement, isValidElement } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 import {
   submitFieldRunner,
   submitPro,
@@ -20,6 +21,40 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { CheckCircle2, Loader2, ChevronLeft, ChevronRight } from "lucide-react";
+
+async function createAccount(opts: {
+  email: string;
+  password: string;
+  full_name: string;
+  phone: string;
+  role: "runner" | "investor";
+}): Promise<{ hasSession: boolean }> {
+  const { data, error } = await supabase.auth.signUp({
+    email: opts.email,
+    password: opts.password,
+    options: {
+      emailRedirectTo:
+        typeof window !== "undefined"
+          ? `${window.location.origin}/dashboard`
+          : undefined,
+      data: {
+        role: opts.role,
+        full_name: opts.full_name,
+        phone: opts.phone,
+      },
+    },
+  });
+  if (error) {
+    const msg = error.message || "";
+    if (/registered|exists/i.test(msg)) {
+      throw new Error(
+        "An account with that email already exists. Please sign in instead.",
+      );
+    }
+    throw new Error(msg || "Could not create your account.");
+  }
+  return { hasSession: !!data.session };
+}
 
 const RUNNER_SERVICES = [
   "Property photos",
@@ -102,6 +137,7 @@ export function FieldRunnerForm() {
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
   const [step, setStep] = useState(0);
+  const [password, setPassword] = useState("");
   const [services, setServices] = useState<string[]>([]);
   const [availability, setAvailability] = useState("");
   const [hasTransport, setHasTransport] = useState("");
@@ -188,14 +224,31 @@ export function FieldRunnerForm() {
       toast.error("Please complete all dropdowns.");
       return;
     }
+    if (password.length < 8) {
+      toast.error("Please choose a password of at least 8 characters.");
+      return;
+    }
     setSubmitting(true);
     try {
+      const { hasSession } = await createAccount({
+        email: payload.email,
+        password,
+        full_name: payload.full_name,
+        phone: payload.phone,
+        role: "runner",
+      });
       await submit({ data: payload as never });
       setDone(true);
-      navigate({ to: "/waitlist" });
+      if (hasSession) {
+        toast.success("Application submitted. Welcome aboard!");
+        navigate({ to: "/dashboard/runner" });
+      } else {
+        toast.success("Application received. Check your email to verify your account.");
+        navigate({ to: "/login", search: { redirect: "/dashboard/runner" } });
+      }
     } catch (err) {
       console.error(err);
-      toast.error("Submission failed. Please review your info and try again.");
+      toast.error(err instanceof Error ? err.message : "Submission failed. Please review your info and try again.");
     } finally {
       setSubmitting(false);
     }
@@ -215,6 +268,7 @@ export function FieldRunnerForm() {
         const el = form.elements.namedItem(name) as HTMLInputElement | null;
         if (!el || !el.value.trim()) return "Please complete all fields in this step.";
       }
+      if (password.length < 8) return "Please choose a password of at least 8 characters.";
     }
     if (step === 1) {
       if (!hasTransport || !hasLicense || !vehicleType || !travelRadius || !hasPhone)
@@ -288,6 +342,18 @@ export function FieldRunnerForm() {
         <Field label="City"><Input name="city" required maxLength={100} /></Field>
         <Field label="State"><Input name="state" required maxLength={50} /></Field>
         <Field label="Zip Code"><Input name="zip_code" required maxLength={20} /></Field>
+        <Field label="Choose a password">
+          <Input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            minLength={8}
+            maxLength={100}
+            autoComplete="new-password"
+            placeholder="At least 8 characters"
+          />
+        </Field>
       </div>
 
       {/* Step 2: Logistics */}
@@ -478,6 +544,7 @@ export function ProForm() {
   const [role, setRole] = useState("");
   const [frequency, setFrequency] = useState("");
   const [urgency, setUrgency] = useState("");
+  const [password, setPassword] = useState("");
   const [reset, setReset] = useState(0);
 
   const toggle = (s: string) =>
@@ -505,13 +572,27 @@ export function ProForm() {
       toast.error("Please complete all dropdowns.");
       return;
     }
+    if (password.length < 8) {
+      toast.error("Please choose a password of at least 8 characters.");
+      return;
+    }
     setSubmitting(true);
     try {
+      const email = String(f.get("email") || "");
+      const fullName = String(f.get("full_name") || "");
+      const phone = String(f.get("phone") || "");
+      const { hasSession } = await createAccount({
+        email,
+        password,
+        full_name: fullName,
+        phone,
+        role: "investor",
+      });
       await submit({
         data: {
-          full_name: String(f.get("full_name") || ""),
-          email: String(f.get("email") || ""),
-          phone: String(f.get("phone") || ""),
+          full_name: fullName,
+          email,
+          phone,
           company_name: String(f.get("company_name") || ""),
           role,
           market_city: String(f.get("market_city") || ""),
@@ -525,10 +606,16 @@ export function ProForm() {
         } as never,
       });
       setDone(true);
-      navigate({ to: "/waitlist" });
+      if (hasSession) {
+        toast.success("Application submitted. Welcome aboard!");
+        navigate({ to: "/dashboard/investor" });
+      } else {
+        toast.success("Application received. Check your email to verify your account.");
+        navigate({ to: "/login", search: { redirect: "/dashboard/investor" } });
+      }
     } catch (err) {
       console.error(err);
-      toast.error("Submission failed. Please review your info and try again.");
+      toast.error(err instanceof Error ? err.message : "Submission failed. Please review your info and try again.");
     } finally {
       setSubmitting(false);
     }
@@ -585,6 +672,19 @@ export function ProForm() {
 
       <Field label="Tell us what kind of help you need">
         <Textarea name="details" rows={4} maxLength={2000} placeholder="A few sentences about your typical deals…" />
+      </Field>
+
+      <Field label="Choose a password">
+        <Input
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+          minLength={8}
+          maxLength={100}
+          autoComplete="new-password"
+          placeholder="At least 8 characters — this creates your account"
+        />
       </Field>
 
       <Button type="submit" size="lg" disabled={submitting} className="w-full bg-gradient-primary shadow-glow">
