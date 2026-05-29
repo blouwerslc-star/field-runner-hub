@@ -2,6 +2,7 @@ import { useState, useId, cloneElement, isValidElement } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 import {
   submitFieldRunner,
   submitPro,
@@ -20,6 +21,40 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { CheckCircle2, Loader2, ChevronLeft, ChevronRight } from "lucide-react";
+
+async function createAccount(opts: {
+  email: string;
+  password: string;
+  full_name: string;
+  phone: string;
+  role: "runner" | "investor";
+}): Promise<{ hasSession: boolean }> {
+  const { data, error } = await supabase.auth.signUp({
+    email: opts.email,
+    password: opts.password,
+    options: {
+      emailRedirectTo:
+        typeof window !== "undefined"
+          ? `${window.location.origin}/dashboard`
+          : undefined,
+      data: {
+        role: opts.role,
+        full_name: opts.full_name,
+        phone: opts.phone,
+      },
+    },
+  });
+  if (error) {
+    const msg = error.message || "";
+    if (/registered|exists/i.test(msg)) {
+      throw new Error(
+        "An account with that email already exists. Please sign in instead.",
+      );
+    }
+    throw new Error(msg || "Could not create your account.");
+  }
+  return { hasSession: !!data.session };
+}
 
 const RUNNER_SERVICES = [
   "Property photos",
