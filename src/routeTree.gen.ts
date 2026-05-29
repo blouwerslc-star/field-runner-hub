@@ -59,6 +59,7 @@ import { Route as AuthenticatedSettingsAccountRouteImport } from './routes/_auth
 import { Route as AuthenticatedProfileVerificationRouteImport } from './routes/_authenticated/profile.verification'
 import { Route as AuthenticatedProfileIdVerificationRouteImport } from './routes/_authenticated/profile.id-verification'
 import { Route as AuthenticatedProfileEditRouteImport } from './routes/_authenticated/profile.edit'
+import { Route as AuthenticatedProfileBackgroundCheckRouteImport } from './routes/_authenticated/profile.background-check'
 import { Route as AuthenticatedMessagesNewRouteImport } from './routes/_authenticated/messages.new'
 import { Route as AuthenticatedMessagesConversationIdRouteImport } from './routes/_authenticated/messages.$conversationId'
 import { Route as AuthenticatedDashboardRunnerRouteImport } from './routes/_authenticated/dashboard.runner'
@@ -76,6 +77,7 @@ import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/e
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
+import { Route as ApiPublicCheckrWebhookRouteImport } from './routes/api/public/checkr/webhook'
 
 const WaitlistRoute = WaitlistRouteImport.update({
   id: '/waitlist',
@@ -346,6 +348,12 @@ const AuthenticatedProfileEditRoute =
     path: '/profile/edit',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const AuthenticatedProfileBackgroundCheckRoute =
+  AuthenticatedProfileBackgroundCheckRouteImport.update({
+    id: '/profile/background-check',
+    path: '/profile/background-check',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedMessagesNewRoute =
   AuthenticatedMessagesNewRouteImport.update({
     id: '/new',
@@ -446,6 +454,11 @@ const ApiPublicPaymentsWebhookRoute =
     path: '/api/public/payments/webhook',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicCheckrWebhookRoute = ApiPublicCheckrWebhookRouteImport.update({
+  id: '/api/public/checkr/webhook',
+  path: '/api/public/checkr/webhook',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -491,6 +504,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/runner': typeof AuthenticatedDashboardRunnerRoute
   '/messages/$conversationId': typeof AuthenticatedMessagesConversationIdRoute
   '/messages/new': typeof AuthenticatedMessagesNewRoute
+  '/profile/background-check': typeof AuthenticatedProfileBackgroundCheckRoute
   '/profile/edit': typeof AuthenticatedProfileEditRoute
   '/profile/id-verification': typeof AuthenticatedProfileIdVerificationRoute
   '/profile/verification': typeof AuthenticatedProfileVerificationRoute
@@ -508,6 +522,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/': typeof AuthenticatedDashboardIndexRoute
   '/messages/': typeof AuthenticatedMessagesIndexRoute
   '/settings/': typeof AuthenticatedSettingsIndexRoute
+  '/api/public/checkr/webhook': typeof ApiPublicCheckrWebhookRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -556,6 +571,7 @@ export interface FileRoutesByTo {
   '/dashboard/runner': typeof AuthenticatedDashboardRunnerRoute
   '/messages/$conversationId': typeof AuthenticatedMessagesConversationIdRoute
   '/messages/new': typeof AuthenticatedMessagesNewRoute
+  '/profile/background-check': typeof AuthenticatedProfileBackgroundCheckRoute
   '/profile/edit': typeof AuthenticatedProfileEditRoute
   '/profile/id-verification': typeof AuthenticatedProfileIdVerificationRoute
   '/profile/verification': typeof AuthenticatedProfileVerificationRoute
@@ -573,6 +589,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AuthenticatedDashboardIndexRoute
   '/messages': typeof AuthenticatedMessagesIndexRoute
   '/settings': typeof AuthenticatedSettingsIndexRoute
+  '/api/public/checkr/webhook': typeof ApiPublicCheckrWebhookRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -626,6 +643,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard/runner': typeof AuthenticatedDashboardRunnerRoute
   '/_authenticated/messages/$conversationId': typeof AuthenticatedMessagesConversationIdRoute
   '/_authenticated/messages/new': typeof AuthenticatedMessagesNewRoute
+  '/_authenticated/profile/background-check': typeof AuthenticatedProfileBackgroundCheckRoute
   '/_authenticated/profile/edit': typeof AuthenticatedProfileEditRoute
   '/_authenticated/profile/id-verification': typeof AuthenticatedProfileIdVerificationRoute
   '/_authenticated/profile/verification': typeof AuthenticatedProfileVerificationRoute
@@ -643,6 +661,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard/': typeof AuthenticatedDashboardIndexRoute
   '/_authenticated/messages/': typeof AuthenticatedMessagesIndexRoute
   '/_authenticated/settings/': typeof AuthenticatedSettingsIndexRoute
+  '/api/public/checkr/webhook': typeof ApiPublicCheckrWebhookRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -696,6 +715,7 @@ export interface FileRouteTypes {
     | '/dashboard/runner'
     | '/messages/$conversationId'
     | '/messages/new'
+    | '/profile/background-check'
     | '/profile/edit'
     | '/profile/id-verification'
     | '/profile/verification'
@@ -713,6 +733,7 @@ export interface FileRouteTypes {
     | '/dashboard/'
     | '/messages/'
     | '/settings/'
+    | '/api/public/checkr/webhook'
     | '/api/public/payments/webhook'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -761,6 +782,7 @@ export interface FileRouteTypes {
     | '/dashboard/runner'
     | '/messages/$conversationId'
     | '/messages/new'
+    | '/profile/background-check'
     | '/profile/edit'
     | '/profile/id-verification'
     | '/profile/verification'
@@ -778,6 +800,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/messages'
     | '/settings'
+    | '/api/public/checkr/webhook'
     | '/api/public/payments/webhook'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -830,6 +853,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard/runner'
     | '/_authenticated/messages/$conversationId'
     | '/_authenticated/messages/new'
+    | '/_authenticated/profile/background-check'
     | '/_authenticated/profile/edit'
     | '/_authenticated/profile/id-verification'
     | '/_authenticated/profile/verification'
@@ -847,6 +871,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard/'
     | '/_authenticated/messages/'
     | '/_authenticated/settings/'
+    | '/api/public/checkr/webhook'
     | '/api/public/payments/webhook'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -875,6 +900,7 @@ export interface RootRouteChildren {
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
   ProfileSlugRoute: typeof ProfileSlugRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
+  ApiPublicCheckrWebhookRoute: typeof ApiPublicCheckrWebhookRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
@@ -1235,6 +1261,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedProfileEditRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/profile/background-check': {
+      id: '/_authenticated/profile/background-check'
+      path: '/profile/background-check'
+      fullPath: '/profile/background-check'
+      preLoaderRoute: typeof AuthenticatedProfileBackgroundCheckRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/messages/new': {
       id: '/_authenticated/messages/new'
       path: '/new'
@@ -1354,6 +1387,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicPaymentsWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/checkr/webhook': {
+      id: '/api/public/checkr/webhook'
+      path: '/api/public/checkr/webhook'
+      fullPath: '/api/public/checkr/webhook'
+      preLoaderRoute: typeof ApiPublicCheckrWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -1451,6 +1491,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedTemplatesRoute: typeof AuthenticatedTemplatesRoute
   AuthenticatedDashboardInvestorRoute: typeof AuthenticatedDashboardInvestorRoute
   AuthenticatedDashboardRunnerRoute: typeof AuthenticatedDashboardRunnerRoute
+  AuthenticatedProfileBackgroundCheckRoute: typeof AuthenticatedProfileBackgroundCheckRoute
   AuthenticatedProfileEditRoute: typeof AuthenticatedProfileEditRoute
   AuthenticatedProfileIdVerificationRoute: typeof AuthenticatedProfileIdVerificationRoute
   AuthenticatedProfileVerificationRoute: typeof AuthenticatedProfileVerificationRoute
@@ -1474,6 +1515,8 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedTemplatesRoute: AuthenticatedTemplatesRoute,
   AuthenticatedDashboardInvestorRoute: AuthenticatedDashboardInvestorRoute,
   AuthenticatedDashboardRunnerRoute: AuthenticatedDashboardRunnerRoute,
+  AuthenticatedProfileBackgroundCheckRoute:
+    AuthenticatedProfileBackgroundCheckRoute,
   AuthenticatedProfileEditRoute: AuthenticatedProfileEditRoute,
   AuthenticatedProfileIdVerificationRoute:
     AuthenticatedProfileIdVerificationRoute,
@@ -1515,6 +1558,7 @@ const rootRouteChildren: RootRouteChildren = {
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
   ProfileSlugRoute: ProfileSlugRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
+  ApiPublicCheckrWebhookRoute: ApiPublicCheckrWebhookRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
