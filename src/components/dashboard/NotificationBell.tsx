@@ -20,11 +20,16 @@ export function NotificationBell() {
     queryKey: ["notifications"],
     queryFn: () => fetchFn(),
     refetchInterval: 60_000,
+    enabled: !!userId,
   });
 
   const [userId, setUserId] = useState<string | null>(null);
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => setUserId(data.user?.id ?? null));
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, session) => {
+      setUserId(session?.user?.id ?? null);
+    });
+    return () => subscription.unsubscribe();
   }, []);
 
   useEffect(() => {
