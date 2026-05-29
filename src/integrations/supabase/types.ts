@@ -272,6 +272,7 @@ export type Database = {
       }
       field_runner_applications: {
         Row: {
+          admin_notes: string | null
           availability: string
           background_check_consent: boolean | null
           city: string
@@ -290,10 +291,13 @@ export type Database = {
           phone: string
           preferred_payout: string | null
           referral_code: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
           sample_url: string | null
           services: string[]
           social_links: string | null
           state: string
+          status: string
           street_address: string | null
           travel_radius_miles: string | null
           user_id: string | null
@@ -301,6 +305,7 @@ export type Database = {
           zip_code: string | null
         }
         Insert: {
+          admin_notes?: string | null
           availability: string
           background_check_consent?: boolean | null
           city: string
@@ -319,10 +324,13 @@ export type Database = {
           phone: string
           preferred_payout?: string | null
           referral_code?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           sample_url?: string | null
           services?: string[]
           social_links?: string | null
           state: string
+          status?: string
           street_address?: string | null
           travel_radius_miles?: string | null
           user_id?: string | null
@@ -330,6 +338,7 @@ export type Database = {
           zip_code?: string | null
         }
         Update: {
+          admin_notes?: string | null
           availability?: string
           background_check_consent?: boolean | null
           city?: string
@@ -348,10 +357,13 @@ export type Database = {
           phone?: string
           preferred_payout?: string | null
           referral_code?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           sample_url?: string | null
           services?: string[]
           social_links?: string | null
           state?: string
+          status?: string
           street_address?: string | null
           travel_radius_miles?: string | null
           user_id?: string | null
@@ -975,6 +987,54 @@ export type Database = {
           reviewer_id?: string
           task_id?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      runner_id_documents: {
+        Row: {
+          bucket: string
+          created_at: string
+          id: string
+          kind: string
+          mime_type: string | null
+          path: string
+          rejection_reason: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          size_bytes: number | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          bucket?: string
+          created_at?: string
+          id?: string
+          kind: string
+          mime_type?: string | null
+          path: string
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          size_bytes?: number | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          bucket?: string
+          created_at?: string
+          id?: string
+          kind?: string
+          mime_type?: string | null
+          path?: string
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          size_bytes?: number | null
+          status?: string
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
