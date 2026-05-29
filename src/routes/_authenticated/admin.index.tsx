@@ -29,6 +29,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { listPayouts, markPayoutPaid } from "@/lib/payments.functions";
 import { getTaskDetail } from "@/lib/tasks.functions";
 import { getSignedDownloadUrl } from "@/lib/storage.functions";
+import { listAdminRunners, type AdminRunner } from "@/lib/admin.functions";
 import { useQuery } from "@tanstack/react-query";
 
 export const Route = createFileRoute("/_authenticated/admin/")({
@@ -36,17 +37,7 @@ export const Route = createFileRoute("/_authenticated/admin/")({
   head: () => ({ meta: [{ title: "Admin — REI Runner" }] }),
 });
 
-type FieldRunner = {
-  id: string;
-  full_name: string;
-  email: string;
-  phone: string;
-  city: string;
-  state: string;
-  services: string[];
-  user_id: string | null;
-  created_at: string;
-};
+type FieldRunner = AdminRunner;
 
 type Investor = {
   id: string;
@@ -102,14 +93,16 @@ function AdminDashboard() {
   const [runners, setRunners] = useState<FieldRunner[]>([]);
   const [investors, setInvestors] = useState<Investor[]>([]);
   const [tasks, setTasks] = useState<Task[]>([]);
+  const fetchRunners = useServerFn(listAdminRunners);
+  const signFn = useServerFn(getSignedDownloadUrl);
 
   async function loadAll() {
     setLoading(true);
     const [r, i, t] = await Promise.all([
-      supabase
-        .from("field_runner_applications")
-        .select("id, full_name, email, phone, city, state, services, user_id, created_at")
-        .order("created_at", { ascending: false }),
+      fetchRunners().catch((e) => {
+        toast.error(e?.message ?? "Failed to load runners");
+        return { runners: [] as AdminRunner[] };
+      }),
       supabase
         .from("real_estate_pro_applications")
         .select("id, full_name, email, phone, market_city, market_state, role, services_needed, user_id, created_at")
@@ -119,10 +112,9 @@ function AdminDashboard() {
         .select("*")
         .order("created_at", { ascending: false }),
     ]);
-    if (r.error) toast.error("Failed to load runners");
     if (i.error) toast.error("Failed to load investors");
     if (t.error) toast.error("Failed to load tasks");
-    setRunners((r.data ?? []) as FieldRunner[]);
+    setRunners(r.runners ?? []);
     setInvestors((i.data ?? []) as Investor[]);
     setTasks((t.data ?? []) as Task[]);
     setLoading(false);
@@ -197,14 +189,14 @@ function AdminDashboard() {
                     <th className="px-4 py-3">Name</th>
                     <th className="px-4 py-3">Contact</th>
                     <th className="px-4 py-3">Market</th>
-                    <th className="px-4 py-3">Services</th>
-                    <th className="px-4 py-3">Account</th>
+                    <th className="px-4 py-3">Task types</th>
+                    <th className="px-4 py-3">ID verification</th>
                     <th className="px-4 py-3">Applied</th>
                   </tr>
                 </thead>
                 <tbody>
                   {runners.map((r) => (
-                    <tr key={r.id} className="border-t border-border/60">
+                    <tr key={r.user_id} className="border-t border-border/60">
                       <td className="px-4 py-3 font-medium">{r.full_name}</td>
                       <td className="px-4 py-3 text-muted-foreground">
                         <div>{r.email}</div>
@@ -214,16 +206,30 @@ function AdminDashboard() {
                         {r.city}, {r.state}
                       </td>
                       <td className="px-4 py-3 text-xs text-muted-foreground">
-                        {(r.services ?? []).join(", ") || "—"}
+                        {(r.task_types ?? []).join(", ") || "—"}
                       </td>
                       <td className="px-4 py-3">
-                        {r.user_id ? (
-                          <Badge variant="outline" className="border-emerald-500/30 text-emerald-300">
-                            Linked
-                          </Badge>
+                        {r.id_file ? (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="h-7 text-xs"
+                            onClick={async () => {
+                              try {
+                                const { url } = await signFn({
+                                  data: { bucket: r.id_file!.bucket as any, path: r.id_file!.path },
+                                });
+                                window.open(url, "_blank", "noopener,noreferrer");
+                              } catch (e) {
+                                toast.error((e as Error).message);
+                              }
+                            }}
+                          >
+                            View ID
+                          </Button>
                         ) : (
                           <Badge variant="outline" className="text-muted-foreground">
-                            Anonymous
+                            Not uploaded
                           </Badge>
                         )}
                       </td>
@@ -408,7 +414,7 @@ function TaskRow({
                 </div>
               )}
               {runners.map((r) => (
-                <SelectItem key={r.id} value={r.user_id as string}>
+                <SelectItem key={r.user_id} value={r.user_id}>
                   {r.full_name} — {r.city}, {r.state}
                 </SelectItem>
               ))}
