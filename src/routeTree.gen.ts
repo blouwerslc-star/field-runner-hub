@@ -32,6 +32,7 @@ import { Route as AuthenticatedTemplatesRouteImport } from './routes/_authentica
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedRunnerDashboardRouteImport } from './routes/_authenticated/runner-dashboard'
 import { Route as AuthenticatedReviewsRouteImport } from './routes/_authenticated/reviews'
+import { Route as AuthenticatedPerformanceRouteImport } from './routes/_authenticated/performance'
 import { Route as AuthenticatedMessagesRouteImport } from './routes/_authenticated/messages'
 import { Route as AuthenticatedInvestorDashboardRouteImport } from './routes/_authenticated/investor-dashboard'
 import { Route as AuthenticatedEarningsRouteImport } from './routes/_authenticated/earnings'
@@ -188,6 +189,12 @@ const AuthenticatedReviewsRoute = AuthenticatedReviewsRouteImport.update({
   path: '/reviews',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedPerformanceRoute =
+  AuthenticatedPerformanceRouteImport.update({
+    id: '/performance',
+    path: '/performance',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedMessagesRoute = AuthenticatedMessagesRouteImport.update({
   id: '/messages',
   path: '/messages',
@@ -443,6 +450,7 @@ export interface FileRoutesByFullPath {
   '/earnings': typeof AuthenticatedEarningsRoute
   '/investor-dashboard': typeof AuthenticatedInvestorDashboardRoute
   '/messages': typeof AuthenticatedMessagesRouteWithChildren
+  '/performance': typeof AuthenticatedPerformanceRoute
   '/reviews': typeof AuthenticatedReviewsRoute
   '/runner-dashboard': typeof AuthenticatedRunnerDashboardRoute
   '/settings': typeof AuthenticatedSettingsRouteWithChildren
@@ -505,6 +513,7 @@ export interface FileRoutesByTo {
   '/disputes': typeof AuthenticatedDisputesRoute
   '/earnings': typeof AuthenticatedEarningsRoute
   '/investor-dashboard': typeof AuthenticatedInvestorDashboardRoute
+  '/performance': typeof AuthenticatedPerformanceRoute
   '/reviews': typeof AuthenticatedReviewsRoute
   '/runner-dashboard': typeof AuthenticatedRunnerDashboardRoute
   '/templates': typeof AuthenticatedTemplatesRoute
@@ -570,6 +579,7 @@ export interface FileRoutesById {
   '/_authenticated/earnings': typeof AuthenticatedEarningsRoute
   '/_authenticated/investor-dashboard': typeof AuthenticatedInvestorDashboardRoute
   '/_authenticated/messages': typeof AuthenticatedMessagesRouteWithChildren
+  '/_authenticated/performance': typeof AuthenticatedPerformanceRoute
   '/_authenticated/reviews': typeof AuthenticatedReviewsRoute
   '/_authenticated/runner-dashboard': typeof AuthenticatedRunnerDashboardRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRouteWithChildren
@@ -636,6 +646,7 @@ export interface FileRouteTypes {
     | '/earnings'
     | '/investor-dashboard'
     | '/messages'
+    | '/performance'
     | '/reviews'
     | '/runner-dashboard'
     | '/settings'
@@ -698,6 +709,7 @@ export interface FileRouteTypes {
     | '/disputes'
     | '/earnings'
     | '/investor-dashboard'
+    | '/performance'
     | '/reviews'
     | '/runner-dashboard'
     | '/templates'
@@ -762,6 +774,7 @@ export interface FileRouteTypes {
     | '/_authenticated/earnings'
     | '/_authenticated/investor-dashboard'
     | '/_authenticated/messages'
+    | '/_authenticated/performance'
     | '/_authenticated/reviews'
     | '/_authenticated/runner-dashboard'
     | '/_authenticated/settings'
@@ -992,6 +1005,13 @@ declare module '@tanstack/react-router' {
       path: '/reviews'
       fullPath: '/reviews'
       preLoaderRoute: typeof AuthenticatedReviewsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/performance': {
+      id: '/_authenticated/performance'
+      path: '/performance'
+      fullPath: '/performance'
+      preLoaderRoute: typeof AuthenticatedPerformanceRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/messages': {
@@ -1359,6 +1379,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedEarningsRoute: typeof AuthenticatedEarningsRoute
   AuthenticatedInvestorDashboardRoute: typeof AuthenticatedInvestorDashboardRoute
   AuthenticatedMessagesRoute: typeof AuthenticatedMessagesRouteWithChildren
+  AuthenticatedPerformanceRoute: typeof AuthenticatedPerformanceRoute
   AuthenticatedReviewsRoute: typeof AuthenticatedReviewsRoute
   AuthenticatedRunnerDashboardRoute: typeof AuthenticatedRunnerDashboardRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRouteWithChildren
@@ -1380,6 +1401,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedEarningsRoute: AuthenticatedEarningsRoute,
   AuthenticatedInvestorDashboardRoute: AuthenticatedInvestorDashboardRoute,
   AuthenticatedMessagesRoute: AuthenticatedMessagesRouteWithChildren,
+  AuthenticatedPerformanceRoute: AuthenticatedPerformanceRoute,
   AuthenticatedReviewsRoute: AuthenticatedReviewsRoute,
   AuthenticatedRunnerDashboardRoute: AuthenticatedRunnerDashboardRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRouteWithChildren,
