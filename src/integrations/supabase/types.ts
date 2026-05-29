@@ -684,8 +684,13 @@ export type Database = {
           availability_status: string
           avatar_url: string | null
           average_rating: number
+          background_check_paid_at: string | null
           background_check_verified: boolean
           bio: string | null
+          checkr_candidate_id: string | null
+          checkr_invitation_url: string | null
+          checkr_report_id: string | null
+          checkr_status: string | null
           city: string | null
           company_description: string | null
           company_name: string | null
@@ -748,8 +753,13 @@ export type Database = {
           availability_status?: string
           avatar_url?: string | null
           average_rating?: number
+          background_check_paid_at?: string | null
           background_check_verified?: boolean
           bio?: string | null
+          checkr_candidate_id?: string | null
+          checkr_invitation_url?: string | null
+          checkr_report_id?: string | null
+          checkr_status?: string | null
           city?: string | null
           company_description?: string | null
           company_name?: string | null
@@ -812,8 +822,13 @@ export type Database = {
           availability_status?: string
           avatar_url?: string | null
           average_rating?: number
+          background_check_paid_at?: string | null
           background_check_verified?: boolean
           bio?: string | null
+          checkr_candidate_id?: string | null
+          checkr_invitation_url?: string | null
+          checkr_report_id?: string | null
+          checkr_status?: string | null
           city?: string | null
           company_description?: string | null
           company_name?: string | null
