@@ -734,6 +734,12 @@ export type Database = {
           turnaround_time: string | null
           updated_at: string
           user_id: string
+          verification_level: number
+          verification_notes: string | null
+          verification_requested_at: string | null
+          verification_reviewed_at: string | null
+          verification_reviewed_by: string | null
+          verification_status: string
           verified_status: boolean
           years_experience: number | null
         }
@@ -792,6 +798,12 @@ export type Database = {
           turnaround_time?: string | null
           updated_at?: string
           user_id: string
+          verification_level?: number
+          verification_notes?: string | null
+          verification_requested_at?: string | null
+          verification_reviewed_at?: string | null
+          verification_reviewed_by?: string | null
+          verification_status?: string
           verified_status?: boolean
           years_experience?: number | null
         }
@@ -850,6 +862,12 @@ export type Database = {
           turnaround_time?: string | null
           updated_at?: string
           user_id?: string
+          verification_level?: number
+          verification_notes?: string | null
+          verification_requested_at?: string | null
+          verification_reviewed_at?: string | null
+          verification_reviewed_by?: string | null
+          verification_status?: string
           verified_status?: boolean
           years_experience?: number | null
         }
@@ -1402,6 +1420,45 @@ export type Database = {
           created_at?: string
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      verification_requests: {
+        Row: {
+          admin_notes: string | null
+          created_at: string
+          id: string
+          notes: string | null
+          requested_level: number
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          requested_level: number
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          admin_notes?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          requested_level?: number
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
           user_id?: string
         }
         Relationships: []
