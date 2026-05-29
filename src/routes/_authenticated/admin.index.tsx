@@ -27,6 +27,8 @@ import { toast } from "sonner";
 import { Loader2, Users, ClipboardList, UserCog, Plus } from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
 import { listPayouts, markPayoutPaid } from "@/lib/payments.functions";
+import { getTaskDetail } from "@/lib/tasks.functions";
+import { getSignedDownloadUrl } from "@/lib/storage.functions";
 import { useQuery } from "@tanstack/react-query";
 
 export const Route = createFileRoute("/_authenticated/admin/")({
@@ -84,10 +86,12 @@ function statusColor(status: string) {
       return "bg-purple-500/15 text-purple-300 border-purple-500/30";
     case "submitted":
       return "bg-cyan-500/15 text-cyan-300 border-cyan-500/30";
-    case "completed":
+    case "approved":
       return "bg-emerald-500/15 text-emerald-300 border-emerald-500/30";
-    case "cancelled":
+    case "rejected":
       return "bg-red-500/15 text-red-300 border-red-500/30";
+    case "paid":
+      return "bg-emerald-600/20 text-emerald-200 border-emerald-500/40";
     default:
       return "bg-muted text-muted-foreground";
   }
@@ -422,13 +426,112 @@ function TaskRow({
               <SelectItem value="assigned">Assigned</SelectItem>
               <SelectItem value="in_progress">In progress</SelectItem>
               <SelectItem value="submitted">Submitted</SelectItem>
-              <SelectItem value="completed">Completed</SelectItem>
-              <SelectItem value="cancelled">Cancelled</SelectItem>
+              <SelectItem value="approved">Approved</SelectItem>
+              <SelectItem value="rejected">Rejected</SelectItem>
+              <SelectItem value="paid">Paid</SelectItem>
             </SelectContent>
           </Select>
+          <AdminTaskDetailDialog task={task} />
         </div>
       </div>
     </div>
+  );
+}
+
+function AdminTaskDetailDialog({ task }: { task: Task }) {
+  const [open, setOpen] = useState(false);
+  const fetchDetail = useServerFn(getTaskDetail);
+  const signFn = useServerFn(getSignedDownloadUrl);
+  const { data, isLoading } = useQuery({
+    queryKey: ["admin-task-detail", task.id, open],
+    queryFn: () => fetchDetail({ data: { taskId: task.id } }),
+    enabled: open,
+  });
+
+  async function openFile(bucket: string, path: string) {
+    try {
+      const { url } = await signFn({ data: { bucket: bucket as "task-photos", path } });
+      window.open(url, "_blank");
+    } catch (e: any) {
+      toast.error(e?.message ?? "Could not open file");
+    }
+  }
+
+  const submissions = data?.submissions ?? [];
+  const files = data?.files ?? [];
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button size="sm" variant="outline" className="h-8 text-xs">View</Button>
+      </DialogTrigger>
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>{task.title}</DialogTitle>
+        </DialogHeader>
+        {isLoading ? (
+          <Loader2 className="size-5 animate-spin text-primary" />
+        ) : (
+          <div className="space-y-5 text-sm">
+            <div className="rounded-xl border border-border bg-muted/20 p-3">
+              <div className="font-medium">{task.property_address}</div>
+              <div className="text-muted-foreground">{task.city}, {task.state}</div>
+              {task.payout_amount != null && (
+                <div className="mt-2 text-primary font-semibold">
+                  Payout: ${Number(task.payout_amount).toFixed(2)}
+                </div>
+              )}
+            </div>
+
+            <div>
+              <Label>Submissions ({submissions.length})</Label>
+              {submissions.length === 0 ? (
+                <p className="text-xs text-muted-foreground mt-2">No submissions yet.</p>
+              ) : (
+                <div className="mt-2 space-y-2">
+                  {submissions.map((s: any) => (
+                    <div key={s.id} className="rounded-lg border border-border bg-card/40 p-3">
+                      <div className="flex items-center justify-between gap-2 mb-1">
+                        <Badge variant="outline" className={statusColor(s.status)}>
+                          {s.status}
+                        </Badge>
+                        <span className="text-xs text-muted-foreground">
+                          {new Date(s.created_at).toLocaleString()}
+                        </span>
+                      </div>
+                      {s.notes && <p className="text-muted-foreground whitespace-pre-wrap">{s.notes}</p>}
+                      {s.rejection_reason && (
+                        <p className="text-xs text-red-300 mt-1">Rejected: {s.rejection_reason}</p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div>
+              <Label>Files ({files.length})</Label>
+              {files.length === 0 ? (
+                <p className="text-xs text-muted-foreground mt-2">No files uploaded.</p>
+              ) : (
+                <div className="mt-2 grid grid-cols-3 gap-2">
+                  {files.map((f: any) => (
+                    <button
+                      key={f.id}
+                      onClick={() => openFile(f.bucket, f.path)}
+                      className="aspect-square rounded-lg bg-muted/30 border border-border hover:border-primary/50 transition grid place-items-center text-xs text-muted-foreground p-2 text-center"
+                    >
+                      <ClipboardList className="size-5 mb-1" />
+                      {f.kind}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
   );
 }
 

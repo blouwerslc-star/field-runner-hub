@@ -176,7 +176,7 @@ export const reviewSubmission = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
 
     if (data.action === "approve") {
-      await supabase.from("tasks").update({ status: "completed" }).eq("id", sub.task_id);
+      await supabase.from("tasks").update({ status: "approved" }).eq("id", sub.task_id);
       const { data: task } = await supabase
         .from("tasks")
         .select("payout_amount, investor_id, runner_id")
@@ -198,7 +198,7 @@ export const reviewSubmission = createServerFn({ method: "POST" })
     } else {
       await supabase
         .from("tasks")
-        .update({ status: "in_progress" })
+        .update({ status: "rejected" })
         .eq("id", sub.task_id);
     }
     return { ok: true };
