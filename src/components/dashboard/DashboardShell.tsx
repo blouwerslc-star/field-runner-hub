@@ -1,10 +1,13 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { LogOut, UserCog, Compass, Settings } from "lucide-react";
+import { LogOut, UserCog, Compass, Settings, MessageSquare } from "lucide-react";
 import { BrandLogo } from "@/components/brand/BrandLogo";
 import { Toaster } from "@/components/ui/sonner";
 import { NotificationBell } from "@/components/dashboard/NotificationBell";
+import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
+import { getUnreadCount } from "@/lib/messages.functions";
 
 export function DashboardShell({
   title,
@@ -16,6 +19,13 @@ export function DashboardShell({
   children: React.ReactNode;
 }) {
   const navigate = useNavigate();
+  const unreadFn = useServerFn(getUnreadCount);
+  const { data: unread } = useQuery({
+    queryKey: ["messages-unread"],
+    queryFn: () => unreadFn(),
+    refetchInterval: 60_000,
+  });
+  const unreadTotal = unread?.total ?? 0;
 
   async function signOut() {
     await supabase.auth.signOut();
@@ -33,6 +43,16 @@ export function DashboardShell({
           <div className="flex items-center gap-1">
             <Button asChild variant="ghost" size="sm">
               <Link to="/profiles"><Compass className="size-4 mr-1.5" /> Browse</Link>
+            </Button>
+            <Button asChild variant="ghost" size="sm" className="relative">
+              <Link to="/messages">
+                <MessageSquare className="size-4 mr-1.5" /> Messages
+                {unreadTotal > 0 && (
+                  <span className="ml-1.5 size-5 rounded-full bg-primary text-[10px] font-bold text-primary-foreground grid place-items-center">
+                    {unreadTotal > 9 ? "9+" : unreadTotal}
+                  </span>
+                )}
+              </Link>
             </Button>
             <Button asChild variant="ghost" size="sm">
               <Link to="/profile/edit"><UserCog className="size-4 mr-1.5" /> My profile</Link>
