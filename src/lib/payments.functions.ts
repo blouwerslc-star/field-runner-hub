@@ -184,6 +184,13 @@ export const markPayoutPaid = createServerFn({ method: "POST" })
     const isAdmin = (roles ?? []).some((r) => r.role === "admin");
     if (!isAdmin) throw new Error("Admins only");
 
+    const { data: payment, error: pErr } = await supabase
+      .from("payments")
+      .select("task_id")
+      .eq("id", data.paymentId)
+      .maybeSingle();
+    if (pErr) throw new Error(pErr.message);
+
     const { error } = await supabase
       .from("payments")
       .update({
@@ -195,5 +202,9 @@ export const markPayoutPaid = createServerFn({ method: "POST" })
       })
       .eq("id", data.paymentId);
     if (error) throw new Error(error.message);
+
+    if (payment?.task_id) {
+      await supabase.from("tasks").update({ status: "paid" }).eq("id", payment.task_id);
+    }
     return { ok: true };
   });
