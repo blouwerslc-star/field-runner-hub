@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WaitlistRouteImport } from './routes/waitlist'
 import { Route as TermsRouteImport } from './routes/terms'
+import { Route as TasksRouteImport } from './routes/tasks'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as ProfilesRouteImport } from './routes/profiles'
@@ -67,6 +68,11 @@ const WaitlistRoute = WaitlistRouteImport.update({
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
   path: '/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TasksRoute = TasksRouteImport.update({
+  id: '/tasks',
+  path: '/tasks',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
@@ -341,6 +347,7 @@ export interface FileRoutesByFullPath {
   '/profiles': typeof ProfilesRoute
   '/signup': typeof SignupRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/tasks': typeof TasksRoute
   '/terms': typeof TermsRoute
   '/waitlist': typeof WaitlistRoute
   '/admin': typeof AuthenticatedAdminRouteWithChildren
@@ -391,6 +398,7 @@ export interface FileRoutesByTo {
   '/profiles': typeof ProfilesRoute
   '/signup': typeof SignupRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/tasks': typeof TasksRoute
   '/terms': typeof TermsRoute
   '/waitlist': typeof WaitlistRoute
   '/admin-dashboard': typeof AuthenticatedAdminDashboardRoute
@@ -440,6 +448,7 @@ export interface FileRoutesById {
   '/profiles': typeof ProfilesRoute
   '/signup': typeof SignupRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/tasks': typeof TasksRoute
   '/terms': typeof TermsRoute
   '/waitlist': typeof WaitlistRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
@@ -492,6 +501,7 @@ export interface FileRouteTypes {
     | '/profiles'
     | '/signup'
     | '/sitemap.xml'
+    | '/tasks'
     | '/terms'
     | '/waitlist'
     | '/admin'
@@ -542,6 +552,7 @@ export interface FileRouteTypes {
     | '/profiles'
     | '/signup'
     | '/sitemap.xml'
+    | '/tasks'
     | '/terms'
     | '/waitlist'
     | '/admin-dashboard'
@@ -590,6 +601,7 @@ export interface FileRouteTypes {
     | '/profiles'
     | '/signup'
     | '/sitemap.xml'
+    | '/tasks'
     | '/terms'
     | '/waitlist'
     | '/_authenticated/admin'
@@ -642,6 +654,7 @@ export interface RootRouteChildren {
   ProfilesRoute: typeof ProfilesRoute
   SignupRoute: typeof SignupRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  TasksRoute: typeof TasksRoute
   TermsRoute: typeof TermsRoute
   WaitlistRoute: typeof WaitlistRoute
   CheckoutReturnRoute: typeof CheckoutReturnRoute
@@ -670,6 +683,13 @@ declare module '@tanstack/react-router' {
       path: '/terms'
       fullPath: '/terms'
       preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/sitemap.xml': {
@@ -1110,6 +1130,7 @@ const rootRouteChildren: RootRouteChildren = {
   ProfilesRoute: ProfilesRoute,
   SignupRoute: SignupRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  TasksRoute: TasksRoute,
   TermsRoute: TermsRoute,
   WaitlistRoute: WaitlistRoute,
   CheckoutReturnRoute: CheckoutReturnRoute,
