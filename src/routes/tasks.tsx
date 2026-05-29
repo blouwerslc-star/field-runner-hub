@@ -129,6 +129,8 @@ function MarketplacePage() {
                 key={t.id}
                 to="/tasks/$taskId"
                 params={{ taskId: t.id }}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="rounded-2xl border border-border bg-card/50 p-5 hover:border-primary/40 transition-colors group"
               >
                 <div className="flex items-start justify-between gap-2">
