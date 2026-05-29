@@ -14,8 +14,9 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Plus, Trash2, DollarSign, ArrowDownToLine } from "lucide-react";
+import { Loader2, Plus, Trash2, DollarSign, ArrowDownToLine, CheckCircle2, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
+import { startConnectOnboarding, getConnectStatus, openConnectDashboard } from "@/lib/stripe-connect.functions";
 
 export const Route = createFileRoute("/_authenticated/billing")({
   component: BillingPage,
@@ -34,12 +35,16 @@ function BillingPage() {
   const requestFn = useServerFn(requestPayout);
   const requestsFn = useServerFn(listMyPayoutRequests);
   const summaryFn = useServerFn(getEarningsSummary);
+  const connectStatusFn = useServerFn(getConnectStatus);
+  const startOnboardFn = useServerFn(startConnectOnboarding);
+  const openDashFn = useServerFn(openConnectDashboard);
   const qc = useQueryClient();
 
   const methods = useQuery({ queryKey: ["payout-methods"], queryFn: () => methodsFn() });
   const invoices = useQuery({ queryKey: ["my-invoices"], queryFn: () => invoicesFn() });
   const requests = useQuery({ queryKey: ["my-payout-requests"], queryFn: () => requestsFn() });
   const summary = useQuery({ queryKey: ["earnings"], queryFn: () => summaryFn() });
+  const connect = useQuery({ queryKey: ["connect-status"], queryFn: () => connectStatusFn() });
 
   const removeMethod = useMutation({
     mutationFn: (id: string) => removeMethodFn({ data: { id } }),
@@ -99,6 +104,26 @@ function BillingPage() {
         </TabsContent>
 
         <TabsContent value="methods" className="space-y-3">
+          <ConnectCard
+            status={connect.data}
+            loading={connect.isLoading}
+            onStart={async () => {
+              const origin = window.location.origin;
+              const r = await startOnboardFn({
+                data: {
+                  returnUrl: `${origin}/billing?connect=return`,
+                  refreshUrl: `${origin}/billing?connect=refresh`,
+                },
+              });
+              if ((r as any).error) { toast.error((r as any).error); return; }
+              if ((r as any).url) window.location.href = (r as any).url;
+            }}
+            onOpenDashboard={async () => {
+              const r = await openDashFn();
+              if ((r as any).error) { toast.error((r as any).error); return; }
+              if ((r as any).url) window.open((r as any).url, "_blank");
+            }}
+          />
           <div className="flex justify-end">
             <AddMethodDialog onSubmit={async (v) => {
               await addMethodFn({ data: v });
@@ -172,6 +197,45 @@ function Stat({ label, value }: { label: string; value: string }) {
 
 function Empty({ children }: { children: React.ReactNode }) {
   return <div className="rounded-2xl border border-dashed border-border bg-card/30 p-10 text-center text-sm text-muted-foreground">{children}</div>;
+}
+
+function ConnectCard({
+  status, loading, onStart, onOpenDashboard,
+}: { status: any; loading: boolean; onStart: () => void | Promise<void>; onOpenDashboard: () => void | Promise<void> }) {
+  const connected = !!status?.connected;
+  const payoutsOn = !!status?.payouts_enabled;
+  const ready = connected && payoutsOn;
+  const needsMore = connected && !payoutsOn;
+  return (
+    <div className="rounded-2xl border border-border bg-gradient-to-br from-primary/10 to-card/40 p-5 mb-3">
+      <div className="flex items-start gap-4 flex-wrap">
+        <div className="flex-1 min-w-[240px]">
+          <div className="flex items-center gap-2">
+            <h3 className="font-semibold">Direct deposit via Stripe</h3>
+            {ready && <Badge variant="outline" className="text-xs gap-1"><CheckCircle2 className="size-3" /> Active</Badge>}
+            {needsMore && <Badge variant="outline" className="text-xs">Action needed</Badge>}
+          </div>
+          <p className="text-sm text-muted-foreground mt-1">
+            {loading ? "Checking your account…" :
+              ready ? "You're set up to receive instant ACH payouts when tasks are approved." :
+              needsMore ? "Finish a few details with Stripe to unlock payouts." :
+              "Connect your bank with Stripe Express for fast, secure payouts."}
+          </p>
+        </div>
+        <div className="flex gap-2">
+          {ready ? (
+            <Button variant="outline" onClick={onOpenDashboard}>
+              <ExternalLink className="size-4 mr-2" /> Stripe dashboard
+            </Button>
+          ) : (
+            <Button onClick={onStart}>
+              {needsMore ? "Complete setup" : "Connect with Stripe"}
+            </Button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
 }
 
 function AddMethodDialog({ onSubmit }: { onSubmit: (v: any) => Promise<void> }) {
