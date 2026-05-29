@@ -47,6 +47,7 @@ import { Route as AuthenticatedSettingsNotificationsRouteImport } from './routes
 import { Route as AuthenticatedSettingsAdminRouteImport } from './routes/_authenticated/settings.admin'
 import { Route as AuthenticatedSettingsAccountRouteImport } from './routes/_authenticated/settings.account'
 import { Route as AuthenticatedProfileEditRouteImport } from './routes/_authenticated/profile.edit'
+import { Route as AuthenticatedMessagesNewRouteImport } from './routes/_authenticated/messages.new'
 import { Route as AuthenticatedDashboardRunnerRouteImport } from './routes/_authenticated/dashboard.runner'
 import { Route as AuthenticatedDashboardInvestorRouteImport } from './routes/_authenticated/dashboard.investor'
 import { Route as AuthenticatedAdminProfilesRouteImport } from './routes/_authenticated/admin.profiles'
@@ -262,6 +263,12 @@ const AuthenticatedProfileEditRoute =
     path: '/profile/edit',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const AuthenticatedMessagesNewRoute =
+  AuthenticatedMessagesNewRouteImport.update({
+    id: '/new',
+    path: '/new',
+    getParentRoute: () => AuthenticatedMessagesRoute,
+  } as any)
 const AuthenticatedDashboardRunnerRoute =
   AuthenticatedDashboardRunnerRouteImport.update({
     id: '/dashboard/runner',
@@ -341,6 +348,7 @@ export interface FileRoutesByFullPath {
   '/admin/profiles': typeof AuthenticatedAdminProfilesRoute
   '/dashboard/investor': typeof AuthenticatedDashboardInvestorRoute
   '/dashboard/runner': typeof AuthenticatedDashboardRunnerRoute
+  '/messages/new': typeof AuthenticatedMessagesNewRoute
   '/profile/edit': typeof AuthenticatedProfileEditRoute
   '/settings/account': typeof AuthenticatedSettingsAccountRoute
   '/settings/admin': typeof AuthenticatedSettingsAdminRoute
@@ -386,6 +394,7 @@ export interface FileRoutesByTo {
   '/admin/profiles': typeof AuthenticatedAdminProfilesRoute
   '/dashboard/investor': typeof AuthenticatedDashboardInvestorRoute
   '/dashboard/runner': typeof AuthenticatedDashboardRunnerRoute
+  '/messages/new': typeof AuthenticatedMessagesNewRoute
   '/profile/edit': typeof AuthenticatedProfileEditRoute
   '/settings/account': typeof AuthenticatedSettingsAccountRoute
   '/settings/admin': typeof AuthenticatedSettingsAdminRoute
@@ -436,6 +445,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/profiles': typeof AuthenticatedAdminProfilesRoute
   '/_authenticated/dashboard/investor': typeof AuthenticatedDashboardInvestorRoute
   '/_authenticated/dashboard/runner': typeof AuthenticatedDashboardRunnerRoute
+  '/_authenticated/messages/new': typeof AuthenticatedMessagesNewRoute
   '/_authenticated/profile/edit': typeof AuthenticatedProfileEditRoute
   '/_authenticated/settings/account': typeof AuthenticatedSettingsAccountRoute
   '/_authenticated/settings/admin': typeof AuthenticatedSettingsAdminRoute
@@ -486,6 +496,7 @@ export interface FileRouteTypes {
     | '/admin/profiles'
     | '/dashboard/investor'
     | '/dashboard/runner'
+    | '/messages/new'
     | '/profile/edit'
     | '/settings/account'
     | '/settings/admin'
@@ -531,6 +542,7 @@ export interface FileRouteTypes {
     | '/admin/profiles'
     | '/dashboard/investor'
     | '/dashboard/runner'
+    | '/messages/new'
     | '/profile/edit'
     | '/settings/account'
     | '/settings/admin'
@@ -580,6 +592,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/profiles'
     | '/_authenticated/dashboard/investor'
     | '/_authenticated/dashboard/runner'
+    | '/_authenticated/messages/new'
     | '/_authenticated/profile/edit'
     | '/_authenticated/settings/account'
     | '/_authenticated/settings/admin'
@@ -898,6 +911,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedProfileEditRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/messages/new': {
+      id: '/_authenticated/messages/new'
+      path: '/new'
+      fullPath: '/messages/new'
+      preLoaderRoute: typeof AuthenticatedMessagesNewRouteImport
+      parentRoute: typeof AuthenticatedMessagesRoute
+    }
     '/_authenticated/dashboard/runner': {
       id: '/_authenticated/dashboard/runner'
       path: '/dashboard/runner'
@@ -978,10 +998,12 @@ const AuthenticatedAdminRouteWithChildren =
   AuthenticatedAdminRoute._addFileChildren(AuthenticatedAdminRouteChildren)
 
 interface AuthenticatedMessagesRouteChildren {
+  AuthenticatedMessagesNewRoute: typeof AuthenticatedMessagesNewRoute
   AuthenticatedMessagesIndexRoute: typeof AuthenticatedMessagesIndexRoute
 }
 
 const AuthenticatedMessagesRouteChildren: AuthenticatedMessagesRouteChildren = {
+  AuthenticatedMessagesNewRoute: AuthenticatedMessagesNewRoute,
   AuthenticatedMessagesIndexRoute: AuthenticatedMessagesIndexRoute,
 }
 
