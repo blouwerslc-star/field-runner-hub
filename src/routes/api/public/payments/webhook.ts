@@ -14,7 +14,7 @@ function getSupabase() {
 }
 
 async function handleCheckoutCompleted(session: any) {
-  // Route by metadata.kind — verification payments bypass the task escrow flow.
+  // Route by metadata.kind; verification payments use the manual admin review flow.
   if (session.metadata?.kind === "background_check") {
     return handleBackgroundCheckPaid(session);
   }
