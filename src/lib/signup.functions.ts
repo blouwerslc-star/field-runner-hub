@@ -39,17 +39,12 @@ export const finalizeSignupProfile = createServerFn({ method: "POST" })
       phone: emptyToNull(data.phone),
       city: emptyToNull(data.city),
       state: emptyToNull(data.state),
-      ...(data.role === "runner"
-        ? {
-            service_radius: emptyToNull(data.service_radius),
-            transportation_available: data.transportation_available ?? null,
-            task_types: data.task_types,
-          }
-        : {
-            company_name: emptyToNull(data.company_name),
-            markets_served: emptyToNull(data.markets_served),
-            monthly_deal_volume: emptyToNull(data.monthly_deal_volume),
-          }),
+      service_radius: data.role === "runner" ? emptyToNull(data.service_radius) : null,
+      transportation_available: data.role === "runner" ? data.transportation_available ?? null : null,
+      task_types: data.role === "runner" ? data.task_types : [],
+      company_name: data.role === "investor" ? emptyToNull(data.company_name) : null,
+      markets_served: data.role === "investor" ? emptyToNull(data.markets_served) : null,
+      monthly_deal_volume: data.role === "investor" ? emptyToNull(data.monthly_deal_volume) : null,
     };
 
     const { error: profileError } = await context.supabase
