@@ -1,7 +1,9 @@
 import { useState, useId, cloneElement, isValidElement } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { finalizeSignupProfile } from "@/lib/signup.functions";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -28,6 +30,13 @@ type InvestorMeta = {
   company_name: string;
   markets_served: string;
   monthly_deal_volume: string;
+};
+
+type SignupDebug = {
+  authUserId: string;
+  email: string;
+  role: "runner" | "investor";
+  profileStatus: string;
 };
 
 function mapAuthError(code: string | undefined, message: string): string {
@@ -63,7 +72,8 @@ async function createAccount(opts: {
   phone: string;
   role: "runner" | "investor";
   extra: RunnerMeta | InvestorMeta;
-}): Promise<{ hasSession: boolean }> {
+  finalizeProfile: (payload: { data: Record<string, unknown> }) => Promise<{ profileStatus: string }>;
+}): Promise<{ hasSession: boolean; debug: SignupDebug }> {
   const { data, error } = await supabase.auth.signUp({
     email: opts.email,
     password: opts.password,
@@ -86,7 +96,30 @@ async function createAccount(opts: {
   if (!data.user) {
     throw new Error("Sign-up didn't return a user. Please try again.");
   }
-  return { hasSession: !!data.session };
+  let profileStatus = "Created by database trigger; sign in after email verification to confirm profile access.";
+  if (data.session) {
+    await supabase.auth.getSession();
+    const result = await opts.finalizeProfile({
+      data: {
+        userId: data.user.id,
+        email: data.user.email ?? opts.email,
+        full_name: opts.full_name,
+        phone: opts.phone,
+        role: opts.role,
+        ...opts.extra,
+      },
+    });
+    profileStatus = result.profileStatus;
+  }
+  return {
+    hasSession: !!data.session,
+    debug: {
+      authUserId: data.user.id,
+      email: data.user.email ?? opts.email,
+      role: opts.role,
+      profileStatus,
+    },
+  };
 }
 
 const RUNNER_TASK_TYPES = [
@@ -149,10 +182,12 @@ function SuccessCard({
   onReset,
   needsEmailVerification,
   email,
+  debug,
 }: {
   onReset: () => void;
   needsEmailVerification: boolean;
   email: string;
+  debug: SignupDebug | null;
 }) {
   return (
     <div className="text-center py-12 animate-fade-up">
@@ -176,6 +211,14 @@ function SuccessCard({
           <>Your account is set up. Redirecting you to your dashboard…</>
         )}
       </p>
+      {debug && (
+        <div className="mt-5 rounded-lg border border-border bg-muted/40 p-3 text-left text-xs text-muted-foreground">
+          <div><strong className="text-foreground">Auth user id:</strong> {debug.authUserId}</div>
+          <div><strong className="text-foreground">Email:</strong> {debug.email}</div>
+          <div><strong className="text-foreground">Selected role:</strong> {debug.role}</div>
+          <div><strong className="text-foreground">Profile insert:</strong> {debug.profileStatus}</div>
+        </div>
+      )}
       <Button variant="outline" className="mt-6" onClick={onReset}>
         Start over
       </Button>
