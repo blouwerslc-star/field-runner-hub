@@ -76,18 +76,30 @@ const RUNNER_TASK_TYPES = [
   "Document Delivery",
 ];
 
-function ServicesGrid({
-  options,
+const SERVICE_RADIUS_OPTIONS = [
+  "Up to 10 miles",
+  "Up to 25 miles",
+  "Up to 50 miles",
+  "50+ miles",
+];
+
+const DEAL_VOLUME_OPTIONS = [
+  "1–3 deals / month",
+  "4–10 deals / month",
+  "11–25 deals / month",
+  "25+ deals / month",
+];
+
+function TaskTypesGrid({
   selected,
   onToggle,
 }: {
-  options: string[];
   selected: string[];
   onToggle: (s: string) => void;
 }) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-      {options.map((s) => {
+      {RUNNER_TASK_TYPES.map((s) => {
         const active = selected.includes(s);
         return (
           <button
@@ -117,8 +129,7 @@ function SuccessCard({ onReset }: { onReset: () => void }) {
       </div>
       <h2 className="text-xl font-semibold mb-2">Application received</h2>
       <p className="text-muted-foreground max-w-md mx-auto">
-        Your application has been received. We&apos;ll contact you as REI Runner
-        launches in your market.
+        Your account is set up. We&apos;ll be in touch about your first tasks.
       </p>
       <Button variant="outline" className="mt-6" onClick={onReset}>
         Submit another
@@ -128,490 +139,82 @@ function SuccessCard({ onReset }: { onReset: () => void }) {
 }
 
 export function FieldRunnerForm() {
-  const submit = useServerFn(submitFieldRunner);
   const navigate = useNavigate();
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
-  const [step, setStep] = useState(0);
+  const [serviceRadius, setServiceRadius] = useState("");
+  const [transportation, setTransportation] = useState("");
+  const [taskTypes, setTaskTypes] = useState<string[]>([]);
   const [password, setPassword] = useState("");
-  const [services, setServices] = useState<string[]>([]);
-  const [availability, setAvailability] = useState("");
-  const [hasTransport, setHasTransport] = useState("");
-  const [hasPhone, setHasPhone] = useState("");
-  const [agreed, setAgreed] = useState(false);
-  const [hasLicense, setHasLicense] = useState("");
-  const [vehicleType, setVehicleType] = useState("");
-  const [travelRadius, setTravelRadius] = useState("");
-  const [hoursPerWeek, setHoursPerWeek] = useState("");
-  const [payout, setPayout] = useState("");
-  const [heardAbout, setHeardAbout] = useState("");
-  const [bgConsent, setBgConsent] = useState(false);
   const [reset, setReset] = useState(0);
 
   const toggle = (s: string) =>
-    setServices((prev) =>
-      prev.includes(s) ? prev.filter((x) => x !== s) : [...prev, s]
+    setTaskTypes((prev) =>
+      prev.includes(s) ? prev.filter((x) => x !== s) : [...prev, s],
     );
 
   const onReset = () => {
     setDone(false);
-    setStep(0);
-    setServices([]);
-    setAvailability("");
-    setHasTransport("");
-    setHasPhone("");
-    setAgreed(false);
-    setHasLicense("");
-    setVehicleType("");
-    setTravelRadius("");
-    setHoursPerWeek("");
-    setPayout("");
-    setHeardAbout("");
-    setBgConsent(false);
+    setServiceRadius("");
+    setTransportation("");
+    setTaskTypes([]);
+    setPassword("");
     setReset((n) => n + 1);
   };
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const f = new FormData(e.currentTarget);
-    const payload = {
-      full_name: String(f.get("full_name") || ""),
-      email: String(f.get("email") || ""),
-      phone: String(f.get("phone") || ""),
-      city: String(f.get("city") || ""),
-      state: String(f.get("state") || ""),
-      street_address: String(f.get("street_address") || ""),
-      zip_code: String(f.get("zip_code") || ""),
-      date_of_birth: String(f.get("date_of_birth") || ""),
-      has_transportation: hasTransport,
-      has_drivers_license: hasLicense,
-      vehicle_type: vehicleType,
-      travel_radius_miles: travelRadius,
-      has_smartphone: hasPhone,
-      services,
-      availability,
-      hours_per_week: hoursPerWeek,
-      preferred_payout: payout,
-      background_check_consent: bgConsent,
-      heard_about: heardAbout,
-      referral_code: String(f.get("referral_code") || ""),
-      social_links: String(f.get("social_links") || ""),
-      experience: String(f.get("experience") || ""),
-      sample_url: String(f.get("sample_url") || ""),
-      disclaimer_agreed: agreed,
-      website: String(f.get("website") || ""),
-    };
-    if (!agreed) {
-      toast.error("Please agree to the disclaimer.");
+    const full_name = String(f.get("full_name") || "").trim();
+    const email = String(f.get("email") || "").trim();
+    const phone = String(f.get("phone") || "").trim();
+    const city = String(f.get("city") || "").trim();
+    const state = String(f.get("state") || "").trim();
+
+    if (!full_name || !email || !phone || !city || !state) {
+      toast.error("Please complete all required fields.");
       return;
     }
-    if (!bgConsent) {
-      toast.error("Please consent to a background check to continue.");
+    if (!serviceRadius || !transportation) {
+      toast.error("Please complete service radius and transportation.");
       return;
     }
-    if (!services.length) {
-      toast.error("Pick at least one service you can perform.");
-      return;
-    }
-    if (
-      !availability || !hasTransport || !hasPhone || !hasLicense ||
-      !vehicleType || !travelRadius || !hoursPerWeek || !payout || !heardAbout
-    ) {
-      toast.error("Please complete all dropdowns.");
+    if (taskTypes.length === 0) {
+      toast.error("Pick at least one task type you can perform.");
       return;
     }
     if (password.length < 8) {
       toast.error("Please choose a password of at least 8 characters.");
       return;
     }
+
     setSubmitting(true);
     try {
       const { hasSession } = await createAccount({
-        email: payload.email,
+        email,
         password,
-        full_name: payload.full_name,
-        phone: payload.phone,
+        full_name,
+        phone,
         role: "runner",
+        extra: {
+          city,
+          state,
+          service_radius: serviceRadius,
+          transportation_available: transportation === "yes",
+          task_types: taskTypes,
+        },
       });
-      await submit({ data: payload as never });
       setDone(true);
       if (hasSession) {
-        toast.success("Application submitted. Welcome aboard!");
+        toast.success("Welcome aboard!");
         navigate({ to: "/dashboard/runner" });
       } else {
-        toast.success("Application received. Check your email to verify your account.");
+        toast.success("Account created. Check your email to verify, then sign in.");
         navigate({ to: "/login", search: { redirect: "/dashboard/runner" } });
       }
     } catch (err) {
       console.error(err);
-      toast.error(err instanceof Error ? err.message : "Submission failed. Please review your info and try again.");
-    } finally {
-      setSubmitting(false);
-    }
-  }
-
-  if (done) return <SuccessCard onReset={onReset} />;
-
-  const STEPS = ["About you", "Logistics", "Work prefs", "Experience"];
-  const progressPct = ((step + 1) / STEPS.length) * 100;
-
-  function validateStep(): string | null {
-    if (step === 0) {
-      const form = document.querySelector<HTMLFormElement>("form[data-runner-form]");
-      if (!form) return null;
-      const required = ["full_name", "email", "phone", "date_of_birth", "street_address", "city", "state", "zip_code"];
-      for (const name of required) {
-        const el = form.elements.namedItem(name) as HTMLInputElement | null;
-        if (!el || !el.value.trim()) return "Please complete all fields in this step.";
-      }
-      if (password.length < 8) return "Please choose a password of at least 8 characters.";
-    }
-    if (step === 1) {
-      if (!hasTransport || !hasLicense || !vehicleType || !travelRadius || !hasPhone)
-        return "Please complete all logistics questions.";
-    }
-    if (step === 2) {
-      if (!availability || !hoursPerWeek || !payout || !heardAbout)
-        return "Please complete all work preference questions.";
-      if (!services.length) return "Pick at least one service you can perform.";
-    }
-    return null;
-  }
-
-  function goNext() {
-    const err = validateStep();
-    if (err) {
-      toast.error(err);
-      return;
-    }
-    setStep((s) => Math.min(s + 1, STEPS.length - 1));
-    if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "smooth" });
-  }
-
-  return (
-    <form key={reset} data-runner-form onSubmit={handleSubmit} className="space-y-6">
-      {/* honeypot */}
-      <input
-        type="text"
-        name="website"
-        tabIndex={-1}
-        autoComplete="off"
-        className="hidden"
-        aria-hidden="true"
-      />
-
-      {/* Progress */}
-      <div className="space-y-3">
-        <div className="flex items-center justify-between text-xs">
-          <span className="font-semibold text-foreground">
-            Step {step + 1} of {STEPS.length}
-          </span>
-          <span className="text-muted-foreground">{STEPS[step]}</span>
-        </div>
-        <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden">
-          <div
-            className="h-full bg-gradient-primary transition-all duration-500 ease-out"
-            style={{ width: `${progressPct}%` }}
-          />
-        </div>
-        <div className="hidden sm:flex items-center justify-between gap-2">
-          {STEPS.map((label, i) => (
-            <div
-              key={label}
-              className={`flex-1 text-center text-[11px] uppercase tracking-wider transition ${
-                i <= step ? "text-primary font-semibold" : "text-muted-foreground/60"
-              }`}
-            >
-              {label}
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Step 1: About you */}
-      <div className={step === 0 ? "grid sm:grid-cols-2 gap-4 animate-fade-up" : "hidden"}>
-        <Field label="Full Name"><Input name="full_name" required maxLength={100} /></Field>
-        <Field label="Email Address"><Input name="email" type="email" required maxLength={200} /></Field>
-        <Field label="Phone Number"><Input name="phone" required maxLength={30} /></Field>
-        <Field label="Date of Birth"><Input name="date_of_birth" type="date" required /></Field>
-        <Field label="Street Address"><Input name="street_address" required maxLength={200} /></Field>
-        <Field label="City"><Input name="city" required maxLength={100} /></Field>
-        <Field label="State"><Input name="state" required maxLength={50} /></Field>
-        <Field label="Zip Code"><Input name="zip_code" required maxLength={20} /></Field>
-        <Field label="Choose a password">
-          <Input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            minLength={8}
-            maxLength={100}
-            autoComplete="new-password"
-            placeholder="At least 8 characters"
-          />
-        </Field>
-      </div>
-
-      {/* Step 2: Logistics */}
-      <div className={step === 1 ? "grid sm:grid-cols-2 gap-4 animate-fade-up" : "hidden"}>
-        <Field label="Reliable transportation?">
-          <Select value={hasTransport} onValueChange={setHasTransport}>
-            <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="yes">Yes</SelectItem>
-              <SelectItem value="no">No</SelectItem>
-            </SelectContent>
-          </Select>
-        </Field>
-        <Field label="Valid driver's license?">
-          <Select value={hasLicense} onValueChange={setHasLicense}>
-            <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="yes">Yes</SelectItem>
-              <SelectItem value="no">No</SelectItem>
-            </SelectContent>
-          </Select>
-        </Field>
-        <Field label="Vehicle type">
-          <Select value={vehicleType} onValueChange={setVehicleType}>
-            <SelectTrigger><SelectValue placeholder="Select vehicle" /></SelectTrigger>
-            <SelectContent>
-              {["Car","SUV","Truck","Van","Motorcycle","Bicycle","None"].map((o) => (
-                <SelectItem key={o} value={o}>{o}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </Field>
-        <Field label="Willing to travel">
-          <Select value={travelRadius} onValueChange={setTravelRadius}>
-            <SelectTrigger><SelectValue placeholder="Travel radius" /></SelectTrigger>
-            <SelectContent>
-              {["Up to 10 miles","Up to 25 miles","Up to 50 miles","50+ miles"].map((o) => (
-                <SelectItem key={o} value={o}>{o}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </Field>
-        <Field label="Smartphone with quality camera?">
-          <Select value={hasPhone} onValueChange={setHasPhone}>
-            <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="yes">Yes</SelectItem>
-              <SelectItem value="no">No</SelectItem>
-            </SelectContent>
-          </Select>
-        </Field>
-      </div>
-
-      {/* Step 3: Work preferences */}
-      <div className={step === 2 ? "space-y-5 animate-fade-up" : "hidden"}>
-      <div className="grid sm:grid-cols-2 gap-4">
-        <Field label="Availability">
-          <Select value={availability} onValueChange={setAvailability}>
-            <SelectTrigger><SelectValue placeholder="Select availability" /></SelectTrigger>
-            <SelectContent>
-              {["Weekdays", "Weekends", "Evenings", "Same-day tasks", "Flexible"].map((o) => (
-                <SelectItem key={o} value={o}>{o}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </Field>
-        <Field label="Hours per week">
-          <Select value={hoursPerWeek} onValueChange={setHoursPerWeek}>
-            <SelectTrigger><SelectValue placeholder="Select hours" /></SelectTrigger>
-            <SelectContent>
-              {["Under 5","5–10","10–20","20–40","40+"].map((o) => (
-                <SelectItem key={o} value={o}>{o}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </Field>
-        <Field label="Preferred payout method">
-          <Select value={payout} onValueChange={setPayout}>
-            <SelectTrigger><SelectValue placeholder="How do you want to be paid?" /></SelectTrigger>
-            <SelectContent>
-              {["Direct Deposit","PayPal","Venmo","Cash App","Zelle","Check"].map((o) => (
-                <SelectItem key={o} value={o}>{o}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </Field>
-        <Field label="How did you hear about us?">
-          <Select value={heardAbout} onValueChange={setHeardAbout}>
-            <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
-            <SelectContent>
-              {["Google search","Facebook","Instagram","TikTok","YouTube","Friend / Referral","Real estate group","Other"].map((o) => (
-                <SelectItem key={o} value={o}>{o}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </Field>
-      </div>
-        <Field label="Services you can perform">
-          <ServicesGrid options={RUNNER_SERVICES} selected={services} onToggle={toggle} />
-        </Field>
-      </div>
-
-      {/* Step 4: Experience & consent */}
-      <div className={step === 3 ? "space-y-5 animate-fade-up" : "hidden"}>
-      <Field label="Tell us about your experience">
-        <Textarea name="experience" rows={4} maxLength={2000} placeholder="Real estate, photography, gig work, etc." />
-      </Field>
-
-      <Field label="Sample photos or videos (URL)">
-        <Input name="sample_url" placeholder="Link to Google Drive, Dropbox, portfolio…" maxLength={500} />
-      </Field>
-
-      <div className="grid sm:grid-cols-2 gap-4">
-        <Field label="Referral code (optional)">
-          <Input name="referral_code" placeholder="Who sent you?" maxLength={50} />
-        </Field>
-        <Field label="Social profile link (optional)">
-          <Input name="social_links" placeholder="LinkedIn, Instagram, etc." maxLength={500} />
-        </Field>
-      </div>
-
-      <label className="flex items-start gap-3 text-sm text-muted-foreground">
-        <Checkbox checked={bgConsent} onCheckedChange={(v) => setBgConsent(v === true)} className="mt-0.5" />
-        <span>
-          I consent to a basic background check if selected for the REI Runner field
-          runner network.
-        </span>
-      </label>
-
-      <label className="flex items-start gap-3 text-sm text-muted-foreground">
-        <Checkbox checked={agreed} onCheckedChange={(v) => setAgreed(v === true)} className="mt-0.5" />
-        <span>
-          I understand REI Runner only allows non-licensed support tasks. I will
-          not negotiate contracts, provide pricing advice, represent buyers or
-          sellers, perform inspections, or conduct licensed real estate activity.
-        </span>
-      </label>
-      </div>
-
-      {/* Sticky nav */}
-      <div className="sticky bottom-0 -mx-6 md:-mx-8 px-6 md:px-8 pt-4 pb-4 bg-gradient-to-t from-card via-card/95 to-transparent border-t border-border/40 flex items-center gap-3">
-        {step > 0 ? (
-          <Button
-            type="button"
-            variant="outline"
-            size="lg"
-            onClick={() => setStep((s) => Math.max(0, s - 1))}
-            className="h-12"
-          >
-            <ChevronLeft className="size-4 mr-1" /> Back
-          </Button>
-        ) : (
-          <div className="text-xs text-muted-foreground hidden sm:block">
-            Takes ~3 minutes
-          </div>
-        )}
-        <div className="flex-1" />
-        {step < STEPS.length - 1 ? (
-          <Button
-            type="button"
-            size="lg"
-            onClick={goNext}
-            className="h-12 min-w-[140px] bg-gradient-primary shadow-glow"
-          >
-            Continue <ChevronRight className="size-4 ml-1" />
-          </Button>
-        ) : (
-          <Button
-            type="submit"
-            size="lg"
-            disabled={submitting}
-            className="h-12 min-w-[180px] bg-gradient-primary shadow-glow"
-          >
-            {submitting ? <><Loader2 className="size-4 mr-2 animate-spin" /> Submitting…</> : "Submit Application"}
-          </Button>
-        )}
-      </div>
-    </form>
-  );
-}
-
-export function ProForm() {
-  const submit = useServerFn(submitPro);
-  const navigate = useNavigate();
-  const [submitting, setSubmitting] = useState(false);
-  const [done, setDone] = useState(false);
-  const [services, setServices] = useState<string[]>([]);
-  const [role, setRole] = useState("");
-  const [frequency, setFrequency] = useState("");
-  const [urgency, setUrgency] = useState("");
-  const [password, setPassword] = useState("");
-  const [reset, setReset] = useState(0);
-
-  const toggle = (s: string) =>
-    setServices((prev) =>
-      prev.includes(s) ? prev.filter((x) => x !== s) : [...prev, s]
-    );
-
-  const onReset = () => {
-    setDone(false);
-    setServices([]);
-    setRole("");
-    setFrequency("");
-    setUrgency("");
-    setReset((n) => n + 1);
-  };
-
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    const f = new FormData(e.currentTarget);
-    if (!services.length) {
-      toast.error("Pick at least one service you need.");
-      return;
-    }
-    if (!role || !frequency || !urgency) {
-      toast.error("Please complete all dropdowns.");
-      return;
-    }
-    if (password.length < 8) {
-      toast.error("Please choose a password of at least 8 characters.");
-      return;
-    }
-    setSubmitting(true);
-    try {
-      const email = String(f.get("email") || "");
-      const fullName = String(f.get("full_name") || "");
-      const phone = String(f.get("phone") || "");
-      const { hasSession } = await createAccount({
-        email,
-        password,
-        full_name: fullName,
-        phone,
-        role: "investor",
-      });
-      await submit({
-        data: {
-          full_name: fullName,
-          email,
-          phone,
-          company_name: String(f.get("company_name") || ""),
-          role,
-          market_city: String(f.get("market_city") || ""),
-          market_state: String(f.get("market_state") || ""),
-          services_needed: services,
-          frequency,
-          budget: String(f.get("budget") || ""),
-          urgency,
-          details: String(f.get("details") || ""),
-          website: String(f.get("website") || ""),
-        } as never,
-      });
-      setDone(true);
-      if (hasSession) {
-        toast.success("Application submitted. Welcome aboard!");
-        navigate({ to: "/dashboard/investor" });
-      } else {
-        toast.success("Application received. Check your email to verify your account.");
-        navigate({ to: "/login", search: { redirect: "/dashboard/investor" } });
-      }
-    } catch (err) {
-      console.error(err);
-      toast.error(err instanceof Error ? err.message : "Submission failed. Please review your info and try again.");
+      toast.error(err instanceof Error ? err.message : "Submission failed.");
     } finally {
       setSubmitting(false);
     }
@@ -621,53 +224,35 @@ export function ProForm() {
 
   return (
     <form key={reset} onSubmit={handleSubmit} className="space-y-5">
-      <input type="text" name="website" tabIndex={-1} autoComplete="off" className="hidden" aria-hidden="true" />
       <div className="grid sm:grid-cols-2 gap-4">
         <Field label="Full Name"><Input name="full_name" required maxLength={100} /></Field>
-        <Field label="Email Address"><Input name="email" type="email" required maxLength={200} /></Field>
-        <Field label="Phone Number"><Input name="phone" required maxLength={30} /></Field>
-        <Field label="Company Name"><Input name="company_name" maxLength={150} /></Field>
-        <Field label="Role">
-          <Select value={role} onValueChange={setRole}>
-            <SelectTrigger><SelectValue placeholder="Select role" /></SelectTrigger>
+        <Field label="Email"><Input name="email" type="email" required maxLength={200} /></Field>
+        <Field label="Phone"><Input name="phone" required maxLength={30} /></Field>
+        <Field label="City"><Input name="city" required maxLength={100} /></Field>
+        <Field label="State"><Input name="state" required maxLength={50} /></Field>
+        <Field label="Service Radius">
+          <Select value={serviceRadius} onValueChange={setServiceRadius}>
+            <SelectTrigger><SelectValue placeholder="Select radius" /></SelectTrigger>
             <SelectContent>
-              {["Wholesaler","Investor","Realtor","Property Manager","Landlord","Lender","Contractor","Other"].map((o) => (
+              {SERVICE_RADIUS_OPTIONS.map((o) => (
                 <SelectItem key={o} value={o}>{o}</SelectItem>
               ))}
             </SelectContent>
           </Select>
         </Field>
-        <Field label="Primary Market City"><Input name="market_city" required maxLength={100} /></Field>
-        <Field label="State"><Input name="market_state" required maxLength={50} /></Field>
-        <Field label="Frequency">
-          <Select value={frequency} onValueChange={setFrequency}>
-            <SelectTrigger><SelectValue placeholder="How often?" /></SelectTrigger>
+        <Field label="Transportation Available">
+          <Select value={transportation} onValueChange={setTransportation}>
+            <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
             <SelectContent>
-              {["One-time","Weekly","Monthly","Multiple times per month","Daily"].map((o) => (
-                <SelectItem key={o} value={o}>{o}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </Field>
-        <Field label="Average budget per task"><Input name="budget" placeholder="$" maxLength={50} /></Field>
-        <Field label="Urgency">
-          <Select value={urgency} onValueChange={setUrgency}>
-            <SelectTrigger><SelectValue placeholder="When do you need help?" /></SelectTrigger>
-            <SelectContent>
-              {["Immediately","This week","This month","Future use"].map((o) => (
-                <SelectItem key={o} value={o}>{o}</SelectItem>
-              ))}
+              <SelectItem value="yes">Yes</SelectItem>
+              <SelectItem value="no">No</SelectItem>
             </SelectContent>
           </Select>
         </Field>
       </div>
 
-      <Field label="Services needed">
-        <ServicesGrid options={PRO_SERVICES} selected={services} onToggle={toggle} />
-      </Field>
-
-      <Field label="Tell us what kind of help you need">
-        <Textarea name="details" rows={4} maxLength={2000} placeholder="A few sentences about your typical deals…" />
+      <Field label="Task Types (select all you can perform)">
+        <TaskTypesGrid selected={taskTypes} onToggle={toggle} />
       </Field>
 
       <Field label="Choose a password">
@@ -684,7 +269,118 @@ export function ProForm() {
       </Field>
 
       <Button type="submit" size="lg" disabled={submitting} className="w-full bg-gradient-primary shadow-glow">
-        {submitting ? <><Loader2 className="size-4 mr-2 animate-spin" /> Submitting…</> : "Join Early Access"}
+        {submitting ? <><Loader2 className="size-4 mr-2 animate-spin" /> Creating account…</> : "Create Runner Account"}
+      </Button>
+    </form>
+  );
+}
+
+export function ProForm() {
+  const navigate = useNavigate();
+  const [submitting, setSubmitting] = useState(false);
+  const [done, setDone] = useState(false);
+  const [dealVolume, setDealVolume] = useState("");
+  const [password, setPassword] = useState("");
+  const [reset, setReset] = useState(0);
+
+  const onReset = () => {
+    setDone(false);
+    setDealVolume("");
+    setPassword("");
+    setReset((n) => n + 1);
+  };
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const f = new FormData(e.currentTarget);
+    const full_name = String(f.get("full_name") || "").trim();
+    const email = String(f.get("email") || "").trim();
+    const phone = String(f.get("phone") || "").trim();
+    const company_name = String(f.get("company_name") || "").trim();
+    const markets_served = String(f.get("markets_served") || "").trim();
+
+    if (!full_name || !email || !phone || !markets_served) {
+      toast.error("Please complete all required fields.");
+      return;
+    }
+    if (!dealVolume) {
+      toast.error("Please select your monthly deal volume.");
+      return;
+    }
+    if (password.length < 8) {
+      toast.error("Please choose a password of at least 8 characters.");
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      const { hasSession } = await createAccount({
+        email,
+        password,
+        full_name,
+        phone,
+        role: "investor",
+        extra: {
+          company_name,
+          markets_served,
+          monthly_deal_volume: dealVolume,
+        },
+      });
+      setDone(true);
+      if (hasSession) {
+        toast.success("Welcome aboard!");
+        navigate({ to: "/dashboard/investor" });
+      } else {
+        toast.success("Account created. Check your email to verify, then sign in.");
+        navigate({ to: "/login", search: { redirect: "/dashboard/investor" } });
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error(err instanceof Error ? err.message : "Submission failed.");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  if (done) return <SuccessCard onReset={onReset} />;
+
+  return (
+    <form key={reset} onSubmit={handleSubmit} className="space-y-5">
+      <div className="grid sm:grid-cols-2 gap-4">
+        <Field label="Full Name"><Input name="full_name" required maxLength={100} /></Field>
+        <Field label="Email"><Input name="email" type="email" required maxLength={200} /></Field>
+        <Field label="Phone"><Input name="phone" required maxLength={30} /></Field>
+        <Field label="Company Name"><Input name="company_name" maxLength={150} /></Field>
+        <Field label="Markets Served">
+          <Input name="markets_served" required maxLength={300} placeholder="e.g. Atlanta GA, Charlotte NC" />
+        </Field>
+        <Field label="Monthly Deal Volume">
+          <Select value={dealVolume} onValueChange={setDealVolume}>
+            <SelectTrigger><SelectValue placeholder="Select volume" /></SelectTrigger>
+            <SelectContent>
+              {DEAL_VOLUME_OPTIONS.map((o) => (
+                <SelectItem key={o} value={o}>{o}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </Field>
+      </div>
+
+      <Field label="Choose a password">
+        <Input
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+          minLength={8}
+          maxLength={100}
+          autoComplete="new-password"
+          placeholder="At least 8 characters — this creates your account"
+        />
+      </Field>
+
+      <Button type="submit" size="lg" disabled={submitting} className="w-full bg-gradient-primary shadow-glow">
+        {submitting ? <><Loader2 className="size-4 mr-2 animate-spin" /> Creating account…</> : "Create Investor Account"}
       </Button>
     </form>
   );
@@ -708,7 +404,7 @@ export function ApplicationForms({ defaultTab = "runner" }: { defaultTab?: "runn
     <Tabs defaultValue={defaultTab} className="w-full">
       <TabsList className="grid w-full grid-cols-2 h-12 bg-muted/40">
         <TabsTrigger value="runner" className="h-10">Field Runner</TabsTrigger>
-        <TabsTrigger value="pro" className="h-10">Real Estate Pro</TabsTrigger>
+        <TabsTrigger value="pro" className="h-10">Investor</TabsTrigger>
       </TabsList>
       <div className="mt-6 rounded-2xl border border-border bg-card/60 backdrop-blur p-6 md:p-8 shadow-card">
         <TabsContent value="runner" className="mt-0"><FieldRunnerForm /></TabsContent>
