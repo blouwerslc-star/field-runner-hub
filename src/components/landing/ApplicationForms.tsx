@@ -674,6 +674,19 @@ export function ProForm() {
         <Textarea name="details" rows={4} maxLength={2000} placeholder="A few sentences about your typical deals…" />
       </Field>
 
+      <Field label="Choose a password">
+        <Input
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+          minLength={8}
+          maxLength={100}
+          autoComplete="new-password"
+          placeholder="At least 8 characters — this creates your account"
+        />
+      </Field>
+
       <Button type="submit" size="lg" disabled={submitting} className="w-full bg-gradient-primary shadow-glow">
         {submitting ? <><Loader2 className="size-4 mr-2 animate-spin" /> Submitting…</> : "Join Early Access"}
       </Button>
