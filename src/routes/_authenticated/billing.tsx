@@ -199,6 +199,45 @@ function Empty({ children }: { children: React.ReactNode }) {
   return <div className="rounded-2xl border border-dashed border-border bg-card/30 p-10 text-center text-sm text-muted-foreground">{children}</div>;
 }
 
+function ConnectCard({
+  status, loading, onStart, onOpenDashboard,
+}: { status: any; loading: boolean; onStart: () => void | Promise<void>; onOpenDashboard: () => void | Promise<void> }) {
+  const connected = !!status?.connected;
+  const payoutsOn = !!status?.payouts_enabled;
+  const ready = connected && payoutsOn;
+  const needsMore = connected && !payoutsOn;
+  return (
+    <div className="rounded-2xl border border-border bg-gradient-to-br from-primary/10 to-card/40 p-5 mb-3">
+      <div className="flex items-start gap-4 flex-wrap">
+        <div className="flex-1 min-w-[240px]">
+          <div className="flex items-center gap-2">
+            <h3 className="font-semibold">Direct deposit via Stripe</h3>
+            {ready && <Badge variant="outline" className="text-xs gap-1"><CheckCircle2 className="size-3" /> Active</Badge>}
+            {needsMore && <Badge variant="outline" className="text-xs">Action needed</Badge>}
+          </div>
+          <p className="text-sm text-muted-foreground mt-1">
+            {loading ? "Checking your account…" :
+              ready ? "You're set up to receive instant ACH payouts when tasks are approved." :
+              needsMore ? "Finish a few details with Stripe to unlock payouts." :
+              "Connect your bank with Stripe Express for fast, secure payouts."}
+          </p>
+        </div>
+        <div className="flex gap-2">
+          {ready ? (
+            <Button variant="outline" onClick={onOpenDashboard}>
+              <ExternalLink className="size-4 mr-2" /> Stripe dashboard
+            </Button>
+          ) : (
+            <Button onClick={onStart}>
+              {needsMore ? "Complete setup" : "Connect with Stripe"}
+            </Button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function AddMethodDialog({ onSubmit }: { onSubmit: (v: any) => Promise<void> }) {
   const [open, setOpen] = useState(false);
   const [method_type, setType] = useState<"bank_account" | "debit_card" | "paypal" | "venmo" | "cashapp" | "other">("bank_account");
