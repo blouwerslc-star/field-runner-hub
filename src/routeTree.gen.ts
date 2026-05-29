@@ -65,6 +65,7 @@ import { Route as AuthenticatedDashboardInvestorRouteImport } from './routes/_au
 import { Route as AuthenticatedAdminRunnerApprovalsRouteImport } from './routes/_authenticated/admin.runner-approvals'
 import { Route as AuthenticatedAdminProfilesRouteImport } from './routes/_authenticated/admin.profiles'
 import { Route as AuthenticatedAdminModerationRouteImport } from './routes/_authenticated/admin.moderation'
+import { Route as AuthenticatedAdminMarketplaceHealthRouteImport } from './routes/_authenticated/admin.marketplace-health'
 import { Route as AuthenticatedAdminDispatchRouteImport } from './routes/_authenticated/admin.dispatch'
 import { Route as AuthenticatedAdminAnalyticsRouteImport } from './routes/_authenticated/admin.analytics'
 import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
@@ -379,6 +380,12 @@ const AuthenticatedAdminModerationRoute =
     path: '/moderation',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminMarketplaceHealthRoute =
+  AuthenticatedAdminMarketplaceHealthRouteImport.update({
+    id: '/marketplace-health',
+    path: '/marketplace-health',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminDispatchRoute =
   AuthenticatedAdminDispatchRouteImport.update({
     id: '/dispatch',
@@ -461,6 +468,7 @@ export interface FileRoutesByFullPath {
   '/tasks/$taskId': typeof TasksTaskIdRoute
   '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
   '/admin/dispatch': typeof AuthenticatedAdminDispatchRoute
+  '/admin/marketplace-health': typeof AuthenticatedAdminMarketplaceHealthRoute
   '/admin/moderation': typeof AuthenticatedAdminModerationRoute
   '/admin/profiles': typeof AuthenticatedAdminProfilesRoute
   '/admin/runner-approvals': typeof AuthenticatedAdminRunnerApprovalsRoute
@@ -523,6 +531,7 @@ export interface FileRoutesByTo {
   '/tasks/$taskId': typeof TasksTaskIdRoute
   '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
   '/admin/dispatch': typeof AuthenticatedAdminDispatchRoute
+  '/admin/marketplace-health': typeof AuthenticatedAdminMarketplaceHealthRoute
   '/admin/moderation': typeof AuthenticatedAdminModerationRoute
   '/admin/profiles': typeof AuthenticatedAdminProfilesRoute
   '/admin/runner-approvals': typeof AuthenticatedAdminRunnerApprovalsRoute
@@ -590,6 +599,7 @@ export interface FileRoutesById {
   '/tasks/$taskId': typeof TasksTaskIdRoute
   '/_authenticated/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
   '/_authenticated/admin/dispatch': typeof AuthenticatedAdminDispatchRoute
+  '/_authenticated/admin/marketplace-health': typeof AuthenticatedAdminMarketplaceHealthRoute
   '/_authenticated/admin/moderation': typeof AuthenticatedAdminModerationRoute
   '/_authenticated/admin/profiles': typeof AuthenticatedAdminProfilesRoute
   '/_authenticated/admin/runner-approvals': typeof AuthenticatedAdminRunnerApprovalsRoute
@@ -657,6 +667,7 @@ export interface FileRouteTypes {
     | '/tasks/$taskId'
     | '/admin/analytics'
     | '/admin/dispatch'
+    | '/admin/marketplace-health'
     | '/admin/moderation'
     | '/admin/profiles'
     | '/admin/runner-approvals'
@@ -719,6 +730,7 @@ export interface FileRouteTypes {
     | '/tasks/$taskId'
     | '/admin/analytics'
     | '/admin/dispatch'
+    | '/admin/marketplace-health'
     | '/admin/moderation'
     | '/admin/profiles'
     | '/admin/runner-approvals'
@@ -785,6 +797,7 @@ export interface FileRouteTypes {
     | '/tasks/$taskId'
     | '/_authenticated/admin/analytics'
     | '/_authenticated/admin/dispatch'
+    | '/_authenticated/admin/marketplace-health'
     | '/_authenticated/admin/moderation'
     | '/_authenticated/admin/profiles'
     | '/_authenticated/admin/runner-approvals'
@@ -1238,6 +1251,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminModerationRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/marketplace-health': {
+      id: '/_authenticated/admin/marketplace-health'
+      path: '/marketplace-health'
+      fullPath: '/admin/marketplace-health'
+      preLoaderRoute: typeof AuthenticatedAdminMarketplaceHealthRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/dispatch': {
       id: '/_authenticated/admin/dispatch'
       path: '/dispatch'
@@ -1300,6 +1320,7 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminAnalyticsRoute: typeof AuthenticatedAdminAnalyticsRoute
   AuthenticatedAdminDispatchRoute: typeof AuthenticatedAdminDispatchRoute
+  AuthenticatedAdminMarketplaceHealthRoute: typeof AuthenticatedAdminMarketplaceHealthRoute
   AuthenticatedAdminModerationRoute: typeof AuthenticatedAdminModerationRoute
   AuthenticatedAdminProfilesRoute: typeof AuthenticatedAdminProfilesRoute
   AuthenticatedAdminRunnerApprovalsRoute: typeof AuthenticatedAdminRunnerApprovalsRoute
@@ -1309,6 +1330,8 @@ interface AuthenticatedAdminRouteChildren {
 const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminAnalyticsRoute: AuthenticatedAdminAnalyticsRoute,
   AuthenticatedAdminDispatchRoute: AuthenticatedAdminDispatchRoute,
+  AuthenticatedAdminMarketplaceHealthRoute:
+    AuthenticatedAdminMarketplaceHealthRoute,
   AuthenticatedAdminModerationRoute: AuthenticatedAdminModerationRoute,
   AuthenticatedAdminProfilesRoute: AuthenticatedAdminProfilesRoute,
   AuthenticatedAdminRunnerApprovalsRoute:
