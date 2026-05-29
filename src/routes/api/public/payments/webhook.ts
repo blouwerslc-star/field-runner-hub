@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { createClient } from "@supabase/supabase-js";
 import { verifyWebhook, type StripeEnv } from "@/lib/stripe.server";
+import { createCandidate, createInvitation } from "@/lib/checkr.server";
 
 let _supabase: ReturnType<typeof createClient> | null = null;
 function getSupabase() {
@@ -14,6 +15,11 @@ function getSupabase() {
 }
 
 async function handleCheckoutCompleted(session: any) {
+  // Route by metadata.kind — verification payments bypass the task escrow flow.
+  if (session.metadata?.kind === "background_check") {
+    return handleBackgroundCheckPaid(session);
+  }
+
   const taskId = session.metadata?.task_id;
   const investorId = session.metadata?.investor_id;
   const payoutCents = Number(session.metadata?.payout_cents ?? 0);
@@ -55,6 +61,63 @@ async function handleCheckoutCompleted(session: any) {
     .from("tasks")
     .update({ funded: true, funding_payment_id: paymentId })
     .eq("id", taskId);
+}
+
+async function handleBackgroundCheckPaid(session: any) {
+  const userId = session.metadata?.user_id;
+  const email = session.metadata?.runner_email || session.customer_details?.email;
+  const fullName = session.metadata?.runner_name || session.customer_details?.name;
+  if (!userId || !email) {
+    console.error("background_check session missing user_id or email", session.id);
+    return;
+  }
+  const supabase = getSupabase() as any;
+
+  // Idempotency: skip if we already invited this candidate
+  const { data: existing } = await supabase
+    .from("profiles")
+    .select("checkr_candidate_id, checkr_invitation_url")
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  let candidateId = (existing as any)?.checkr_candidate_id as string | undefined;
+  let invitationUrl = (existing as any)?.checkr_invitation_url as string | undefined;
+
+  try {
+    if (!candidateId) {
+      const candidate = await createCandidate({ email, fullName });
+      candidateId = candidate.id;
+    }
+    if (!invitationUrl) {
+      const invite = await createInvitation(candidateId);
+      invitationUrl = invite.invitation_url;
+    }
+  } catch (e) {
+    console.error("Checkr invitation failed", e);
+    // Still record payment so we can retry from admin
+  }
+
+  await supabase
+    .from("profiles")
+    .update({
+      background_check_paid_at: new Date().toISOString(),
+      checkr_candidate_id: candidateId ?? null,
+      checkr_invitation_url: invitationUrl ?? null,
+      checkr_status: invitationUrl ? "invitation_sent" : "payment_received",
+      verification_status: "pending_review",
+      verification_requested_at: new Date().toISOString(),
+    })
+    .eq("user_id", userId);
+
+  await supabase.from("notifications").insert({
+    user_id: userId,
+    type: "background_check_invite",
+    title: invitationUrl ? "Complete your background check" : "Background check payment received",
+    body: invitationUrl
+      ? "Click to finish your Checkr background check."
+      : "We received your payment. We'll email you a Checkr link shortly.",
+    link: "/profile/verification",
+  });
 }
 
 export const Route = createFileRoute("/api/public/payments/webhook")({
