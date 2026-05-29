@@ -342,6 +342,18 @@ export function FieldRunnerForm() {
         <Field label="City"><Input name="city" required maxLength={100} /></Field>
         <Field label="State"><Input name="state" required maxLength={50} /></Field>
         <Field label="Zip Code"><Input name="zip_code" required maxLength={20} /></Field>
+        <Field label="Choose a password">
+          <Input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            minLength={8}
+            maxLength={100}
+            autoComplete="new-password"
+            placeholder="At least 8 characters"
+          />
+        </Field>
       </div>
 
       {/* Step 2: Logistics */}
