@@ -59,6 +59,7 @@ import { Route as AuthenticatedMessagesNewRouteImport } from './routes/_authenti
 import { Route as AuthenticatedMessagesConversationIdRouteImport } from './routes/_authenticated/messages.$conversationId'
 import { Route as AuthenticatedDashboardRunnerRouteImport } from './routes/_authenticated/dashboard.runner'
 import { Route as AuthenticatedDashboardInvestorRouteImport } from './routes/_authenticated/dashboard.investor'
+import { Route as AuthenticatedAdminRunnerApprovalsRouteImport } from './routes/_authenticated/admin.runner-approvals'
 import { Route as AuthenticatedAdminProfilesRouteImport } from './routes/_authenticated/admin.profiles'
 import { Route as AuthenticatedAdminModerationRouteImport } from './routes/_authenticated/admin.moderation'
 import { Route as AuthenticatedAdminAnalyticsRouteImport } from './routes/_authenticated/admin.analytics'
@@ -339,6 +340,12 @@ const AuthenticatedDashboardInvestorRoute =
     path: '/dashboard/investor',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const AuthenticatedAdminRunnerApprovalsRoute =
+  AuthenticatedAdminRunnerApprovalsRouteImport.update({
+    id: '/runner-approvals',
+    path: '/runner-approvals',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminProfilesRoute =
   AuthenticatedAdminProfilesRouteImport.update({
     id: '/profiles',
@@ -426,6 +433,7 @@ export interface FileRoutesByFullPath {
   '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
   '/admin/moderation': typeof AuthenticatedAdminModerationRoute
   '/admin/profiles': typeof AuthenticatedAdminProfilesRoute
+  '/admin/runner-approvals': typeof AuthenticatedAdminRunnerApprovalsRoute
   '/dashboard/investor': typeof AuthenticatedDashboardInvestorRoute
   '/dashboard/runner': typeof AuthenticatedDashboardRunnerRoute
   '/messages/$conversationId': typeof AuthenticatedMessagesConversationIdRoute
@@ -483,6 +491,7 @@ export interface FileRoutesByTo {
   '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
   '/admin/moderation': typeof AuthenticatedAdminModerationRoute
   '/admin/profiles': typeof AuthenticatedAdminProfilesRoute
+  '/admin/runner-approvals': typeof AuthenticatedAdminRunnerApprovalsRoute
   '/dashboard/investor': typeof AuthenticatedDashboardInvestorRoute
   '/dashboard/runner': typeof AuthenticatedDashboardRunnerRoute
   '/messages/$conversationId': typeof AuthenticatedMessagesConversationIdRoute
@@ -545,6 +554,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
   '/_authenticated/admin/moderation': typeof AuthenticatedAdminModerationRoute
   '/_authenticated/admin/profiles': typeof AuthenticatedAdminProfilesRoute
+  '/_authenticated/admin/runner-approvals': typeof AuthenticatedAdminRunnerApprovalsRoute
   '/_authenticated/dashboard/investor': typeof AuthenticatedDashboardInvestorRoute
   '/_authenticated/dashboard/runner': typeof AuthenticatedDashboardRunnerRoute
   '/_authenticated/messages/$conversationId': typeof AuthenticatedMessagesConversationIdRoute
@@ -607,6 +617,7 @@ export interface FileRouteTypes {
     | '/admin/analytics'
     | '/admin/moderation'
     | '/admin/profiles'
+    | '/admin/runner-approvals'
     | '/dashboard/investor'
     | '/dashboard/runner'
     | '/messages/$conversationId'
@@ -664,6 +675,7 @@ export interface FileRouteTypes {
     | '/admin/analytics'
     | '/admin/moderation'
     | '/admin/profiles'
+    | '/admin/runner-approvals'
     | '/dashboard/investor'
     | '/dashboard/runner'
     | '/messages/$conversationId'
@@ -725,6 +737,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/analytics'
     | '/_authenticated/admin/moderation'
     | '/_authenticated/admin/profiles'
+    | '/_authenticated/admin/runner-approvals'
     | '/_authenticated/dashboard/investor'
     | '/_authenticated/dashboard/runner'
     | '/_authenticated/messages/$conversationId'
@@ -1132,6 +1145,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardInvestorRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/admin/runner-approvals': {
+      id: '/_authenticated/admin/runner-approvals'
+      path: '/runner-approvals'
+      fullPath: '/admin/runner-approvals'
+      preLoaderRoute: typeof AuthenticatedAdminRunnerApprovalsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/profiles': {
       id: '/_authenticated/admin/profiles'
       path: '/profiles'
@@ -1202,6 +1222,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminAnalyticsRoute: typeof AuthenticatedAdminAnalyticsRoute
   AuthenticatedAdminModerationRoute: typeof AuthenticatedAdminModerationRoute
   AuthenticatedAdminProfilesRoute: typeof AuthenticatedAdminProfilesRoute
+  AuthenticatedAdminRunnerApprovalsRoute: typeof AuthenticatedAdminRunnerApprovalsRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
 }
 
@@ -1209,6 +1230,8 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminAnalyticsRoute: AuthenticatedAdminAnalyticsRoute,
   AuthenticatedAdminModerationRoute: AuthenticatedAdminModerationRoute,
   AuthenticatedAdminProfilesRoute: AuthenticatedAdminProfilesRoute,
+  AuthenticatedAdminRunnerApprovalsRoute:
+    AuthenticatedAdminRunnerApprovalsRoute,
   AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
 }
 
