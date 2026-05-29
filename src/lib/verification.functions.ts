@@ -164,7 +164,7 @@ export const adminDecideVerification = createServerFn({ method: "POST" })
       .eq("id", data.request_id);
     if (updErr) throw new Error(updErr.message);
 
-    const patch: Record<string, unknown> = {
+    const patch: Record<string, any> = {
       verification_status: data.decision,
       verification_reviewed_at: now,
       verification_reviewed_by: userId,
@@ -184,7 +184,7 @@ export const adminDecideVerification = createServerFn({ method: "POST" })
 
     const { error: profErr } = await supabaseAdmin
       .from("profiles")
-      .update(patch)
+      .update(patch as any)
       .eq("user_id", req.user_id);
     if (profErr) throw new Error(profErr.message);
 
