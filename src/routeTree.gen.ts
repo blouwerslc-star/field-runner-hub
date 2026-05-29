@@ -28,10 +28,12 @@ import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe
 import { Route as CheckoutReturnRouteImport } from './routes/checkout.return'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedRunnerDashboardRouteImport } from './routes/_authenticated/runner-dashboard'
+import { Route as AuthenticatedMessagesRouteImport } from './routes/_authenticated/messages'
 import { Route as AuthenticatedInvestorDashboardRouteImport } from './routes/_authenticated/investor-dashboard'
 import { Route as AuthenticatedAdminDashboardRouteImport } from './routes/_authenticated/admin-dashboard'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedSettingsIndexRouteImport } from './routes/_authenticated/settings.index'
+import { Route as AuthenticatedMessagesIndexRouteImport } from './routes/_authenticated/messages.index'
 import { Route as AuthenticatedDashboardIndexRouteImport } from './routes/_authenticated/dashboard.index'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
@@ -45,6 +47,8 @@ import { Route as AuthenticatedSettingsNotificationsRouteImport } from './routes
 import { Route as AuthenticatedSettingsAdminRouteImport } from './routes/_authenticated/settings.admin'
 import { Route as AuthenticatedSettingsAccountRouteImport } from './routes/_authenticated/settings.account'
 import { Route as AuthenticatedProfileEditRouteImport } from './routes/_authenticated/profile.edit'
+import { Route as AuthenticatedMessagesNewRouteImport } from './routes/_authenticated/messages.new'
+import { Route as AuthenticatedMessagesConversationIdRouteImport } from './routes/_authenticated/messages.$conversationId'
 import { Route as AuthenticatedDashboardRunnerRouteImport } from './routes/_authenticated/dashboard.runner'
 import { Route as AuthenticatedDashboardInvestorRouteImport } from './routes/_authenticated/dashboard.investor'
 import { Route as AuthenticatedAdminProfilesRouteImport } from './routes/_authenticated/admin.profiles'
@@ -150,6 +154,11 @@ const AuthenticatedRunnerDashboardRoute =
     path: '/runner-dashboard',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const AuthenticatedMessagesRoute = AuthenticatedMessagesRouteImport.update({
+  id: '/messages',
+  path: '/messages',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedInvestorDashboardRoute =
   AuthenticatedInvestorDashboardRouteImport.update({
     id: '/investor-dashboard',
@@ -172,6 +181,12 @@ const AuthenticatedSettingsIndexRoute =
     id: '/',
     path: '/',
     getParentRoute: () => AuthenticatedSettingsRoute,
+  } as any)
+const AuthenticatedMessagesIndexRoute =
+  AuthenticatedMessagesIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedMessagesRoute,
   } as any)
 const AuthenticatedDashboardIndexRoute =
   AuthenticatedDashboardIndexRouteImport.update({
@@ -249,6 +264,18 @@ const AuthenticatedProfileEditRoute =
     path: '/profile/edit',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const AuthenticatedMessagesNewRoute =
+  AuthenticatedMessagesNewRouteImport.update({
+    id: '/new',
+    path: '/new',
+    getParentRoute: () => AuthenticatedMessagesRoute,
+  } as any)
+const AuthenticatedMessagesConversationIdRoute =
+  AuthenticatedMessagesConversationIdRouteImport.update({
+    id: '/$conversationId',
+    path: '/$conversationId',
+    getParentRoute: () => AuthenticatedMessagesRoute,
+  } as any)
 const AuthenticatedDashboardRunnerRoute =
   AuthenticatedDashboardRunnerRouteImport.update({
     id: '/dashboard/runner',
@@ -319,6 +346,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/admin-dashboard': typeof AuthenticatedAdminDashboardRoute
   '/investor-dashboard': typeof AuthenticatedInvestorDashboardRoute
+  '/messages': typeof AuthenticatedMessagesRouteWithChildren
   '/runner-dashboard': typeof AuthenticatedRunnerDashboardRoute
   '/settings': typeof AuthenticatedSettingsRouteWithChildren
   '/checkout/return': typeof CheckoutReturnRoute
@@ -327,6 +355,8 @@ export interface FileRoutesByFullPath {
   '/admin/profiles': typeof AuthenticatedAdminProfilesRoute
   '/dashboard/investor': typeof AuthenticatedDashboardInvestorRoute
   '/dashboard/runner': typeof AuthenticatedDashboardRunnerRoute
+  '/messages/$conversationId': typeof AuthenticatedMessagesConversationIdRoute
+  '/messages/new': typeof AuthenticatedMessagesNewRoute
   '/profile/edit': typeof AuthenticatedProfileEditRoute
   '/settings/account': typeof AuthenticatedSettingsAccountRoute
   '/settings/admin': typeof AuthenticatedSettingsAdminRoute
@@ -340,6 +370,7 @@ export interface FileRoutesByFullPath {
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/dashboard/': typeof AuthenticatedDashboardIndexRoute
+  '/messages/': typeof AuthenticatedMessagesIndexRoute
   '/settings/': typeof AuthenticatedSettingsIndexRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -371,6 +402,8 @@ export interface FileRoutesByTo {
   '/admin/profiles': typeof AuthenticatedAdminProfilesRoute
   '/dashboard/investor': typeof AuthenticatedDashboardInvestorRoute
   '/dashboard/runner': typeof AuthenticatedDashboardRunnerRoute
+  '/messages/$conversationId': typeof AuthenticatedMessagesConversationIdRoute
+  '/messages/new': typeof AuthenticatedMessagesNewRoute
   '/profile/edit': typeof AuthenticatedProfileEditRoute
   '/settings/account': typeof AuthenticatedSettingsAccountRoute
   '/settings/admin': typeof AuthenticatedSettingsAdminRoute
@@ -384,6 +417,7 @@ export interface FileRoutesByTo {
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/dashboard': typeof AuthenticatedDashboardIndexRoute
+  '/messages': typeof AuthenticatedMessagesIndexRoute
   '/settings': typeof AuthenticatedSettingsIndexRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -411,6 +445,7 @@ export interface FileRoutesById {
   '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
   '/_authenticated/admin-dashboard': typeof AuthenticatedAdminDashboardRoute
   '/_authenticated/investor-dashboard': typeof AuthenticatedInvestorDashboardRoute
+  '/_authenticated/messages': typeof AuthenticatedMessagesRouteWithChildren
   '/_authenticated/runner-dashboard': typeof AuthenticatedRunnerDashboardRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRouteWithChildren
   '/checkout/return': typeof CheckoutReturnRoute
@@ -419,6 +454,8 @@ export interface FileRoutesById {
   '/_authenticated/admin/profiles': typeof AuthenticatedAdminProfilesRoute
   '/_authenticated/dashboard/investor': typeof AuthenticatedDashboardInvestorRoute
   '/_authenticated/dashboard/runner': typeof AuthenticatedDashboardRunnerRoute
+  '/_authenticated/messages/$conversationId': typeof AuthenticatedMessagesConversationIdRoute
+  '/_authenticated/messages/new': typeof AuthenticatedMessagesNewRoute
   '/_authenticated/profile/edit': typeof AuthenticatedProfileEditRoute
   '/_authenticated/settings/account': typeof AuthenticatedSettingsAccountRoute
   '/_authenticated/settings/admin': typeof AuthenticatedSettingsAdminRoute
@@ -432,6 +469,7 @@ export interface FileRoutesById {
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/dashboard/': typeof AuthenticatedDashboardIndexRoute
+  '/_authenticated/messages/': typeof AuthenticatedMessagesIndexRoute
   '/_authenticated/settings/': typeof AuthenticatedSettingsIndexRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -459,6 +497,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/admin-dashboard'
     | '/investor-dashboard'
+    | '/messages'
     | '/runner-dashboard'
     | '/settings'
     | '/checkout/return'
@@ -467,6 +506,8 @@ export interface FileRouteTypes {
     | '/admin/profiles'
     | '/dashboard/investor'
     | '/dashboard/runner'
+    | '/messages/$conversationId'
+    | '/messages/new'
     | '/profile/edit'
     | '/settings/account'
     | '/settings/admin'
@@ -480,6 +521,7 @@ export interface FileRouteTypes {
     | '/lovable/email/suppression'
     | '/admin/'
     | '/dashboard/'
+    | '/messages/'
     | '/settings/'
     | '/api/public/payments/webhook'
     | '/lovable/email/auth/preview'
@@ -511,6 +553,8 @@ export interface FileRouteTypes {
     | '/admin/profiles'
     | '/dashboard/investor'
     | '/dashboard/runner'
+    | '/messages/$conversationId'
+    | '/messages/new'
     | '/profile/edit'
     | '/settings/account'
     | '/settings/admin'
@@ -524,6 +568,7 @@ export interface FileRouteTypes {
     | '/lovable/email/suppression'
     | '/admin'
     | '/dashboard'
+    | '/messages'
     | '/settings'
     | '/api/public/payments/webhook'
     | '/lovable/email/auth/preview'
@@ -550,6 +595,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin'
     | '/_authenticated/admin-dashboard'
     | '/_authenticated/investor-dashboard'
+    | '/_authenticated/messages'
     | '/_authenticated/runner-dashboard'
     | '/_authenticated/settings'
     | '/checkout/return'
@@ -558,6 +604,8 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/profiles'
     | '/_authenticated/dashboard/investor'
     | '/_authenticated/dashboard/runner'
+    | '/_authenticated/messages/$conversationId'
+    | '/_authenticated/messages/new'
     | '/_authenticated/profile/edit'
     | '/_authenticated/settings/account'
     | '/_authenticated/settings/admin'
@@ -571,6 +619,7 @@ export interface FileRouteTypes {
     | '/lovable/email/suppression'
     | '/_authenticated/admin/'
     | '/_authenticated/dashboard/'
+    | '/_authenticated/messages/'
     | '/_authenticated/settings/'
     | '/api/public/payments/webhook'
     | '/lovable/email/auth/preview'
@@ -742,6 +791,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedRunnerDashboardRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/messages': {
+      id: '/_authenticated/messages'
+      path: '/messages'
+      fullPath: '/messages'
+      preLoaderRoute: typeof AuthenticatedMessagesRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/investor-dashboard': {
       id: '/_authenticated/investor-dashboard'
       path: '/investor-dashboard'
@@ -769,6 +825,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/settings/'
       preLoaderRoute: typeof AuthenticatedSettingsIndexRouteImport
       parentRoute: typeof AuthenticatedSettingsRoute
+    }
+    '/_authenticated/messages/': {
+      id: '/_authenticated/messages/'
+      path: '/'
+      fullPath: '/messages/'
+      preLoaderRoute: typeof AuthenticatedMessagesIndexRouteImport
+      parentRoute: typeof AuthenticatedMessagesRoute
     }
     '/_authenticated/dashboard/': {
       id: '/_authenticated/dashboard/'
@@ -861,6 +924,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedProfileEditRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/messages/new': {
+      id: '/_authenticated/messages/new'
+      path: '/new'
+      fullPath: '/messages/new'
+      preLoaderRoute: typeof AuthenticatedMessagesNewRouteImport
+      parentRoute: typeof AuthenticatedMessagesRoute
+    }
+    '/_authenticated/messages/$conversationId': {
+      id: '/_authenticated/messages/$conversationId'
+      path: '/$conversationId'
+      fullPath: '/messages/$conversationId'
+      preLoaderRoute: typeof AuthenticatedMessagesConversationIdRouteImport
+      parentRoute: typeof AuthenticatedMessagesRoute
+    }
     '/_authenticated/dashboard/runner': {
       id: '/_authenticated/dashboard/runner'
       path: '/dashboard/runner'
@@ -940,6 +1017,24 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
 const AuthenticatedAdminRouteWithChildren =
   AuthenticatedAdminRoute._addFileChildren(AuthenticatedAdminRouteChildren)
 
+interface AuthenticatedMessagesRouteChildren {
+  AuthenticatedMessagesConversationIdRoute: typeof AuthenticatedMessagesConversationIdRoute
+  AuthenticatedMessagesNewRoute: typeof AuthenticatedMessagesNewRoute
+  AuthenticatedMessagesIndexRoute: typeof AuthenticatedMessagesIndexRoute
+}
+
+const AuthenticatedMessagesRouteChildren: AuthenticatedMessagesRouteChildren = {
+  AuthenticatedMessagesConversationIdRoute:
+    AuthenticatedMessagesConversationIdRoute,
+  AuthenticatedMessagesNewRoute: AuthenticatedMessagesNewRoute,
+  AuthenticatedMessagesIndexRoute: AuthenticatedMessagesIndexRoute,
+}
+
+const AuthenticatedMessagesRouteWithChildren =
+  AuthenticatedMessagesRoute._addFileChildren(
+    AuthenticatedMessagesRouteChildren,
+  )
+
 interface AuthenticatedSettingsRouteChildren {
   AuthenticatedSettingsAccountRoute: typeof AuthenticatedSettingsAccountRoute
   AuthenticatedSettingsAdminRoute: typeof AuthenticatedSettingsAdminRoute
@@ -976,6 +1071,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRouteWithChildren
   AuthenticatedAdminDashboardRoute: typeof AuthenticatedAdminDashboardRoute
   AuthenticatedInvestorDashboardRoute: typeof AuthenticatedInvestorDashboardRoute
+  AuthenticatedMessagesRoute: typeof AuthenticatedMessagesRouteWithChildren
   AuthenticatedRunnerDashboardRoute: typeof AuthenticatedRunnerDashboardRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRouteWithChildren
   AuthenticatedDashboardInvestorRoute: typeof AuthenticatedDashboardInvestorRoute
@@ -988,6 +1084,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRouteWithChildren,
   AuthenticatedAdminDashboardRoute: AuthenticatedAdminDashboardRoute,
   AuthenticatedInvestorDashboardRoute: AuthenticatedInvestorDashboardRoute,
+  AuthenticatedMessagesRoute: AuthenticatedMessagesRouteWithChildren,
   AuthenticatedRunnerDashboardRoute: AuthenticatedRunnerDashboardRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRouteWithChildren,
   AuthenticatedDashboardInvestorRoute: AuthenticatedDashboardInvestorRoute,
