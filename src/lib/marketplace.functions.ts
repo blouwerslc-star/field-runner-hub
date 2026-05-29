@@ -152,6 +152,36 @@ export const decideApplication = createServerFn({ method: "POST" })
         .neq("id", app.id)
         .eq("status", "pending");
     }
+    // Email the runner about the decision (best-effort)
+    try {
+      const { notifyUserByEmail } = await import("./email-sender.server");
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      const { data: t } = await supabaseAdmin
+        .from("tasks")
+        .select("title")
+        .eq("id", task.id)
+        .maybeSingle();
+      const title = (t as any)?.title ?? "a task";
+      if (data.decision === "approved") {
+        await notifyUserByEmail({
+          userId: app.runner_id,
+          title: `You were approved for "${title}"`,
+          body: "Head to the task page to start work.",
+          link: `/tasks/${task.id}`,
+          ctaLabel: "View task",
+        });
+      } else {
+        await notifyUserByEmail({
+          userId: app.runner_id,
+          title: `Your application wasn't selected`,
+          body: `"${title}" was assigned to another runner. Keep browsing the marketplace for new opportunities.`,
+          link: `/tasks`,
+          ctaLabel: "Browse tasks",
+        });
+      }
+    } catch (err) {
+      console.error("application email notify failed", err);
+    }
     return { ok: true };
   });
 
