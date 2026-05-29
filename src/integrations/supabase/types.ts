@@ -317,36 +317,54 @@ export type Database = {
         Row: {
           avatar_url: string | null
           city: string | null
+          company_name: string | null
           created_at: string
           full_name: string | null
           id: string
+          markets_served: string | null
+          monthly_deal_volume: string | null
           phone: string | null
+          service_radius: string | null
           state: string | null
           stripe_customer_id: string | null
+          task_types: string[]
+          transportation_available: boolean | null
           updated_at: string
           user_id: string
         }
         Insert: {
           avatar_url?: string | null
           city?: string | null
+          company_name?: string | null
           created_at?: string
           full_name?: string | null
           id?: string
+          markets_served?: string | null
+          monthly_deal_volume?: string | null
           phone?: string | null
+          service_radius?: string | null
           state?: string | null
           stripe_customer_id?: string | null
+          task_types?: string[]
+          transportation_available?: boolean | null
           updated_at?: string
           user_id: string
         }
         Update: {
           avatar_url?: string | null
           city?: string | null
+          company_name?: string | null
           created_at?: string
           full_name?: string | null
           id?: string
+          markets_served?: string | null
+          monthly_deal_volume?: string | null
           phone?: string | null
+          service_radius?: string | null
           state?: string | null
           stripe_customer_id?: string | null
+          task_types?: string[]
+          transportation_available?: boolean | null
           updated_at?: string
           user_id?: string
         }
