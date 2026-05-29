@@ -201,3 +201,94 @@ export const adminDecideVerification = createServerFn({ method: "POST" })
 
     return { ok: true };
   });
+
+// ============================================================
+// Background-check admin functions (manual Checkr workflow)
+// ============================================================
+
+const bgListSchema = z.object({
+  status: z.enum(["pending", "passed", "failed", "all"]).default("pending"),
+});
+
+export const adminListBackgroundChecks = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i: unknown) => bgListSchema.parse(i ?? {}))
+  .handler(async ({ context, data }) => {
+    const { userId } = context;
+    const { data: isAdmin } = await supabaseAdmin.rpc("has_role", { _user_id: userId, _role: "admin" });
+    if (!isAdmin) throw new Error("Admins only");
+
+    let q = supabaseAdmin
+      .from("profiles")
+      .select(
+        "user_id, full_name, email, phone, city, state, profile_photo_url, background_check_paid_at, background_check_verified, checkr_status, verification_level",
+      )
+      .not("background_check_paid_at", "is", null)
+      .order("background_check_paid_at", { ascending: false })
+      .limit(200);
+
+    if (data.status === "pending") q = q.eq("checkr_status", "pending");
+    else if (data.status === "passed") q = q.eq("checkr_status", "passed");
+    else if (data.status === "failed") q = q.eq("checkr_status", "failed");
+
+    const { data: rows, error } = await q;
+    if (error) throw new Error(error.message);
+    return { profiles: rows ?? [] };
+  });
+
+const bgDecideSchema = z.object({
+  user_id: z.string().uuid(),
+  status: z.enum(["pending", "passed", "failed"]),
+  admin_notes: z.string().trim().max(2000).optional().nullable(),
+});
+
+export const adminSetBackgroundCheckStatus = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i: unknown) => bgDecideSchema.parse(i))
+  .handler(async ({ context, data }) => {
+    const { userId } = context;
+    const { data: isAdmin } = await supabaseAdmin.rpc("has_role", { _user_id: userId, _role: "admin" });
+    if (!isAdmin) throw new Error("Admins only");
+
+    const now = new Date().toISOString();
+    const patch: Record<string, any> = {
+      checkr_status: data.status,
+      verification_reviewed_at: now,
+      verification_reviewed_by: userId,
+      verification_notes: data.admin_notes ?? null,
+    };
+
+    if (data.status === "passed") {
+      patch.background_check_verified = true;
+      patch.verification_level = 4;
+      patch.verified_status = true;
+      patch.verification_status = "verified";
+    } else if (data.status === "failed") {
+      patch.background_check_verified = false;
+      patch.verification_status = "rejected";
+    } else {
+      patch.verification_status = "pending_review";
+    }
+
+    const { error } = await supabaseAdmin
+      .from("profiles")
+      .update(patch as any)
+      .eq("user_id", data.user_id);
+    if (error) throw new Error(error.message);
+
+    const title =
+      data.status === "passed"
+        ? "Background check passed — you're Verified!"
+        : data.status === "failed"
+          ? "Background check did not pass"
+          : "Background check is being reviewed";
+    await supabaseAdmin.from("notifications").insert({
+      user_id: data.user_id,
+      type: `background_check_${data.status}`,
+      title,
+      body: data.admin_notes ?? null,
+      link: "/profile/background-check",
+    });
+
+    return { ok: true };
+  });
