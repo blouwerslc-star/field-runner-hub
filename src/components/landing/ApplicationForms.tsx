@@ -137,6 +137,7 @@ export function FieldRunnerForm() {
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
   const [step, setStep] = useState(0);
+  const [password, setPassword] = useState("");
   const [services, setServices] = useState<string[]>([]);
   const [availability, setAvailability] = useState("");
   const [hasTransport, setHasTransport] = useState("");
@@ -223,14 +224,31 @@ export function FieldRunnerForm() {
       toast.error("Please complete all dropdowns.");
       return;
     }
+    if (password.length < 8) {
+      toast.error("Please choose a password of at least 8 characters.");
+      return;
+    }
     setSubmitting(true);
     try {
+      const { hasSession } = await createAccount({
+        email: payload.email,
+        password,
+        full_name: payload.full_name,
+        phone: payload.phone,
+        role: "runner",
+      });
       await submit({ data: payload as never });
       setDone(true);
-      navigate({ to: "/waitlist" });
+      if (hasSession) {
+        toast.success("Application submitted. Welcome aboard!");
+        navigate({ to: "/dashboard/runner" });
+      } else {
+        toast.success("Application received. Check your email to verify your account.");
+        navigate({ to: "/login", search: { redirect: "/dashboard/runner" } });
+      }
     } catch (err) {
       console.error(err);
-      toast.error("Submission failed. Please review your info and try again.");
+      toast.error(err instanceof Error ? err.message : "Submission failed. Please review your info and try again.");
     } finally {
       setSubmitting(false);
     }
@@ -250,6 +268,7 @@ export function FieldRunnerForm() {
         const el = form.elements.namedItem(name) as HTMLInputElement | null;
         if (!el || !el.value.trim()) return "Please complete all fields in this step.";
       }
+      if (password.length < 8) return "Please choose a password of at least 8 characters.";
     }
     if (step === 1) {
       if (!hasTransport || !hasLicense || !vehicleType || !travelRadius || !hasPhone)
