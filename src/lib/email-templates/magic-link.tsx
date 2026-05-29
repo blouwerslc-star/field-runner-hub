@@ -1,15 +1,6 @@
 import * as React from 'react'
-
-import {
-  Body,
-  Button,
-  Container,
-  Head,
-  Heading,
-  Html,
-  Preview,
-  Text,
-} from '@react-email/components'
+import { Body, Button, Container, Head, Heading, Html, Preview, Text } from '@react-email/components'
+import { BrandFooter, BrandHeader, button, card, container, footer, h1, main, text } from './_brand'
 
 interface MagicLinkEmailProps {
   siteName: string
