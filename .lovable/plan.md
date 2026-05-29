@@ -1,93 +1,82 @@
-# Fiverr-Style Public Profile System
+## Settings Section for REI Runner
 
-Build a marketplace-style profile layer on top of the existing `profiles` table without disrupting the task workflow or dashboards.
+Build a `/settings` hub with role-aware sections, persisted preferences, and links into existing systems (profile, auth, payments). Keep dashboards, public profiles, and task workflow untouched.
 
-## 1. Database migration
+---
 
-Extend `public.profiles` with nullable columns (safe defaults, no breaking changes):
+### 1. Database
 
-- `profile_slug` text UNIQUE
-- `profile_photo_url` text
-- `cover_photo_url` text
-- `headline` text
-- `bio` text
-- `services_offered` text[] default '{}'
-- `experience_level` text (`beginner|intermediate|expert`)
-- `years_experience` int
-- `hourly_rate` numeric
-- `task_rate` numeric
-- `availability_status` text default 'available' (`available|busy|unavailable`)
-- `average_rating` numeric default 0
-- `review_count` int default 0
-- `completed_tasks_count` int default 0
-- `response_time` text
-- `verified_status` boolean default false
-- `public_profile_enabled` boolean default true
-- `phone_public` boolean default false
-- `featured` boolean default false
-- `suspended` boolean default false
-- `turnaround_time` text
-- `preferred_payout_min` numeric, `preferred_payout_max` numeric
-- `company_description` text
+One migration adds settings/preferences columns to `profiles` (no new table — keeps one row per user, matches existing pattern):
 
-(`markets_served`, `service_radius`, `transportation_available`, `task_types`, `company_name`, `monthly_deal_volume`, `city`, `state`, `full_name`, `avatar_url` already exist.)
+- `notification_prefs jsonb default '{}'::jsonb` — email/SMS/task/payout/marketing/weekly toggles
+- `privacy_prefs jsonb default '{}'::jsonb` — show city/state, completed count, ratings, allow contact, allow invites
+- `timezone text` — IANA tz string
+- `dashboard_prefs jsonb default '{}'::jsonb` — display prefs
+- `theme_preference text` — 'system' | 'light' | 'dark'
+- `preferred_task_radius text`
+- `preferred_markets text`
+- `account_status text default 'active'` — active | pending_deletion | suspended
+- `deletion_requested_at timestamptz`
 
-Auto-generate `profile_slug` from `full_name` + short id via a trigger on insert/update when null.
+Reuses existing `task_types`, `services_offered`, `markets_served`, `availability_status`, `public_profile_enabled`, `phone_public`, `verified_status`, `featured` for the other toggles.
 
-### RLS additions
+Admin platform settings go into existing `app_settings` table (key/value) — e.g. `platform_fee_percentage`.
 
-Add a public-read policy scoped to safe columns via a SECURITY DEFINER view `public.public_profiles` that exposes only non-sensitive columns and filters by `public_profile_enabled = true AND suspended = false`. Grant SELECT on the view to `anon` and `authenticated`. Keep the base `profiles` table policies unchanged (user/admin only).
+### 2. Server functions (`src/lib/settings.functions.ts`)
 
-Admin policy: add UPDATE policy on profiles for admins (already covered? add if missing for `featured`, `verified_status`, `suspended`).
+- `getMySettings()` — returns profile + roles + auth user (email, created_at, last_sign_in_at)
+- `updateAccountSettings()` — full_name, phone, city, state (NOT role, NOT email-change here)
+- `updateNotificationPrefs()`
+- `updatePrivacyPrefs()`
+- `updatePreferences()` — timezone, theme, radius, markets, task_types, dashboard_prefs
+- `requestAccountDeletion()` — sets account_status='pending_deletion', deletion_requested_at=now()
+- `cancelAccountDeletion()`
+- `submitSupportRequest({ category, subject, message })` — inserts into existing notifications for admins (or new `support_requests` table — see below)
+- Admin: `getPlatformSettings()`, `updatePlatformSetting(key, value)`
 
-### Storage
+Email changes use `supabase.auth.updateUser({ email })` from the client (Supabase handles confirmation). Password change uses `supabase.auth.updateUser({ password })` client-side. Password reset uses `supabase.auth.resetPasswordForEmail`.
 
-Reuse `avatars` bucket for profile + cover photos. Add policy allowing public read for files under `public/` prefix or make a new `profile-media` public bucket. **Decision**: create a new public bucket `profile-media` with public read, authenticated insert/update/delete scoped to the user's own folder (`{user_id}/...`).
+Adds one small table `support_requests` (id, user_id, category, subject, message, status, created_at) with RLS: user inserts/views own, admin sees all.
 
-## 2. Server functions (`src/lib/profiles.functions.ts`)
+### 3. Routes
 
-- `getMyProfile()` — auth required, returns full profile + role
-- `updateMyProfile(input)` — auth, validates with Zod, updates allowed fields
-- `getPublicProfileBySlug(slug)` — public, queries the view
-- `listPublicProfiles({ q, role, city, state, service, availability, sort, page })` — public
-- Admin: `adminListProfiles`, `adminSetVerified`, `adminSetFeatured`, `adminSetSuspended`
+- `src/routes/_authenticated/settings.tsx` — layout with sidebar nav (desktop) + Tabs (mobile), `<Outlet />`
+- `src/routes/_authenticated/settings.index.tsx` — redirect to `account`
+- `src/routes/_authenticated/settings.account.tsx`
+- `src/routes/_authenticated/settings.profile.tsx` — reuses photo uploaders + key profile fields; links to `/profile/edit` for the full editor, plus "View Public Profile" button
+- `src/routes/_authenticated/settings.security.tsx`
+- `src/routes/_authenticated/settings.notifications.tsx`
+- `src/routes/_authenticated/settings.privacy.tsx`
+- `src/routes/_authenticated/settings.payments.tsx` — role-aware (runner vs investor); payout/billing history pulled from existing `payments` table; Stripe Connect shown as placeholder card
+- `src/routes/_authenticated/settings.preferences.tsx`
+- `src/routes/_authenticated/settings.support.tsx` — contact form + FAQ/legal links
+- `src/routes/_authenticated/settings.admin.tsx` — admin-only, gated by `has_role('admin')`
 
-## 3. Routes
+### 4. Navigation
 
-- `/_authenticated/profile.edit.tsx` — edit form with photo upload, all role-specific fields rendered conditionally
-- `/profile.$slug.tsx` — public profile page (Fiverr-style hero + sidebar)
-- `/profiles.tsx` — directory with search/filters/sort and marketplace cards
-- `/_authenticated/admin.profiles.tsx` — admin moderation table
+Add a "Settings" link with `Settings` icon to `DashboardShell` header next to "My profile". Visible to all authenticated users (Runner/Investor/Admin dashboards all use this shell).
 
-Add links to: dashboards ("Edit Public Profile"), navbar ("Browse Profiles"), admin sidebar.
+### 5. Design
 
-## 4. Components
+- shadcn `Card`, `Switch`, `Tabs`, `Button`, `Input`, `Textarea`, `Select`, `Separator`
+- Desktop: 2-column with sticky left nav (`md:grid-cols-[220px_1fr]`)
+- Mobile: horizontal scroll Tabs at top
+- Each section: section header → cards with form rows → "Save changes" footer button per card
+- `toast.success/error` from sonner for save feedback
+- React Query mutations with `isPending` loading states
+- Placeholder sections rendered as muted cards labeled "Coming soon" (2FA, sessions, login history, Stripe Connect, tax forms, dispute flow)
 
-- `ProfileCard` — Fiverr-style card (photo, name, headline, rating stars, location, starting rate, service badges, View Profile CTA)
-- `VerifiedBadge`, `RoleBadge`, `AvailabilityBadge`, `StarRating`
-- `ProfileMediaUploader` — wraps Supabase storage upload to `profile-media/{user_id}/...`
+### 6. Out of scope (placeholders only)
 
-## 5. Privacy
+- Real 2FA / session listing / login history
+- Stripe Connect onboarding / tax forms
+- Actual account-deletion processing (only records the request; admin handles)
+- Dispute resolution flow
 
-Public view exposes only: slug, full_name, role (joined), city, state, headline, bio, profile_photo_url, cover_photo_url, services_offered, markets_served, experience_level, years_experience, task_rate, availability_status, average_rating, review_count, completed_tasks_count, response_time, verified_status, featured, created_at (member since), company_name, company_description, turnaround_time.
-Excludes: email, phone (unless `phone_public`), address, IDs, payment info.
+### Technical notes
 
-## 6. Trust
-
-- `average_rating`, `review_count`, `completed_tasks_count` are read-only from the edit form (system-managed).
-- Member since = `created_at`.
-- Reviews section: render an empty state ("No reviews yet — earned after completed tasks") since review creation comes later.
-
-## 7. Out of scope (explicit)
-
-- Actual review writing flow (placeholder UI only)
-- "Invite Runner To Task" / "Connect With Investor" CTAs wire to existing task-create / messaging flows where available; otherwise open a toast "Coming soon" so we don't block this milestone.
-
-## Technical notes
-
-- Use TanStack Query + `useSuspenseQuery` per the project's data pattern.
-- Zod validation on all `updateMyProfile` inputs (length caps, slug regex `^[a-z0-9-]{3,40}$`).
-- Slug uniqueness enforced at DB level; on conflict during auto-gen, append random suffix.
-- Storage uploads go through browser client; server fn only stores resulting public URL.
-
-Ready to implement on approval.
+- Server fns under `_authenticated` layout — safe to call from loaders
+- All JSON pref columns default to `{}`; client merges defaults
+- Theme toggle persists to profile AND `localStorage` for immediate apply
+- Email/password changes use browser `supabase` client directly (auth-only ops)
+- Support requests table follows the standard 4-step migration shape (CREATE → GRANT → RLS → POLICY)

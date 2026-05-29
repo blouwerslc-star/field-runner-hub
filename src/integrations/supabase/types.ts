@@ -315,6 +315,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          account_status: string
           availability_status: string
           avatar_url: string | null
           average_rating: number
@@ -325,6 +326,8 @@ export type Database = {
           completed_tasks_count: number
           cover_photo_url: string | null
           created_at: string
+          dashboard_prefs: Json
+          deletion_requested_at: string | null
           email: string | null
           experience_level: string | null
           featured: boolean
@@ -334,10 +337,14 @@ export type Database = {
           id: string
           markets_served: string | null
           monthly_deal_volume: string | null
+          notification_prefs: Json
           phone: string | null
           phone_public: boolean
+          preferred_markets: string | null
           preferred_payout_max: number | null
           preferred_payout_min: number | null
+          preferred_task_radius: string | null
+          privacy_prefs: Json
           profile_photo_url: string | null
           profile_slug: string | null
           public_profile_enabled: boolean
@@ -350,6 +357,8 @@ export type Database = {
           suspended: boolean
           task_rate: number | null
           task_types: string[]
+          theme_preference: string | null
+          timezone: string | null
           transportation_available: boolean | null
           turnaround_time: string | null
           updated_at: string
@@ -358,6 +367,7 @@ export type Database = {
           years_experience: number | null
         }
         Insert: {
+          account_status?: string
           availability_status?: string
           avatar_url?: string | null
           average_rating?: number
@@ -368,6 +378,8 @@ export type Database = {
           completed_tasks_count?: number
           cover_photo_url?: string | null
           created_at?: string
+          dashboard_prefs?: Json
+          deletion_requested_at?: string | null
           email?: string | null
           experience_level?: string | null
           featured?: boolean
@@ -377,10 +389,14 @@ export type Database = {
           id?: string
           markets_served?: string | null
           monthly_deal_volume?: string | null
+          notification_prefs?: Json
           phone?: string | null
           phone_public?: boolean
+          preferred_markets?: string | null
           preferred_payout_max?: number | null
           preferred_payout_min?: number | null
+          preferred_task_radius?: string | null
+          privacy_prefs?: Json
           profile_photo_url?: string | null
           profile_slug?: string | null
           public_profile_enabled?: boolean
@@ -393,6 +409,8 @@ export type Database = {
           suspended?: boolean
           task_rate?: number | null
           task_types?: string[]
+          theme_preference?: string | null
+          timezone?: string | null
           transportation_available?: boolean | null
           turnaround_time?: string | null
           updated_at?: string
@@ -401,6 +419,7 @@ export type Database = {
           years_experience?: number | null
         }
         Update: {
+          account_status?: string
           availability_status?: string
           avatar_url?: string | null
           average_rating?: number
@@ -411,6 +430,8 @@ export type Database = {
           completed_tasks_count?: number
           cover_photo_url?: string | null
           created_at?: string
+          dashboard_prefs?: Json
+          deletion_requested_at?: string | null
           email?: string | null
           experience_level?: string | null
           featured?: boolean
@@ -420,10 +441,14 @@ export type Database = {
           id?: string
           markets_served?: string | null
           monthly_deal_volume?: string | null
+          notification_prefs?: Json
           phone?: string | null
           phone_public?: boolean
+          preferred_markets?: string | null
           preferred_payout_max?: number | null
           preferred_payout_min?: number | null
+          preferred_task_radius?: string | null
+          privacy_prefs?: Json
           profile_photo_url?: string | null
           profile_slug?: string | null
           public_profile_enabled?: boolean
@@ -436,6 +461,8 @@ export type Database = {
           suspended?: boolean
           task_rate?: number | null
           task_types?: string[]
+          theme_preference?: string | null
+          timezone?: string | null
           transportation_available?: boolean | null
           turnaround_time?: string | null
           updated_at?: string
@@ -524,6 +551,42 @@ export type Database = {
           onboarding_completed?: boolean
           payouts_enabled?: boolean
           stripe_account_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      support_requests: {
+        Row: {
+          admin_notes: string | null
+          category: string
+          created_at: string
+          id: string
+          message: string
+          status: string
+          subject: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          category: string
+          created_at?: string
+          id?: string
+          message: string
+          status?: string
+          subject: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          admin_notes?: string | null
+          category?: string
+          created_at?: string
+          id?: string
+          message?: string
+          status?: string
+          subject?: string
           updated_at?: string
           user_id?: string
         }
