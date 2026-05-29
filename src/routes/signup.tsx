@@ -14,8 +14,8 @@ type RoleParam = "runner" | "investor";
 
 export const Route = createFileRoute("/signup")({
   validateSearch: (s: Record<string, unknown>) => ({
-    role: (s.role === "investor" ? "investor" : "runner") as RoleParam,
-    redirect: typeof s.redirect === "string" ? s.redirect : "/dashboard",
+    role: (s.role === "investor" || s.role === "runner" ? s.role : undefined) as RoleParam | undefined,
+    redirect: typeof s.redirect === "string" ? s.redirect : undefined,
   }),
   component: SignupPage,
   head: () => ({
@@ -29,15 +29,22 @@ export const Route = createFileRoute("/signup")({
 function SignupPage() {
   const { role, redirect } = Route.useSearch();
   const navigate = useNavigate();
-  const [activeRole, setActiveRole] = useState<RoleParam>(role);
+  const [activeRole, setActiveRole] = useState<RoleParam | null>(role ?? null);
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [phone, setPhone] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const dashboardFor = (r: RoleParam) => (r === "investor" ? "/dashboard/investor" : "/dashboard/runner");
+  const postSignupRedirect = activeRole ? (redirect ?? dashboardFor(activeRole)) : (redirect ?? "/dashboard");
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (!activeRole) {
+      toast.error("Please choose how you'll use REI Runner.");
+      return;
+    }
     if (password.length < 8) {
       toast.error("Password must be at least 8 characters.");
       return;
@@ -48,13 +55,13 @@ function SignupPage() {
         email,
         password,
         options: {
-          emailRedirectTo: `${window.location.origin}${redirect}`,
+          emailRedirectTo: `${window.location.origin}${postSignupRedirect}`,
           data: { full_name: fullName, phone, role: activeRole },
         },
       });
       if (error) throw error;
       toast.success("Account created. Check your email to confirm, then sign in.");
-      navigate({ to: "/login", search: { redirect } });
+      navigate({ to: "/login", search: { redirect: postSignupRedirect } });
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Signup failed";
       toast.error(msg);
@@ -64,16 +71,19 @@ function SignupPage() {
   }
 
   async function handleGoogle() {
+    if (!activeRole) {
+      toast.error("Please choose how you'll use REI Runner.");
+      return;
+    }
     setLoading(true);
     try {
-      // Note: role from raw_user_meta_data not set for OAuth — user picks on first dashboard load if missing.
       const result = await lovable.auth.signInWithOAuth("google", {
-        redirect_uri: `${window.location.origin}${redirect}`,
+        redirect_uri: `${window.location.origin}${postSignupRedirect}`,
         extraParams: { role: activeRole },
       });
       if (result.redirected) return;
       if (result.error) throw result.error;
-      navigate({ to: redirect });
+      navigate({ to: postSignupRedirect });
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Google sign-in failed";
       toast.error(msg);
@@ -84,31 +94,60 @@ function SignupPage() {
   return (
     <div className="min-h-screen bg-background text-foreground grid place-items-center px-5 py-12">
       <Toaster richColors closeButton position="top-center" theme="dark" />
-      <div className="w-full max-w-md">
+      <div className="w-full max-w-2xl">
         <Link to="/" aria-label="REI Runner home" className="flex justify-center mb-8">
           <BrandLogo size="md" />
         </Link>
 
-        <div className="rounded-2xl border border-border bg-card/60 backdrop-blur p-6 md:p-8 shadow-card">
-          <h1 className="text-2xl font-bold tracking-tight">Create your account</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Pick how you'll use REI Runner.</p>
+        {!activeRole ? (
+          <div className="rounded-2xl border border-border bg-card/60 backdrop-blur p-6 md:p-8 shadow-card">
+            <h1 className="text-2xl font-bold tracking-tight text-center">How will you use REI Runner?</h1>
+            <p className="mt-1 text-sm text-muted-foreground text-center">Choose one to continue. You can't create an account without picking a role.</p>
 
-          <div className="mt-5 grid grid-cols-2 gap-2 p-1 bg-muted/40 rounded-xl">
-            {(["runner", "investor"] as RoleParam[]).map((r) => (
-              <button
-                key={r}
-                type="button"
-                onClick={() => setActiveRole(r)}
-                className={`text-sm font-medium py-2 rounded-lg transition ${
-                  activeRole === r
-                    ? "bg-gradient-primary text-primary-foreground shadow-glow"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                I'm {r === "runner" ? "a Runner" : "an Investor"}
-              </button>
-            ))}
+            <div className="mt-6 grid gap-4 md:grid-cols-2">
+              {([
+                {
+                  role: "runner" as const,
+                  title: "Become a Runner",
+                  desc: "Get paid completing property photos, walkthroughs, occupancy checks, and other field tasks.",
+                },
+                {
+                  role: "investor" as const,
+                  title: "Join as an Investor",
+                  desc: "Post property tasks and hire local runners nationwide.",
+                },
+              ]).map((c) => (
+                <button
+                  key={c.role}
+                  type="button"
+                  onClick={() => setActiveRole(c.role)}
+                  className="text-left rounded-xl border border-border bg-background/60 p-5 hover:border-primary hover:shadow-glow transition group"
+                >
+                  <div className="text-lg font-semibold tracking-tight group-hover:text-primary">{c.title}</div>
+                  <p className="mt-2 text-sm text-muted-foreground">{c.desc}</p>
+                  <div className="mt-4 text-sm font-medium text-primary">Continue →</div>
+                </button>
+              ))}
+            </div>
+
+            <p className="mt-6 text-sm text-muted-foreground text-center">
+              Already have an account?{" "}
+              <Link to="/login" className="text-primary hover:underline">Sign in</Link>
+            </p>
           </div>
+        ) : (
+        <div className="mx-auto max-w-md rounded-2xl border border-border bg-card/60 backdrop-blur p-6 md:p-8 shadow-card">
+          <button
+            type="button"
+            onClick={() => setActiveRole(null)}
+            className="text-xs text-muted-foreground hover:text-foreground mb-3"
+          >
+            ← Change role
+          </button>
+          <h1 className="text-2xl font-bold tracking-tight">Create your {activeRole} account</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Signing up as {activeRole === "runner" ? "a Runner" : "an Investor"}.
+          </p>
 
           <form onSubmit={handleSubmit} className="mt-6 space-y-4">
             <div className="space-y-1.5">
@@ -144,9 +183,10 @@ function SignupPage() {
 
           <p className="mt-6 text-sm text-muted-foreground text-center">
             Already have an account?{" "}
-            <Link to="/login" search={{ redirect }} className="text-primary hover:underline">Sign in</Link>
+            <Link to="/login" search={{ redirect: postSignupRedirect }} className="text-primary hover:underline">Sign in</Link>
           </p>
         </div>
+        )}
       </div>
     </div>
   );
