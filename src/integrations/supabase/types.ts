@@ -282,6 +282,51 @@ export type Database = {
         }
         Relationships: []
       }
+      invoices: {
+        Row: {
+          amount_cents: number
+          created_at: string
+          currency: string
+          description: string | null
+          due_at: string | null
+          id: string
+          investor_id: string
+          paid_at: string | null
+          status: string
+          stripe_invoice_id: string | null
+          task_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          amount_cents: number
+          created_at?: string
+          currency?: string
+          description?: string | null
+          due_at?: string | null
+          id?: string
+          investor_id: string
+          paid_at?: string | null
+          status?: string
+          stripe_invoice_id?: string | null
+          task_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          amount_cents?: number
+          created_at?: string
+          currency?: string
+          description?: string | null
+          due_at?: string | null
+          id?: string
+          investor_id?: string
+          paid_at?: string | null
+          status?: string
+          stripe_invoice_id?: string | null
+          task_id?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       message_attachments: {
         Row: {
           bucket: string
@@ -462,33 +507,119 @@ export type Database = {
           },
         ]
       }
+      payout_methods: {
+        Row: {
+          created_at: string
+          details: Json
+          display_name: string | null
+          id: string
+          is_default: boolean
+          method_type: string
+          updated_at: string
+          user_id: string
+          verified: boolean
+        }
+        Insert: {
+          created_at?: string
+          details?: Json
+          display_name?: string | null
+          id?: string
+          is_default?: boolean
+          method_type: string
+          updated_at?: string
+          user_id: string
+          verified?: boolean
+        }
+        Update: {
+          created_at?: string
+          details?: Json
+          display_name?: string | null
+          id?: string
+          is_default?: boolean
+          method_type?: string
+          updated_at?: string
+          user_id?: string
+          verified?: boolean
+        }
+        Relationships: []
+      }
+      payout_requests: {
+        Row: {
+          amount_cents: number
+          created_at: string
+          currency: string
+          id: string
+          notes: string | null
+          payout_method_id: string | null
+          processed_at: string | null
+          processed_by: string | null
+          requested_at: string
+          runner_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          amount_cents: number
+          created_at?: string
+          currency?: string
+          id?: string
+          notes?: string | null
+          payout_method_id?: string | null
+          processed_at?: string | null
+          processed_by?: string | null
+          requested_at?: string
+          runner_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          amount_cents?: number
+          created_at?: string
+          currency?: string
+          id?: string
+          notes?: string | null
+          payout_method_id?: string | null
+          processed_at?: string | null
+          processed_by?: string | null
+          requested_at?: string
+          runner_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           account_status: string
           availability_status: string
           avatar_url: string | null
           average_rating: number
+          background_check_verified: boolean
           bio: string | null
           city: string | null
           company_description: string | null
           company_name: string | null
+          company_verified: boolean
           completed_tasks_count: number
           cover_photo_url: string | null
           created_at: string
           dashboard_prefs: Json
           deletion_requested_at: string | null
           email: string | null
+          email_verified: boolean
           experience_level: string | null
           featured: boolean
           full_name: string | null
           headline: string | null
           hourly_rate: number | null
           id: string
+          identity_verified: boolean
           markets_served: string | null
           monthly_deal_volume: string | null
           notification_prefs: Json
           phone: string | null
           phone_public: boolean
+          phone_verified: boolean
           preferred_markets: string | null
           preferred_payout_max: number | null
           preferred_payout_min: number | null
@@ -497,6 +628,7 @@ export type Database = {
           profile_photo_url: string | null
           profile_slug: string | null
           public_profile_enabled: boolean
+          repeat_client_count: number
           response_time: string | null
           review_count: number
           service_radius: string | null
@@ -520,27 +652,32 @@ export type Database = {
           availability_status?: string
           avatar_url?: string | null
           average_rating?: number
+          background_check_verified?: boolean
           bio?: string | null
           city?: string | null
           company_description?: string | null
           company_name?: string | null
+          company_verified?: boolean
           completed_tasks_count?: number
           cover_photo_url?: string | null
           created_at?: string
           dashboard_prefs?: Json
           deletion_requested_at?: string | null
           email?: string | null
+          email_verified?: boolean
           experience_level?: string | null
           featured?: boolean
           full_name?: string | null
           headline?: string | null
           hourly_rate?: number | null
           id?: string
+          identity_verified?: boolean
           markets_served?: string | null
           monthly_deal_volume?: string | null
           notification_prefs?: Json
           phone?: string | null
           phone_public?: boolean
+          phone_verified?: boolean
           preferred_markets?: string | null
           preferred_payout_max?: number | null
           preferred_payout_min?: number | null
@@ -549,6 +686,7 @@ export type Database = {
           profile_photo_url?: string | null
           profile_slug?: string | null
           public_profile_enabled?: boolean
+          repeat_client_count?: number
           response_time?: string | null
           review_count?: number
           service_radius?: string | null
@@ -572,27 +710,32 @@ export type Database = {
           availability_status?: string
           avatar_url?: string | null
           average_rating?: number
+          background_check_verified?: boolean
           bio?: string | null
           city?: string | null
           company_description?: string | null
           company_name?: string | null
+          company_verified?: boolean
           completed_tasks_count?: number
           cover_photo_url?: string | null
           created_at?: string
           dashboard_prefs?: Json
           deletion_requested_at?: string | null
           email?: string | null
+          email_verified?: boolean
           experience_level?: string | null
           featured?: boolean
           full_name?: string | null
           headline?: string | null
           hourly_rate?: number | null
           id?: string
+          identity_verified?: boolean
           markets_served?: string | null
           monthly_deal_volume?: string | null
           notification_prefs?: Json
           phone?: string | null
           phone_public?: boolean
+          phone_verified?: boolean
           preferred_markets?: string | null
           preferred_payout_max?: number | null
           preferred_payout_min?: number | null
@@ -601,6 +744,7 @@ export type Database = {
           profile_photo_url?: string | null
           profile_slug?: string | null
           public_profile_enabled?: boolean
+          repeat_client_count?: number
           response_time?: string | null
           review_count?: number
           service_radius?: string | null
@@ -675,6 +819,42 @@ export type Database = {
         }
         Relationships: []
       }
+      reviews: {
+        Row: {
+          comment: string | null
+          created_at: string
+          direction: string
+          id: string
+          rating: number
+          reviewee_id: string
+          reviewer_id: string
+          task_id: string
+          updated_at: string
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string
+          direction: string
+          id?: string
+          rating: number
+          reviewee_id: string
+          reviewer_id: string
+          task_id: string
+          updated_at?: string
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string
+          direction?: string
+          id?: string
+          rating?: number
+          reviewee_id?: string
+          reviewer_id?: string
+          task_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       runner_profiles: {
         Row: {
           created_at: string
@@ -701,6 +881,27 @@ export type Database = {
           payouts_enabled?: boolean
           stripe_account_id?: string | null
           updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      saved_tasks: {
+        Row: {
+          created_at: string
+          id: string
+          task_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          task_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          task_id?: string
           user_id?: string
         }
         Relationships: []
@@ -762,6 +963,36 @@ export type Database = {
           id?: string
           metadata?: Json | null
           reason?: string
+        }
+        Relationships: []
+      }
+      task_applications: {
+        Row: {
+          created_at: string
+          id: string
+          message: string | null
+          runner_id: string
+          status: string
+          task_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message?: string | null
+          runner_id: string
+          status?: string
+          task_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string | null
+          runner_id?: string
+          status?: string
+          task_id?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -865,6 +1096,45 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      task_templates: {
+        Row: {
+          created_at: string
+          default_payout: number | null
+          description: string | null
+          id: string
+          is_system: boolean
+          name: string
+          owner_id: string | null
+          task_type: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          default_payout?: number | null
+          description?: string | null
+          id?: string
+          is_system?: boolean
+          name: string
+          owner_id?: string | null
+          task_type: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          default_payout?: number | null
+          description?: string | null
+          id?: string
+          is_system?: boolean
+          name?: string
+          owner_id?: string | null
+          task_type?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       tasks: {
         Row: {
