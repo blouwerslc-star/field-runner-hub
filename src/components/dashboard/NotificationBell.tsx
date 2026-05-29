@@ -16,13 +16,6 @@ export function NotificationBell() {
   const fetchFn = useServerFn(listNotifications);
   const markFn = useServerFn(markNotificationRead);
 
-  const { data } = useQuery({
-    queryKey: ["notifications"],
-    queryFn: () => fetchFn(),
-    refetchInterval: 60_000,
-    enabled: !!userId,
-  });
-
   const [userId, setUserId] = useState<string | null>(null);
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => setUserId(data.user?.id ?? null));
@@ -31,6 +24,13 @@ export function NotificationBell() {
     });
     return () => subscription.unsubscribe();
   }, []);
+
+  const { data } = useQuery({
+    queryKey: ["notifications"],
+    queryFn: () => fetchFn(),
+    refetchInterval: 60_000,
+    enabled: !!userId,
+  });
 
   useEffect(() => {
     if (!userId) return;
