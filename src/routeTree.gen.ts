@@ -70,6 +70,7 @@ import { Route as AuthenticatedAdminProfilesRouteImport } from './routes/_authen
 import { Route as AuthenticatedAdminModerationRouteImport } from './routes/_authenticated/admin.moderation'
 import { Route as AuthenticatedAdminMarketplaceHealthRouteImport } from './routes/_authenticated/admin.marketplace-health'
 import { Route as AuthenticatedAdminDispatchRouteImport } from './routes/_authenticated/admin.dispatch'
+import { Route as AuthenticatedAdminBackgroundChecksRouteImport } from './routes/_authenticated/admin.background-checks'
 import { Route as AuthenticatedAdminAnalyticsRouteImport } from './routes/_authenticated/admin.analytics'
 import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
@@ -77,7 +78,6 @@ import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/e
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
-import { Route as ApiPublicCheckrWebhookRouteImport } from './routes/api/public/checkr/webhook'
 
 const WaitlistRoute = WaitlistRouteImport.update({
   id: '/waitlist',
@@ -414,6 +414,12 @@ const AuthenticatedAdminDispatchRoute =
     path: '/dispatch',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminBackgroundChecksRoute =
+  AuthenticatedAdminBackgroundChecksRouteImport.update({
+    id: '/background-checks',
+    path: '/background-checks',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminAnalyticsRoute =
   AuthenticatedAdminAnalyticsRouteImport.update({
     id: '/analytics',
@@ -454,11 +460,6 @@ const ApiPublicPaymentsWebhookRoute =
     path: '/api/public/payments/webhook',
     getParentRoute: () => rootRouteImport,
   } as any)
-const ApiPublicCheckrWebhookRoute = ApiPublicCheckrWebhookRouteImport.update({
-  id: '/api/public/checkr/webhook',
-  path: '/api/public/checkr/webhook',
-  getParentRoute: () => rootRouteImport,
-} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -494,6 +495,7 @@ export interface FileRoutesByFullPath {
   '/profile/$slug': typeof ProfileSlugRoute
   '/tasks/$taskId': typeof TasksTaskIdRoute
   '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
+  '/admin/background-checks': typeof AuthenticatedAdminBackgroundChecksRoute
   '/admin/dispatch': typeof AuthenticatedAdminDispatchRoute
   '/admin/marketplace-health': typeof AuthenticatedAdminMarketplaceHealthRoute
   '/admin/moderation': typeof AuthenticatedAdminModerationRoute
@@ -522,7 +524,6 @@ export interface FileRoutesByFullPath {
   '/dashboard/': typeof AuthenticatedDashboardIndexRoute
   '/messages/': typeof AuthenticatedMessagesIndexRoute
   '/settings/': typeof AuthenticatedSettingsIndexRoute
-  '/api/public/checkr/webhook': typeof ApiPublicCheckrWebhookRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -561,6 +562,7 @@ export interface FileRoutesByTo {
   '/profile/$slug': typeof ProfileSlugRoute
   '/tasks/$taskId': typeof TasksTaskIdRoute
   '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
+  '/admin/background-checks': typeof AuthenticatedAdminBackgroundChecksRoute
   '/admin/dispatch': typeof AuthenticatedAdminDispatchRoute
   '/admin/marketplace-health': typeof AuthenticatedAdminMarketplaceHealthRoute
   '/admin/moderation': typeof AuthenticatedAdminModerationRoute
@@ -589,7 +591,6 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AuthenticatedDashboardIndexRoute
   '/messages': typeof AuthenticatedMessagesIndexRoute
   '/settings': typeof AuthenticatedSettingsIndexRoute
-  '/api/public/checkr/webhook': typeof ApiPublicCheckrWebhookRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -633,6 +634,7 @@ export interface FileRoutesById {
   '/profile/$slug': typeof ProfileSlugRoute
   '/tasks/$taskId': typeof TasksTaskIdRoute
   '/_authenticated/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
+  '/_authenticated/admin/background-checks': typeof AuthenticatedAdminBackgroundChecksRoute
   '/_authenticated/admin/dispatch': typeof AuthenticatedAdminDispatchRoute
   '/_authenticated/admin/marketplace-health': typeof AuthenticatedAdminMarketplaceHealthRoute
   '/_authenticated/admin/moderation': typeof AuthenticatedAdminModerationRoute
@@ -661,7 +663,6 @@ export interface FileRoutesById {
   '/_authenticated/dashboard/': typeof AuthenticatedDashboardIndexRoute
   '/_authenticated/messages/': typeof AuthenticatedMessagesIndexRoute
   '/_authenticated/settings/': typeof AuthenticatedSettingsIndexRoute
-  '/api/public/checkr/webhook': typeof ApiPublicCheckrWebhookRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -705,6 +706,7 @@ export interface FileRouteTypes {
     | '/profile/$slug'
     | '/tasks/$taskId'
     | '/admin/analytics'
+    | '/admin/background-checks'
     | '/admin/dispatch'
     | '/admin/marketplace-health'
     | '/admin/moderation'
@@ -733,7 +735,6 @@ export interface FileRouteTypes {
     | '/dashboard/'
     | '/messages/'
     | '/settings/'
-    | '/api/public/checkr/webhook'
     | '/api/public/payments/webhook'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -772,6 +773,7 @@ export interface FileRouteTypes {
     | '/profile/$slug'
     | '/tasks/$taskId'
     | '/admin/analytics'
+    | '/admin/background-checks'
     | '/admin/dispatch'
     | '/admin/marketplace-health'
     | '/admin/moderation'
@@ -800,7 +802,6 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/messages'
     | '/settings'
-    | '/api/public/checkr/webhook'
     | '/api/public/payments/webhook'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -843,6 +844,7 @@ export interface FileRouteTypes {
     | '/profile/$slug'
     | '/tasks/$taskId'
     | '/_authenticated/admin/analytics'
+    | '/_authenticated/admin/background-checks'
     | '/_authenticated/admin/dispatch'
     | '/_authenticated/admin/marketplace-health'
     | '/_authenticated/admin/moderation'
@@ -871,7 +873,6 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard/'
     | '/_authenticated/messages/'
     | '/_authenticated/settings/'
-    | '/api/public/checkr/webhook'
     | '/api/public/payments/webhook'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -900,7 +901,6 @@ export interface RootRouteChildren {
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
   ProfileSlugRoute: typeof ProfileSlugRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
-  ApiPublicCheckrWebhookRoute: typeof ApiPublicCheckrWebhookRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
@@ -1338,6 +1338,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminDispatchRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/background-checks': {
+      id: '/_authenticated/admin/background-checks'
+      path: '/background-checks'
+      fullPath: '/admin/background-checks'
+      preLoaderRoute: typeof AuthenticatedAdminBackgroundChecksRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/analytics': {
       id: '/_authenticated/admin/analytics'
       path: '/analytics'
@@ -1387,18 +1394,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicPaymentsWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/public/checkr/webhook': {
-      id: '/api/public/checkr/webhook'
-      path: '/api/public/checkr/webhook'
-      fullPath: '/api/public/checkr/webhook'
-      preLoaderRoute: typeof ApiPublicCheckrWebhookRouteImport
-      parentRoute: typeof rootRouteImport
-    }
   }
 }
 
 interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminAnalyticsRoute: typeof AuthenticatedAdminAnalyticsRoute
+  AuthenticatedAdminBackgroundChecksRoute: typeof AuthenticatedAdminBackgroundChecksRoute
   AuthenticatedAdminDispatchRoute: typeof AuthenticatedAdminDispatchRoute
   AuthenticatedAdminMarketplaceHealthRoute: typeof AuthenticatedAdminMarketplaceHealthRoute
   AuthenticatedAdminModerationRoute: typeof AuthenticatedAdminModerationRoute
@@ -1410,6 +1411,8 @@ interface AuthenticatedAdminRouteChildren {
 
 const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminAnalyticsRoute: AuthenticatedAdminAnalyticsRoute,
+  AuthenticatedAdminBackgroundChecksRoute:
+    AuthenticatedAdminBackgroundChecksRoute,
   AuthenticatedAdminDispatchRoute: AuthenticatedAdminDispatchRoute,
   AuthenticatedAdminMarketplaceHealthRoute:
     AuthenticatedAdminMarketplaceHealthRoute,
@@ -1558,7 +1561,6 @@ const rootRouteChildren: RootRouteChildren = {
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
   ProfileSlugRoute: ProfileSlugRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
-  ApiPublicCheckrWebhookRoute: ApiPublicCheckrWebhookRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,

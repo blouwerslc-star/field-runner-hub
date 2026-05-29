@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { BackgroundCheckCheckout } from "@/components/payments/BackgroundCheckCheckout";
 import { getBackgroundCheckStatus } from "@/lib/background-check.functions";
-import { Loader2, ShieldCheck, ExternalLink, CheckCircle2 } from "lucide-react";
+import { Loader2, ShieldCheck, CheckCircle2, XCircle, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/_authenticated/profile/background-check")({
@@ -17,17 +17,19 @@ function BackgroundCheckPage() {
   const { data, isLoading } = useQuery({
     queryKey: ["bg-check-status"],
     queryFn: () => fn(),
-    refetchInterval: 8000,
+    refetchInterval: 15000,
   });
   const p = (data?.profile ?? {}) as any;
   const returnUrl = typeof window !== "undefined"
     ? `${window.location.origin}/profile/background-check?paid=1`
     : "/profile/background-check";
 
+  const status = (p.checkr_status as string | null) ?? null;
+
   return (
     <DashboardShell
       title="Background Check Verification"
-      subtitle="Powered by Checkr. One-time $39.99 — unlocks your Level 4 Verified badge."
+      subtitle="One-time $24.99 — unlocks your Verified badge once approved."
     >
       {isLoading ? (
         <Loader2 className="size-5 animate-spin text-primary" />
@@ -42,30 +44,32 @@ function BackgroundCheckPage() {
             <Button variant="outline">Back to verification</Button>
           </Link>
         </div>
-      ) : p.checkr_invitation_url ? (
-        <div className="rounded-2xl border border-border bg-card/60 p-8 space-y-4 text-center">
-          <ShieldCheck className="size-10 text-primary mx-auto" />
-          <h2 className="text-xl font-semibold">Finish your background check</h2>
+      ) : status === "failed" ? (
+        <div className="rounded-2xl border border-destructive/30 bg-destructive/5 p-8 text-center space-y-3">
+          <XCircle className="size-10 text-destructive mx-auto" />
+          <h2 className="text-xl font-semibold">Background check did not pass</h2>
           <p className="text-sm text-muted-foreground">
-            We received your payment. Complete the secure Checkr form to submit your info.
-            Most reports finish in 24–72 hours.
+            Unfortunately your background check was not approved. Contact support if you believe this is a mistake.
           </p>
-          <a href={p.checkr_invitation_url} target="_blank" rel="noopener noreferrer">
-            <Button size="lg" className="gap-2">
-              Open Checkr <ExternalLink className="size-4" />
-            </Button>
-          </a>
-          <p className="text-xs text-muted-foreground">
-            Status: <span className="capitalize">{p.checkr_status?.replace(/_/g, " ") || "pending"}</span>
-          </p>
+          <Link to="/help">
+            <Button variant="outline">Contact support</Button>
+          </Link>
         </div>
       ) : p.background_check_paid_at ? (
         <div className="rounded-2xl border border-border bg-card/60 p-8 text-center space-y-3">
-          <Loader2 className="size-8 animate-spin text-primary mx-auto" />
-          <h2 className="text-xl font-semibold">Generating your Checkr invitation…</h2>
+          <Clock className="size-10 text-primary mx-auto" />
+          <h2 className="text-xl font-semibold">Background check in progress</h2>
           <p className="text-sm text-muted-foreground">
-            This usually takes a few seconds. Refresh if it doesn't appear.
+            We received your payment on{" "}
+            {new Date(p.background_check_paid_at).toLocaleDateString()}. Our team has been notified and will run your
+            check within 1 business day. Most results come back in 24–72 hours after that.
           </p>
+          <p className="text-xs text-muted-foreground">
+            Status: <span className="capitalize font-medium">{status || "pending"}</span>
+          </p>
+          <Link to="/profile/verification">
+            <Button variant="outline">Back to verification</Button>
+          </Link>
         </div>
       ) : (
         <div className="grid lg:grid-cols-[1fr_1fr] gap-6">
@@ -80,8 +84,8 @@ function BackgroundCheckPage() {
             </ul>
             <div className="pt-4 border-t border-border">
               <p className="text-xs text-muted-foreground">
-                Run by <strong>Checkr</strong>, the same trusted provider used by Uber, DoorDash, and Instacart.
-                Your data is encrypted and never shared.
+                Background checks are run through <strong>Checkr</strong>, the same provider used by Uber, DoorDash,
+                and Instacart. Your data is encrypted and never shared.
               </p>
             </div>
           </div>
