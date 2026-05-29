@@ -266,6 +266,34 @@ export const sendMessage = createServerFn({ method: "POST" })
       .eq("conversation_id", data.conversationId)
       .eq("user_id", userId);
 
+    // Email the other participants (best-effort, non-blocking)
+    try {
+      const { notifyUserByEmail } = await import("./email-sender.server");
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      const [{ data: parts }, { data: senderProfile }] = await Promise.all([
+        supabaseAdmin
+          .from("conversation_participants")
+          .select("user_id")
+          .eq("conversation_id", data.conversationId),
+        supabaseAdmin.from("profiles").select("full_name").eq("user_id", userId).maybeSingle(),
+      ]);
+      const senderName = (senderProfile as any)?.full_name ?? "Someone";
+      const recipients = (parts ?? []).map((p: any) => p.user_id).filter((u: string) => u !== userId);
+      await Promise.all(
+        recipients.map((uid) =>
+          notifyUserByEmail({
+            userId: uid,
+            title: `New message from ${senderName}`,
+            body: data.body.slice(0, 200),
+            link: `/messages/${data.conversationId}`,
+            ctaLabel: "View message",
+          }),
+        ),
+      );
+    } catch (err) {
+      console.error("message email notify failed", err);
+    }
+
     return { messageId: msg.id };
   });
 
