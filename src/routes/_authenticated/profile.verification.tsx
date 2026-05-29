@@ -131,13 +131,13 @@ function VerificationPage() {
                 {nextLevel === 4 && !isPending && (
                   <div className="mt-4 rounded-xl border border-primary/40 bg-background/40 p-4 space-y-2">
                     <div className="text-sm">
-                      <strong>$39.99 one-time</strong> — runs a Checkr background check
+                      <strong>$24.99 one-time</strong> — covers a full background check
                       (SSN trace, national + county criminal, sex offender, global watchlist).
-                      Approval is automatic once Checkr returns a clear result.
+                      Our team initiates the check after payment; results typically come back in 24–72 hours.
                     </div>
                     <Link to="/profile/background-check">
                       <Button size="lg" className="bg-gradient-to-r from-primary to-primary/80 gap-2">
-                        <ShieldCheck className="size-4" /> Pay $39.99 & Start Background Check
+                        <ShieldCheck className="size-4" /> Get Verified — $24.99
                       </Button>
                     </Link>
                   </div>
