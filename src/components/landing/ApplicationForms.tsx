@@ -72,7 +72,7 @@ async function createAccount(opts: {
   phone: string;
   role: "runner" | "investor";
   extra: RunnerMeta | InvestorMeta;
-  finalizeProfile: (payload: { data: Record<string, unknown> }) => Promise<{ profileStatus: string }>;
+  finalizeProfile: (payload: { data: any }) => Promise<{ profileStatus: string }>;
 }): Promise<{ hasSession: boolean; debug: SignupDebug }> {
   const { data, error } = await supabase.auth.signUp({
     email: opts.email,
