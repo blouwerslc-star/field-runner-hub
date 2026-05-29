@@ -1,7 +1,7 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { LogOut, UserCog, Compass, Settings, MessageSquare, Store, Briefcase, Wallet, Activity, ShieldAlert, Menu, DollarSign, BarChart3 } from "lucide-react";
+import { LogOut, UserCog, Compass, Settings, MessageSquare, Store, Briefcase, Wallet, Activity, ShieldAlert, Menu, DollarSign, BarChart3, ShieldCheck } from "lucide-react";
 import { BrandLogo } from "@/components/brand/BrandLogo";
 import { Toaster } from "@/components/ui/sonner";
 import { NotificationBell } from "@/components/dashboard/NotificationBell";
@@ -21,6 +21,7 @@ const NAV_ITEMS = [
   { to: "/activity", label: "Activity", icon: Activity },
   { to: "/disputes", label: "Disputes", icon: ShieldAlert },
   { to: "/messages", label: "Messages", icon: MessageSquare },
+  { to: "/profile/verification", label: "Get Verified", icon: ShieldCheck },
   { to: "/profile/edit", label: "My profile", icon: UserCog },
   { to: "/settings", label: "Settings", icon: Settings },
 ] as const;

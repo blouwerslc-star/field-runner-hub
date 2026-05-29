@@ -4,7 +4,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
 const PUBLIC_COLUMNS =
-  "user_id, profile_slug, full_name, city, state, profile_photo_url, cover_photo_url, headline, bio, services_offered, markets_served, experience_level, years_experience, task_rate, hourly_rate, availability_status, average_rating, review_count, completed_tasks_count, response_time, verified_status, featured, turnaround_time, task_types, transportation_available, service_radius, company_name, company_description, monthly_deal_volume, created_at";
+  "user_id, profile_slug, full_name, city, state, profile_photo_url, cover_photo_url, headline, bio, services_offered, markets_served, experience_level, years_experience, task_rate, hourly_rate, availability_status, average_rating, review_count, completed_tasks_count, response_time, verified_status, featured, turnaround_time, task_types, transportation_available, service_radius, company_name, company_description, monthly_deal_volume, created_at, verification_level, verification_status, email_verified, phone_verified, identity_verified, background_check_verified";
 
 export const getMyProfile = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
@@ -107,6 +107,8 @@ export const listPublicProfiles = createServerFn({ method: "POST" })
     if (data.service) q = q.contains("services_offered", [data.service]);
     if (data.availability) q = q.eq("availability_status", data.availability);
 
+    // Verified runners always rank first
+    q = q.order("verification_level", { ascending: false });
     if (data.sort === "rating") q = q.order("average_rating", { ascending: false });
     else if (data.sort === "completed") q = q.order("completed_tasks_count", { ascending: false });
     else if (data.sort === "newest") q = q.order("created_at", { ascending: false });

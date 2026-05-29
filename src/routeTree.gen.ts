@@ -56,12 +56,14 @@ import { Route as AuthenticatedSettingsPaymentsRouteImport } from './routes/_aut
 import { Route as AuthenticatedSettingsNotificationsRouteImport } from './routes/_authenticated/settings.notifications'
 import { Route as AuthenticatedSettingsAdminRouteImport } from './routes/_authenticated/settings.admin'
 import { Route as AuthenticatedSettingsAccountRouteImport } from './routes/_authenticated/settings.account'
+import { Route as AuthenticatedProfileVerificationRouteImport } from './routes/_authenticated/profile.verification'
 import { Route as AuthenticatedProfileIdVerificationRouteImport } from './routes/_authenticated/profile.id-verification'
 import { Route as AuthenticatedProfileEditRouteImport } from './routes/_authenticated/profile.edit'
 import { Route as AuthenticatedMessagesNewRouteImport } from './routes/_authenticated/messages.new'
 import { Route as AuthenticatedMessagesConversationIdRouteImport } from './routes/_authenticated/messages.$conversationId'
 import { Route as AuthenticatedDashboardRunnerRouteImport } from './routes/_authenticated/dashboard.runner'
 import { Route as AuthenticatedDashboardInvestorRouteImport } from './routes/_authenticated/dashboard.investor'
+import { Route as AuthenticatedAdminVerificationsRouteImport } from './routes/_authenticated/admin.verifications'
 import { Route as AuthenticatedAdminRunnerApprovalsRouteImport } from './routes/_authenticated/admin.runner-approvals'
 import { Route as AuthenticatedAdminProfilesRouteImport } from './routes/_authenticated/admin.profiles'
 import { Route as AuthenticatedAdminModerationRouteImport } from './routes/_authenticated/admin.moderation'
@@ -326,6 +328,12 @@ const AuthenticatedSettingsAccountRoute =
     path: '/account',
     getParentRoute: () => AuthenticatedSettingsRoute,
   } as any)
+const AuthenticatedProfileVerificationRoute =
+  AuthenticatedProfileVerificationRouteImport.update({
+    id: '/profile/verification',
+    path: '/profile/verification',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedProfileIdVerificationRoute =
   AuthenticatedProfileIdVerificationRouteImport.update({
     id: '/profile/id-verification',
@@ -361,6 +369,12 @@ const AuthenticatedDashboardInvestorRoute =
     id: '/dashboard/investor',
     path: '/dashboard/investor',
     getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedAdminVerificationsRoute =
+  AuthenticatedAdminVerificationsRouteImport.update({
+    id: '/verifications',
+    path: '/verifications',
+    getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
 const AuthenticatedAdminRunnerApprovalsRoute =
   AuthenticatedAdminRunnerApprovalsRouteImport.update({
@@ -472,12 +486,14 @@ export interface FileRoutesByFullPath {
   '/admin/moderation': typeof AuthenticatedAdminModerationRoute
   '/admin/profiles': typeof AuthenticatedAdminProfilesRoute
   '/admin/runner-approvals': typeof AuthenticatedAdminRunnerApprovalsRoute
+  '/admin/verifications': typeof AuthenticatedAdminVerificationsRoute
   '/dashboard/investor': typeof AuthenticatedDashboardInvestorRoute
   '/dashboard/runner': typeof AuthenticatedDashboardRunnerRoute
   '/messages/$conversationId': typeof AuthenticatedMessagesConversationIdRoute
   '/messages/new': typeof AuthenticatedMessagesNewRoute
   '/profile/edit': typeof AuthenticatedProfileEditRoute
   '/profile/id-verification': typeof AuthenticatedProfileIdVerificationRoute
+  '/profile/verification': typeof AuthenticatedProfileVerificationRoute
   '/settings/account': typeof AuthenticatedSettingsAccountRoute
   '/settings/admin': typeof AuthenticatedSettingsAdminRoute
   '/settings/notifications': typeof AuthenticatedSettingsNotificationsRoute
@@ -535,12 +551,14 @@ export interface FileRoutesByTo {
   '/admin/moderation': typeof AuthenticatedAdminModerationRoute
   '/admin/profiles': typeof AuthenticatedAdminProfilesRoute
   '/admin/runner-approvals': typeof AuthenticatedAdminRunnerApprovalsRoute
+  '/admin/verifications': typeof AuthenticatedAdminVerificationsRoute
   '/dashboard/investor': typeof AuthenticatedDashboardInvestorRoute
   '/dashboard/runner': typeof AuthenticatedDashboardRunnerRoute
   '/messages/$conversationId': typeof AuthenticatedMessagesConversationIdRoute
   '/messages/new': typeof AuthenticatedMessagesNewRoute
   '/profile/edit': typeof AuthenticatedProfileEditRoute
   '/profile/id-verification': typeof AuthenticatedProfileIdVerificationRoute
+  '/profile/verification': typeof AuthenticatedProfileVerificationRoute
   '/settings/account': typeof AuthenticatedSettingsAccountRoute
   '/settings/admin': typeof AuthenticatedSettingsAdminRoute
   '/settings/notifications': typeof AuthenticatedSettingsNotificationsRoute
@@ -603,12 +621,14 @@ export interface FileRoutesById {
   '/_authenticated/admin/moderation': typeof AuthenticatedAdminModerationRoute
   '/_authenticated/admin/profiles': typeof AuthenticatedAdminProfilesRoute
   '/_authenticated/admin/runner-approvals': typeof AuthenticatedAdminRunnerApprovalsRoute
+  '/_authenticated/admin/verifications': typeof AuthenticatedAdminVerificationsRoute
   '/_authenticated/dashboard/investor': typeof AuthenticatedDashboardInvestorRoute
   '/_authenticated/dashboard/runner': typeof AuthenticatedDashboardRunnerRoute
   '/_authenticated/messages/$conversationId': typeof AuthenticatedMessagesConversationIdRoute
   '/_authenticated/messages/new': typeof AuthenticatedMessagesNewRoute
   '/_authenticated/profile/edit': typeof AuthenticatedProfileEditRoute
   '/_authenticated/profile/id-verification': typeof AuthenticatedProfileIdVerificationRoute
+  '/_authenticated/profile/verification': typeof AuthenticatedProfileVerificationRoute
   '/_authenticated/settings/account': typeof AuthenticatedSettingsAccountRoute
   '/_authenticated/settings/admin': typeof AuthenticatedSettingsAdminRoute
   '/_authenticated/settings/notifications': typeof AuthenticatedSettingsNotificationsRoute
@@ -671,12 +691,14 @@ export interface FileRouteTypes {
     | '/admin/moderation'
     | '/admin/profiles'
     | '/admin/runner-approvals'
+    | '/admin/verifications'
     | '/dashboard/investor'
     | '/dashboard/runner'
     | '/messages/$conversationId'
     | '/messages/new'
     | '/profile/edit'
     | '/profile/id-verification'
+    | '/profile/verification'
     | '/settings/account'
     | '/settings/admin'
     | '/settings/notifications'
@@ -734,12 +756,14 @@ export interface FileRouteTypes {
     | '/admin/moderation'
     | '/admin/profiles'
     | '/admin/runner-approvals'
+    | '/admin/verifications'
     | '/dashboard/investor'
     | '/dashboard/runner'
     | '/messages/$conversationId'
     | '/messages/new'
     | '/profile/edit'
     | '/profile/id-verification'
+    | '/profile/verification'
     | '/settings/account'
     | '/settings/admin'
     | '/settings/notifications'
@@ -801,12 +825,14 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/moderation'
     | '/_authenticated/admin/profiles'
     | '/_authenticated/admin/runner-approvals'
+    | '/_authenticated/admin/verifications'
     | '/_authenticated/dashboard/investor'
     | '/_authenticated/dashboard/runner'
     | '/_authenticated/messages/$conversationId'
     | '/_authenticated/messages/new'
     | '/_authenticated/profile/edit'
     | '/_authenticated/profile/id-verification'
+    | '/_authenticated/profile/verification'
     | '/_authenticated/settings/account'
     | '/_authenticated/settings/admin'
     | '/_authenticated/settings/notifications'
@@ -1188,6 +1214,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSettingsAccountRouteImport
       parentRoute: typeof AuthenticatedSettingsRoute
     }
+    '/_authenticated/profile/verification': {
+      id: '/_authenticated/profile/verification'
+      path: '/profile/verification'
+      fullPath: '/profile/verification'
+      preLoaderRoute: typeof AuthenticatedProfileVerificationRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/profile/id-verification': {
       id: '/_authenticated/profile/id-verification'
       path: '/profile/id-verification'
@@ -1229,6 +1262,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/dashboard/investor'
       preLoaderRoute: typeof AuthenticatedDashboardInvestorRouteImport
       parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/admin/verifications': {
+      id: '/_authenticated/admin/verifications'
+      path: '/verifications'
+      fullPath: '/admin/verifications'
+      preLoaderRoute: typeof AuthenticatedAdminVerificationsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
     }
     '/_authenticated/admin/runner-approvals': {
       id: '/_authenticated/admin/runner-approvals'
@@ -1324,6 +1364,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminModerationRoute: typeof AuthenticatedAdminModerationRoute
   AuthenticatedAdminProfilesRoute: typeof AuthenticatedAdminProfilesRoute
   AuthenticatedAdminRunnerApprovalsRoute: typeof AuthenticatedAdminRunnerApprovalsRoute
+  AuthenticatedAdminVerificationsRoute: typeof AuthenticatedAdminVerificationsRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
 }
 
@@ -1336,6 +1377,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminProfilesRoute: AuthenticatedAdminProfilesRoute,
   AuthenticatedAdminRunnerApprovalsRoute:
     AuthenticatedAdminRunnerApprovalsRoute,
+  AuthenticatedAdminVerificationsRoute: AuthenticatedAdminVerificationsRoute,
   AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
 }
 
@@ -1411,6 +1453,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedDashboardRunnerRoute: typeof AuthenticatedDashboardRunnerRoute
   AuthenticatedProfileEditRoute: typeof AuthenticatedProfileEditRoute
   AuthenticatedProfileIdVerificationRoute: typeof AuthenticatedProfileIdVerificationRoute
+  AuthenticatedProfileVerificationRoute: typeof AuthenticatedProfileVerificationRoute
   AuthenticatedDashboardIndexRoute: typeof AuthenticatedDashboardIndexRoute
 }
 
@@ -1434,6 +1477,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedProfileEditRoute: AuthenticatedProfileEditRoute,
   AuthenticatedProfileIdVerificationRoute:
     AuthenticatedProfileIdVerificationRoute,
+  AuthenticatedProfileVerificationRoute: AuthenticatedProfileVerificationRoute,
   AuthenticatedDashboardIndexRoute: AuthenticatedDashboardIndexRoute,
 }
 
@@ -1481,13 +1525,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

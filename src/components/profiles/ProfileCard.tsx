@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { RoleBadge, StarRating, LocationLine, VerifiedBadge } from "./ProfileBadges";
+import { VerificationLevelBadge } from "./VerificationLevelBadge";
 
 export type PublicProfile = {
   user_id: string;
@@ -18,6 +19,7 @@ export type PublicProfile = {
   verified_status: boolean;
   featured: boolean;
   roles: string[];
+  verification_level?: number;
 };
 
 function initials(name: string | null) {
@@ -58,6 +60,9 @@ export function ProfileCard({ p }: { p: PublicProfile }) {
             {p.verified_status && <VerifiedBadge />}
           </div>
         </div>
+        {(p.verification_level ?? 0) > 0 && (
+          <div><VerificationLevelBadge level={p.verification_level ?? 0} /></div>
+        )}
         {p.headline && <p className="text-sm text-muted-foreground line-clamp-2">{p.headline}</p>}
         <div className="flex items-center justify-between gap-2">
           <StarRating rating={p.average_rating} count={p.review_count} />
