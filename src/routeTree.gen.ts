@@ -59,6 +59,7 @@ import { Route as AuthenticatedSettingsAccountRouteImport } from './routes/_auth
 import { Route as AuthenticatedProfileVerificationRouteImport } from './routes/_authenticated/profile.verification'
 import { Route as AuthenticatedProfileIdVerificationRouteImport } from './routes/_authenticated/profile.id-verification'
 import { Route as AuthenticatedProfileEditRouteImport } from './routes/_authenticated/profile.edit'
+import { Route as AuthenticatedProfileBackgroundCheckRouteImport } from './routes/_authenticated/profile.background-check'
 import { Route as AuthenticatedMessagesNewRouteImport } from './routes/_authenticated/messages.new'
 import { Route as AuthenticatedMessagesConversationIdRouteImport } from './routes/_authenticated/messages.$conversationId'
 import { Route as AuthenticatedDashboardRunnerRouteImport } from './routes/_authenticated/dashboard.runner'
@@ -347,6 +348,12 @@ const AuthenticatedProfileEditRoute =
     path: '/profile/edit',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const AuthenticatedProfileBackgroundCheckRoute =
+  AuthenticatedProfileBackgroundCheckRouteImport.update({
+    id: '/profile/background-check',
+    path: '/profile/background-check',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedMessagesNewRoute =
   AuthenticatedMessagesNewRouteImport.update({
     id: '/new',
@@ -497,6 +504,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/runner': typeof AuthenticatedDashboardRunnerRoute
   '/messages/$conversationId': typeof AuthenticatedMessagesConversationIdRoute
   '/messages/new': typeof AuthenticatedMessagesNewRoute
+  '/profile/background-check': typeof AuthenticatedProfileBackgroundCheckRoute
   '/profile/edit': typeof AuthenticatedProfileEditRoute
   '/profile/id-verification': typeof AuthenticatedProfileIdVerificationRoute
   '/profile/verification': typeof AuthenticatedProfileVerificationRoute
@@ -563,6 +571,7 @@ export interface FileRoutesByTo {
   '/dashboard/runner': typeof AuthenticatedDashboardRunnerRoute
   '/messages/$conversationId': typeof AuthenticatedMessagesConversationIdRoute
   '/messages/new': typeof AuthenticatedMessagesNewRoute
+  '/profile/background-check': typeof AuthenticatedProfileBackgroundCheckRoute
   '/profile/edit': typeof AuthenticatedProfileEditRoute
   '/profile/id-verification': typeof AuthenticatedProfileIdVerificationRoute
   '/profile/verification': typeof AuthenticatedProfileVerificationRoute
@@ -634,6 +643,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard/runner': typeof AuthenticatedDashboardRunnerRoute
   '/_authenticated/messages/$conversationId': typeof AuthenticatedMessagesConversationIdRoute
   '/_authenticated/messages/new': typeof AuthenticatedMessagesNewRoute
+  '/_authenticated/profile/background-check': typeof AuthenticatedProfileBackgroundCheckRoute
   '/_authenticated/profile/edit': typeof AuthenticatedProfileEditRoute
   '/_authenticated/profile/id-verification': typeof AuthenticatedProfileIdVerificationRoute
   '/_authenticated/profile/verification': typeof AuthenticatedProfileVerificationRoute
@@ -705,6 +715,7 @@ export interface FileRouteTypes {
     | '/dashboard/runner'
     | '/messages/$conversationId'
     | '/messages/new'
+    | '/profile/background-check'
     | '/profile/edit'
     | '/profile/id-verification'
     | '/profile/verification'
@@ -771,6 +782,7 @@ export interface FileRouteTypes {
     | '/dashboard/runner'
     | '/messages/$conversationId'
     | '/messages/new'
+    | '/profile/background-check'
     | '/profile/edit'
     | '/profile/id-verification'
     | '/profile/verification'
@@ -841,6 +853,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard/runner'
     | '/_authenticated/messages/$conversationId'
     | '/_authenticated/messages/new'
+    | '/_authenticated/profile/background-check'
     | '/_authenticated/profile/edit'
     | '/_authenticated/profile/id-verification'
     | '/_authenticated/profile/verification'
@@ -1248,6 +1261,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedProfileEditRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/profile/background-check': {
+      id: '/_authenticated/profile/background-check'
+      path: '/profile/background-check'
+      fullPath: '/profile/background-check'
+      preLoaderRoute: typeof AuthenticatedProfileBackgroundCheckRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/messages/new': {
       id: '/_authenticated/messages/new'
       path: '/new'
@@ -1471,6 +1491,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedTemplatesRoute: typeof AuthenticatedTemplatesRoute
   AuthenticatedDashboardInvestorRoute: typeof AuthenticatedDashboardInvestorRoute
   AuthenticatedDashboardRunnerRoute: typeof AuthenticatedDashboardRunnerRoute
+  AuthenticatedProfileBackgroundCheckRoute: typeof AuthenticatedProfileBackgroundCheckRoute
   AuthenticatedProfileEditRoute: typeof AuthenticatedProfileEditRoute
   AuthenticatedProfileIdVerificationRoute: typeof AuthenticatedProfileIdVerificationRoute
   AuthenticatedProfileVerificationRoute: typeof AuthenticatedProfileVerificationRoute
@@ -1494,6 +1515,8 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedTemplatesRoute: AuthenticatedTemplatesRoute,
   AuthenticatedDashboardInvestorRoute: AuthenticatedDashboardInvestorRoute,
   AuthenticatedDashboardRunnerRoute: AuthenticatedDashboardRunnerRoute,
+  AuthenticatedProfileBackgroundCheckRoute:
+    AuthenticatedProfileBackgroundCheckRoute,
   AuthenticatedProfileEditRoute: AuthenticatedProfileEditRoute,
   AuthenticatedProfileIdVerificationRoute:
     AuthenticatedProfileIdVerificationRoute,
