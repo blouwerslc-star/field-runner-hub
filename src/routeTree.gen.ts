@@ -32,6 +32,7 @@ import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedRunnerDashboardRouteImport } from './routes/_authenticated/runner-dashboard'
 import { Route as AuthenticatedMessagesRouteImport } from './routes/_authenticated/messages'
 import { Route as AuthenticatedInvestorDashboardRouteImport } from './routes/_authenticated/investor-dashboard'
+import { Route as AuthenticatedApplicationsRouteImport } from './routes/_authenticated/applications'
 import { Route as AuthenticatedAdminDashboardRouteImport } from './routes/_authenticated/admin-dashboard'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedSettingsIndexRouteImport } from './routes/_authenticated/settings.index'
@@ -175,6 +176,12 @@ const AuthenticatedInvestorDashboardRoute =
   AuthenticatedInvestorDashboardRouteImport.update({
     id: '/investor-dashboard',
     path: '/investor-dashboard',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedApplicationsRoute =
+  AuthenticatedApplicationsRouteImport.update({
+    id: '/applications',
+    path: '/applications',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
 const AuthenticatedAdminDashboardRoute =
@@ -358,6 +365,7 @@ export interface FileRoutesByFullPath {
   '/waitlist': typeof WaitlistRoute
   '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/admin-dashboard': typeof AuthenticatedAdminDashboardRoute
+  '/applications': typeof AuthenticatedApplicationsRoute
   '/investor-dashboard': typeof AuthenticatedInvestorDashboardRoute
   '/messages': typeof AuthenticatedMessagesRouteWithChildren
   '/runner-dashboard': typeof AuthenticatedRunnerDashboardRoute
@@ -409,6 +417,7 @@ export interface FileRoutesByTo {
   '/terms': typeof TermsRoute
   '/waitlist': typeof WaitlistRoute
   '/admin-dashboard': typeof AuthenticatedAdminDashboardRoute
+  '/applications': typeof AuthenticatedApplicationsRoute
   '/investor-dashboard': typeof AuthenticatedInvestorDashboardRoute
   '/runner-dashboard': typeof AuthenticatedRunnerDashboardRoute
   '/checkout/return': typeof CheckoutReturnRoute
@@ -461,6 +470,7 @@ export interface FileRoutesById {
   '/waitlist': typeof WaitlistRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
   '/_authenticated/admin-dashboard': typeof AuthenticatedAdminDashboardRoute
+  '/_authenticated/applications': typeof AuthenticatedApplicationsRoute
   '/_authenticated/investor-dashboard': typeof AuthenticatedInvestorDashboardRoute
   '/_authenticated/messages': typeof AuthenticatedMessagesRouteWithChildren
   '/_authenticated/runner-dashboard': typeof AuthenticatedRunnerDashboardRoute
@@ -515,6 +525,7 @@ export interface FileRouteTypes {
     | '/waitlist'
     | '/admin'
     | '/admin-dashboard'
+    | '/applications'
     | '/investor-dashboard'
     | '/messages'
     | '/runner-dashboard'
@@ -566,6 +577,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/waitlist'
     | '/admin-dashboard'
+    | '/applications'
     | '/investor-dashboard'
     | '/runner-dashboard'
     | '/checkout/return'
@@ -617,6 +629,7 @@ export interface FileRouteTypes {
     | '/waitlist'
     | '/_authenticated/admin'
     | '/_authenticated/admin-dashboard'
+    | '/_authenticated/applications'
     | '/_authenticated/investor-dashboard'
     | '/_authenticated/messages'
     | '/_authenticated/runner-dashboard'
@@ -842,6 +855,13 @@ declare module '@tanstack/react-router' {
       path: '/investor-dashboard'
       fullPath: '/investor-dashboard'
       preLoaderRoute: typeof AuthenticatedInvestorDashboardRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/applications': {
+      id: '/_authenticated/applications'
+      path: '/applications'
+      fullPath: '/applications'
+      preLoaderRoute: typeof AuthenticatedApplicationsRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/admin-dashboard': {
@@ -1109,6 +1129,7 @@ const AuthenticatedSettingsRouteWithChildren =
 interface AuthenticatedRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRouteWithChildren
   AuthenticatedAdminDashboardRoute: typeof AuthenticatedAdminDashboardRoute
+  AuthenticatedApplicationsRoute: typeof AuthenticatedApplicationsRoute
   AuthenticatedInvestorDashboardRoute: typeof AuthenticatedInvestorDashboardRoute
   AuthenticatedMessagesRoute: typeof AuthenticatedMessagesRouteWithChildren
   AuthenticatedRunnerDashboardRoute: typeof AuthenticatedRunnerDashboardRoute
@@ -1122,6 +1143,7 @@ interface AuthenticatedRouteChildren {
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRouteWithChildren,
   AuthenticatedAdminDashboardRoute: AuthenticatedAdminDashboardRoute,
+  AuthenticatedApplicationsRoute: AuthenticatedApplicationsRoute,
   AuthenticatedInvestorDashboardRoute: AuthenticatedInvestorDashboardRoute,
   AuthenticatedMessagesRoute: AuthenticatedMessagesRouteWithChildren,
   AuthenticatedRunnerDashboardRoute: AuthenticatedRunnerDashboardRoute,
