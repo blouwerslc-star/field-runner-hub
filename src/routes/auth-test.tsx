@@ -72,15 +72,12 @@ function AuthTestPage() {
       nextResult.profileResponse = profileResult.data;
       if (profileResult.error) nextResult.profileError = profileResult.error.message;
 
-      const roleResult = await supabase
-        .from("user_roles")
-        .upsert({ user_id: userId, role: "runner" }, { onConflict: "user_id,role" })
-        .select("user_id,role")
-        .single();
-      nextResult.roleResponse = roleResult.data;
-      if (roleResult.error) nextResult.roleError = roleResult.error.message;
-
-      nextResult.ok = !profileResult.error && !roleResult.error;
+      // user_roles is intentionally not written from the client.
+      // The handle_new_user() DB trigger (SECURITY DEFINER) inserts the role
+      // from signup metadata, and the server function finalizeSignupProfile
+      // uses the service-role key for any follow-up role writes.
+      nextResult.roleResponse = { note: "Role assignment handled by DB trigger / server fn" };
+      nextResult.ok = !profileResult.error;
       setResult(nextResult);
     } catch (error) {
       nextResult.authError = error instanceof Error ? error.message : String(error);
