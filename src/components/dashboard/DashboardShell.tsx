@@ -1,7 +1,7 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { LogOut, UserCog, Compass, Settings, MessageSquare } from "lucide-react";
+import { LogOut, UserCog, Compass, Settings, MessageSquare, Store, Briefcase, Wallet } from "lucide-react";
 import { BrandLogo } from "@/components/brand/BrandLogo";
 import { Toaster } from "@/components/ui/sonner";
 import { NotificationBell } from "@/components/dashboard/NotificationBell";
@@ -43,6 +43,15 @@ export function DashboardShell({
           <div className="flex items-center gap-1">
             <Button asChild variant="ghost" size="sm">
               <Link to="/profiles"><Compass className="size-4 mr-1.5" /> Browse</Link>
+            </Button>
+            <Button asChild variant="ghost" size="sm">
+              <Link to="/tasks"><Store className="size-4 mr-1.5" /> Marketplace</Link>
+            </Button>
+            <Button asChild variant="ghost" size="sm">
+              <Link to="/applications"><Briefcase className="size-4 mr-1.5" /> Applications</Link>
+            </Button>
+            <Button asChild variant="ghost" size="sm">
+              <Link to="/billing"><Wallet className="size-4 mr-1.5" /> Billing</Link>
             </Button>
             <Button asChild variant="ghost" size="sm" className="relative">
               <Link to="/messages">
