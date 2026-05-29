@@ -4,7 +4,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { createStripeClient, getStripeErrorMessage, type StripeEnv } from "@/lib/stripe.server";
 
 const ENV_SCHEMA = z.enum(["sandbox", "live"]);
-const BG_CHECK_PRICE_CENTS = 3999; // $39.99
+export const BG_CHECK_PRICE_CENTS = 2499; // $24.99
 
 type CheckoutResult = { clientSecret: string } | { error: string };
 
@@ -38,7 +38,7 @@ export const startBackgroundCheckCheckout = createServerFn({ method: "POST" })
             currency: "usd",
             product_data: {
               name: "REI Runner — Background Check Verification",
-              description: "One-time identity & criminal background screening via Checkr.",
+              description: "One-time identity & criminal background screening.",
             },
             unit_amount: BG_CHECK_PRICE_CENTS,
           },
