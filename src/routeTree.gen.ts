@@ -34,10 +34,12 @@ import { Route as AuthenticatedRunnerDashboardRouteImport } from './routes/_auth
 import { Route as AuthenticatedReviewsRouteImport } from './routes/_authenticated/reviews'
 import { Route as AuthenticatedMessagesRouteImport } from './routes/_authenticated/messages'
 import { Route as AuthenticatedInvestorDashboardRouteImport } from './routes/_authenticated/investor-dashboard'
+import { Route as AuthenticatedDisputesRouteImport } from './routes/_authenticated/disputes'
 import { Route as AuthenticatedBillingRouteImport } from './routes/_authenticated/billing'
 import { Route as AuthenticatedApplicationsRouteImport } from './routes/_authenticated/applications'
 import { Route as AuthenticatedAdminDashboardRouteImport } from './routes/_authenticated/admin-dashboard'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
+import { Route as AuthenticatedActivityRouteImport } from './routes/_authenticated/activity'
 import { Route as AuthenticatedSettingsIndexRouteImport } from './routes/_authenticated/settings.index'
 import { Route as AuthenticatedMessagesIndexRouteImport } from './routes/_authenticated/messages.index'
 import { Route as AuthenticatedDashboardIndexRouteImport } from './routes/_authenticated/dashboard.index'
@@ -191,6 +193,11 @@ const AuthenticatedInvestorDashboardRoute =
     path: '/investor-dashboard',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const AuthenticatedDisputesRoute = AuthenticatedDisputesRouteImport.update({
+  id: '/disputes',
+  path: '/disputes',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedBillingRoute = AuthenticatedBillingRouteImport.update({
   id: '/billing',
   path: '/billing',
@@ -211,6 +218,11 @@ const AuthenticatedAdminDashboardRoute =
 const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   id: '/admin',
   path: '/admin',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedActivityRoute = AuthenticatedActivityRouteImport.update({
+  id: '/activity',
+  path: '/activity',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
 const AuthenticatedSettingsIndexRoute =
@@ -381,10 +393,12 @@ export interface FileRoutesByFullPath {
   '/tasks': typeof TasksRouteWithChildren
   '/terms': typeof TermsRoute
   '/waitlist': typeof WaitlistRoute
+  '/activity': typeof AuthenticatedActivityRoute
   '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/admin-dashboard': typeof AuthenticatedAdminDashboardRoute
   '/applications': typeof AuthenticatedApplicationsRoute
   '/billing': typeof AuthenticatedBillingRoute
+  '/disputes': typeof AuthenticatedDisputesRoute
   '/investor-dashboard': typeof AuthenticatedInvestorDashboardRoute
   '/messages': typeof AuthenticatedMessagesRouteWithChildren
   '/reviews': typeof AuthenticatedReviewsRoute
@@ -437,9 +451,11 @@ export interface FileRoutesByTo {
   '/tasks': typeof TasksRouteWithChildren
   '/terms': typeof TermsRoute
   '/waitlist': typeof WaitlistRoute
+  '/activity': typeof AuthenticatedActivityRoute
   '/admin-dashboard': typeof AuthenticatedAdminDashboardRoute
   '/applications': typeof AuthenticatedApplicationsRoute
   '/billing': typeof AuthenticatedBillingRoute
+  '/disputes': typeof AuthenticatedDisputesRoute
   '/investor-dashboard': typeof AuthenticatedInvestorDashboardRoute
   '/reviews': typeof AuthenticatedReviewsRoute
   '/runner-dashboard': typeof AuthenticatedRunnerDashboardRoute
@@ -492,10 +508,12 @@ export interface FileRoutesById {
   '/tasks': typeof TasksRouteWithChildren
   '/terms': typeof TermsRoute
   '/waitlist': typeof WaitlistRoute
+  '/_authenticated/activity': typeof AuthenticatedActivityRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
   '/_authenticated/admin-dashboard': typeof AuthenticatedAdminDashboardRoute
   '/_authenticated/applications': typeof AuthenticatedApplicationsRoute
   '/_authenticated/billing': typeof AuthenticatedBillingRoute
+  '/_authenticated/disputes': typeof AuthenticatedDisputesRoute
   '/_authenticated/investor-dashboard': typeof AuthenticatedInvestorDashboardRoute
   '/_authenticated/messages': typeof AuthenticatedMessagesRouteWithChildren
   '/_authenticated/reviews': typeof AuthenticatedReviewsRoute
@@ -550,10 +568,12 @@ export interface FileRouteTypes {
     | '/tasks'
     | '/terms'
     | '/waitlist'
+    | '/activity'
     | '/admin'
     | '/admin-dashboard'
     | '/applications'
     | '/billing'
+    | '/disputes'
     | '/investor-dashboard'
     | '/messages'
     | '/reviews'
@@ -606,9 +626,11 @@ export interface FileRouteTypes {
     | '/tasks'
     | '/terms'
     | '/waitlist'
+    | '/activity'
     | '/admin-dashboard'
     | '/applications'
     | '/billing'
+    | '/disputes'
     | '/investor-dashboard'
     | '/reviews'
     | '/runner-dashboard'
@@ -660,10 +682,12 @@ export interface FileRouteTypes {
     | '/tasks'
     | '/terms'
     | '/waitlist'
+    | '/_authenticated/activity'
     | '/_authenticated/admin'
     | '/_authenticated/admin-dashboard'
     | '/_authenticated/applications'
     | '/_authenticated/billing'
+    | '/_authenticated/disputes'
     | '/_authenticated/investor-dashboard'
     | '/_authenticated/messages'
     | '/_authenticated/reviews'
@@ -907,6 +931,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedInvestorDashboardRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/disputes': {
+      id: '/_authenticated/disputes'
+      path: '/disputes'
+      fullPath: '/disputes'
+      preLoaderRoute: typeof AuthenticatedDisputesRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/billing': {
       id: '/_authenticated/billing'
       path: '/billing'
@@ -933,6 +964,13 @@ declare module '@tanstack/react-router' {
       path: '/admin'
       fullPath: '/admin'
       preLoaderRoute: typeof AuthenticatedAdminRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/activity': {
+      id: '/_authenticated/activity'
+      path: '/activity'
+      fullPath: '/activity'
+      preLoaderRoute: typeof AuthenticatedActivityRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/settings/': {
@@ -1184,10 +1222,12 @@ const AuthenticatedSettingsRouteWithChildren =
   )
 
 interface AuthenticatedRouteChildren {
+  AuthenticatedActivityRoute: typeof AuthenticatedActivityRoute
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRouteWithChildren
   AuthenticatedAdminDashboardRoute: typeof AuthenticatedAdminDashboardRoute
   AuthenticatedApplicationsRoute: typeof AuthenticatedApplicationsRoute
   AuthenticatedBillingRoute: typeof AuthenticatedBillingRoute
+  AuthenticatedDisputesRoute: typeof AuthenticatedDisputesRoute
   AuthenticatedInvestorDashboardRoute: typeof AuthenticatedInvestorDashboardRoute
   AuthenticatedMessagesRoute: typeof AuthenticatedMessagesRouteWithChildren
   AuthenticatedReviewsRoute: typeof AuthenticatedReviewsRoute
@@ -1201,10 +1241,12 @@ interface AuthenticatedRouteChildren {
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
+  AuthenticatedActivityRoute: AuthenticatedActivityRoute,
   AuthenticatedAdminRoute: AuthenticatedAdminRouteWithChildren,
   AuthenticatedAdminDashboardRoute: AuthenticatedAdminDashboardRoute,
   AuthenticatedApplicationsRoute: AuthenticatedApplicationsRoute,
   AuthenticatedBillingRoute: AuthenticatedBillingRoute,
+  AuthenticatedDisputesRoute: AuthenticatedDisputesRoute,
   AuthenticatedInvestorDashboardRoute: AuthenticatedInvestorDashboardRoute,
   AuthenticatedMessagesRoute: AuthenticatedMessagesRouteWithChildren,
   AuthenticatedReviewsRoute: AuthenticatedReviewsRoute,
@@ -1261,3 +1303,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
