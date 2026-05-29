@@ -1,23 +1,29 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { Flag, ArrowLeft, Sparkles, Clock, ShieldCheck, Zap } from "lucide-react";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { Flag, ArrowLeft, Sparkles, Clock, ShieldCheck, Zap, Briefcase, Footprints, ArrowRight } from "lucide-react";
 import { BrandLogo } from "@/components/brand/BrandLogo";
 import { Toaster } from "@/components/ui/sonner";
-import { FieldRunnerForm } from "@/components/landing/ApplicationForms";
+import { FieldRunnerForm, ProForm } from "@/components/landing/ApplicationForms";
 
 export const Route = createFileRoute("/apply")({
+  validateSearch: (s: Record<string, unknown>) => ({
+    role:
+      s.role === "runner" || s.role === "investor"
+        ? (s.role as "runner" | "investor")
+        : undefined,
+  }),
   head: () => ({
     meta: [
-      { title: "Apply to Become a Founding Runner — REI Runner" },
+      { title: "Apply — REI Runner" },
       {
         name: "description",
         content:
-          "Apply to become a Founding Runner with REI Runner. Per-task pay, flexible schedule, no real estate license required.",
+          "Apply to REI Runner as a Field Runner or as an Investor. Your application creates your account.",
       },
-      { property: "og:title", content: "Apply to Become a Founding Runner — REI Runner" },
+      { property: "og:title", content: "Apply — REI Runner" },
       {
         property: "og:description",
         content:
-          "Apply to join the REI Runner network of local independent field runners for real estate investors.",
+          "Choose Runner or Investor and apply. Your application creates your REI Runner account.",
       },
       { property: "og:url", content: "https://reirunner.com/apply" },
     ],
@@ -27,6 +33,73 @@ export const Route = createFileRoute("/apply")({
 });
 
 function ApplyPage() {
+  const { role } = Route.useSearch();
+  const navigate = useNavigate();
+
+  if (!role) {
+    return (
+      <div className="min-h-screen bg-background text-foreground">
+        <Toaster richColors closeButton position="top-center" theme="dark" />
+        <header className="sticky top-0 z-40 backdrop-blur bg-background/70 border-b border-border/60">
+          <div className="mx-auto max-w-7xl px-5 h-16 flex items-center justify-between">
+            <Link to="/" aria-label="REI Runner home"><BrandLogo /></Link>
+            <Link to="/" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition">
+              <ArrowLeft className="size-4" /> Back
+            </Link>
+          </div>
+        </header>
+        <section className="mx-auto max-w-3xl px-5 py-14 md:py-20">
+          <div className="text-center mb-10">
+            <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-semibold tracking-widest text-primary uppercase">
+              <Sparkles className="size-3.5" /> Get started
+            </div>
+            <h1 className="mt-4 text-3xl md:text-5xl font-bold leading-tight">How do you want to join?</h1>
+            <p className="mt-4 text-muted-foreground text-base md:text-lg">
+              Pick a path. Your application will also create your REI Runner account.
+            </p>
+          </div>
+          <div className="grid sm:grid-cols-2 gap-4">
+            <button
+              onClick={() => navigate({ to: "/apply", search: { role: "runner" } })}
+              className="group text-left rounded-2xl border border-border bg-card/60 backdrop-blur p-6 md:p-7 shadow-card hover:border-primary/60 transition"
+            >
+              <div className="size-10 rounded-xl bg-primary/15 text-primary grid place-items-center mb-4">
+                <Footprints className="size-5" />
+              </div>
+              <h2 className="text-xl font-semibold">Become a Runner</h2>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Get paid completing property photos, walkthroughs, occupancy checks, and other field tasks.
+              </p>
+              <span className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-primary">
+                Apply as a Runner <ArrowRight className="size-4 group-hover:translate-x-1 transition-transform" />
+              </span>
+            </button>
+            <button
+              onClick={() => navigate({ to: "/apply", search: { role: "investor" } })}
+              className="group text-left rounded-2xl border border-border bg-card/60 backdrop-blur p-6 md:p-7 shadow-card hover:border-primary/60 transition"
+            >
+              <div className="size-10 rounded-xl bg-primary/15 text-primary grid place-items-center mb-4">
+                <Briefcase className="size-5" />
+              </div>
+              <h2 className="text-xl font-semibold">Join as an Investor</h2>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Post property tasks and hire vetted local runners nationwide.
+              </p>
+              <span className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-primary">
+                Apply as an Investor <ArrowRight className="size-4 group-hover:translate-x-1 transition-transform" />
+              </span>
+            </button>
+          </div>
+          <p className="mt-8 text-center text-sm text-muted-foreground">
+            Already have an account?{" "}
+            <Link to="/login" search={{ redirect: "/dashboard" }} className="text-primary hover:underline">Sign in</Link>
+          </p>
+        </section>
+      </div>
+    );
+  }
+
+  const isRunner = role === "runner";
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Toaster richColors closeButton position="top-center" theme="dark" />
@@ -36,25 +109,28 @@ function ApplyPage() {
           <Link to="/" aria-label="REI Runner home">
             <BrandLogo />
           </Link>
-          <Link
-            to="/"
+          <button
+            type="button"
+            onClick={() => navigate({ to: "/apply", search: {} })}
             className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition"
           >
-            <ArrowLeft className="size-4" /> Back
-          </Link>
+            <ArrowLeft className="size-4" /> Change path
+          </button>
         </div>
       </header>
 
       <section className="mx-auto max-w-3xl px-5 py-14 md:py-20">
         <div className="text-center mb-10">
           <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-semibold tracking-widest text-primary uppercase">
-            <Sparkles className="size-3.5" /> Founding Runner Program
+            <Sparkles className="size-3.5" /> {isRunner ? "Founding Runner Program" : "Investor Early Access"}
           </div>
           <h1 className="mt-4 text-3xl md:text-5xl font-bold leading-tight">
-            Become a Founding Runner
+            {isRunner ? "Become a Founding Runner" : "Apply as an Investor"}
           </h1>
           <p className="mt-4 text-muted-foreground text-base md:text-lg">
-            Join the nationwide field operations network for real estate investors.
+            {isRunner
+              ? "Join the nationwide field operations network for real estate investors."
+              : "Post property tasks and hire vetted local runners nationwide."}
           </p>
 
           <div className="mt-6 inline-flex items-center gap-2 rounded-full bg-amber-500/10 border border-amber-500/30 px-4 py-1.5 text-sm text-amber-300">
@@ -64,6 +140,7 @@ function ApplyPage() {
           </div>
         </div>
 
+        {isRunner && (
         <div className="mb-6 grid grid-cols-1 sm:grid-cols-3 gap-3">
           {[
             { icon: Zap, title: "First pick of leads", desc: "Priority routing in your market" },
@@ -77,13 +154,14 @@ function ApplyPage() {
             </div>
           ))}
         </div>
+        )}
 
         <div className="rounded-2xl border border-border bg-card/60 backdrop-blur p-6 md:p-8 shadow-card">
-          <FieldRunnerForm />
+          {isRunner ? <FieldRunnerForm /> : <ProForm />}
         </div>
 
         <p className="mt-6 text-center text-xs text-muted-foreground">
-          Takes about 3 minutes · Your info is encrypted and never sold
+          Submitting this application creates your REI Runner account.
         </p>
       </section>
     </div>
