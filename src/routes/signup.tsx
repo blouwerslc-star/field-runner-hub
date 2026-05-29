@@ -1,13 +1,16 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
+import { finalizeSignupProfile } from "@/lib/signup.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
+import { AlertCircle, Loader2 } from "lucide-react";
 import { BrandLogo } from "@/components/brand/BrandLogo";
 
 type RoleParam = "runner" | "investor";
@@ -29,12 +32,15 @@ export const Route = createFileRoute("/signup")({
 function SignupPage() {
   const { role, redirect } = Route.useSearch();
   const navigate = useNavigate();
+  const finalizeProfile = useServerFn(finalizeSignupProfile);
   const [activeRole, setActiveRole] = useState<RoleParam | null>(role ?? null);
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [phone, setPhone] = useState("");
   const [loading, setLoading] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
+  const [debug, setDebug] = useState<{ authUserId: string; email: string; role: RoleParam; profileStatus: string } | null>(null);
 
   const dashboardFor = (r: RoleParam) => (r === "investor" ? "/dashboard/investor" : "/dashboard/runner");
   const postSignupRedirect = activeRole ? (redirect ?? dashboardFor(activeRole)) : (redirect ?? "/dashboard");
@@ -49,9 +55,11 @@ function SignupPage() {
       toast.error("Password must be at least 8 characters.");
       return;
     }
+    setFormError(null);
+    setDebug(null);
     setLoading(true);
     try {
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -60,10 +68,30 @@ function SignupPage() {
         },
       });
       if (error) throw error;
-      toast.success("Account created. Check your email to confirm, then sign in.");
-      navigate({ to: "/login", search: { redirect: postSignupRedirect } });
+      if (!data.user) throw new Error("Sign-up didn't return a user. Please try again.");
+      let profileStatus = "Created by database trigger; sign in after email verification to confirm profile access.";
+      if (data.session) {
+        const result = await finalizeProfile({
+          data: {
+            userId: data.user.id,
+            email: data.user.email ?? email,
+            full_name: fullName,
+            phone,
+            role: activeRole,
+          },
+        });
+        profileStatus = result.profileStatus;
+      }
+      setDebug({ authUserId: data.user.id, email: data.user.email ?? email, role: activeRole, profileStatus });
+      if (!data.session) {
+        toast.success("Account created. Check your email to confirm, then sign in.");
+        return;
+      }
+      toast.success("Account created.");
+      navigate({ to: postSignupRedirect });
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Signup failed";
+      setFormError(msg);
       toast.error(msg);
     } finally {
       setLoading(false);
@@ -150,6 +178,24 @@ function SignupPage() {
           </p>
 
           <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+            {formError && (
+              <Alert variant="destructive">
+                <AlertCircle className="size-4" />
+                <AlertTitle>Sign-up failed</AlertTitle>
+                <AlertDescription>{formError}</AlertDescription>
+              </Alert>
+            )}
+            {debug && (
+              <Alert>
+                <AlertTitle>Signup debug</AlertTitle>
+                <AlertDescription className="space-y-1 text-xs">
+                  <div>Auth user id: {debug.authUserId}</div>
+                  <div>Email: {debug.email}</div>
+                  <div>Selected role: {debug.role}</div>
+                  <div>Profile insert: {debug.profileStatus}</div>
+                </AlertDescription>
+              </Alert>
+            )}
             <div className="space-y-1.5">
               <Label htmlFor="su-name">Full name</Label>
               <Input id="su-name" value={fullName} onChange={(e) => setFullName(e.target.value)} required maxLength={100} />

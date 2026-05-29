@@ -1,7 +1,9 @@
 import { useState, useId, cloneElement, isValidElement } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { finalizeSignupProfile } from "@/lib/signup.functions";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -28,6 +30,13 @@ type InvestorMeta = {
   company_name: string;
   markets_served: string;
   monthly_deal_volume: string;
+};
+
+type SignupDebug = {
+  authUserId: string;
+  email: string;
+  role: "runner" | "investor";
+  profileStatus: string;
 };
 
 function mapAuthError(code: string | undefined, message: string): string {
@@ -63,7 +72,8 @@ async function createAccount(opts: {
   phone: string;
   role: "runner" | "investor";
   extra: RunnerMeta | InvestorMeta;
-}): Promise<{ hasSession: boolean }> {
+  finalizeProfile: (payload: { data: any }) => Promise<{ profileStatus: string }>;
+}): Promise<{ hasSession: boolean; debug: SignupDebug }> {
   const { data, error } = await supabase.auth.signUp({
     email: opts.email,
     password: opts.password,
@@ -86,7 +96,30 @@ async function createAccount(opts: {
   if (!data.user) {
     throw new Error("Sign-up didn't return a user. Please try again.");
   }
-  return { hasSession: !!data.session };
+  let profileStatus = "Created by database trigger; sign in after email verification to confirm profile access.";
+  if (data.session) {
+    await supabase.auth.getSession();
+    const result = await opts.finalizeProfile({
+      data: {
+        userId: data.user.id,
+        email: data.user.email ?? opts.email,
+        full_name: opts.full_name,
+        phone: opts.phone,
+        role: opts.role,
+        ...opts.extra,
+      },
+    });
+    profileStatus = result.profileStatus;
+  }
+  return {
+    hasSession: !!data.session,
+    debug: {
+      authUserId: data.user.id,
+      email: data.user.email ?? opts.email,
+      role: opts.role,
+      profileStatus,
+    },
+  };
 }
 
 const RUNNER_TASK_TYPES = [
@@ -149,10 +182,12 @@ function SuccessCard({
   onReset,
   needsEmailVerification,
   email,
+  debug,
 }: {
   onReset: () => void;
   needsEmailVerification: boolean;
   email: string;
+  debug: SignupDebug | null;
 }) {
   return (
     <div className="text-center py-12 animate-fade-up">
@@ -176,6 +211,14 @@ function SuccessCard({
           <>Your account is set up. Redirecting you to your dashboard…</>
         )}
       </p>
+      {debug && (
+        <div className="mt-5 rounded-lg border border-border bg-muted/40 p-3 text-left text-xs text-muted-foreground">
+          <div><strong className="text-foreground">Auth user id:</strong> {debug.authUserId}</div>
+          <div><strong className="text-foreground">Email:</strong> {debug.email}</div>
+          <div><strong className="text-foreground">Selected role:</strong> {debug.role}</div>
+          <div><strong className="text-foreground">Profile insert:</strong> {debug.profileStatus}</div>
+        </div>
+      )}
       <Button variant="outline" className="mt-6" onClick={onReset}>
         Start over
       </Button>
@@ -185,10 +228,12 @@ function SuccessCard({
 
 export function FieldRunnerForm() {
   const navigate = useNavigate();
+  const finalizeProfile = useServerFn(finalizeSignupProfile);
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
   const [needsEmailVerification, setNeedsEmailVerification] = useState(false);
   const [submittedEmail, setSubmittedEmail] = useState("");
+  const [signupDebug, setSignupDebug] = useState<SignupDebug | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
   const [serviceRadius, setServiceRadius] = useState("");
   const [transportation, setTransportation] = useState("");
@@ -205,6 +250,7 @@ export function FieldRunnerForm() {
     setDone(false);
     setNeedsEmailVerification(false);
     setSubmittedEmail("");
+    setSignupDebug(null);
     setFormError(null);
     setServiceRadius("");
     setTransportation("");
@@ -242,12 +288,13 @@ export function FieldRunnerForm() {
 
     setSubmitting(true);
     try {
-      const { hasSession } = await createAccount({
+      const { hasSession, debug } = await createAccount({
         email,
         password,
         full_name,
         phone,
         role: "runner",
+        finalizeProfile,
         extra: {
           city,
           state,
@@ -257,6 +304,7 @@ export function FieldRunnerForm() {
         },
       });
       setSubmittedEmail(email);
+      setSignupDebug(debug);
       setNeedsEmailVerification(!hasSession);
       setDone(true);
       if (hasSession) {
@@ -281,6 +329,7 @@ export function FieldRunnerForm() {
         onReset={onReset}
         needsEmailVerification={needsEmailVerification}
         email={submittedEmail}
+        debug={signupDebug}
       />
     );
 
@@ -346,10 +395,12 @@ export function FieldRunnerForm() {
 
 export function ProForm() {
   const navigate = useNavigate();
+  const finalizeProfile = useServerFn(finalizeSignupProfile);
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
   const [needsEmailVerification, setNeedsEmailVerification] = useState(false);
   const [submittedEmail, setSubmittedEmail] = useState("");
+  const [signupDebug, setSignupDebug] = useState<SignupDebug | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
   const [dealVolume, setDealVolume] = useState("");
   const [password, setPassword] = useState("");
@@ -359,6 +410,7 @@ export function ProForm() {
     setDone(false);
     setNeedsEmailVerification(false);
     setSubmittedEmail("");
+    setSignupDebug(null);
     setFormError(null);
     setDealVolume("");
     setPassword("");
@@ -390,12 +442,13 @@ export function ProForm() {
 
     setSubmitting(true);
     try {
-      const { hasSession } = await createAccount({
+      const { hasSession, debug } = await createAccount({
         email,
         password,
         full_name,
         phone,
         role: "investor",
+        finalizeProfile,
         extra: {
           company_name,
           markets_served,
@@ -403,6 +456,7 @@ export function ProForm() {
         },
       });
       setSubmittedEmail(email);
+      setSignupDebug(debug);
       setNeedsEmailVerification(!hasSession);
       setDone(true);
       if (hasSession) {
@@ -427,6 +481,7 @@ export function ProForm() {
         onReset={onReset}
         needsEmailVerification={needsEmailVerification}
         email={submittedEmail}
+        debug={signupDebug}
       />
     );
 
