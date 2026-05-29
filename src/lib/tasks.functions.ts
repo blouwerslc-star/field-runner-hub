@@ -198,7 +198,7 @@ export const reviewSubmission = createServerFn({ method: "POST" })
     } else {
       await supabase
         .from("tasks")
-        .update({ status: "rejected" })
+        .update({ status: "revision_requested" })
         .eq("id", sub.task_id);
     }
     return { ok: true };
