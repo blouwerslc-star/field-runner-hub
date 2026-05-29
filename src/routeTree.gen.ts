@@ -33,6 +33,7 @@ import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedRunnerDashboardRouteImport } from './routes/_authenticated/runner-dashboard'
 import { Route as AuthenticatedMessagesRouteImport } from './routes/_authenticated/messages'
 import { Route as AuthenticatedInvestorDashboardRouteImport } from './routes/_authenticated/investor-dashboard'
+import { Route as AuthenticatedBillingRouteImport } from './routes/_authenticated/billing'
 import { Route as AuthenticatedApplicationsRouteImport } from './routes/_authenticated/applications'
 import { Route as AuthenticatedAdminDashboardRouteImport } from './routes/_authenticated/admin-dashboard'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
@@ -184,6 +185,11 @@ const AuthenticatedInvestorDashboardRoute =
     path: '/investor-dashboard',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const AuthenticatedBillingRoute = AuthenticatedBillingRouteImport.update({
+  id: '/billing',
+  path: '/billing',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedApplicationsRoute =
   AuthenticatedApplicationsRouteImport.update({
     id: '/applications',
@@ -372,6 +378,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/admin-dashboard': typeof AuthenticatedAdminDashboardRoute
   '/applications': typeof AuthenticatedApplicationsRoute
+  '/billing': typeof AuthenticatedBillingRoute
   '/investor-dashboard': typeof AuthenticatedInvestorDashboardRoute
   '/messages': typeof AuthenticatedMessagesRouteWithChildren
   '/runner-dashboard': typeof AuthenticatedRunnerDashboardRoute
@@ -425,6 +432,7 @@ export interface FileRoutesByTo {
   '/waitlist': typeof WaitlistRoute
   '/admin-dashboard': typeof AuthenticatedAdminDashboardRoute
   '/applications': typeof AuthenticatedApplicationsRoute
+  '/billing': typeof AuthenticatedBillingRoute
   '/investor-dashboard': typeof AuthenticatedInvestorDashboardRoute
   '/runner-dashboard': typeof AuthenticatedRunnerDashboardRoute
   '/templates': typeof AuthenticatedTemplatesRoute
@@ -479,6 +487,7 @@ export interface FileRoutesById {
   '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
   '/_authenticated/admin-dashboard': typeof AuthenticatedAdminDashboardRoute
   '/_authenticated/applications': typeof AuthenticatedApplicationsRoute
+  '/_authenticated/billing': typeof AuthenticatedBillingRoute
   '/_authenticated/investor-dashboard': typeof AuthenticatedInvestorDashboardRoute
   '/_authenticated/messages': typeof AuthenticatedMessagesRouteWithChildren
   '/_authenticated/runner-dashboard': typeof AuthenticatedRunnerDashboardRoute
@@ -535,6 +544,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/admin-dashboard'
     | '/applications'
+    | '/billing'
     | '/investor-dashboard'
     | '/messages'
     | '/runner-dashboard'
@@ -588,6 +598,7 @@ export interface FileRouteTypes {
     | '/waitlist'
     | '/admin-dashboard'
     | '/applications'
+    | '/billing'
     | '/investor-dashboard'
     | '/runner-dashboard'
     | '/templates'
@@ -641,6 +652,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin'
     | '/_authenticated/admin-dashboard'
     | '/_authenticated/applications'
+    | '/_authenticated/billing'
     | '/_authenticated/investor-dashboard'
     | '/_authenticated/messages'
     | '/_authenticated/runner-dashboard'
@@ -874,6 +886,13 @@ declare module '@tanstack/react-router' {
       path: '/investor-dashboard'
       fullPath: '/investor-dashboard'
       preLoaderRoute: typeof AuthenticatedInvestorDashboardRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/billing': {
+      id: '/_authenticated/billing'
+      path: '/billing'
+      fullPath: '/billing'
+      preLoaderRoute: typeof AuthenticatedBillingRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/applications': {
@@ -1149,6 +1168,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRouteWithChildren
   AuthenticatedAdminDashboardRoute: typeof AuthenticatedAdminDashboardRoute
   AuthenticatedApplicationsRoute: typeof AuthenticatedApplicationsRoute
+  AuthenticatedBillingRoute: typeof AuthenticatedBillingRoute
   AuthenticatedInvestorDashboardRoute: typeof AuthenticatedInvestorDashboardRoute
   AuthenticatedMessagesRoute: typeof AuthenticatedMessagesRouteWithChildren
   AuthenticatedRunnerDashboardRoute: typeof AuthenticatedRunnerDashboardRoute
@@ -1164,6 +1184,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRouteWithChildren,
   AuthenticatedAdminDashboardRoute: AuthenticatedAdminDashboardRoute,
   AuthenticatedApplicationsRoute: AuthenticatedApplicationsRoute,
+  AuthenticatedBillingRoute: AuthenticatedBillingRoute,
   AuthenticatedInvestorDashboardRoute: AuthenticatedInvestorDashboardRoute,
   AuthenticatedMessagesRoute: AuthenticatedMessagesRouteWithChildren,
   AuthenticatedRunnerDashboardRoute: AuthenticatedRunnerDashboardRoute,
