@@ -13,7 +13,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { CheckCircle2, Loader2 } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AlertCircle, CheckCircle2, Loader2, MailCheck } from "lucide-react";
 
 type RunnerMeta = {
   city: string;
@@ -28,6 +29,32 @@ type InvestorMeta = {
   markets_served: string;
   monthly_deal_volume: string;
 };
+
+function mapAuthError(code: string | undefined, message: string): string {
+  switch (code) {
+    case "weak_password":
+      return "That password is too weak or has appeared in a known data breach. Please choose a stronger, unique password (mix letters, numbers, and symbols — and don't reuse a password from another site).";
+    case "user_already_exists":
+    case "email_exists":
+      return "An account with that email already exists. Please sign in instead.";
+    case "signup_disabled":
+      return "New account sign-ups are temporarily disabled. Please try again later.";
+    case "validation_failed":
+    case "invalid_email":
+      return "That email address looks invalid. Please double-check and try again.";
+    case "over_email_send_rate_limit":
+    case "over_request_rate_limit":
+      return "Too many attempts. Please wait a minute and try again.";
+    default:
+      if (/registered|already.*exists/i.test(message)) {
+        return "An account with that email already exists. Please sign in instead.";
+      }
+      if (/password/i.test(message) && /weak|pwned|breach/i.test(message)) {
+        return "That password is too weak or has appeared in a known data breach. Please choose a stronger, unique password.";
+      }
+      return message || "Could not create your account. Please try again.";
+  }
+}
 
 async function createAccount(opts: {
   email: string;
@@ -54,13 +81,10 @@ async function createAccount(opts: {
     },
   });
   if (error) {
-    const msg = error.message || "";
-    if (/registered|exists/i.test(msg)) {
-      throw new Error(
-        "An account with that email already exists. Please sign in instead.",
-      );
-    }
-    throw new Error(msg || "Could not create your account.");
+    throw new Error(mapAuthError((error as { code?: string }).code, error.message));
+  }
+  if (!data.user) {
+    throw new Error("Sign-up didn't return a user. Please try again.");
   }
   return { hasSession: !!data.session };
 }
@@ -121,18 +145,39 @@ function TaskTypesGrid({
   );
 }
 
-function SuccessCard({ onReset }: { onReset: () => void }) {
+function SuccessCard({
+  onReset,
+  needsEmailVerification,
+  email,
+}: {
+  onReset: () => void;
+  needsEmailVerification: boolean;
+  email: string;
+}) {
   return (
     <div className="text-center py-12 animate-fade-up">
       <div className="mx-auto mb-4 size-14 rounded-full bg-primary/15 grid place-items-center">
-        <CheckCircle2 className="size-7 text-primary" />
+        {needsEmailVerification ? (
+          <MailCheck className="size-7 text-primary" />
+        ) : (
+          <CheckCircle2 className="size-7 text-primary" />
+        )}
       </div>
-      <h2 className="text-xl font-semibold mb-2">Application received</h2>
+      <h2 className="text-xl font-semibold mb-2">
+        {needsEmailVerification ? "Verify your email" : "Account created"}
+      </h2>
       <p className="text-muted-foreground max-w-md mx-auto">
-        Your account is set up. We&apos;ll be in touch about your first tasks.
+        {needsEmailVerification ? (
+          <>
+            We sent a confirmation link to <strong>{email}</strong>. Click it
+            to activate your account, then sign in.
+          </>
+        ) : (
+          <>Your account is set up. Redirecting you to your dashboard…</>
+        )}
       </p>
       <Button variant="outline" className="mt-6" onClick={onReset}>
-        Submit another
+        Start over
       </Button>
     </div>
   );
@@ -142,6 +187,9 @@ export function FieldRunnerForm() {
   const navigate = useNavigate();
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
+  const [needsEmailVerification, setNeedsEmailVerification] = useState(false);
+  const [submittedEmail, setSubmittedEmail] = useState("");
+  const [formError, setFormError] = useState<string | null>(null);
   const [serviceRadius, setServiceRadius] = useState("");
   const [transportation, setTransportation] = useState("");
   const [taskTypes, setTaskTypes] = useState<string[]>([]);
@@ -155,6 +203,9 @@ export function FieldRunnerForm() {
 
   const onReset = () => {
     setDone(false);
+    setNeedsEmailVerification(false);
+    setSubmittedEmail("");
+    setFormError(null);
     setServiceRadius("");
     setTransportation("");
     setTaskTypes([]);
@@ -164,6 +215,7 @@ export function FieldRunnerForm() {
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    setFormError(null);
     const f = new FormData(e.currentTarget);
     const full_name = String(f.get("full_name") || "").trim();
     const email = String(f.get("email") || "").trim();
@@ -204,26 +256,43 @@ export function FieldRunnerForm() {
           task_types: taskTypes,
         },
       });
+      setSubmittedEmail(email);
+      setNeedsEmailVerification(!hasSession);
       setDone(true);
       if (hasSession) {
         toast.success("Welcome aboard!");
         navigate({ to: "/dashboard/runner" });
       } else {
-        toast.success("Account created. Check your email to verify, then sign in.");
-        navigate({ to: "/login", search: { redirect: "/dashboard/runner" } });
+        toast.success("Account created — check your email to verify.");
       }
     } catch (err) {
-      console.error(err);
-      toast.error(err instanceof Error ? err.message : "Submission failed.");
+      const msg = err instanceof Error ? err.message : "Submission failed.";
+      console.error("[signup:runner]", err);
+      setFormError(msg);
+      toast.error(msg);
     } finally {
       setSubmitting(false);
     }
   }
 
-  if (done) return <SuccessCard onReset={onReset} />;
+  if (done)
+    return (
+      <SuccessCard
+        onReset={onReset}
+        needsEmailVerification={needsEmailVerification}
+        email={submittedEmail}
+      />
+    );
 
   return (
     <form key={reset} onSubmit={handleSubmit} className="space-y-5">
+      {formError && (
+        <Alert variant="destructive">
+          <AlertCircle className="size-4" />
+          <AlertTitle>Sign-up failed</AlertTitle>
+          <AlertDescription>{formError}</AlertDescription>
+        </Alert>
+      )}
       <div className="grid sm:grid-cols-2 gap-4">
         <Field label="Full Name"><Input name="full_name" required maxLength={100} /></Field>
         <Field label="Email"><Input name="email" type="email" required maxLength={200} /></Field>
@@ -279,12 +348,18 @@ export function ProForm() {
   const navigate = useNavigate();
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
+  const [needsEmailVerification, setNeedsEmailVerification] = useState(false);
+  const [submittedEmail, setSubmittedEmail] = useState("");
+  const [formError, setFormError] = useState<string | null>(null);
   const [dealVolume, setDealVolume] = useState("");
   const [password, setPassword] = useState("");
   const [reset, setReset] = useState(0);
 
   const onReset = () => {
     setDone(false);
+    setNeedsEmailVerification(false);
+    setSubmittedEmail("");
+    setFormError(null);
     setDealVolume("");
     setPassword("");
     setReset((n) => n + 1);
@@ -292,6 +367,7 @@ export function ProForm() {
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    setFormError(null);
     const f = new FormData(e.currentTarget);
     const full_name = String(f.get("full_name") || "").trim();
     const email = String(f.get("email") || "").trim();
@@ -326,26 +402,43 @@ export function ProForm() {
           monthly_deal_volume: dealVolume,
         },
       });
+      setSubmittedEmail(email);
+      setNeedsEmailVerification(!hasSession);
       setDone(true);
       if (hasSession) {
         toast.success("Welcome aboard!");
         navigate({ to: "/dashboard/investor" });
       } else {
-        toast.success("Account created. Check your email to verify, then sign in.");
-        navigate({ to: "/login", search: { redirect: "/dashboard/investor" } });
+        toast.success("Account created — check your email to verify.");
       }
     } catch (err) {
-      console.error(err);
-      toast.error(err instanceof Error ? err.message : "Submission failed.");
+      const msg = err instanceof Error ? err.message : "Submission failed.";
+      console.error("[signup:investor]", err);
+      setFormError(msg);
+      toast.error(msg);
     } finally {
       setSubmitting(false);
     }
   }
 
-  if (done) return <SuccessCard onReset={onReset} />;
+  if (done)
+    return (
+      <SuccessCard
+        onReset={onReset}
+        needsEmailVerification={needsEmailVerification}
+        email={submittedEmail}
+      />
+    );
 
   return (
     <form key={reset} onSubmit={handleSubmit} className="space-y-5">
+      {formError && (
+        <Alert variant="destructive">
+          <AlertCircle className="size-4" />
+          <AlertTitle>Sign-up failed</AlertTitle>
+          <AlertDescription>{formError}</AlertDescription>
+        </Alert>
+      )}
       <div className="grid sm:grid-cols-2 gap-4">
         <Field label="Full Name"><Input name="full_name" required maxLength={100} /></Field>
         <Field label="Email"><Input name="email" type="email" required maxLength={200} /></Field>
