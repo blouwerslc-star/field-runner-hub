@@ -1,18 +1,11 @@
 import { useState, useId, cloneElement, isValidElement } from "react";
-import { useServerFn } from "@tanstack/react-start";
 import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import {
-  submitFieldRunner,
-  submitPro,
-} from "@/lib/applications.functions";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
@@ -20,7 +13,21 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { CheckCircle2, Loader2, ChevronLeft, ChevronRight } from "lucide-react";
+import { CheckCircle2, Loader2 } from "lucide-react";
+
+type RunnerMeta = {
+  city: string;
+  state: string;
+  service_radius: string;
+  transportation_available: boolean;
+  task_types: string[];
+};
+
+type InvestorMeta = {
+  company_name: string;
+  markets_served: string;
+  monthly_deal_volume: string;
+};
 
 async function createAccount(opts: {
   email: string;
@@ -28,6 +35,7 @@ async function createAccount(opts: {
   full_name: string;
   phone: string;
   role: "runner" | "investor";
+  extra: RunnerMeta | InvestorMeta;
 }): Promise<{ hasSession: boolean }> {
   const { data, error } = await supabase.auth.signUp({
     email: opts.email,
@@ -41,6 +49,7 @@ async function createAccount(opts: {
         role: opts.role,
         full_name: opts.full_name,
         phone: opts.phone,
+        ...opts.extra,
       },
     },
   });
@@ -56,28 +65,15 @@ async function createAccount(opts: {
   return { hasSession: !!data.session };
 }
 
-const RUNNER_SERVICES = [
-  "Property photos",
-  "Walkthrough videos",
-  "Occupancy checks",
-  "Lockbox installation",
-  "Yard sign placement",
-  "Rehab progress photos",
-  "Drive-by inspections",
-  "Utility checks",
-  "Contractor meetup support",
-  "Other",
-];
-
-const PRO_SERVICES = [
-  "Property photos",
-  "Walkthrough videos",
-  "Occupancy checks",
-  "Lockbox installs",
-  "Rehab updates",
-  "Drive-by inspections",
-  "Yard sign placement",
-  "Other",
+const RUNNER_TASK_TYPES = [
+  "Property Photos",
+  "Walkthrough Videos",
+  "Occupancy Checks",
+  "Lockbox Installs",
+  "Showing Assistance",
+  "Property Condition Reports",
+  "Vacant Property Verification",
+  "Document Delivery",
 ];
 
 function ServicesGrid({
