@@ -63,6 +63,7 @@ import { Route as AuthenticatedDashboardInvestorRouteImport } from './routes/_au
 import { Route as AuthenticatedAdminRunnerApprovalsRouteImport } from './routes/_authenticated/admin.runner-approvals'
 import { Route as AuthenticatedAdminProfilesRouteImport } from './routes/_authenticated/admin.profiles'
 import { Route as AuthenticatedAdminModerationRouteImport } from './routes/_authenticated/admin.moderation'
+import { Route as AuthenticatedAdminDispatchRouteImport } from './routes/_authenticated/admin.dispatch'
 import { Route as AuthenticatedAdminAnalyticsRouteImport } from './routes/_authenticated/admin.analytics'
 import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
@@ -365,6 +366,12 @@ const AuthenticatedAdminModerationRoute =
     path: '/moderation',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminDispatchRoute =
+  AuthenticatedAdminDispatchRouteImport.update({
+    id: '/dispatch',
+    path: '/dispatch',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminAnalyticsRoute =
   AuthenticatedAdminAnalyticsRouteImport.update({
     id: '/analytics',
@@ -438,6 +445,7 @@ export interface FileRoutesByFullPath {
   '/profile/$slug': typeof ProfileSlugRoute
   '/tasks/$taskId': typeof TasksTaskIdRoute
   '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
+  '/admin/dispatch': typeof AuthenticatedAdminDispatchRoute
   '/admin/moderation': typeof AuthenticatedAdminModerationRoute
   '/admin/profiles': typeof AuthenticatedAdminProfilesRoute
   '/admin/runner-approvals': typeof AuthenticatedAdminRunnerApprovalsRoute
@@ -497,6 +505,7 @@ export interface FileRoutesByTo {
   '/profile/$slug': typeof ProfileSlugRoute
   '/tasks/$taskId': typeof TasksTaskIdRoute
   '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
+  '/admin/dispatch': typeof AuthenticatedAdminDispatchRoute
   '/admin/moderation': typeof AuthenticatedAdminModerationRoute
   '/admin/profiles': typeof AuthenticatedAdminProfilesRoute
   '/admin/runner-approvals': typeof AuthenticatedAdminRunnerApprovalsRoute
@@ -561,6 +570,7 @@ export interface FileRoutesById {
   '/profile/$slug': typeof ProfileSlugRoute
   '/tasks/$taskId': typeof TasksTaskIdRoute
   '/_authenticated/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
+  '/_authenticated/admin/dispatch': typeof AuthenticatedAdminDispatchRoute
   '/_authenticated/admin/moderation': typeof AuthenticatedAdminModerationRoute
   '/_authenticated/admin/profiles': typeof AuthenticatedAdminProfilesRoute
   '/_authenticated/admin/runner-approvals': typeof AuthenticatedAdminRunnerApprovalsRoute
@@ -625,6 +635,7 @@ export interface FileRouteTypes {
     | '/profile/$slug'
     | '/tasks/$taskId'
     | '/admin/analytics'
+    | '/admin/dispatch'
     | '/admin/moderation'
     | '/admin/profiles'
     | '/admin/runner-approvals'
@@ -684,6 +695,7 @@ export interface FileRouteTypes {
     | '/profile/$slug'
     | '/tasks/$taskId'
     | '/admin/analytics'
+    | '/admin/dispatch'
     | '/admin/moderation'
     | '/admin/profiles'
     | '/admin/runner-approvals'
@@ -747,6 +759,7 @@ export interface FileRouteTypes {
     | '/profile/$slug'
     | '/tasks/$taskId'
     | '/_authenticated/admin/analytics'
+    | '/_authenticated/admin/dispatch'
     | '/_authenticated/admin/moderation'
     | '/_authenticated/admin/profiles'
     | '/_authenticated/admin/runner-approvals'
@@ -1186,6 +1199,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminModerationRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/dispatch': {
+      id: '/_authenticated/admin/dispatch'
+      path: '/dispatch'
+      fullPath: '/admin/dispatch'
+      preLoaderRoute: typeof AuthenticatedAdminDispatchRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/analytics': {
       id: '/_authenticated/admin/analytics'
       path: '/analytics'
@@ -1240,6 +1260,7 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminAnalyticsRoute: typeof AuthenticatedAdminAnalyticsRoute
+  AuthenticatedAdminDispatchRoute: typeof AuthenticatedAdminDispatchRoute
   AuthenticatedAdminModerationRoute: typeof AuthenticatedAdminModerationRoute
   AuthenticatedAdminProfilesRoute: typeof AuthenticatedAdminProfilesRoute
   AuthenticatedAdminRunnerApprovalsRoute: typeof AuthenticatedAdminRunnerApprovalsRoute
@@ -1248,6 +1269,7 @@ interface AuthenticatedAdminRouteChildren {
 
 const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminAnalyticsRoute: AuthenticatedAdminAnalyticsRoute,
+  AuthenticatedAdminDispatchRoute: AuthenticatedAdminDispatchRoute,
   AuthenticatedAdminModerationRoute: AuthenticatedAdminModerationRoute,
   AuthenticatedAdminProfilesRoute: AuthenticatedAdminProfilesRoute,
   AuthenticatedAdminRunnerApprovalsRoute:
