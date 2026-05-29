@@ -10,6 +10,7 @@ import {
 
 import appCss from "../styles.css?url";
 import { META_PIXEL_ID, GA4_MEASUREMENT_ID } from "@/lib/tracking";
+import { BackButton } from "@/components/navigation/BackButton";
 
 function NotFoundComponent() {
   return (
@@ -151,6 +152,7 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <Outlet />
+      <BackButton />
     </QueryClientProvider>
   );
 }
