@@ -1,76 +1,93 @@
+# Fiverr-Style Public Profile System
 
-# Full Marketplace Backend & Dashboards
-
-Your project already has: auth (runners/investors/admin via `user_roles`), `profiles`, `field_runner_applications`, `real_estate_pro_applications`, `tasks`, and an admin dashboard that creates/assigns tasks. This plan fills in the rest.
+Build a marketplace-style profile layer on top of the existing `profiles` table without disrupting the task workflow or dashboards.
 
 ## 1. Database migration
 
-New tables (all with RLS + GRANTs):
+Extend `public.profiles` with nullable columns (safe defaults, no breaking changes):
 
-- **`task_submissions`** — runner deliverables per task: `task_id`, `runner_id`, `notes`, `status` (pending/approved/rejected), `reviewed_by`, `reviewed_at`, `rejection_reason`.
-- **`task_files`** — file attachments: `task_id`, `submission_id` (nullable), `uploader_id`, `bucket`, `path`, `mime_type`, `size_bytes`, `kind` (photo/video/id/deliverable/other).
-- **`payments`** — `task_id`, `investor_id`, `runner_id`, `amount_cents`, `platform_fee_cents`, `runner_payout_cents`, `status` (pending/charged/released/refunded/failed), `stripe_payment_intent_id`, `stripe_transfer_id`.
-- **`notifications`** — `user_id`, `type`, `title`, `body`, `link`, `read_at`, `created_at`.
-- **`runner_profiles`** — Stripe Connect account id, payout enabled flag. (Investor Stripe customer id stored on `profiles`.)
+- `profile_slug` text UNIQUE
+- `profile_photo_url` text
+- `cover_photo_url` text
+- `headline` text
+- `bio` text
+- `services_offered` text[] default '{}'
+- `experience_level` text (`beginner|intermediate|expert`)
+- `years_experience` int
+- `hourly_rate` numeric
+- `task_rate` numeric
+- `availability_status` text default 'available' (`available|busy|unavailable`)
+- `average_rating` numeric default 0
+- `review_count` int default 0
+- `completed_tasks_count` int default 0
+- `response_time` text
+- `verified_status` boolean default false
+- `public_profile_enabled` boolean default true
+- `phone_public` boolean default false
+- `featured` boolean default false
+- `suspended` boolean default false
+- `turnaround_time` text
+- `preferred_payout_min` numeric, `preferred_payout_max` numeric
+- `company_description` text
 
-RLS summary (plain English):
-- Runners see only their assigned tasks, their submissions, their payments, their notifications.
-- Investors see only their tasks, payments for them, their notifications.
-- Admins see and manage everything (existing `has_role(..., 'admin')` pattern).
-- Triggers create notifications on task assigned / submitted / approved / rejected / payment released.
+(`markets_served`, `service_radius`, `transportation_available`, `task_types`, `company_name`, `monthly_deal_volume`, `city`, `state`, `full_name`, `avatar_url` already exist.)
 
-Realtime enabled on `tasks` and `notifications`.
+Auto-generate `profile_slug` from `full_name` + short id via a trigger on insert/update when null.
 
-## 2. Storage buckets
+### RLS additions
 
-- `task-photos` (private) — runner-uploaded photos/videos per task
-- `task-deliverables` (private) — final deliverables
-- `runner-ids` (private) — ID verification docs (runner + admin only)
-- `avatars` (public) — profile pictures
+Add a public-read policy scoped to safe columns via a SECURITY DEFINER view `public.public_profiles` that exposes only non-sensitive columns and filters by `public_profile_enabled = true AND suspended = false`. Grant SELECT on the view to `anon` and `authenticated`. Keep the base `profiles` table policies unchanged (user/admin only).
 
-RLS on `storage.objects` keyed by `(bucket, taskId-or-userId-prefix)` so each user only touches their own folder; admins full access.
+Admin policy: add UPDATE policy on profiles for admins (already covered? add if missing for `featured`, `verified_status`, `suspended`).
 
-## 3. Stripe payments (seamless, no keys needed from you)
+### Storage
 
-I'll first run `recommend_payment_provider`, then enable Stripe payments. Flow:
-- Investor funds a task → Stripe PaymentIntent (held).
-- Admin/auto-approve releases → transfer to runner's Stripe Connect account minus platform fee.
-- Server functions: `createTaskCheckout`, `releaseTaskPayment`, `onboardRunnerStripe`. Webhook at `/api/public/webhooks/stripe`.
+Reuse `avatars` bucket for profile + cover photos. Add policy allowing public read for files under `public/` prefix or make a new `profile-media` public bucket. **Decision**: create a new public bucket `profile-media` with public read, authenticated insert/update/delete scoped to the user's own folder (`{user_id}/...`).
 
-## 4. Functional dashboards
+## 2. Server functions (`src/lib/profiles.functions.ts`)
 
-**Runner** (`/dashboard/runner`):
-- Stats: assigned / in-progress / submitted / paid
-- Tabs: Available (open tasks in market) · Assigned · Submitted · Completed
-- Task detail drawer: address, payout, due, description; upload photos/video, add notes, submit
-- Stripe Connect onboarding banner if not yet onboarded
-- Notifications bell
+- `getMyProfile()` — auth required, returns full profile + role
+- `updateMyProfile(input)` — auth, validates with Zod, updates allowed fields
+- `getPublicProfileBySlug(slug)` — public, queries the view
+- `listPublicProfiles({ q, role, city, state, service, availability, sort, page })` — public
+- Admin: `adminListProfiles`, `adminSetVerified`, `adminSetFeatured`, `adminSetSuspended`
 
-**Investor** (`/dashboard/investor`):
-- Stats: open / in-progress / submitted / completed; total spent
-- "Post a task" wizard with Stripe checkout to fund payout
-- Tabs by status; view submission deliverables; Approve / Request changes (releases payment on approve)
-- Notifications bell
+## 3. Routes
 
-**Admin** (existing) — extended to also see submissions, payments, force-approve.
+- `/_authenticated/profile.edit.tsx` — edit form with photo upload, all role-specific fields rendered conditionally
+- `/profile.$slug.tsx` — public profile page (Fiverr-style hero + sidebar)
+- `/profiles.tsx` — directory with search/filters/sort and marketplace cards
+- `/_authenticated/admin.profiles.tsx` — admin moderation table
 
-## 5. Notifications UI
-Bell in `DashboardShell` with unread count, dropdown list, mark-as-read, realtime updates.
+Add links to: dashboards ("Edit Public Profile"), navbar ("Browse Profiles"), admin sidebar.
 
-## Technical details
+## 4. Components
 
-- Server functions in `src/lib/tasks.functions.ts`, `src/lib/payments.functions.ts`, `src/lib/notifications.functions.ts`, `src/lib/storage.functions.ts` (signed URLs).
-- All protected with `requireSupabaseAuth`; `supabaseAdmin` only for webhook + Stripe transfers.
-- New routes: `/dashboard/runner/tasks/$taskId`, `/dashboard/investor/tasks/new`, `/dashboard/investor/tasks/$taskId`.
-- Server route: `src/routes/api/public/webhooks/stripe.ts` with signature verification.
-- Bumps to existing `tasks` schema: add `funded` boolean + `funding_payment_id` for fund-before-assign flow.
+- `ProfileCard` — Fiverr-style card (photo, name, headline, rating stars, location, starting rate, service badges, View Profile CTA)
+- `VerifiedBadge`, `RoleBadge`, `AvailabilityBadge`, `StarRating`
+- `ProfileMediaUploader` — wraps Supabase storage upload to `profile-media/{user_id}/...`
 
-## Order of operations
+## 5. Privacy
 
-1. Approve this plan.
-2. Run Stripe eligibility check → enable Stripe payments (you'll fill a short form).
-3. Migration for all new tables + storage + RLS.
-4. Build server functions + Stripe webhook.
-5. Build runner, investor, admin UI + notifications bell.
+Public view exposes only: slug, full_name, role (joined), city, state, headline, bio, profile_photo_url, cover_photo_url, services_offered, markets_served, experience_level, years_experience, task_rate, availability_status, average_rating, review_count, completed_tasks_count, response_time, verified_status, featured, created_at (member since), company_name, company_description, turnaround_time.
+Excludes: email, phone (unless `phone_public`), address, IDs, payment info.
 
-This is a substantial buildout (~10–15 new files). Approve and I'll proceed.
+## 6. Trust
+
+- `average_rating`, `review_count`, `completed_tasks_count` are read-only from the edit form (system-managed).
+- Member since = `created_at`.
+- Reviews section: render an empty state ("No reviews yet — earned after completed tasks") since review creation comes later.
+
+## 7. Out of scope (explicit)
+
+- Actual review writing flow (placeholder UI only)
+- "Invite Runner To Task" / "Connect With Investor" CTAs wire to existing task-create / messaging flows where available; otherwise open a toast "Coming soon" so we don't block this milestone.
+
+## Technical notes
+
+- Use TanStack Query + `useSuspenseQuery` per the project's data pattern.
+- Zod validation on all `updateMyProfile` inputs (length caps, slug regex `^[a-z0-9-]{3,40}$`).
+- Slug uniqueness enforced at DB level; on conflict during auto-gen, append random suffix.
+- Storage uploads go through browser client; server fn only stores resulting public URL.
+
+Ready to implement on approval.

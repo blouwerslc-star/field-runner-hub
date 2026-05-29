@@ -315,61 +315,133 @@ export type Database = {
       }
       profiles: {
         Row: {
+          availability_status: string
           avatar_url: string | null
+          average_rating: number
+          bio: string | null
           city: string | null
+          company_description: string | null
           company_name: string | null
+          completed_tasks_count: number
+          cover_photo_url: string | null
           created_at: string
           email: string | null
+          experience_level: string | null
+          featured: boolean
           full_name: string | null
+          headline: string | null
+          hourly_rate: number | null
           id: string
           markets_served: string | null
           monthly_deal_volume: string | null
           phone: string | null
+          phone_public: boolean
+          preferred_payout_max: number | null
+          preferred_payout_min: number | null
+          profile_photo_url: string | null
+          profile_slug: string | null
+          public_profile_enabled: boolean
+          response_time: string | null
+          review_count: number
           service_radius: string | null
+          services_offered: string[]
           state: string | null
           stripe_customer_id: string | null
+          suspended: boolean
+          task_rate: number | null
           task_types: string[]
           transportation_available: boolean | null
+          turnaround_time: string | null
           updated_at: string
           user_id: string
+          verified_status: boolean
+          years_experience: number | null
         }
         Insert: {
+          availability_status?: string
           avatar_url?: string | null
+          average_rating?: number
+          bio?: string | null
           city?: string | null
+          company_description?: string | null
           company_name?: string | null
+          completed_tasks_count?: number
+          cover_photo_url?: string | null
           created_at?: string
           email?: string | null
+          experience_level?: string | null
+          featured?: boolean
           full_name?: string | null
+          headline?: string | null
+          hourly_rate?: number | null
           id?: string
           markets_served?: string | null
           monthly_deal_volume?: string | null
           phone?: string | null
+          phone_public?: boolean
+          preferred_payout_max?: number | null
+          preferred_payout_min?: number | null
+          profile_photo_url?: string | null
+          profile_slug?: string | null
+          public_profile_enabled?: boolean
+          response_time?: string | null
+          review_count?: number
           service_radius?: string | null
+          services_offered?: string[]
           state?: string | null
           stripe_customer_id?: string | null
+          suspended?: boolean
+          task_rate?: number | null
           task_types?: string[]
           transportation_available?: boolean | null
+          turnaround_time?: string | null
           updated_at?: string
           user_id: string
+          verified_status?: boolean
+          years_experience?: number | null
         }
         Update: {
+          availability_status?: string
           avatar_url?: string | null
+          average_rating?: number
+          bio?: string | null
           city?: string | null
+          company_description?: string | null
           company_name?: string | null
+          completed_tasks_count?: number
+          cover_photo_url?: string | null
           created_at?: string
           email?: string | null
+          experience_level?: string | null
+          featured?: boolean
           full_name?: string | null
+          headline?: string | null
+          hourly_rate?: number | null
           id?: string
           markets_served?: string | null
           monthly_deal_volume?: string | null
           phone?: string | null
+          phone_public?: boolean
+          preferred_payout_max?: number | null
+          preferred_payout_min?: number | null
+          profile_photo_url?: string | null
+          profile_slug?: string | null
+          public_profile_enabled?: boolean
+          response_time?: string | null
+          review_count?: number
           service_radius?: string | null
+          services_offered?: string[]
           state?: string | null
           stripe_customer_id?: string | null
+          suspended?: boolean
+          task_rate?: number | null
           task_types?: string[]
           transportation_available?: boolean | null
+          turnaround_time?: string | null
           updated_at?: string
           user_id?: string
+          verified_status?: boolean
+          years_experience?: number | null
         }
         Relationships: []
       }
@@ -671,7 +743,108 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      public_profiles: {
+        Row: {
+          availability_status: string | null
+          average_rating: number | null
+          bio: string | null
+          city: string | null
+          company_description: string | null
+          company_name: string | null
+          completed_tasks_count: number | null
+          cover_photo_url: string | null
+          created_at: string | null
+          experience_level: string | null
+          featured: boolean | null
+          full_name: string | null
+          headline: string | null
+          hourly_rate: number | null
+          markets_served: string | null
+          monthly_deal_volume: string | null
+          profile_photo_url: string | null
+          profile_slug: string | null
+          response_time: string | null
+          review_count: number | null
+          roles: string[] | null
+          service_radius: string | null
+          services_offered: string[] | null
+          state: string | null
+          task_rate: number | null
+          task_types: string[] | null
+          transportation_available: boolean | null
+          turnaround_time: string | null
+          user_id: string | null
+          verified_status: boolean | null
+          years_experience: number | null
+        }
+        Insert: {
+          availability_status?: string | null
+          average_rating?: number | null
+          bio?: string | null
+          city?: string | null
+          company_description?: string | null
+          company_name?: string | null
+          completed_tasks_count?: number | null
+          cover_photo_url?: string | null
+          created_at?: string | null
+          experience_level?: string | null
+          featured?: boolean | null
+          full_name?: string | null
+          headline?: string | null
+          hourly_rate?: number | null
+          markets_served?: string | null
+          monthly_deal_volume?: string | null
+          profile_photo_url?: string | null
+          profile_slug?: string | null
+          response_time?: string | null
+          review_count?: number | null
+          roles?: never
+          service_radius?: string | null
+          services_offered?: string[] | null
+          state?: string | null
+          task_rate?: number | null
+          task_types?: string[] | null
+          transportation_available?: boolean | null
+          turnaround_time?: string | null
+          user_id?: string | null
+          verified_status?: boolean | null
+          years_experience?: number | null
+        }
+        Update: {
+          availability_status?: string | null
+          average_rating?: number | null
+          bio?: string | null
+          city?: string | null
+          company_description?: string | null
+          company_name?: string | null
+          completed_tasks_count?: number | null
+          cover_photo_url?: string | null
+          created_at?: string | null
+          experience_level?: string | null
+          featured?: boolean | null
+          full_name?: string | null
+          headline?: string | null
+          hourly_rate?: number | null
+          markets_served?: string | null
+          monthly_deal_volume?: string | null
+          profile_photo_url?: string | null
+          profile_slug?: string | null
+          response_time?: string | null
+          review_count?: number | null
+          roles?: never
+          service_radius?: string | null
+          services_offered?: string[] | null
+          state?: string | null
+          task_rate?: number | null
+          task_types?: string[] | null
+          transportation_available?: boolean | null
+          turnaround_time?: string | null
+          user_id?: string | null
+          verified_status?: boolean | null
+          years_experience?: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       delete_email: {
