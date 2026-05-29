@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      activity_events: {
+        Row: {
+          actor_id: string | null
+          body: string | null
+          created_at: string
+          event_type: string
+          id: string
+          link: string | null
+          metadata: Json
+          title: string
+        }
+        Insert: {
+          actor_id?: string | null
+          body?: string | null
+          created_at?: string
+          event_type: string
+          id?: string
+          link?: string | null
+          metadata?: Json
+          title: string
+        }
+        Update: {
+          actor_id?: string | null
+          body?: string | null
+          created_at?: string
+          event_type?: string
+          id?: string
+          link?: string | null
+          metadata?: Json
+          title?: string
+        }
+        Relationships: []
+      }
       app_settings: {
         Row: {
           key: string
@@ -104,6 +137,51 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      disputes: {
+        Row: {
+          against_id: string | null
+          category: string
+          created_at: string
+          description: string
+          id: string
+          opened_by: string
+          resolution: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          status: string
+          task_id: string
+          updated_at: string
+        }
+        Insert: {
+          against_id?: string | null
+          category: string
+          created_at?: string
+          description: string
+          id?: string
+          opened_by: string
+          resolution?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: string
+          task_id: string
+          updated_at?: string
+        }
+        Update: {
+          against_id?: string | null
+          category?: string
+          created_at?: string
+          description?: string
+          id?: string
+          opened_by?: string
+          resolution?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: string
+          task_id?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       email_send_log: {
         Row: {
@@ -816,6 +894,51 @@ export type Database = {
           services_needed?: string[]
           urgency?: string
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      reports: {
+        Row: {
+          admin_notes: string | null
+          created_at: string
+          details: string | null
+          id: string
+          reason: string
+          reporter_id: string
+          resolved_at: string | null
+          resolved_by: string | null
+          status: string
+          target_id: string
+          target_type: string
+          updated_at: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          created_at?: string
+          details?: string | null
+          id?: string
+          reason: string
+          reporter_id: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: string
+          target_id: string
+          target_type: string
+          updated_at?: string
+        }
+        Update: {
+          admin_notes?: string | null
+          created_at?: string
+          details?: string | null
+          id?: string
+          reason?: string
+          reporter_id?: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: string
+          target_id?: string
+          target_type?: string
+          updated_at?: string
         }
         Relationships: []
       }
