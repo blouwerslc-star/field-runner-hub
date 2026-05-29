@@ -25,13 +25,33 @@ function MarketplacePage() {
   const [q, setQ] = useState("");
   const [city, setCity] = useState("");
   const [state, setState] = useState("");
+  const [taskType, setTaskType] = useState<string>("all");
+  const [minPayout, setMinPayout] = useState<string>("");
+  const [maxPayout, setMaxPayout] = useState<string>("");
+  const [beforeDue, setBeforeDue] = useState<string>("");
   const [sort, setSort] = useState<"newest" | "payout" | "due">("newest");
   const fn = useServerFn(listOpenTasks);
   const { data, isLoading, refetch, isFetching } = useQuery({
-    queryKey: ["open-tasks", { q, city, state, sort }],
-    queryFn: () => fn({ data: { q: q || undefined, city: city || undefined, state: state || undefined, sort } }),
+    queryKey: ["open-tasks", { q, city, state, taskType, minPayout, maxPayout, beforeDue, sort }],
+    queryFn: () => fn({
+      data: {
+        q: q || undefined,
+        city: city || undefined,
+        state: state || undefined,
+        task_type: taskType !== "all" ? taskType : undefined,
+        min_payout: minPayout ? Number(minPayout) : undefined,
+        max_payout: maxPayout ? Number(maxPayout) : undefined,
+        before_due: beforeDue || undefined,
+        sort,
+      },
+    }),
   });
   const tasks = data?.tasks ?? [];
+
+  function reset() {
+    setQ(""); setCity(""); setState(""); setTaskType("all");
+    setMinPayout(""); setMaxPayout(""); setBeforeDue(""); setSort("newest");
+  }
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -52,25 +72,48 @@ function MarketplacePage() {
 
         <form
           onSubmit={(e) => { e.preventDefault(); refetch(); }}
-          className="grid md:grid-cols-[1fr,160px,120px,160px,auto] gap-2 mb-8 rounded-2xl border border-border/60 bg-card/40 p-3"
+          className="mb-8 rounded-2xl border border-border/60 bg-card/40 p-3 space-y-2"
         >
-          <div className="relative">
-            <Search className="size-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-            <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search title or description" className="pl-9" />
+          <div className="grid md:grid-cols-[1fr_160px_120px_180px_auto] gap-2">
+            <div className="relative">
+              <Search className="size-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+              <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search title or description" className="pl-9" />
+            </div>
+            <Input value={city} onChange={(e) => setCity(e.target.value)} placeholder="City" />
+            <Input value={state} onChange={(e) => setState(e.target.value)} placeholder="State" />
+            <Select value={sort} onValueChange={(v) => setSort(v as any)}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="newest">Newest</SelectItem>
+                <SelectItem value="payout">Highest payout</SelectItem>
+                <SelectItem value="due">Soonest due</SelectItem>
+              </SelectContent>
+            </Select>
+            <Button type="submit" disabled={isFetching}>
+              {isFetching && <Loader2 className="size-4 mr-2 animate-spin" />} Search
+            </Button>
           </div>
-          <Input value={city} onChange={(e) => setCity(e.target.value)} placeholder="City" />
-          <Input value={state} onChange={(e) => setState(e.target.value)} placeholder="State" />
-          <Select value={sort} onValueChange={(v) => setSort(v as any)}>
-            <SelectTrigger><SelectValue /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="newest">Newest</SelectItem>
-              <SelectItem value="payout">Highest payout</SelectItem>
-              <SelectItem value="due">Soonest due</SelectItem>
-            </SelectContent>
-          </Select>
-          <Button type="submit" disabled={isFetching}>
-            {isFetching && <Loader2 className="size-4 mr-2 animate-spin" />} Search
-          </Button>
+          <div className="grid md:grid-cols-[200px_140px_140px_180px_auto] gap-2">
+            <Select value={taskType} onValueChange={setTaskType}>
+              <SelectTrigger><SelectValue placeholder="Task type" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All task types</SelectItem>
+                <SelectItem value="property_photos">Property photos</SelectItem>
+                <SelectItem value="occupancy_check">Occupancy check</SelectItem>
+                <SelectItem value="drive_by">Drive-by inspection</SelectItem>
+                <SelectItem value="lockbox_install">Lockbox install</SelectItem>
+                <SelectItem value="sign_install">Sign install</SelectItem>
+                <SelectItem value="document_drop">Document drop-off</SelectItem>
+                <SelectItem value="property_inspection">Property inspection</SelectItem>
+                <SelectItem value="key_pickup">Key pickup</SelectItem>
+                <SelectItem value="other">Other</SelectItem>
+              </SelectContent>
+            </Select>
+            <Input type="number" min={0} value={minPayout} onChange={(e) => setMinPayout(e.target.value)} placeholder="Min $" />
+            <Input type="number" min={0} value={maxPayout} onChange={(e) => setMaxPayout(e.target.value)} placeholder="Max $" />
+            <Input type="date" value={beforeDue} onChange={(e) => setBeforeDue(e.target.value)} placeholder="Due before" />
+            <Button type="button" variant="ghost" onClick={reset}>Reset</Button>
+          </div>
         </form>
 
         {isLoading ? (
