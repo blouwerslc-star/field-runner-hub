@@ -16,16 +16,21 @@ export function NotificationBell() {
   const fetchFn = useServerFn(listNotifications);
   const markFn = useServerFn(markNotificationRead);
 
+  const [userId, setUserId] = useState<string | null>(null);
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => setUserId(data.user?.id ?? null));
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, session) => {
+      setUserId(session?.user?.id ?? null);
+    });
+    return () => subscription.unsubscribe();
+  }, []);
+
   const { data } = useQuery({
     queryKey: ["notifications"],
     queryFn: () => fetchFn(),
     refetchInterval: 60_000,
+    enabled: !!userId,
   });
-
-  const [userId, setUserId] = useState<string | null>(null);
-  useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => setUserId(data.user?.id ?? null));
-  }, []);
 
   useEffect(() => {
     if (!userId) return;
