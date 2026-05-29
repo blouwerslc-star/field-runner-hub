@@ -34,6 +34,7 @@ import { Route as AuthenticatedRunnerDashboardRouteImport } from './routes/_auth
 import { Route as AuthenticatedReviewsRouteImport } from './routes/_authenticated/reviews'
 import { Route as AuthenticatedMessagesRouteImport } from './routes/_authenticated/messages'
 import { Route as AuthenticatedInvestorDashboardRouteImport } from './routes/_authenticated/investor-dashboard'
+import { Route as AuthenticatedEarningsRouteImport } from './routes/_authenticated/earnings'
 import { Route as AuthenticatedDisputesRouteImport } from './routes/_authenticated/disputes'
 import { Route as AuthenticatedBillingRouteImport } from './routes/_authenticated/billing'
 import { Route as AuthenticatedApplicationsRouteImport } from './routes/_authenticated/applications'
@@ -198,6 +199,11 @@ const AuthenticatedInvestorDashboardRoute =
     path: '/investor-dashboard',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const AuthenticatedEarningsRoute = AuthenticatedEarningsRouteImport.update({
+  id: '/earnings',
+  path: '/earnings',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedDisputesRoute = AuthenticatedDisputesRouteImport.update({
   id: '/disputes',
   path: '/disputes',
@@ -434,6 +440,7 @@ export interface FileRoutesByFullPath {
   '/applications': typeof AuthenticatedApplicationsRoute
   '/billing': typeof AuthenticatedBillingRoute
   '/disputes': typeof AuthenticatedDisputesRoute
+  '/earnings': typeof AuthenticatedEarningsRoute
   '/investor-dashboard': typeof AuthenticatedInvestorDashboardRoute
   '/messages': typeof AuthenticatedMessagesRouteWithChildren
   '/reviews': typeof AuthenticatedReviewsRoute
@@ -496,6 +503,7 @@ export interface FileRoutesByTo {
   '/applications': typeof AuthenticatedApplicationsRoute
   '/billing': typeof AuthenticatedBillingRoute
   '/disputes': typeof AuthenticatedDisputesRoute
+  '/earnings': typeof AuthenticatedEarningsRoute
   '/investor-dashboard': typeof AuthenticatedInvestorDashboardRoute
   '/reviews': typeof AuthenticatedReviewsRoute
   '/runner-dashboard': typeof AuthenticatedRunnerDashboardRoute
@@ -559,6 +567,7 @@ export interface FileRoutesById {
   '/_authenticated/applications': typeof AuthenticatedApplicationsRoute
   '/_authenticated/billing': typeof AuthenticatedBillingRoute
   '/_authenticated/disputes': typeof AuthenticatedDisputesRoute
+  '/_authenticated/earnings': typeof AuthenticatedEarningsRoute
   '/_authenticated/investor-dashboard': typeof AuthenticatedInvestorDashboardRoute
   '/_authenticated/messages': typeof AuthenticatedMessagesRouteWithChildren
   '/_authenticated/reviews': typeof AuthenticatedReviewsRoute
@@ -624,6 +633,7 @@ export interface FileRouteTypes {
     | '/applications'
     | '/billing'
     | '/disputes'
+    | '/earnings'
     | '/investor-dashboard'
     | '/messages'
     | '/reviews'
@@ -686,6 +696,7 @@ export interface FileRouteTypes {
     | '/applications'
     | '/billing'
     | '/disputes'
+    | '/earnings'
     | '/investor-dashboard'
     | '/reviews'
     | '/runner-dashboard'
@@ -748,6 +759,7 @@ export interface FileRouteTypes {
     | '/_authenticated/applications'
     | '/_authenticated/billing'
     | '/_authenticated/disputes'
+    | '/_authenticated/earnings'
     | '/_authenticated/investor-dashboard'
     | '/_authenticated/messages'
     | '/_authenticated/reviews'
@@ -994,6 +1006,13 @@ declare module '@tanstack/react-router' {
       path: '/investor-dashboard'
       fullPath: '/investor-dashboard'
       preLoaderRoute: typeof AuthenticatedInvestorDashboardRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/earnings': {
+      id: '/_authenticated/earnings'
+      path: '/earnings'
+      fullPath: '/earnings'
+      preLoaderRoute: typeof AuthenticatedEarningsRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/disputes': {
@@ -1337,6 +1356,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedApplicationsRoute: typeof AuthenticatedApplicationsRoute
   AuthenticatedBillingRoute: typeof AuthenticatedBillingRoute
   AuthenticatedDisputesRoute: typeof AuthenticatedDisputesRoute
+  AuthenticatedEarningsRoute: typeof AuthenticatedEarningsRoute
   AuthenticatedInvestorDashboardRoute: typeof AuthenticatedInvestorDashboardRoute
   AuthenticatedMessagesRoute: typeof AuthenticatedMessagesRouteWithChildren
   AuthenticatedReviewsRoute: typeof AuthenticatedReviewsRoute
@@ -1357,6 +1377,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedApplicationsRoute: AuthenticatedApplicationsRoute,
   AuthenticatedBillingRoute: AuthenticatedBillingRoute,
   AuthenticatedDisputesRoute: AuthenticatedDisputesRoute,
+  AuthenticatedEarningsRoute: AuthenticatedEarningsRoute,
   AuthenticatedInvestorDashboardRoute: AuthenticatedInvestorDashboardRoute,
   AuthenticatedMessagesRoute: AuthenticatedMessagesRouteWithChildren,
   AuthenticatedReviewsRoute: AuthenticatedReviewsRoute,
