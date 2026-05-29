@@ -33,7 +33,7 @@ function statusColor(status: string) {
     case "in_progress": return "bg-purple-500/15 text-purple-300 border-purple-500/30";
     case "submitted": return "bg-cyan-500/15 text-cyan-300 border-cyan-500/30";
     case "approved": return "bg-emerald-500/15 text-emerald-300 border-emerald-500/30";
-    case "rejected": return "bg-red-500/15 text-red-300 border-red-500/30";
+    case "revision_requested": return "bg-red-500/15 text-red-300 border-red-500/30";
     case "paid": return "bg-emerald-600/20 text-emerald-200 border-emerald-500/40";
     default: return "bg-muted text-muted-foreground";
   }
@@ -45,7 +45,7 @@ function RunnerDashboard() {
   const tasks = data?.tasks ?? [];
 
   const buckets = {
-    assigned: tasks.filter((t) => t.status === "assigned" || t.status === "rejected"),
+    assigned: tasks.filter((t) => t.status === "assigned" || t.status === "revision_requested"),
     in_progress: tasks.filter((t) => t.status === "in_progress"),
     submitted: tasks.filter((t) => t.status === "submitted"),
     completed: tasks.filter((t) => t.status === "approved" || t.status === "paid"),
@@ -264,10 +264,10 @@ function TaskWorkPanel({ task, onDone }: { task: Task; onDone: () => void }) {
         </Button>
       )}
 
-      {lastSub?.status === "rejected" && (
+      {(lastSub?.status === "rejected" || task.status === "revision_requested") && (
         <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-sm">
           <div className="font-semibold text-red-300">Changes requested</div>
-          <div className="text-muted-foreground mt-1">{lastSub.rejection_reason || "Please revise and resubmit."}</div>
+          <div className="text-muted-foreground mt-1">{lastSub?.rejection_reason || "Please revise and resubmit."}</div>
         </div>
       )}
 

@@ -79,7 +79,7 @@ function statusColor(status: string) {
       return "bg-cyan-500/15 text-cyan-300 border-cyan-500/30";
     case "approved":
       return "bg-emerald-500/15 text-emerald-300 border-emerald-500/30";
-    case "rejected":
+    case "revision_requested":
       return "bg-red-500/15 text-red-300 border-red-500/30";
     case "paid":
       return "bg-emerald-600/20 text-emerald-200 border-emerald-500/40";
@@ -433,7 +433,7 @@ function TaskRow({
               <SelectItem value="in_progress">In progress</SelectItem>
               <SelectItem value="submitted">Submitted</SelectItem>
               <SelectItem value="approved">Approved</SelectItem>
-              <SelectItem value="rejected">Rejected</SelectItem>
+              <SelectItem value="revision_requested">Revision requested</SelectItem>
               <SelectItem value="paid">Paid</SelectItem>
             </SelectContent>
           </Select>
