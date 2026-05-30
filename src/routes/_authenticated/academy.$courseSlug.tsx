@@ -17,9 +17,10 @@ export const Route = createFileRoute("/_authenticated/academy/$courseSlug")({
 function CoursePage() {
   const { courseSlug } = Route.useParams();
   const fetchDetail = useServerFn(getModuleDetail);
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, error, refetch, isFetching } = useQuery({
     queryKey: ["academy-course", courseSlug],
     queryFn: () => fetchDetail({ data: { moduleId: courseSlug } }),
+    retry: 1,
   });
 
   if (isLoading) {
@@ -30,9 +31,28 @@ function CoursePage() {
     );
   }
   if (error || !data) {
+    const message = (error as any)?.message ?? "Course not found.";
+    const isAuth = /unauthor/i.test(message);
     return (
       <DashboardShell title="Course not found" subtitle="">
-        <Link to="/academy" className="text-primary text-sm">← Back to Academy</Link>
+        <div className="rounded-2xl border border-border bg-card/60 p-6 max-w-xl">
+          <div className="text-sm font-semibold mb-1">{isAuth ? "Please sign in to view this course" : "Couldn't load course"}</div>
+          <div className="text-xs text-muted-foreground mb-4">{message}</div>
+          <div className="flex gap-2">
+            {isAuth ? (
+              <Button size="sm" asChild>
+                <Link to="/login" search={{ redirect: `/academy/${courseSlug}` }}>Sign in</Link>
+              </Button>
+            ) : (
+              <Button size="sm" onClick={() => refetch()} disabled={isFetching}>
+                {isFetching ? <Loader2 className="size-4 animate-spin" /> : "Retry"}
+              </Button>
+            )}
+            <Button size="sm" variant="outline" asChild>
+              <Link to="/academy">← Back to Academy</Link>
+            </Button>
+          </div>
+        </div>
       </DashboardShell>
     );
   }
@@ -70,28 +90,34 @@ function CoursePage() {
           <div className="h-full bg-primary" style={{ width: `${progressPct}%` }} />
         </div>
         <div className="mt-4 flex flex-wrap gap-2">
-          <Link
-            to="/academy/$courseSlug/$lessonSlug"
-            params={{ courseSlug, lessonSlug: firstIncomplete.id }}
-          >
-            <Button size="sm">
+          <Button size="sm" asChild>
+            <Link
+              to="/academy/$courseSlug/$lessonSlug"
+              params={{ courseSlug, lessonSlug: firstIncomplete.id }}
+            >
               <PlayCircle className="size-4 mr-1.5" />
               {completedCount === 0 ? "Start course" : completedCount === total ? "Review lessons" : "Continue course"}
-            </Button>
-          </Link>
-          <Link to="/academy/$courseSlug/quiz" params={{ courseSlug }}>
-            <Button size="sm" variant="outline" disabled={!allLessonsDone && !passed}>
-              <ClipboardList className="size-4 mr-1.5" />
-              {passed ? `Quiz passed (${data.progress?.quiz_score}%)` : "Take quiz"}
-              {!allLessonsDone && !passed && <Lock className="size-3 ml-1.5" />}
-            </Button>
-          </Link>
-          {passed && (
-            <Link to="/academy/$courseSlug/certificate" params={{ courseSlug }}>
-              <Button size="sm" variant="outline">
-                <Award className="size-4 mr-1.5" /> Certificate
-              </Button>
             </Link>
+          </Button>
+          {allLessonsDone || passed ? (
+            <Button size="sm" variant="outline" asChild>
+              <Link to="/academy/$courseSlug/quiz" params={{ courseSlug }}>
+                <ClipboardList className="size-4 mr-1.5" />
+                {passed ? `Quiz passed (${data.progress?.quiz_score}%)` : "Take quiz"}
+              </Link>
+            </Button>
+          ) : (
+            <Button size="sm" variant="outline" disabled>
+              <ClipboardList className="size-4 mr-1.5" />
+              Take quiz <Lock className="size-3 ml-1.5" />
+            </Button>
+          )}
+          {passed && (
+            <Button size="sm" variant="outline" asChild>
+              <Link to="/academy/$courseSlug/certificate" params={{ courseSlug }}>
+                <Award className="size-4 mr-1.5" /> Certificate
+              </Link>
+            </Button>
           )}
         </div>
       </div>

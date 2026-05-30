@@ -157,25 +157,25 @@ function LessonPage() {
 
       <div className="flex items-center justify-between gap-3">
         {data.prev ? (
-          <Link to="/academy/$courseSlug/$lessonSlug" params={{ courseSlug, lessonSlug: data.prev.slug }}>
-            <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" asChild>
+            <Link to="/academy/$courseSlug/$lessonSlug" params={{ courseSlug, lessonSlug: data.prev.slug }}>
               <ArrowLeft className="size-4 mr-1.5" /> Previous: {data.prev.title}
-            </Button>
-          </Link>
+            </Link>
+          </Button>
         ) : <span />}
 
         {data.next ? (
-          <Link to="/academy/$courseSlug/$lessonSlug" params={{ courseSlug, lessonSlug: data.next.slug }}>
-            <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" asChild>
+            <Link to="/academy/$courseSlug/$lessonSlug" params={{ courseSlug, lessonSlug: data.next.slug }}>
               Next: {data.next.title} <ArrowRight className="size-4 ml-1.5" />
-            </Button>
-          </Link>
+            </Link>
+          </Button>
         ) : (
-          <Link to="/academy/$courseSlug/quiz" params={{ courseSlug }}>
-            <Button size="sm">
+          <Button size="sm" asChild>
+            <Link to="/academy/$courseSlug/quiz" params={{ courseSlug }}>
               <ClipboardList className="size-4 mr-1.5" /> Take final quiz
-            </Button>
-          </Link>
+            </Link>
+          </Button>
         )}
       </div>
     </DashboardShell>

@@ -72,9 +72,9 @@ function QuizPage() {
           <p className="text-sm text-muted-foreground mb-4">
             You've completed {completed.length} of {mod.sections.length} lessons.
           </p>
-          <Link to="/academy/$courseSlug" params={{ courseSlug }}>
-            <Button size="sm">Continue lessons</Button>
-          </Link>
+          <Button size="sm" asChild>
+            <Link to="/academy/$courseSlug" params={{ courseSlug }}>Continue lessons</Link>
+          </Button>
         </div>
       </DashboardShell>
     );
@@ -94,11 +94,11 @@ function QuizPage() {
           <div className="text-sm text-emerald-200">
             You already passed with {data.progress?.quiz_score}%. You may retake to improve your score.
           </div>
-          <Link to="/academy/$courseSlug/certificate" params={{ courseSlug }}>
-            <Button size="sm" variant="outline">
+          <Button size="sm" variant="outline" asChild>
+            <Link to="/academy/$courseSlug/certificate" params={{ courseSlug }}>
               <Award className="size-4 mr-1.5" /> View certificate
-            </Button>
-          </Link>
+            </Link>
+          </Button>
         </div>
       )}
 
@@ -146,15 +146,15 @@ function QuizPage() {
                 Retake
               </Button>
               {result.passed ? (
-                <Link to="/academy/$courseSlug/certificate" params={{ courseSlug }}>
-                  <Button>
+                <Button asChild>
+                  <Link to="/academy/$courseSlug/certificate" params={{ courseSlug }}>
                     <Award className="size-4 mr-1.5" /> Get certificate <ArrowRight className="size-4 ml-1" />
-                  </Button>
-                </Link>
+                  </Link>
+                </Button>
               ) : (
-                <Link to="/academy/$courseSlug" params={{ courseSlug }}>
-                  <Button variant="outline">Review lessons</Button>
-                </Link>
+                <Button variant="outline" asChild>
+                  <Link to="/academy/$courseSlug" params={{ courseSlug }}>Review lessons</Link>
+                </Button>
               )}
             </div>
           ) : (
