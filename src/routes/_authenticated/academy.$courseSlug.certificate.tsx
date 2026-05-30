@@ -4,8 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { Button } from "@/components/ui/button";
-import { getModuleDetail } from "@/lib/academy.functions";
-import { generateCertificatePdf } from "@/lib/academy/certificate.functions";
+import { getCourseCertification } from "@/lib/academy.db.functions";
 import { Loader2, ArrowLeft, Award, Download, Lock } from "lucide-react";
 import { toast } from "sonner";
 
@@ -16,31 +15,18 @@ export const Route = createFileRoute("/_authenticated/academy/$courseSlug/certif
 
 function CertificatePage() {
   const { courseSlug } = Route.useParams();
-  const fetchFn = useServerFn(getModuleDetail);
-  const certFn = useServerFn(generateCertificatePdf);
+  const fetchFn = useServerFn(getCourseCertification);
   const [downloading, setDownloading] = useState(false);
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ["academy-course", courseSlug],
-    queryFn: () => fetchFn({ data: { moduleId: courseSlug } }),
+    queryKey: ["academy-cert", courseSlug],
+    queryFn: () => fetchFn({ data: { courseSlug } }),
   });
 
   async function download() {
     try {
       setDownloading(true);
-      const res = await certFn({ data: { moduleId: courseSlug } });
-      const bin = atob(res.base64);
-      const bytes = new Uint8Array(bin.length);
-      for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
-      const blob = new Blob([bytes], { type: res.contentType });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = res.filename;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(url);
+      window.print();
     } catch (e: any) {
       toast.error(e?.message ?? "Could not generate certificate");
     } finally {
@@ -63,12 +49,14 @@ function CertificatePage() {
     );
   }
 
-  const mod = data.module as any;
-  const passed = !!data.progress?.passed;
+  const title = data.course.title;
+  const passed = data.passed;
+  const issuedAt = data.certification?.issued_at ?? null;
+  const bestScore = data.best_score;
 
   if (!passed) {
     return (
-      <DashboardShell title={`${mod.title} — Certificate`} subtitle="Locked until you pass the final quiz.">
+      <DashboardShell title={`${title} — Certificate`} subtitle="Locked until you pass the final quiz.">
         <Link to="/academy/$courseSlug" params={{ courseSlug }} className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-4">
           <ArrowLeft className="size-4" /> Back to course
         </Link>
@@ -76,7 +64,7 @@ function CertificatePage() {
           <Lock className="size-8 mx-auto text-muted-foreground mb-3" />
           <div className="text-base font-semibold mb-1">Certificate not yet earned</div>
           <p className="text-sm text-muted-foreground mb-4">
-            Pass the final quiz with {data.pass_threshold}% or higher to unlock your certificate.
+            Pass the final quiz to unlock your certificate.
           </p>
           <Button size="sm" asChild>
             <Link to="/academy/$courseSlug/quiz" params={{ courseSlug }}>Take the quiz</Link>
@@ -87,7 +75,7 @@ function CertificatePage() {
   }
 
   return (
-    <DashboardShell title={`${mod.title} — Certificate`} subtitle="Congratulations on completing this course.">
+    <DashboardShell title={`${title} — Certificate`} subtitle="Congratulations on completing this course.">
       <Link to="/academy/$courseSlug" params={{ courseSlug }} className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-4">
         <ArrowLeft className="size-4" /> Back to course
       </Link>
@@ -98,19 +86,19 @@ function CertificatePage() {
         <div className="text-xs uppercase tracking-widest text-muted-foreground mt-1">Certificate of completion</div>
         <div className="my-6 border-y border-border py-6">
           <div className="text-sm text-muted-foreground italic">This certifies the successful completion of</div>
-          <h1 className="text-2xl md:text-3xl font-bold mt-2">{mod.title}</h1>
+          <h1 className="text-2xl md:text-3xl font-bold mt-2">{title}</h1>
           <div className="text-sm text-muted-foreground mt-3">
-            Final score: <span className="text-foreground font-semibold">{data.progress?.quiz_score}%</span>
+            Final score: <span className="text-foreground font-semibold">{bestScore}%</span>
           </div>
-          {data.progress?.completed_at && (
+          {issuedAt && (
             <div className="text-xs text-muted-foreground mt-1">
-              Issued {new Date(data.progress.completed_at).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}
+              Issued {new Date(issuedAt).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}
             </div>
           )}
         </div>
         <Button onClick={download} disabled={downloading} size="lg">
           {downloading ? <Loader2 className="size-4 animate-spin" /> : (
-            <><Download className="size-4 mr-1.5" /> Download PDF certificate</>
+            <><Download className="size-4 mr-1.5" /> Print / save certificate</>
           )}
         </Button>
       </div>
