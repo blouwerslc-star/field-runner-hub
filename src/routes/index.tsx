@@ -738,32 +738,80 @@ function Index() {
         <div className="grid lg:grid-cols-5 gap-8 items-start">
           <div className="lg:col-span-2">
             <div className="text-xs font-mono text-primary uppercase tracking-widest mb-3 flex items-center gap-2">
-              <HeartHandshake className="size-3.5" /> Our Mission
+              <HeartHandshake className="size-3.5" /> Meet the Founder
             </div>
             <h2 className="text-3xl md:text-4xl font-bold leading-tight">
-              Building the nationwide field operations layer for real estate.
+              Built by an operator who lived the problem.
             </h2>
             <p className="mt-5 text-muted-foreground">
-              Real estate runs on people who show up to properties. Today that's a fragmented mess of agents, wholesalers, contractors, and favors. REI Runner replaces it with a single, vetted, on-demand network — so investors can operate in any market without flying out, and locals can earn real income without a license or a long-term commitment.
+              REI Runner was started by Brian Louwers, a real estate operator who got tired of cold-calling friends-of-friends every time he needed a property checked in another city. The vision is simple: a single, vetted, on-demand network for real estate field work — so investors can operate confidently in any market, and locals can earn real income without a license or a long-term commitment.
+            </p>
+            <p className="mt-3 text-xs text-muted-foreground">
+              REI Runner is in active beta. We are building this market-by-market, with the people we serve.
             </p>
           </div>
           <div className="lg:col-span-3">
             <div className="relative rounded-3xl border border-border bg-card/60 backdrop-blur p-7 md:p-9 shadow-card">
               <Quote className="absolute -top-3 -left-3 size-8 text-primary bg-background rounded-full p-1.5 border border-border" />
               <p className="text-base md:text-lg leading-relaxed text-foreground/90">
-                "We built REI Runner because we lived the problem. Buying a property in another city used to mean calling a friend of a friend to drive by. That doesn't scale — and it shouldn't be how a trillion-dollar industry operates. Our job is to make local field work as reliable as ordering a ride."
+                "I built REI Runner because I lived the problem. Buying a property in another city used to mean calling a friend of a friend to drive by. That doesn't scale — and it shouldn't be how a trillion-dollar industry operates. My job is to make local field work reliable, transparent, and fair to everyone involved."
               </p>
               <div className="mt-6 flex items-center gap-4">
-                <div className="size-12 rounded-full bg-gradient-primary grid place-items-center shadow-glow">
-                  <span className="text-primary-foreground font-bold">RR</span>
+                <div className="size-14 rounded-full bg-gradient-primary grid place-items-center shadow-glow">
+                  <span className="text-primary-foreground font-bold">BL</span>
                 </div>
                 <div>
-                  <div className="font-semibold">The REI Runner Team</div>
-                  <div className="text-xs text-muted-foreground">Real estate operators &amp; technology builders · United States</div>
+                  <div className="font-semibold">Brian Louwers</div>
+                  <div className="text-xs text-muted-foreground">Founder · REI Runner · United States</div>
                 </div>
               </div>
             </div>
           </div>
+        </div>
+      </Section>
+
+      {/* RUNNER RESTRICTIONS / SAFETY RULES */}
+      <Section id="safety">
+        <SectionHeader
+          eyebrow="Safety &amp; Scope"
+          title="What Runners May Not Do"
+          subtitle="Runners are independent contractors performing non-licensed field tasks. The following activities are out of scope."
+        />
+        <div className="max-w-3xl mx-auto rounded-2xl border border-border bg-card/60 backdrop-blur p-6 md:p-8">
+          <ul className="space-y-3">
+            {RUNNER_RESTRICTIONS.map((r) => (
+              <li key={r} className="flex items-start gap-3 text-sm md:text-base text-foreground/90">
+                <span className="mt-1 size-4 rounded-full border border-destructive/60 text-destructive grid place-items-center text-[10px] shrink-0">✕</span>
+                <span>{r}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </Section>
+
+      {/* CONTACT / SUPPORT */}
+      <Section id="contact">
+        <SectionHeader
+          eyebrow="Support &amp; Contact"
+          title="Talk To a Real Person"
+          subtitle="We are a small, hands-on team. Reach out — we read everything."
+        />
+        <div className="grid md:grid-cols-3 gap-4 max-w-4xl mx-auto">
+          <a href="mailto:support@reirunner.com" className="rounded-2xl border border-border bg-card/60 backdrop-blur p-6 hover:border-primary/50 transition block">
+            <Mail className="size-5 text-primary mb-3" />
+            <div className="text-sm font-semibold">Support email</div>
+            <div className="text-xs text-muted-foreground mt-1">support@reirunner.com</div>
+          </a>
+          <Link to="/faq" className="rounded-2xl border border-border bg-card/60 backdrop-blur p-6 hover:border-primary/50 transition block">
+            <HelpCircle className="size-5 text-primary mb-3" />
+            <div className="text-sm font-semibold">Help center &amp; FAQ</div>
+            <div className="text-xs text-muted-foreground mt-1">Answers to the most common questions.</div>
+          </Link>
+          <a href="mailto:support@reirunner.com?subject=Report%20a%20problem" className="rounded-2xl border border-border bg-card/60 backdrop-blur p-6 hover:border-primary/50 transition block">
+            <ShieldCheck className="size-5 text-primary mb-3" />
+            <div className="text-sm font-semibold">Report a problem</div>
+            <div className="text-xs text-muted-foreground mt-1">Safety, conduct, or platform issues.</div>
+          </a>
         </div>
       </Section>
 
