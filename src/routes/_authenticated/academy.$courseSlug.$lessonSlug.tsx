@@ -158,6 +158,8 @@ function LessonPage() {
         )}
       </div>
 
+      <AffiliateProductList products={(data as any).products ?? []} />
+
       <div className="flex items-center justify-between gap-3">
         {data.prev ? (
           <Button variant="outline" size="sm" asChild>
