@@ -8,6 +8,7 @@ import {
   Loader2, ArrowLeft, ArrowRight, CheckCircle2, Video, FileText, BookOpen, ClipboardList,
 } from "lucide-react";
 import { toast } from "sonner";
+import { AffiliateProductList } from "@/components/academy/AffiliateProductList";
 
 export const Route = createFileRoute("/_authenticated/academy/$courseSlug/$lessonSlug")({
   component: LessonPage,
