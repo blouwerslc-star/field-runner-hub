@@ -8,6 +8,7 @@ import {
   Loader2, ArrowLeft, ArrowRight, CheckCircle2, Circle, Lock,
   Award, ClipboardList, PlayCircle,
 } from "lucide-react";
+import { AffiliateProductList } from "@/components/academy/AffiliateProductList";
 
 export const Route = createFileRoute("/_authenticated/academy/$courseSlug/")({
   component: CoursePage,
