@@ -90,6 +90,15 @@ export const applyToTask = createServerFn({ method: "POST" })
   )
   .handler(async ({ context, data }) => {
     const { supabase, userId } = context;
+    // Gate: must be a Certified Runner (Academy Level 1+) before applying to paid tasks.
+    const { data: rp } = await supabase
+      .from("runner_profiles")
+      .select("certification_level")
+      .eq("user_id", userId)
+      .maybeSingle();
+    if (!rp || ((rp as any).certification_level ?? 0) < 1) {
+      throw new Error("Complete REI Runner Academy certification before applying to tasks.");
+    }
     const { error } = await supabase
       .from("task_applications")
       .insert({ task_id: data.taskId, runner_id: userId, message: data.message ?? null });
