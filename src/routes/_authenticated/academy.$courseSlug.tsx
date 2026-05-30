@@ -1,11 +1,11 @@
-import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { Button } from "@/components/ui/button";
-import { getModuleDetail } from "@/lib/academy.functions";
+import { getCourseDetail } from "@/lib/academy.db.functions";
 import {
-  Loader2, ArrowLeft, ArrowRight, CheckCircle2, Circle, Lock, BookOpen,
+  Loader2, ArrowLeft, ArrowRight, CheckCircle2, Circle, Lock,
   Award, ClipboardList, PlayCircle,
 } from "lucide-react";
 
@@ -16,10 +16,10 @@ export const Route = createFileRoute("/_authenticated/academy/$courseSlug")({
 
 function CoursePage() {
   const { courseSlug } = Route.useParams();
-  const fetchDetail = useServerFn(getModuleDetail);
+  const fetchDetail = useServerFn(getCourseDetail);
   const { data, isLoading, error, refetch, isFetching } = useQuery({
     queryKey: ["academy-course", courseSlug],
-    queryFn: () => fetchDetail({ data: { moduleId: courseSlug } }),
+    queryFn: () => fetchDetail({ data: { slug: courseSlug } }),
     retry: 1,
   });
 
@@ -57,17 +57,18 @@ function CoursePage() {
     );
   }
 
-  const mod = data.module as any;
-  const completed: string[] = data.progress?.sections_completed ?? [];
-  const completedCount = completed.length;
-  const total = mod.sections.length;
-  const progressPct = Math.round((completedCount / total) * 100);
-  const allLessonsDone = completedCount === total;
-  const passed = !!data.progress?.passed;
-  const firstIncomplete = mod.sections.find((s: any) => !completed.includes(s.id)) ?? mod.sections[0];
+  const course = data.course;
+  const lessons = data.lessons;
+  const completedCount = lessons.filter((l) => l.completed).length;
+  const total = lessons.length;
+  const progressPct = total > 0 ? Math.round((completedCount / total) * 100) : 0;
+  const allLessonsDone = data.all_lessons_done;
+  const passed = data.passed;
+  const quiz = data.quiz;
+  const firstIncomplete = lessons.find((l) => !l.completed) ?? lessons[0];
 
   return (
-    <DashboardShell title={mod.title} subtitle={mod.summary}>
+    <DashboardShell title={course.title} subtitle={course.description ?? ""}>
       <Link to="/academy" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-4">
         <ArrowLeft className="size-4" /> Back to Academy
       </Link>
@@ -76,9 +77,9 @@ function CoursePage() {
       <div className="rounded-2xl border border-border bg-card/60 backdrop-blur p-5 mb-6">
         <div className="flex items-center justify-between gap-4 flex-wrap">
           <div>
-            <div className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">Course M{mod.order}</div>
+            <div className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">{course.category ?? "Course"}</div>
             <div className="text-sm text-muted-foreground mt-1">
-              {total} lessons · {mod.quiz.length}-question quiz · {mod.duration}
+              {total} lessons{quiz ? ` · ${quiz.passing_score}% to pass` : ""}
             </div>
           </div>
           <div className="text-right">
@@ -90,28 +91,28 @@ function CoursePage() {
           <div className="h-full bg-primary" style={{ width: `${progressPct}%` }} />
         </div>
         <div className="mt-4 flex flex-wrap gap-2">
-          <Button size="sm" asChild>
+          {firstIncomplete && (<Button size="sm" asChild>
             <Link
               to="/academy/$courseSlug/$lessonSlug"
-              params={{ courseSlug, lessonSlug: firstIncomplete.id }}
+              params={{ courseSlug, lessonSlug: firstIncomplete.slug }}
             >
               <PlayCircle className="size-4 mr-1.5" />
               {completedCount === 0 ? "Start course" : completedCount === total ? "Review lessons" : "Continue course"}
             </Link>
-          </Button>
-          {allLessonsDone || passed ? (
+          </Button>)}
+          {(allLessonsDone || passed) && quiz ? (
             <Button size="sm" variant="outline" asChild>
               <Link to="/academy/$courseSlug/quiz" params={{ courseSlug }}>
                 <ClipboardList className="size-4 mr-1.5" />
-                {passed ? `Quiz passed (${data.progress?.quiz_score}%)` : "Take quiz"}
+                {passed ? `Quiz passed (${data.best_score}%)` : "Take quiz"}
               </Link>
             </Button>
-          ) : (
+          ) : quiz ? (
             <Button size="sm" variant="outline" disabled>
               <ClipboardList className="size-4 mr-1.5" />
               Take quiz <Lock className="size-3 ml-1.5" />
             </Button>
-          )}
+          ) : null}
           {passed && (
             <Button size="sm" variant="outline" asChild>
               <Link to="/academy/$courseSlug/certificate" params={{ courseSlug }}>
@@ -125,13 +126,13 @@ function CoursePage() {
       {/* Lesson list */}
       <h2 className="text-lg font-semibold mb-3">Lessons</h2>
       <ol className="space-y-2 mb-8">
-        {mod.sections.map((s: any, i: number) => {
-          const done = completed.includes(s.id);
+        {lessons.map((s, i) => {
+          const done = s.completed;
           return (
             <li key={s.id}>
               <Link
                 to="/academy/$courseSlug/$lessonSlug"
-                params={{ courseSlug, lessonSlug: s.id }}
+                params={{ courseSlug, lessonSlug: s.slug }}
                 className="block rounded-xl border border-border bg-card/60 backdrop-blur p-4 hover:border-primary/50 transition-colors"
               >
                 <div className="flex items-center gap-3">
@@ -149,7 +150,7 @@ function CoursePage() {
           );
         })}
         {/* Quiz row */}
-        <li>
+        {quiz && (<li>
           <Link
             to="/academy/$courseSlug/quiz"
             params={{ courseSlug }}
@@ -166,13 +167,13 @@ function CoursePage() {
               <div className="min-w-0 flex-1">
                 <div className="text-xs font-mono text-muted-foreground">Final assessment</div>
                 <div className="text-sm font-semibold">
-                  Knowledge quiz {passed && `· Passed with ${data.progress?.quiz_score}%`}
+                  {quiz.title} {passed && `· Passed with ${data.best_score}%`}
                 </div>
               </div>
               {!allLessonsDone && !passed ? <Lock className="size-4 text-muted-foreground" /> : <ArrowRight className="size-4 text-muted-foreground" />}
             </div>
           </Link>
-        </li>
+        </li>)}
         {/* Certificate row */}
         <li>
           <Link
