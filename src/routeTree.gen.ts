@@ -47,6 +47,7 @@ import { Route as AuthenticatedSettingsIndexRouteImport } from './routes/_authen
 import { Route as AuthenticatedMessagesIndexRouteImport } from './routes/_authenticated/messages.index'
 import { Route as AuthenticatedDashboardIndexRouteImport } from './routes/_authenticated/dashboard.index'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
+import { Route as AuthenticatedAcademyIndexRouteImport } from './routes/_authenticated/academy.index'
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
 import { Route as AuthenticatedSettingsSupportRouteImport } from './routes/_authenticated/settings.support'
 import { Route as AuthenticatedSettingsSecurityRouteImport } from './routes/_authenticated/settings.security'
@@ -74,6 +75,7 @@ import { Route as AuthenticatedAdminDispatchRouteImport } from './routes/_authen
 import { Route as AuthenticatedAdminBackgroundChecksRouteImport } from './routes/_authenticated/admin.background-checks'
 import { Route as AuthenticatedAdminAnalyticsRouteImport } from './routes/_authenticated/admin.analytics'
 import { Route as AuthenticatedAcademyCourseSlugRouteImport } from './routes/_authenticated/academy.$courseSlug'
+import { Route as AuthenticatedAcademyCourseSlugIndexRouteImport } from './routes/_authenticated/academy.$courseSlug.index'
 import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
@@ -281,6 +283,12 @@ const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AuthenticatedAdminRoute,
 } as any)
+const AuthenticatedAcademyIndexRoute =
+  AuthenticatedAcademyIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedAcademyRoute,
+  } as any)
 const LovableEmailSuppressionRoute = LovableEmailSuppressionRouteImport.update({
   id: '/lovable/email/suppression',
   path: '/lovable/email/suppression',
@@ -442,6 +450,12 @@ const AuthenticatedAcademyCourseSlugRoute =
     path: '/$courseSlug',
     getParentRoute: () => AuthenticatedAcademyRoute,
   } as any)
+const AuthenticatedAcademyCourseSlugIndexRoute =
+  AuthenticatedAcademyCourseSlugIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedAcademyCourseSlugRoute,
+  } as any)
 const LovableEmailTransactionalSendRoute =
   LovableEmailTransactionalSendRouteImport.update({
     id: '/lovable/email/transactional/send',
@@ -556,6 +570,7 @@ export interface FileRoutesByFullPath {
   '/settings/security': typeof AuthenticatedSettingsSecurityRoute
   '/settings/support': typeof AuthenticatedSettingsSupportRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
+  '/academy/': typeof AuthenticatedAcademyIndexRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/dashboard/': typeof AuthenticatedDashboardIndexRoute
   '/messages/': typeof AuthenticatedMessagesIndexRoute
@@ -569,6 +584,7 @@ export interface FileRoutesByFullPath {
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
+  '/academy/$courseSlug/': typeof AuthenticatedAcademyCourseSlugIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -585,7 +601,6 @@ export interface FileRoutesByTo {
   '/tasks': typeof TasksRouteWithChildren
   '/terms': typeof TermsRoute
   '/waitlist': typeof WaitlistRoute
-  '/academy': typeof AuthenticatedAcademyRouteWithChildren
   '/activity': typeof AuthenticatedActivityRoute
   '/admin-dashboard': typeof AuthenticatedAdminDashboardRoute
   '/applications': typeof AuthenticatedApplicationsRoute
@@ -601,7 +616,6 @@ export interface FileRoutesByTo {
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/profile/$slug': typeof ProfileSlugRoute
   '/tasks/$taskId': typeof TasksTaskIdRoute
-  '/academy/$courseSlug': typeof AuthenticatedAcademyCourseSlugRouteWithChildren
   '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
   '/admin/background-checks': typeof AuthenticatedAdminBackgroundChecksRoute
   '/admin/dispatch': typeof AuthenticatedAdminDispatchRoute
@@ -628,6 +642,7 @@ export interface FileRoutesByTo {
   '/settings/security': typeof AuthenticatedSettingsSecurityRoute
   '/settings/support': typeof AuthenticatedSettingsSupportRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
+  '/academy': typeof AuthenticatedAcademyIndexRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/dashboard': typeof AuthenticatedDashboardIndexRoute
   '/messages': typeof AuthenticatedMessagesIndexRoute
@@ -641,6 +656,7 @@ export interface FileRoutesByTo {
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
+  '/academy/$courseSlug': typeof AuthenticatedAcademyCourseSlugIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -705,6 +721,7 @@ export interface FileRoutesById {
   '/_authenticated/settings/security': typeof AuthenticatedSettingsSecurityRoute
   '/_authenticated/settings/support': typeof AuthenticatedSettingsSupportRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
+  '/_authenticated/academy/': typeof AuthenticatedAcademyIndexRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/dashboard/': typeof AuthenticatedDashboardIndexRoute
   '/_authenticated/messages/': typeof AuthenticatedMessagesIndexRoute
@@ -718,6 +735,7 @@ export interface FileRoutesById {
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
+  '/_authenticated/academy/$courseSlug/': typeof AuthenticatedAcademyCourseSlugIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -782,6 +800,7 @@ export interface FileRouteTypes {
     | '/settings/security'
     | '/settings/support'
     | '/lovable/email/suppression'
+    | '/academy/'
     | '/admin/'
     | '/dashboard/'
     | '/messages/'
@@ -795,6 +814,7 @@ export interface FileRouteTypes {
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
+    | '/academy/$courseSlug/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -811,7 +831,6 @@ export interface FileRouteTypes {
     | '/tasks'
     | '/terms'
     | '/waitlist'
-    | '/academy'
     | '/activity'
     | '/admin-dashboard'
     | '/applications'
@@ -827,7 +846,6 @@ export interface FileRouteTypes {
     | '/email/unsubscribe'
     | '/profile/$slug'
     | '/tasks/$taskId'
-    | '/academy/$courseSlug'
     | '/admin/analytics'
     | '/admin/background-checks'
     | '/admin/dispatch'
@@ -854,6 +872,7 @@ export interface FileRouteTypes {
     | '/settings/security'
     | '/settings/support'
     | '/lovable/email/suppression'
+    | '/academy'
     | '/admin'
     | '/dashboard'
     | '/messages'
@@ -867,6 +886,7 @@ export interface FileRouteTypes {
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
+    | '/academy/$courseSlug'
   id:
     | '__root__'
     | '/'
@@ -930,6 +950,7 @@ export interface FileRouteTypes {
     | '/_authenticated/settings/security'
     | '/_authenticated/settings/support'
     | '/lovable/email/suppression'
+    | '/_authenticated/academy/'
     | '/_authenticated/admin/'
     | '/_authenticated/dashboard/'
     | '/_authenticated/messages/'
@@ -943,6 +964,7 @@ export interface FileRouteTypes {
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
+    | '/_authenticated/academy/$courseSlug/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -1241,6 +1263,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminIndexRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/academy/': {
+      id: '/_authenticated/academy/'
+      path: '/'
+      fullPath: '/academy/'
+      preLoaderRoute: typeof AuthenticatedAcademyIndexRouteImport
+      parentRoute: typeof AuthenticatedAcademyRoute
+    }
     '/lovable/email/suppression': {
       id: '/lovable/email/suppression'
       path: '/lovable/email/suppression'
@@ -1430,6 +1459,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAcademyCourseSlugRouteImport
       parentRoute: typeof AuthenticatedAcademyRoute
     }
+    '/_authenticated/academy/$courseSlug/': {
+      id: '/_authenticated/academy/$courseSlug/'
+      path: '/'
+      fullPath: '/academy/$courseSlug/'
+      preLoaderRoute: typeof AuthenticatedAcademyCourseSlugIndexRouteImport
+      parentRoute: typeof AuthenticatedAcademyCourseSlugRoute
+    }
     '/lovable/email/transactional/send': {
       id: '/lovable/email/transactional/send'
       path: '/lovable/email/transactional/send'
@@ -1500,6 +1536,7 @@ interface AuthenticatedAcademyCourseSlugRouteChildren {
   AuthenticatedAcademyCourseSlugLessonSlugRoute: typeof AuthenticatedAcademyCourseSlugLessonSlugRoute
   AuthenticatedAcademyCourseSlugCertificateRoute: typeof AuthenticatedAcademyCourseSlugCertificateRoute
   AuthenticatedAcademyCourseSlugQuizRoute: typeof AuthenticatedAcademyCourseSlugQuizRoute
+  AuthenticatedAcademyCourseSlugIndexRoute: typeof AuthenticatedAcademyCourseSlugIndexRoute
 }
 
 const AuthenticatedAcademyCourseSlugRouteChildren: AuthenticatedAcademyCourseSlugRouteChildren =
@@ -1510,6 +1547,8 @@ const AuthenticatedAcademyCourseSlugRouteChildren: AuthenticatedAcademyCourseSlu
       AuthenticatedAcademyCourseSlugCertificateRoute,
     AuthenticatedAcademyCourseSlugQuizRoute:
       AuthenticatedAcademyCourseSlugQuizRoute,
+    AuthenticatedAcademyCourseSlugIndexRoute:
+      AuthenticatedAcademyCourseSlugIndexRoute,
   }
 
 const AuthenticatedAcademyCourseSlugRouteWithChildren =
@@ -1519,11 +1558,13 @@ const AuthenticatedAcademyCourseSlugRouteWithChildren =
 
 interface AuthenticatedAcademyRouteChildren {
   AuthenticatedAcademyCourseSlugRoute: typeof AuthenticatedAcademyCourseSlugRouteWithChildren
+  AuthenticatedAcademyIndexRoute: typeof AuthenticatedAcademyIndexRoute
 }
 
 const AuthenticatedAcademyRouteChildren: AuthenticatedAcademyRouteChildren = {
   AuthenticatedAcademyCourseSlugRoute:
     AuthenticatedAcademyCourseSlugRouteWithChildren,
+  AuthenticatedAcademyIndexRoute: AuthenticatedAcademyIndexRoute,
 }
 
 const AuthenticatedAcademyRouteWithChildren =
