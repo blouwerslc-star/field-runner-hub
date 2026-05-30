@@ -73,11 +73,28 @@ export const getPublicProfileBySlug = createServerFn({ method: "POST" })
       .maybeSingle();
     if (error) throw new Error(error.message);
     if (!profile) return { profile: null, roles: [] as string[] };
-    const { data: roles } = await supabaseAdmin
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", (profile as { user_id: string }).user_id);
-    return { profile, roles: (roles ?? []).map((r) => r.role as string) };
+    const userId = (profile as { user_id: string }).user_id;
+    const [{ data: roles }, { data: runner }, { data: progress }] = await Promise.all([
+      supabaseAdmin.from("user_roles").select("role").eq("user_id", userId),
+      supabaseAdmin
+        .from("runner_profiles")
+        .select("certification_level, certification_status, certified_at, verified_at, elite_at")
+        .eq("user_id", userId)
+        .maybeSingle(),
+      supabaseAdmin
+        .from("academy_progress")
+        .select("module_id, passed")
+        .eq("user_id", userId),
+    ]);
+    const { earnedSkillBadges } = await import("@/lib/academy/badges");
+    const passedIds = (progress ?? []).filter((p: any) => p.passed).map((p: any) => p.module_id);
+    const earned = earnedSkillBadges(passedIds).map((b) => ({ id: b.id, label: b.label, moduleId: b.moduleId }));
+    return {
+      profile,
+      roles: (roles ?? []).map((r) => r.role as string),
+      runner: runner ?? null,
+      academy: { passed_module_ids: passedIds, earned_badges: earned },
+    };
   });
 
 const listSchema = z.object({
