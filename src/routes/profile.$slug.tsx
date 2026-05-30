@@ -5,6 +5,8 @@ import { getPublicProfileBySlug } from "@/lib/profiles.functions";
 import { Button } from "@/components/ui/button";
 import { RoleBadge, VerifiedBadge, AvailabilityBadge, StarRating, LocationLine } from "@/components/profiles/ProfileBadges";
 import { BrandLogo } from "@/components/brand/BrandLogo";
+import { CertificationBadge } from "@/components/academy/CertificationBadge";
+import { SKILL_BADGES } from "@/lib/academy/badges";
 import { Loader2, MessageSquare, Send, Clock, Award } from "lucide-react";
 import { toast } from "sonner";
 import { Toaster } from "@/components/ui/sonner";
@@ -82,6 +84,9 @@ function PublicProfilePage() {
   const isRunner = roles.includes("runner");
   const isInvestor = roles.includes("investor");
   const memberSince = new Date(p.created_at).toLocaleDateString(undefined, { year: "numeric", month: "long" });
+  const certLevel: number = (data as any).runner?.certification_level ?? 0;
+  const earnedBadges: { id: string; label: string }[] = (data as any).academy?.earned_badges ?? [];
+  const earnedSet = new Set(earnedBadges.map((b) => b.id));
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -119,11 +124,31 @@ function PublicProfilePage() {
                   <LocationLine city={p.city} state={p.state} />
                   <AvailabilityBadge status={p.availability_status} />
                   <StarRating rating={p.average_rating} count={p.review_count} />
+                  {isRunner && <CertificationBadge level={certLevel} hideWhenZero />}
                 </div>
               </div>
             </div>
             {p.headline && <p className="mt-6 text-lg text-foreground">{p.headline}</p>}
             {p.bio && <p className="mt-3 text-muted-foreground whitespace-pre-wrap">{p.bio}</p>}
+
+            {isRunner && earnedBadges.length > 0 && (
+              <Section title="Academy certifications">
+                <div className="flex flex-wrap gap-2">
+                  {SKILL_BADGES.filter((b) => earnedSet.has(b.id)).map((b) => {
+                    const { Icon } = b;
+                    return (
+                      <span
+                        key={b.id}
+                        className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold ${b.cls}`}
+                        title={b.description}
+                      >
+                        <Icon className="size-3.5" /> {b.label}
+                      </span>
+                    );
+                  })}
+                </div>
+              </Section>
+            )}
 
             {(p.services_offered ?? []).length > 0 && (
               <Section title="Services">

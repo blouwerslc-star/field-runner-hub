@@ -4,7 +4,15 @@ import { useQuery } from "@tanstack/react-query";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { getAcademyState } from "@/lib/academy.functions";
 import { CertificationBadge, CERTIFICATION_LABELS } from "@/components/academy/CertificationBadge";
-import { Loader2, BookOpen, CheckCircle2, ArrowRight, Lock, Award, ShieldCheck, Crown } from "lucide-react";
+import { XPBar } from "@/components/academy/XPBar";
+import { StatCard } from "@/components/academy/StatCard";
+import { SkillBadge } from "@/components/academy/SkillBadge";
+import { SKILL_BADGES } from "@/lib/academy/badges";
+import { Button } from "@/components/ui/button";
+import {
+  Loader2, BookOpen, CheckCircle2, ArrowRight, Lock, Award, ShieldCheck, Crown,
+  Trophy, Sparkles, Briefcase, ShieldQuestion,
+} from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/academy")({
   component: AcademyIndex,
@@ -30,39 +38,78 @@ function AcademyIndex() {
   const bgVerified = !!data.profile?.background_check_verified;
   const rating = Number(data.profile?.average_rating ?? 0);
   const completedTasks = Number(data.profile?.completed_tasks_count ?? 0);
+  const xp: number = (data as any).xp ?? 0;
+  const lp = (data as any).level_progress ?? { level: 1, currentLevelXp: 0, nextLevelXp: 500, progressPct: 0 };
+  const xpLevel: number = (data as any).level ?? 1;
+  const nextModule = (data as any).next_module as { id: string; title: string } | null;
+  const earnedBadgeIds = new Set(((data as any).earned_badges ?? []).map((b: any) => b.id));
+  const earnedCount = earnedBadgeIds.size;
 
   return (
     <DashboardShell
       title="REI Runner Academy"
-      subtitle="Complete the training to become a Certified Runner. Required before accepting paid tasks."
+      subtitle="Train, certify, and unlock investor-grade tasks. Required before accepting paid work."
     >
-      {/* CURRENT STATUS */}
-      <div className="rounded-2xl border border-border bg-card/60 backdrop-blur p-6 mb-6">
-        <div className="flex items-start justify-between gap-4 flex-wrap">
+      {/* HERO: XP + status */}
+      <div className="grid md:grid-cols-3 gap-4 mb-6">
+        <div className="md:col-span-2">
+          <XPBar xp={xp} level={xpLevel} {...lp} />
+        </div>
+        <div className="rounded-2xl border border-border bg-card/60 backdrop-blur p-5 flex flex-col justify-between">
           <div>
-            <div className="text-xs font-mono uppercase tracking-widest text-primary mb-2">Your status</div>
-            <div className="flex items-center gap-3">
-              <CertificationBadge level={level} size="md" />
-              <div className="text-sm text-muted-foreground">
-                {passedCount} of {totalCount} modules passed
-              </div>
+            <div className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">Certification tier</div>
+            <div className="mt-2"><CertificationBadge level={level} size="md" /></div>
+            <div className="mt-2 text-xs text-muted-foreground">
+              {passedCount}/{totalCount} modules · {earnedCount} skill badges
             </div>
           </div>
-          <div className="text-right">
-            <div className="text-xs text-muted-foreground">Pass threshold</div>
-            <div className="text-lg font-semibold">{data.pass_threshold}%</div>
-          </div>
+          {nextModule ? (
+            <Link to="/academy/$moduleId" params={{ moduleId: nextModule.id }}>
+              <Button size="sm" className="w-full mt-4">
+                Continue: {nextModule.title} <ArrowRight className="size-3.5 ml-1" />
+              </Button>
+            </Link>
+          ) : (
+            <div className="mt-4 text-xs text-emerald-300 inline-flex items-center gap-1.5">
+              <CheckCircle2 className="size-4" /> All modules complete
+            </div>
+          )}
         </div>
-        <div className="mt-4 h-2 rounded-full bg-muted overflow-hidden">
-          <div
-            className="h-full bg-gradient-to-r from-primary to-primary/60 transition-all"
-            style={{ width: `${(passedCount / totalCount) * 100}%` }}
-          />
+      </div>
+
+      {/* STAT CARDS */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
+        <StatCard Icon={Trophy} label="Modules Passed" value={`${passedCount}/${totalCount}`} sublabel={`${data.pass_threshold}% to pass`} accent="primary" />
+        <StatCard Icon={Award} label="Skill Badges" value={earnedCount} sublabel={`of ${SKILL_BADGES.length} available`} accent="amber" />
+        <StatCard
+          Icon={Briefcase}
+          label="Paid Tasks"
+          value={level >= 1 ? "Unlocked" : "Locked"}
+          sublabel={level >= 1 ? "You can apply" : "Reach Certified"}
+          accent={level >= 1 ? "emerald" : "violet"}
+        />
+        <StatCard Icon={Sparkles} label="Total XP" value={xp.toLocaleString()} sublabel={`Level ${xpLevel}`} accent="violet" />
+      </div>
+
+      {/* VERIFICATION STATUS */}
+      <div className="rounded-2xl border border-border bg-card/60 backdrop-blur p-5 mb-8">
+        <div className="flex items-center justify-between gap-3 flex-wrap">
+          <div>
+            <div className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">Account verification</div>
+            <div className="text-sm font-semibold mt-1">Needed to reach Verified Runner</div>
+          </div>
+          <div className="flex items-center gap-2 flex-wrap">
+            <VerifyChip ok={idVerified} label="Identity" href="/profile/id-verification" />
+            <VerifyChip ok={bgVerified} label="Background check" href="/profile/background-check" />
+          </div>
         </div>
       </div>
 
       {/* MODULES */}
-      <h2 className="text-lg font-semibold mb-3">Modules</h2>
+      <div className="flex items-end justify-between mb-3">
+        <h2 className="text-lg font-semibold">Training modules</h2>
+        <div className="text-xs text-muted-foreground">8 modules · ~90 min total</div>
+      </div>
       <ul className="space-y-3 mb-10">
         {data.modules.map((m: any) => {
           const sectionsDone = (m.sections_completed?.length ?? 0);
@@ -113,8 +160,37 @@ function AcademyIndex() {
         })}
       </ul>
 
+      {/* SKILL BADGES */}
+      <div className="flex items-end justify-between mb-3">
+        <h2 className="text-lg font-semibold">Skill badges</h2>
+        <div className="text-xs text-muted-foreground">{earnedCount}/{SKILL_BADGES.length} earned</div>
+      </div>
+      <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-3 mb-10">
+        {SKILL_BADGES.map((b) => {
+          const earned = earnedBadgeIds.has(b.id);
+          const { Icon } = b;
+          return (
+            <div
+              key={b.id}
+              className={`rounded-2xl border p-4 flex items-start gap-3 ${earned ? "border-primary/40 bg-card/80" : "border-border bg-card/40 opacity-80"}`}
+            >
+              <div className={`size-10 rounded-xl grid place-items-center shrink-0 ${earned ? b.cls : "bg-muted/30 text-muted-foreground border border-border"}`}>
+                <Icon className="size-5" />
+              </div>
+              <div className="min-w-0">
+                <div className="text-sm font-semibold flex items-center gap-2">
+                  {b.label}
+                  {!earned && <Lock className="size-3 text-muted-foreground" />}
+                </div>
+                <div className="text-xs text-muted-foreground mt-0.5">{b.description}</div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
       {/* CERTIFICATION LEVELS */}
-      <h2 className="text-lg font-semibold mb-3">Certification Levels</h2>
+      <h2 className="text-lg font-semibold mb-3">Certification tiers</h2>
       <div className="grid md:grid-cols-3 gap-3">
         <LevelCard
           level={1}
@@ -141,6 +217,24 @@ function AcademyIndex() {
         />
       </div>
     </DashboardShell>
+  );
+}
+
+function VerifyChip({ ok, label, href }: { ok: boolean; label: string; href: string }) {
+  if (ok) {
+    return (
+      <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-1 text-xs text-emerald-300 font-semibold">
+        <CheckCircle2 className="size-3.5" /> {label} verified
+      </span>
+    );
+  }
+  return (
+    <Link
+      to={href}
+      className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card hover:border-primary/40 px-2.5 py-1 text-xs font-semibold transition-colors"
+    >
+      <ShieldQuestion className="size-3.5" /> Start {label} <ArrowRight className="size-3" />
+    </Link>
   );
 }
 
