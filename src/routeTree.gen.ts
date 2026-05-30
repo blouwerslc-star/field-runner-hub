@@ -42,6 +42,7 @@ import { Route as AuthenticatedApplicationsRouteImport } from './routes/_authent
 import { Route as AuthenticatedAdminDashboardRouteImport } from './routes/_authenticated/admin-dashboard'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedActivityRouteImport } from './routes/_authenticated/activity'
+import { Route as AuthenticatedAcademyRouteImport } from './routes/_authenticated/academy'
 import { Route as AuthenticatedSettingsIndexRouteImport } from './routes/_authenticated/settings.index'
 import { Route as AuthenticatedMessagesIndexRouteImport } from './routes/_authenticated/messages.index'
 import { Route as AuthenticatedDashboardIndexRouteImport } from './routes/_authenticated/dashboard.index'
@@ -246,6 +247,11 @@ const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
 const AuthenticatedActivityRoute = AuthenticatedActivityRouteImport.update({
   id: '/activity',
   path: '/activity',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedAcademyRoute = AuthenticatedAcademyRouteImport.update({
+  id: '/academy',
+  path: '/academy',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
 const AuthenticatedSettingsIndexRoute =
@@ -476,6 +482,7 @@ export interface FileRoutesByFullPath {
   '/tasks': typeof TasksRouteWithChildren
   '/terms': typeof TermsRoute
   '/waitlist': typeof WaitlistRoute
+  '/academy': typeof AuthenticatedAcademyRoute
   '/activity': typeof AuthenticatedActivityRoute
   '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/admin-dashboard': typeof AuthenticatedAdminDashboardRoute
@@ -546,6 +553,7 @@ export interface FileRoutesByTo {
   '/tasks': typeof TasksRouteWithChildren
   '/terms': typeof TermsRoute
   '/waitlist': typeof WaitlistRoute
+  '/academy': typeof AuthenticatedAcademyRoute
   '/activity': typeof AuthenticatedActivityRoute
   '/admin-dashboard': typeof AuthenticatedAdminDashboardRoute
   '/applications': typeof AuthenticatedApplicationsRoute
@@ -615,6 +623,7 @@ export interface FileRoutesById {
   '/tasks': typeof TasksRouteWithChildren
   '/terms': typeof TermsRoute
   '/waitlist': typeof WaitlistRoute
+  '/_authenticated/academy': typeof AuthenticatedAcademyRoute
   '/_authenticated/activity': typeof AuthenticatedActivityRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
   '/_authenticated/admin-dashboard': typeof AuthenticatedAdminDashboardRoute
@@ -687,6 +696,7 @@ export interface FileRouteTypes {
     | '/tasks'
     | '/terms'
     | '/waitlist'
+    | '/academy'
     | '/activity'
     | '/admin'
     | '/admin-dashboard'
@@ -757,6 +767,7 @@ export interface FileRouteTypes {
     | '/tasks'
     | '/terms'
     | '/waitlist'
+    | '/academy'
     | '/activity'
     | '/admin-dashboard'
     | '/applications'
@@ -825,6 +836,7 @@ export interface FileRouteTypes {
     | '/tasks'
     | '/terms'
     | '/waitlist'
+    | '/_authenticated/academy'
     | '/_authenticated/activity'
     | '/_authenticated/admin'
     | '/_authenticated/admin-dashboard'
@@ -1140,6 +1152,13 @@ declare module '@tanstack/react-router' {
       path: '/activity'
       fullPath: '/activity'
       preLoaderRoute: typeof AuthenticatedActivityRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/academy': {
+      id: '/_authenticated/academy'
+      path: '/academy'
+      fullPath: '/academy'
+      preLoaderRoute: typeof AuthenticatedAcademyRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/settings/': {
@@ -1478,6 +1497,7 @@ const AuthenticatedSettingsRouteWithChildren =
   )
 
 interface AuthenticatedRouteChildren {
+  AuthenticatedAcademyRoute: typeof AuthenticatedAcademyRoute
   AuthenticatedActivityRoute: typeof AuthenticatedActivityRoute
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRouteWithChildren
   AuthenticatedAdminDashboardRoute: typeof AuthenticatedAdminDashboardRoute
@@ -1502,6 +1522,7 @@ interface AuthenticatedRouteChildren {
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
+  AuthenticatedAcademyRoute: AuthenticatedAcademyRoute,
   AuthenticatedActivityRoute: AuthenticatedActivityRoute,
   AuthenticatedAdminRoute: AuthenticatedAdminRouteWithChildren,
   AuthenticatedAdminDashboardRoute: AuthenticatedAdminDashboardRoute,
