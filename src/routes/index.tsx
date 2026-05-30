@@ -894,7 +894,7 @@ function Index() {
                 <Clock className="size-4 text-primary" /> Support hours: Mon–Fri, 8am–6pm CT
               </div>
               <div className="flex items-center gap-2">
-                <Building2 className="size-4 text-primary" /> US-registered platform · Operating nationwide
+                <Building2 className="size-4 text-primary" /> US-registered platform · Expanding market-by-market
               </div>
             </div>
           </div>
@@ -924,7 +924,7 @@ function Index() {
         </div>
         <div className="border-t border-border/60">
           <div className="mx-auto max-w-7xl px-5 py-5 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-muted-foreground">
-            <div>© {new Date().getFullYear()} REI Runner, Inc. · A nationwide real estate field operations marketplace.</div>
+            <div>© {new Date().getFullYear()} REI Runner, Inc. · Real estate field operations marketplace (beta).</div>
             <div>Built in the USA 🇺🇸</div>
           </div>
         </div>
