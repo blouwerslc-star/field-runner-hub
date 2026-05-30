@@ -174,6 +174,57 @@ export type Database = {
           },
         ]
       }
+      academy_products: {
+        Row: {
+          active: boolean
+          affiliate_url: string
+          audience: string
+          course_id: string | null
+          created_at: string
+          description: string | null
+          id: string
+          image_url: string | null
+          lesson_id: string | null
+          price_display: string | null
+          sort_order: number
+          title: string
+          updated_at: string
+          vendor: string | null
+        }
+        Insert: {
+          active?: boolean
+          affiliate_url: string
+          audience?: string
+          course_id?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          lesson_id?: string | null
+          price_display?: string | null
+          sort_order?: number
+          title: string
+          updated_at?: string
+          vendor?: string | null
+        }
+        Update: {
+          active?: boolean
+          affiliate_url?: string
+          audience?: string
+          course_id?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          lesson_id?: string | null
+          price_display?: string | null
+          sort_order?: number
+          title?: string
+          updated_at?: string
+          vendor?: string | null
+        }
+        Relationships: []
+      }
       academy_progress: {
         Row: {
           completed_at: string | null

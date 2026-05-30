@@ -8,6 +8,7 @@ import {
   Loader2, ArrowLeft, ArrowRight, CheckCircle2, Circle, Lock,
   Award, ClipboardList, PlayCircle,
 } from "lucide-react";
+import { AffiliateProductList } from "@/components/academy/AffiliateProductList";
 
 export const Route = createFileRoute("/_authenticated/academy/$courseSlug/")({
   component: CoursePage,
@@ -198,6 +199,11 @@ function CoursePage() {
           </Link>
         </li>
       </ol>
+
+      <AffiliateProductList
+        products={((data as any).products ?? [])}
+        heading="Recommended gear for this course"
+      />
     </DashboardShell>
   );
 }
