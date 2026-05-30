@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { Button } from "@/components/ui/button";
-import { getModuleDetail, submitQuiz } from "@/lib/academy.functions";
+import { getCourseQuiz, submitCourseQuiz } from "@/lib/academy.db.functions";
 import { Loader2, ArrowLeft, ArrowRight, CheckCircle2, Lock, Award } from "lucide-react";
 import { toast } from "sonner";
 
@@ -17,25 +17,25 @@ function QuizPage() {
   const { courseSlug } = Route.useParams();
   const navigate = useNavigate();
   const qc = useQueryClient();
-  const fetchFn = useServerFn(getModuleDetail);
-  const submitFn = useServerFn(submitQuiz);
+  const fetchFn = useServerFn(getCourseQuiz);
+  const submitFn = useServerFn(submitCourseQuiz);
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ["academy-course", courseSlug],
-    queryFn: () => fetchFn({ data: { moduleId: courseSlug } }),
+    queryKey: ["academy-quiz", courseSlug],
+    queryFn: () => fetchFn({ data: { courseSlug } }),
   });
 
   const [answers, setAnswers] = useState<Record<string, number>>({});
   const [result, setResult] = useState<Awaited<ReturnType<typeof submitFn>> | null>(null);
 
   const submitMut = useMutation({
-    mutationFn: () => submitFn({ data: { moduleId: courseSlug, answers } }),
+    mutationFn: () => submitFn({ data: { courseSlug, answers } }),
     onSuccess: (r) => {
       setResult(r);
-      qc.invalidateQueries({ queryKey: ["academy-state"] });
+      qc.invalidateQueries({ queryKey: ["academy-db-courses"] });
       qc.invalidateQueries({ queryKey: ["academy-course", courseSlug] });
       if (r.passed) toast.success(`Passed with ${r.score}%`);
-      else toast.error(`Score ${r.score}% — need ${r.pass_threshold}% to pass`);
+      else toast.error(`Score ${r.score}% — need ${r.passing_score}% to pass`);
     },
   });
 
@@ -54,15 +54,15 @@ function QuizPage() {
     );
   }
 
-  const mod = data.module as any;
-  const completed: string[] = data.progress?.sections_completed ?? [];
-  const allSectionsDone = mod.sections.every((s: any) => completed.includes(s.id));
-  const alreadyPassed = !!data.progress?.passed;
-  const allAnswered = mod.quiz.every((q: any) => typeof answers[q.id] === "number");
+  const allSectionsDone = data.all_lessons_done;
+  const alreadyPassed = data.passed;
+  const allAnswered = data.questions.every((q) => typeof answers[q.id] === "number");
+  const title = data.course.title;
+  const passingScore = data.quiz.passing_score;
 
   if (!allSectionsDone && !alreadyPassed) {
     return (
-      <DashboardShell title={`${mod.title} — Quiz`} subtitle="Locked until all lessons are complete.">
+      <DashboardShell title={`${title} — Quiz`} subtitle="Locked until all lessons are complete.">
         <Link to="/academy/$courseSlug" params={{ courseSlug }} className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-4">
           <ArrowLeft className="size-4" /> Back to course
         </Link>
@@ -70,7 +70,7 @@ function QuizPage() {
           <Lock className="size-8 mx-auto text-muted-foreground mb-3" />
           <div className="text-base font-semibold mb-1">Complete all lessons first</div>
           <p className="text-sm text-muted-foreground mb-4">
-            You've completed {completed.length} of {mod.sections.length} lessons.
+            You've completed {data.completed_lessons} of {data.total_lessons} lessons.
           </p>
           <Button size="sm" asChild>
             <Link to="/academy/$courseSlug" params={{ courseSlug }}>Continue lessons</Link>
@@ -82,8 +82,8 @@ function QuizPage() {
 
   return (
     <DashboardShell
-      title={`${mod.title} — Knowledge Quiz`}
-      subtitle={`Pass with ${data.pass_threshold}% or higher to earn certification.`}
+      title={`${title} — Knowledge Quiz`}
+      subtitle={`Pass with ${passingScore}% or higher to earn certification.`}
     >
       <Link to="/academy/$courseSlug" params={{ courseSlug }} className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-4">
         <ArrowLeft className="size-4" /> Back to course
@@ -92,7 +92,7 @@ function QuizPage() {
       {alreadyPassed && !result && (
         <div className="mb-6 rounded-2xl border border-emerald-500/40 bg-emerald-500/5 p-4 flex items-center justify-between gap-3 flex-wrap">
           <div className="text-sm text-emerald-200">
-            You already passed with {data.progress?.quiz_score}%. You may retake to improve your score.
+            You already passed with {data.best_score}%. You may retake to improve your score.
           </div>
           <Button size="sm" variant="outline" asChild>
             <Link to="/academy/$courseSlug/certificate" params={{ courseSlug }}>
@@ -104,13 +104,13 @@ function QuizPage() {
 
       <div className="rounded-2xl border border-border bg-card/60 backdrop-blur p-6">
         <ol className="space-y-5">
-          {mod.quiz.map((q: any, i: number) => {
+          {data.questions.map((q, i) => {
             const perQ = result?.per_question?.find((p) => p.id === q.id);
             return (
               <li key={q.id}>
-                <div className="text-sm font-medium mb-2">{i + 1}. {q.prompt}</div>
+                <div className="text-sm font-medium mb-2">{i + 1}. {q.question}</div>
                 <div className="space-y-2">
-                  {q.options.map((opt: string, idx: number) => {
+                  {(q.answers as string[]).map((opt: string, idx: number) => {
                     const checked = answers[q.id] === idx;
                     const showResult = !!result;
                     let cls = "border-border bg-background/40 hover:border-primary/40";
@@ -138,7 +138,7 @@ function QuizPage() {
 
         <div className="mt-6 flex items-center justify-between gap-3 flex-wrap">
           <div className="text-sm text-muted-foreground">
-            {data.progress?.quiz_attempts ? `Best: ${data.progress.quiz_score}% · ${data.progress.quiz_attempts} attempt(s)` : "First attempt"}
+            {data.attempts ? `Best: ${data.best_score}% · ${data.attempts} attempt(s)` : "First attempt"}
           </div>
           {result ? (
             <div className="flex items-center gap-2">
@@ -168,7 +168,7 @@ function QuizPage() {
           <div className={`mt-5 rounded-xl border p-4 text-sm ${result.passed ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-200" : "border-red-500/40 bg-red-500/10 text-red-200"}`}>
             {result.passed
               ? `Passed with ${result.score}%. Certificate unlocked.`
-              : `Scored ${result.score}%. You need ${result.pass_threshold}% to pass — review the lessons and try again.`}
+              : `Scored ${result.score}%. You need ${result.passing_score}% to pass — review the lessons and try again.`}
           </div>
         )}
       </div>
