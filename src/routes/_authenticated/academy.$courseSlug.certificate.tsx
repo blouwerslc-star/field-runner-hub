@@ -78,9 +78,9 @@ function CertificatePage() {
           <p className="text-sm text-muted-foreground mb-4">
             Pass the final quiz with {data.pass_threshold}% or higher to unlock your certificate.
           </p>
-          <Link to="/academy/$courseSlug/quiz" params={{ courseSlug }}>
-            <Button size="sm">Take the quiz</Button>
-          </Link>
+          <Button size="sm" asChild>
+            <Link to="/academy/$courseSlug/quiz" params={{ courseSlug }}>Take the quiz</Link>
+          </Button>
         </div>
       </DashboardShell>
     );
