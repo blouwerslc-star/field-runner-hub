@@ -21,12 +21,42 @@ export const Route = createFileRoute("/_authenticated/academy")({
 
 function AcademyIndex() {
   const fn = useServerFn(getAcademyState);
-  const { data, isLoading } = useQuery({ queryKey: ["academy-state"], queryFn: () => fn() });
+  const { data, isLoading, error, refetch, isFetching } = useQuery({
+    queryKey: ["academy-state"],
+    queryFn: () => fn(),
+    retry: 1,
+  });
 
-  if (isLoading || !data) {
+  if (isLoading) {
     return (
       <DashboardShell title="REI Runner Academy" subtitle="Training & certification for field runners.">
         <Loader2 className="size-6 animate-spin text-primary" />
+      </DashboardShell>
+    );
+  }
+
+  if (error || !data) {
+    const message = (error as any)?.message ?? "We couldn't load your Academy progress.";
+    const isAuth = /unauthor/i.test(message);
+    return (
+      <DashboardShell title="REI Runner Academy" subtitle="Training & certification for field runners.">
+        <div className="rounded-2xl border border-border bg-card/60 p-6 max-w-xl">
+          <div className="text-sm font-semibold mb-1">
+            {isAuth ? "Please sign in to access the Academy" : "Couldn't load Academy"}
+          </div>
+          <div className="text-xs text-muted-foreground mb-4">{message}</div>
+          <div className="flex gap-2">
+            {isAuth ? (
+              <Link to="/login" search={{ redirect: "/academy" }}>
+                <Button size="sm">Sign in</Button>
+              </Link>
+            ) : (
+              <Button size="sm" onClick={() => refetch()} disabled={isFetching}>
+                {isFetching ? <Loader2 className="size-4 animate-spin" /> : "Retry"}
+              </Button>
+            )}
+          </div>
+        </div>
       </DashboardShell>
     );
   }
@@ -64,11 +94,11 @@ function AcademyIndex() {
             </div>
           </div>
           {nextModule ? (
-            <Link to="/academy/$courseSlug" params={{ courseSlug: nextModule.id }}>
-              <Button size="sm" className="w-full mt-4">
+            <Button size="sm" className="w-full mt-4" asChild>
+              <Link to="/academy/$courseSlug" params={{ courseSlug: nextModule.id }}>
                 Continue: {nextModule.title} <ArrowRight className="size-3.5 ml-1" />
-              </Button>
-            </Link>
+              </Link>
+            </Button>
           ) : (
             <div className="mt-4 text-xs text-emerald-300 inline-flex items-center gap-1.5">
               <CheckCircle2 className="size-4" /> All modules complete
