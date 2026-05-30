@@ -158,22 +158,47 @@ export const ACADEMY_MODULES: AcademyModule[] = [
     order: 5,
     title: "Lockbox Installation Procedures",
     summary: "How to install, photograph, and securely communicate lockbox codes.",
-    duration: "10 min",
+    duration: "20 min",
     sections: [
       {
+        id: "intro",
+        title: "Lesson 1 — Introduction to Lockbox Services",
+        body: "Lockbox installation is one of the most requested and trusted runner tasks. Investors rely on you to physically secure access to a property so contractors, agents, and inspectors can enter without the owner being on-site. A correctly installed lockbox protects the property, the investor, and you. A sloppy one creates security risk and kills repeat work.\n\nWhat this course covers:\n- Approved lockbox types\n- Where to place the box on a property\n- The exact installation process\n- Security and code-handling requirements\n- Documentation and confirmation photos\n- Common mistakes that cost runners repeat business",
+      },
+      {
+        id: "approved-types",
+        title: "Lesson 2 — Approved Lockbox Types",
+        body: "Use only the lockbox type specified in the task. The two standard formats:\n\n1) Combination shackle lockbox (Master Lock 5400D or equivalent): preferred for vacant properties; 4-digit resettable code; shackle wraps around a fixed point (door handle, hose bib).\n\n2) Push-button wall-mount lockbox: used only when the investor explicitly requests permanent mounting and provides hardware.\n\nDo NOT use:\n- Personal/used lockboxes (chain-of-custody risk)\n- Realtor electronic Supra boxes (license-restricted)\n- Any box without a resettable code",
+      },
+      {
         id: "placement",
-        title: "Placement",
-        body: "Install at the agreed location (typically a hose bib, gas meter pipe, or the front door knob if specified). Make sure the box is firmly seated and the shackle is fully engaged. The box should not be visible from the street unless the investor requests it.",
+        title: "Lesson 3 — Property Placement Standards",
+        body: "Where you place the lockbox matters as much as the box itself.\n\nPreferred locations (in priority order):\n1. Front door handle or deadbolt — most visible to authorized visitors.\n2. Hose bib on the side of the home — concealed, hard to remove.\n3. Gas meter or utility pipe — secure, weather-protected.\n\nNever attach to:\n- Wooden railings (can be sawn through)\n- Mailboxes (federal property)\n- Neighbor's fence or any structure not on the subject property\n- Anything painted or finished that the shackle could damage\n\nThe box should NOT be visible from the street unless the investor specifically requests street-visible placement.",
       },
       {
-        id: "confirmation-photo",
-        title: "Confirmation photo",
-        body: "Take two photos: one wide shot showing where the box is located on the property, and one close-up showing the box itself. Geotag and timestamp must be enabled.",
+        id: "installation",
+        title: "Lesson 4 — Installation Process",
+        body: "Step-by-step:\n\n1. Verify you are at the correct address — match the task address to the visible house number.\n2. Open the box using the default code (printed on the unit or supplied in the task).\n3. Reset the code to the 4-digit code provided in the task. Test the new code twice with the box still open.\n4. Place the property key inside. Close the box.\n5. Wrap the shackle around the agreed mounting point.\n6. Close the shackle until you hear a firm click. Tug to confirm it is fully engaged.\n7. Spin the dials to scramble the code before walking away.",
       },
       {
-        id: "code-handoff",
-        title: "Code handoff",
-        body: "Deliver the code ONLY through the REI Runner app messaging. Never text or email the code to a personal phone or address. Never share the code with anyone other than the investor who posted the task.",
+        id: "security",
+        title: "Lesson 5 — Security Requirements",
+        body: "Lockbox codes are sensitive. Treat them like passwords.\n\n- Deliver the code ONLY through REI Runner in-app messaging. Never SMS, email, or speak the code aloud in a public space.\n- Never share the code with anyone except the investor who posted the task.\n- If asked for the code by an agent, neighbor, or contractor on-site, decline politely and tell them to contact the investor.\n- If you suspect the code has been compromised, message the investor immediately and offer to re-set it.\n- After the property changes hands or the task closes, the investor — not you — is responsible for retrieving the box.",
+      },
+      {
+        id: "documentation",
+        title: "Lesson 6 — Documentation and Photos",
+        body: "Every lockbox install requires two photos uploaded to the task:\n\n1. WIDE SHOT — shows the lockbox in context on the property, with the front of the home visible in the same frame. Helps the investor confirm location.\n\n2. CLOSE-UP — clearly shows the lockbox itself, the mounting point, and the closed shackle. The dials should be scrambled.\n\nRequirements for both photos:\n- Landscape orientation\n- Geotagging and timestamps enabled in your camera\n- Daylight when possible; flash only when necessary\n- No people, vehicles, or identifying neighbor info in frame",
+      },
+      {
+        id: "mistakes",
+        title: "Lesson 7 — Common Mistakes",
+        body: "The top reasons runners lose repeat lockbox work:\n\n1. Forgetting to reset the code from the factory default. The investor's chosen code never works and access is delayed.\n2. Not scrambling the dials after closing. Anyone walking by can read the last-entered combination.\n3. Mounting on the neighbor's property or on a removable fixture.\n4. Sending the code over personal SMS. This is grounds for removal from the platform.\n5. Skipping the wide shot. The investor has no idea where on the property to look.\n6. Failing to test the new code before walking away.\n7. Leaving the property without confirming the shackle is fully engaged.",
+      },
+      {
+        id: "final-review",
+        title: "Lesson 8 — Final Review Checklist",
+        body: "Run through this checklist before leaving the property:\n\n[ ] Code is reset to the task-supplied combination\n[ ] New code tested twice (opened and closed)\n[ ] Key is inside the box\n[ ] Shackle is fully engaged (audible click + tug-tested)\n[ ] Dials are scrambled\n[ ] Wide shot photo captured\n[ ] Close-up photo captured\n[ ] Geotagging confirmed on both photos\n[ ] Code delivered to investor via REI Runner in-app messaging only\n[ ] Task marked complete with photos attached\n\nIf any item fails, fix it before leaving. A second trip is on you.",
       },
     ],
     quiz: [
