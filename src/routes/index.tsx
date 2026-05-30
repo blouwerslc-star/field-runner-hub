@@ -242,46 +242,6 @@ function scrollToId(id: string) {
   if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
-function useCountUp(target: number, duration = 1600) {
-  const ref = useRef<HTMLDivElement | null>(null);
-  const [val, setVal] = useState(0);
-  const started = useRef(false);
-  useEffect(() => {
-    if (!ref.current) return;
-    const io = new IntersectionObserver((entries) => {
-      entries.forEach((e) => {
-        if (e.isIntersecting && !started.current) {
-          started.current = true;
-          const start = performance.now();
-          const step = (now: number) => {
-            const t = Math.min(1, (now - start) / duration);
-            const eased = 1 - Math.pow(1 - t, 3);
-            setVal(Math.floor(eased * target));
-            if (t < 1) requestAnimationFrame(step);
-            else setVal(target);
-          };
-          requestAnimationFrame(step);
-        }
-      });
-    }, { threshold: 0.4 });
-    io.observe(ref.current);
-    return () => io.disconnect();
-  }, [target, duration]);
-  return { ref, val };
-}
-
-function StatCounter({ value, suffix, label }: { value: number; suffix: string; label: string }) {
-  const { ref, val } = useCountUp(value);
-  return (
-    <div ref={ref} className="text-center">
-      <div className="text-3xl md:text-5xl font-bold text-gradient tabular-nums">
-        {val.toLocaleString()}{suffix}
-      </div>
-      <div className="mt-2 text-xs md:text-sm text-muted-foreground uppercase tracking-wider">{label}</div>
-    </div>
-  );
-}
-
 function MarketplaceUpdatesTicker() {
   // Duplicate the list so the marquee loops seamlessly
   const items = [...MARKETPLACE_UPDATES, ...MARKETPLACE_UPDATES];
