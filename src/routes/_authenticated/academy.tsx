@@ -7,11 +7,11 @@ import { CertificationBadge, CERTIFICATION_LABELS } from "@/components/academy/C
 import { XPBar } from "@/components/academy/XPBar";
 import { StatCard } from "@/components/academy/StatCard";
 import { SkillBadge } from "@/components/academy/SkillBadge";
-import { SKILL_BADGES, earnedSkillBadges } from "@/lib/academy/badges";
+import { SKILL_BADGES } from "@/lib/academy/badges";
 import { Button } from "@/components/ui/button";
 import {
   Loader2, BookOpen, CheckCircle2, ArrowRight, Lock, Award, ShieldCheck, Crown,
-  Trophy, Sparkles, Briefcase, Target, ShieldQuestion, Camera,
+  Trophy, Sparkles, Briefcase, ShieldQuestion,
 } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/academy")({
