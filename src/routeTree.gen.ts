@@ -81,6 +81,8 @@ import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/e
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
+import { Route as AuthenticatedAcademyCourseSlugQuizRouteImport } from './routes/_authenticated/academy.$courseSlug.quiz'
+import { Route as AuthenticatedAcademyCourseSlugCertificateRouteImport } from './routes/_authenticated/academy.$courseSlug.certificate'
 import { Route as AuthenticatedAcademyCourseSlugLessonSlugRouteImport } from './routes/_authenticated/academy.$courseSlug.$lessonSlug'
 
 const WaitlistRoute = WaitlistRouteImport.update({
@@ -481,6 +483,18 @@ const ApiPublicPaymentsWebhookRoute =
     path: '/api/public/payments/webhook',
     getParentRoute: () => rootRouteImport,
   } as any)
+const AuthenticatedAcademyCourseSlugQuizRoute =
+  AuthenticatedAcademyCourseSlugQuizRouteImport.update({
+    id: '/quiz',
+    path: '/quiz',
+    getParentRoute: () => AuthenticatedAcademyCourseSlugRoute,
+  } as any)
+const AuthenticatedAcademyCourseSlugCertificateRoute =
+  AuthenticatedAcademyCourseSlugCertificateRouteImport.update({
+    id: '/certificate',
+    path: '/certificate',
+    getParentRoute: () => AuthenticatedAcademyCourseSlugRoute,
+  } as any)
 const AuthenticatedAcademyCourseSlugLessonSlugRoute =
   AuthenticatedAcademyCourseSlugLessonSlugRouteImport.update({
     id: '/$lessonSlug',
@@ -555,6 +569,8 @@ export interface FileRoutesByFullPath {
   '/messages/': typeof AuthenticatedMessagesIndexRoute
   '/settings/': typeof AuthenticatedSettingsIndexRoute
   '/academy/$courseSlug/$lessonSlug': typeof AuthenticatedAcademyCourseSlugLessonSlugRoute
+  '/academy/$courseSlug/certificate': typeof AuthenticatedAcademyCourseSlugCertificateRoute
+  '/academy/$courseSlug/quiz': typeof AuthenticatedAcademyCourseSlugQuizRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -626,6 +642,8 @@ export interface FileRoutesByTo {
   '/messages': typeof AuthenticatedMessagesIndexRoute
   '/settings': typeof AuthenticatedSettingsIndexRoute
   '/academy/$courseSlug/$lessonSlug': typeof AuthenticatedAcademyCourseSlugLessonSlugRoute
+  '/academy/$courseSlug/certificate': typeof AuthenticatedAcademyCourseSlugCertificateRoute
+  '/academy/$courseSlug/quiz': typeof AuthenticatedAcademyCourseSlugQuizRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -702,6 +720,8 @@ export interface FileRoutesById {
   '/_authenticated/messages/': typeof AuthenticatedMessagesIndexRoute
   '/_authenticated/settings/': typeof AuthenticatedSettingsIndexRoute
   '/_authenticated/academy/$courseSlug/$lessonSlug': typeof AuthenticatedAcademyCourseSlugLessonSlugRoute
+  '/_authenticated/academy/$courseSlug/certificate': typeof AuthenticatedAcademyCourseSlugCertificateRoute
+  '/_authenticated/academy/$courseSlug/quiz': typeof AuthenticatedAcademyCourseSlugQuizRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -778,6 +798,8 @@ export interface FileRouteTypes {
     | '/messages/'
     | '/settings/'
     | '/academy/$courseSlug/$lessonSlug'
+    | '/academy/$courseSlug/certificate'
+    | '/academy/$courseSlug/quiz'
     | '/api/public/payments/webhook'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -849,6 +871,8 @@ export interface FileRouteTypes {
     | '/messages'
     | '/settings'
     | '/academy/$courseSlug/$lessonSlug'
+    | '/academy/$courseSlug/certificate'
+    | '/academy/$courseSlug/quiz'
     | '/api/public/payments/webhook'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -924,6 +948,8 @@ export interface FileRouteTypes {
     | '/_authenticated/messages/'
     | '/_authenticated/settings/'
     | '/_authenticated/academy/$courseSlug/$lessonSlug'
+    | '/_authenticated/academy/$courseSlug/certificate'
+    | '/_authenticated/academy/$courseSlug/quiz'
     | '/api/public/payments/webhook'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -1466,6 +1492,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicPaymentsWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/academy/$courseSlug/quiz': {
+      id: '/_authenticated/academy/$courseSlug/quiz'
+      path: '/quiz'
+      fullPath: '/academy/$courseSlug/quiz'
+      preLoaderRoute: typeof AuthenticatedAcademyCourseSlugQuizRouteImport
+      parentRoute: typeof AuthenticatedAcademyCourseSlugRoute
+    }
+    '/_authenticated/academy/$courseSlug/certificate': {
+      id: '/_authenticated/academy/$courseSlug/certificate'
+      path: '/certificate'
+      fullPath: '/academy/$courseSlug/certificate'
+      preLoaderRoute: typeof AuthenticatedAcademyCourseSlugCertificateRouteImport
+      parentRoute: typeof AuthenticatedAcademyCourseSlugRoute
+    }
     '/_authenticated/academy/$courseSlug/$lessonSlug': {
       id: '/_authenticated/academy/$courseSlug/$lessonSlug'
       path: '/$lessonSlug'
@@ -1478,12 +1518,18 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedAcademyCourseSlugRouteChildren {
   AuthenticatedAcademyCourseSlugLessonSlugRoute: typeof AuthenticatedAcademyCourseSlugLessonSlugRoute
+  AuthenticatedAcademyCourseSlugCertificateRoute: typeof AuthenticatedAcademyCourseSlugCertificateRoute
+  AuthenticatedAcademyCourseSlugQuizRoute: typeof AuthenticatedAcademyCourseSlugQuizRoute
 }
 
 const AuthenticatedAcademyCourseSlugRouteChildren: AuthenticatedAcademyCourseSlugRouteChildren =
   {
     AuthenticatedAcademyCourseSlugLessonSlugRoute:
       AuthenticatedAcademyCourseSlugLessonSlugRoute,
+    AuthenticatedAcademyCourseSlugCertificateRoute:
+      AuthenticatedAcademyCourseSlugCertificateRoute,
+    AuthenticatedAcademyCourseSlugQuizRoute:
+      AuthenticatedAcademyCourseSlugQuizRoute,
   }
 
 const AuthenticatedAcademyCourseSlugRouteWithChildren =
@@ -1681,3 +1727,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
