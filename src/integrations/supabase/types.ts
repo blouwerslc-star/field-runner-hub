@@ -14,6 +14,48 @@ export type Database = {
   }
   public: {
     Tables: {
+      academy_progress: {
+        Row: {
+          completed_at: string | null
+          id: string
+          module_id: string
+          passed: boolean
+          quiz_attempts: number
+          quiz_score: number | null
+          sections_completed: string[]
+          started_at: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          id?: string
+          module_id: string
+          passed?: boolean
+          quiz_attempts?: number
+          quiz_score?: number | null
+          sections_completed?: string[]
+          started_at?: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          id?: string
+          module_id?: string
+          passed?: boolean
+          quiz_attempts?: number
+          quiz_score?: number | null
+          sections_completed?: string[]
+          started_at?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       activity_events: {
         Row: {
           actor_id: string | null
@@ -1073,31 +1115,46 @@ export type Database = {
       }
       runner_profiles: {
         Row: {
+          certification_level: number
+          certification_status: string
+          certified_at: string | null
           created_at: string
+          elite_at: string | null
           id: string
           onboarding_completed: boolean
           payouts_enabled: boolean
           stripe_account_id: string | null
           updated_at: string
           user_id: string
+          verified_at: string | null
         }
         Insert: {
+          certification_level?: number
+          certification_status?: string
+          certified_at?: string | null
           created_at?: string
+          elite_at?: string | null
           id?: string
           onboarding_completed?: boolean
           payouts_enabled?: boolean
           stripe_account_id?: string | null
           updated_at?: string
           user_id: string
+          verified_at?: string | null
         }
         Update: {
+          certification_level?: number
+          certification_status?: string
+          certified_at?: string | null
           created_at?: string
+          elite_at?: string | null
           id?: string
           onboarding_completed?: boolean
           payouts_enabled?: boolean
           stripe_account_id?: string | null
           updated_at?: string
           user_id?: string
+          verified_at?: string | null
         }
         Relationships: []
       }
