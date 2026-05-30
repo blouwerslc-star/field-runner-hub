@@ -75,6 +75,7 @@ import { Route as AuthenticatedAdminDispatchRouteImport } from './routes/_authen
 import { Route as AuthenticatedAdminBackgroundChecksRouteImport } from './routes/_authenticated/admin.background-checks'
 import { Route as AuthenticatedAdminAnalyticsRouteImport } from './routes/_authenticated/admin.analytics'
 import { Route as AuthenticatedAcademyCourseSlugRouteImport } from './routes/_authenticated/academy.$courseSlug'
+import { Route as AuthenticatedAcademyCourseSlugIndexRouteImport } from './routes/_authenticated/academy.$courseSlug.index'
 import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
@@ -449,6 +450,12 @@ const AuthenticatedAcademyCourseSlugRoute =
     path: '/$courseSlug',
     getParentRoute: () => AuthenticatedAcademyRoute,
   } as any)
+const AuthenticatedAcademyCourseSlugIndexRoute =
+  AuthenticatedAcademyCourseSlugIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedAcademyCourseSlugRoute,
+  } as any)
 const LovableEmailTransactionalSendRoute =
   LovableEmailTransactionalSendRouteImport.update({
     id: '/lovable/email/transactional/send',
@@ -577,6 +584,7 @@ export interface FileRoutesByFullPath {
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
+  '/academy/$courseSlug/': typeof AuthenticatedAcademyCourseSlugIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -608,7 +616,6 @@ export interface FileRoutesByTo {
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/profile/$slug': typeof ProfileSlugRoute
   '/tasks/$taskId': typeof TasksTaskIdRoute
-  '/academy/$courseSlug': typeof AuthenticatedAcademyCourseSlugRouteWithChildren
   '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
   '/admin/background-checks': typeof AuthenticatedAdminBackgroundChecksRoute
   '/admin/dispatch': typeof AuthenticatedAdminDispatchRoute
@@ -649,6 +656,7 @@ export interface FileRoutesByTo {
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
+  '/academy/$courseSlug': typeof AuthenticatedAcademyCourseSlugIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -727,6 +735,7 @@ export interface FileRoutesById {
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
+  '/_authenticated/academy/$courseSlug/': typeof AuthenticatedAcademyCourseSlugIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -805,6 +814,7 @@ export interface FileRouteTypes {
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
+    | '/academy/$courseSlug/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -836,7 +846,6 @@ export interface FileRouteTypes {
     | '/email/unsubscribe'
     | '/profile/$slug'
     | '/tasks/$taskId'
-    | '/academy/$courseSlug'
     | '/admin/analytics'
     | '/admin/background-checks'
     | '/admin/dispatch'
@@ -877,6 +886,7 @@ export interface FileRouteTypes {
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
+    | '/academy/$courseSlug'
   id:
     | '__root__'
     | '/'
@@ -954,6 +964,7 @@ export interface FileRouteTypes {
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
+    | '/_authenticated/academy/$courseSlug/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -1448,6 +1459,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAcademyCourseSlugRouteImport
       parentRoute: typeof AuthenticatedAcademyRoute
     }
+    '/_authenticated/academy/$courseSlug/': {
+      id: '/_authenticated/academy/$courseSlug/'
+      path: '/'
+      fullPath: '/academy/$courseSlug/'
+      preLoaderRoute: typeof AuthenticatedAcademyCourseSlugIndexRouteImport
+      parentRoute: typeof AuthenticatedAcademyCourseSlugRoute
+    }
     '/lovable/email/transactional/send': {
       id: '/lovable/email/transactional/send'
       path: '/lovable/email/transactional/send'
@@ -1518,6 +1536,7 @@ interface AuthenticatedAcademyCourseSlugRouteChildren {
   AuthenticatedAcademyCourseSlugLessonSlugRoute: typeof AuthenticatedAcademyCourseSlugLessonSlugRoute
   AuthenticatedAcademyCourseSlugCertificateRoute: typeof AuthenticatedAcademyCourseSlugCertificateRoute
   AuthenticatedAcademyCourseSlugQuizRoute: typeof AuthenticatedAcademyCourseSlugQuizRoute
+  AuthenticatedAcademyCourseSlugIndexRoute: typeof AuthenticatedAcademyCourseSlugIndexRoute
 }
 
 const AuthenticatedAcademyCourseSlugRouteChildren: AuthenticatedAcademyCourseSlugRouteChildren =
@@ -1528,6 +1547,8 @@ const AuthenticatedAcademyCourseSlugRouteChildren: AuthenticatedAcademyCourseSlu
       AuthenticatedAcademyCourseSlugCertificateRoute,
     AuthenticatedAcademyCourseSlugQuizRoute:
       AuthenticatedAcademyCourseSlugQuizRoute,
+    AuthenticatedAcademyCourseSlugIndexRoute:
+      AuthenticatedAcademyCourseSlugIndexRoute,
   }
 
 const AuthenticatedAcademyCourseSlugRouteWithChildren =
@@ -1725,3 +1746,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
