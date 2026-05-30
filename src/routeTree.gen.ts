@@ -73,7 +73,6 @@ import { Route as AuthenticatedAdminMarketplaceHealthRouteImport } from './route
 import { Route as AuthenticatedAdminDispatchRouteImport } from './routes/_authenticated/admin.dispatch'
 import { Route as AuthenticatedAdminBackgroundChecksRouteImport } from './routes/_authenticated/admin.background-checks'
 import { Route as AuthenticatedAdminAnalyticsRouteImport } from './routes/_authenticated/admin.analytics'
-import { Route as AuthenticatedAcademyModuleIdRouteImport } from './routes/_authenticated/academy.$moduleId'
 import { Route as AuthenticatedAcademyCourseSlugRouteImport } from './routes/_authenticated/academy.$courseSlug'
 import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
@@ -437,12 +436,6 @@ const AuthenticatedAdminAnalyticsRoute =
     path: '/analytics',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
-const AuthenticatedAcademyModuleIdRoute =
-  AuthenticatedAcademyModuleIdRouteImport.update({
-    id: '/$moduleId',
-    path: '/$moduleId',
-    getParentRoute: () => AuthenticatedAcademyRoute,
-  } as any)
 const AuthenticatedAcademyCourseSlugRoute =
   AuthenticatedAcademyCourseSlugRouteImport.update({
     id: '/$courseSlug',
@@ -537,7 +530,6 @@ export interface FileRoutesByFullPath {
   '/profile/$slug': typeof ProfileSlugRoute
   '/tasks/$taskId': typeof TasksTaskIdRoute
   '/academy/$courseSlug': typeof AuthenticatedAcademyCourseSlugRouteWithChildren
-  '/academy/$moduleId': typeof AuthenticatedAcademyModuleIdRoute
   '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
   '/admin/background-checks': typeof AuthenticatedAdminBackgroundChecksRoute
   '/admin/dispatch': typeof AuthenticatedAdminDispatchRoute
@@ -610,7 +602,6 @@ export interface FileRoutesByTo {
   '/profile/$slug': typeof ProfileSlugRoute
   '/tasks/$taskId': typeof TasksTaskIdRoute
   '/academy/$courseSlug': typeof AuthenticatedAcademyCourseSlugRouteWithChildren
-  '/academy/$moduleId': typeof AuthenticatedAcademyModuleIdRoute
   '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
   '/admin/background-checks': typeof AuthenticatedAdminBackgroundChecksRoute
   '/admin/dispatch': typeof AuthenticatedAdminDispatchRoute
@@ -688,7 +679,6 @@ export interface FileRoutesById {
   '/profile/$slug': typeof ProfileSlugRoute
   '/tasks/$taskId': typeof TasksTaskIdRoute
   '/_authenticated/academy/$courseSlug': typeof AuthenticatedAcademyCourseSlugRouteWithChildren
-  '/_authenticated/academy/$moduleId': typeof AuthenticatedAcademyModuleIdRoute
   '/_authenticated/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
   '/_authenticated/admin/background-checks': typeof AuthenticatedAdminBackgroundChecksRoute
   '/_authenticated/admin/dispatch': typeof AuthenticatedAdminDispatchRoute
@@ -766,7 +756,6 @@ export interface FileRouteTypes {
     | '/profile/$slug'
     | '/tasks/$taskId'
     | '/academy/$courseSlug'
-    | '/academy/$moduleId'
     | '/admin/analytics'
     | '/admin/background-checks'
     | '/admin/dispatch'
@@ -839,7 +828,6 @@ export interface FileRouteTypes {
     | '/profile/$slug'
     | '/tasks/$taskId'
     | '/academy/$courseSlug'
-    | '/academy/$moduleId'
     | '/admin/analytics'
     | '/admin/background-checks'
     | '/admin/dispatch'
@@ -916,7 +904,6 @@ export interface FileRouteTypes {
     | '/profile/$slug'
     | '/tasks/$taskId'
     | '/_authenticated/academy/$courseSlug'
-    | '/_authenticated/academy/$moduleId'
     | '/_authenticated/admin/analytics'
     | '/_authenticated/admin/background-checks'
     | '/_authenticated/admin/dispatch'
@@ -1436,13 +1423,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminAnalyticsRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
-    '/_authenticated/academy/$moduleId': {
-      id: '/_authenticated/academy/$moduleId'
-      path: '/$moduleId'
-      fullPath: '/academy/$moduleId'
-      preLoaderRoute: typeof AuthenticatedAcademyModuleIdRouteImport
-      parentRoute: typeof AuthenticatedAcademyRoute
-    }
     '/_authenticated/academy/$courseSlug': {
       id: '/_authenticated/academy/$courseSlug'
       path: '/$courseSlug'
@@ -1539,13 +1519,11 @@ const AuthenticatedAcademyCourseSlugRouteWithChildren =
 
 interface AuthenticatedAcademyRouteChildren {
   AuthenticatedAcademyCourseSlugRoute: typeof AuthenticatedAcademyCourseSlugRouteWithChildren
-  AuthenticatedAcademyModuleIdRoute: typeof AuthenticatedAcademyModuleIdRoute
 }
 
 const AuthenticatedAcademyRouteChildren: AuthenticatedAcademyRouteChildren = {
   AuthenticatedAcademyCourseSlugRoute:
     AuthenticatedAcademyCourseSlugRouteWithChildren,
-  AuthenticatedAcademyModuleIdRoute: AuthenticatedAcademyModuleIdRoute,
 }
 
 const AuthenticatedAcademyRouteWithChildren =
@@ -1727,3 +1705,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

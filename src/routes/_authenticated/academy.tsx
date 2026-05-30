@@ -64,7 +64,7 @@ function AcademyIndex() {
             </div>
           </div>
           {nextModule ? (
-            <Link to="/academy/$moduleId" params={{ moduleId: nextModule.id }}>
+            <Link to="/academy/$courseSlug" params={{ courseSlug: nextModule.id }}>
               <Button size="sm" className="w-full mt-4">
                 Continue: {nextModule.title} <ArrowRight className="size-3.5 ml-1" />
               </Button>
@@ -117,8 +117,8 @@ function AcademyIndex() {
           return (
             <li key={m.id}>
               <Link
-                to="/academy/$moduleId"
-                params={{ moduleId: m.id }}
+                to="/academy/$courseSlug"
+                params={{ courseSlug: m.id }}
                 className="block rounded-2xl border border-border bg-card/60 backdrop-blur p-5 hover:border-primary/50 transition-colors"
               >
                 <div className="flex items-start gap-4">
