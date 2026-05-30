@@ -3,7 +3,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { Button } from "@/components/ui/button";
-import { getLessonContext, markSectionComplete } from "@/lib/academy.functions";
+import { getLessonDetail, markLessonComplete } from "@/lib/academy.db.functions";
 import {
   Loader2, ArrowLeft, ArrowRight, CheckCircle2, Video, FileText, BookOpen, ClipboardList,
 } from "lucide-react";
@@ -37,8 +37,8 @@ function LessonPage() {
   const { courseSlug, lessonSlug } = Route.useParams();
   const navigate = useNavigate();
   const qc = useQueryClient();
-  const fetchFn = useServerFn(getLessonContext);
-  const completeFn = useServerFn(markSectionComplete);
+  const fetchFn = useServerFn(getLessonDetail);
+  const completeFn = useServerFn(markLessonComplete);
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["academy-lesson", courseSlug, lessonSlug],
@@ -46,11 +46,11 @@ function LessonPage() {
   });
 
   const completeMut = useMutation({
-    mutationFn: () => completeFn({ data: { moduleId: courseSlug, sectionId: lessonSlug } }),
+    mutationFn: () => completeFn({ data: { courseSlug, lessonSlug } }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["academy-lesson", courseSlug, lessonSlug] });
       qc.invalidateQueries({ queryKey: ["academy-course", courseSlug] });
-      qc.invalidateQueries({ queryKey: ["academy-state"] });
+      qc.invalidateQueries({ queryKey: ["academy-db-courses"] });
       toast.success("Lesson marked complete");
       if (data?.next) {
         navigate({ to: "/academy/$courseSlug/$lessonSlug", params: { courseSlug, lessonSlug: data.next.slug } });
@@ -75,7 +75,7 @@ function LessonPage() {
     );
   }
 
-  const embed = data.lesson.videoUrl ? getVideoEmbed(data.lesson.videoUrl) : null;
+  const embed = data.lesson.video_url ? getVideoEmbed(data.lesson.video_url) : null;
 
   return (
     <DashboardShell
@@ -104,9 +104,9 @@ function LessonPage() {
           </div>
         </div>
       )}
-      {data.lesson.videoUrl && !embed && (
+      {data.lesson.video_url && !embed && (
         <a
-          href={data.lesson.videoUrl}
+          href={data.lesson.video_url}
           target="_blank"
           rel="noreferrer"
           className="inline-flex items-center gap-2 text-sm text-primary hover:underline mb-6"
@@ -121,17 +121,19 @@ function LessonPage() {
           <BookOpen className="size-3.5" /> Training content
         </div>
         <div className="prose prose-invert max-w-none text-sm leading-relaxed whitespace-pre-line">
-          {data.lesson.body}
+          {data.lesson.content}
         </div>
-        {data.lesson.pdfUrl && (
-          <a
-            href={data.lesson.pdfUrl}
-            target="_blank"
-            rel="noreferrer"
-            className="mt-4 inline-flex items-center gap-1.5 text-sm text-primary hover:underline"
-          >
-            <FileText className="size-4" /> Download PDF resource
-          </a>
+        {data.lesson.checklist && data.lesson.checklist.length > 0 && (
+          <div className="mt-5 border-t border-border pt-4">
+            <div className="text-xs font-mono uppercase tracking-widest text-muted-foreground mb-2">Field checklist</div>
+            <ul className="space-y-1.5">
+              {data.lesson.checklist.map((c, i) => (
+                <li key={i} className="flex items-start gap-2 text-sm">
+                  <CheckCircle2 className="size-4 text-emerald-400 mt-0.5 shrink-0" /> {c}
+                </li>
+              ))}
+            </ul>
+          </div>
         )}
       </div>
 
