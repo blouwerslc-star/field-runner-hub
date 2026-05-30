@@ -74,6 +74,7 @@ import { Route as AuthenticatedAdminDispatchRouteImport } from './routes/_authen
 import { Route as AuthenticatedAdminBackgroundChecksRouteImport } from './routes/_authenticated/admin.background-checks'
 import { Route as AuthenticatedAdminAnalyticsRouteImport } from './routes/_authenticated/admin.analytics'
 import { Route as AuthenticatedAcademyModuleIdRouteImport } from './routes/_authenticated/academy.$moduleId'
+import { Route as AuthenticatedAcademyCourseSlugRouteImport } from './routes/_authenticated/academy.$courseSlug'
 import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
@@ -439,6 +440,12 @@ const AuthenticatedAcademyModuleIdRoute =
     path: '/$moduleId',
     getParentRoute: () => AuthenticatedAcademyRoute,
   } as any)
+const AuthenticatedAcademyCourseSlugRoute =
+  AuthenticatedAcademyCourseSlugRouteImport.update({
+    id: '/$courseSlug',
+    path: '/$courseSlug',
+    getParentRoute: () => AuthenticatedAcademyRoute,
+  } as any)
 const LovableEmailTransactionalSendRoute =
   LovableEmailTransactionalSendRouteImport.update({
     id: '/lovable/email/transactional/send',
@@ -508,6 +515,7 @@ export interface FileRoutesByFullPath {
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/profile/$slug': typeof ProfileSlugRoute
   '/tasks/$taskId': typeof TasksTaskIdRoute
+  '/academy/$courseSlug': typeof AuthenticatedAcademyCourseSlugRoute
   '/academy/$moduleId': typeof AuthenticatedAcademyModuleIdRoute
   '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
   '/admin/background-checks': typeof AuthenticatedAdminBackgroundChecksRoute
@@ -577,6 +585,7 @@ export interface FileRoutesByTo {
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/profile/$slug': typeof ProfileSlugRoute
   '/tasks/$taskId': typeof TasksTaskIdRoute
+  '/academy/$courseSlug': typeof AuthenticatedAcademyCourseSlugRoute
   '/academy/$moduleId': typeof AuthenticatedAcademyModuleIdRoute
   '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
   '/admin/background-checks': typeof AuthenticatedAdminBackgroundChecksRoute
@@ -651,6 +660,7 @@ export interface FileRoutesById {
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/profile/$slug': typeof ProfileSlugRoute
   '/tasks/$taskId': typeof TasksTaskIdRoute
+  '/_authenticated/academy/$courseSlug': typeof AuthenticatedAcademyCourseSlugRoute
   '/_authenticated/academy/$moduleId': typeof AuthenticatedAcademyModuleIdRoute
   '/_authenticated/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
   '/_authenticated/admin/background-checks': typeof AuthenticatedAdminBackgroundChecksRoute
@@ -725,6 +735,7 @@ export interface FileRouteTypes {
     | '/email/unsubscribe'
     | '/profile/$slug'
     | '/tasks/$taskId'
+    | '/academy/$courseSlug'
     | '/academy/$moduleId'
     | '/admin/analytics'
     | '/admin/background-checks'
@@ -794,6 +805,7 @@ export interface FileRouteTypes {
     | '/email/unsubscribe'
     | '/profile/$slug'
     | '/tasks/$taskId'
+    | '/academy/$courseSlug'
     | '/academy/$moduleId'
     | '/admin/analytics'
     | '/admin/background-checks'
@@ -867,6 +879,7 @@ export interface FileRouteTypes {
     | '/email/unsubscribe'
     | '/profile/$slug'
     | '/tasks/$taskId'
+    | '/_authenticated/academy/$courseSlug'
     | '/_authenticated/academy/$moduleId'
     | '/_authenticated/admin/analytics'
     | '/_authenticated/admin/background-checks'
@@ -1391,6 +1404,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAcademyModuleIdRouteImport
       parentRoute: typeof AuthenticatedAcademyRoute
     }
+    '/_authenticated/academy/$courseSlug': {
+      id: '/_authenticated/academy/$courseSlug'
+      path: '/$courseSlug'
+      fullPath: '/academy/$courseSlug'
+      preLoaderRoute: typeof AuthenticatedAcademyCourseSlugRouteImport
+      parentRoute: typeof AuthenticatedAcademyRoute
+    }
     '/lovable/email/transactional/send': {
       id: '/lovable/email/transactional/send'
       path: '/lovable/email/transactional/send'
@@ -1437,10 +1457,12 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedAcademyRouteChildren {
+  AuthenticatedAcademyCourseSlugRoute: typeof AuthenticatedAcademyCourseSlugRoute
   AuthenticatedAcademyModuleIdRoute: typeof AuthenticatedAcademyModuleIdRoute
 }
 
 const AuthenticatedAcademyRouteChildren: AuthenticatedAcademyRouteChildren = {
+  AuthenticatedAcademyCourseSlugRoute: AuthenticatedAcademyCourseSlugRoute,
   AuthenticatedAcademyModuleIdRoute: AuthenticatedAcademyModuleIdRoute,
 }
 
