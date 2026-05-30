@@ -92,11 +92,12 @@ const MARKETS = [
   "Tampa", "Indianapolis", "Cleveland", "Chicago",
 ];
 
-const STATS = [
-  { value: 240, suffix: "+", label: "Runner Applications" },
-  { value: 12, suffix: "", label: "Cities Covered" },
-  { value: 38, suffix: "", label: "Investors Onboarding" },
-  { value: 8, suffix: "", label: "Service Types" },
+// Beta status items — no fabricated metrics. Replace with real DB-backed numbers when available.
+const BETA_STATUS = [
+  { icon: Users, label: "Founding Runner Applications", value: "Open" },
+  { icon: Building2, label: "Investor Applications", value: "Open" },
+  { icon: MapPin, label: "Market Coverage", value: "Expanding" },
+  { icon: Zap, label: "Marketplace", value: "Early Access" },
 ];
 
 // Example field-task catalog with payouts, turnaround, and deliverables
@@ -105,64 +106,61 @@ const EXAMPLE_TASKS = [
     icon: Camera,
     title: "Property Photo Set",
     payout: "$45 – $85",
-    eta: "Same-day",
+    eta: "Varies by market",
     deliverables: ["20+ exterior & interior photos", "Geotagged + timestamped", "Uploaded via mobile app"],
-    tag: "Most popular",
+    tag: "Common request",
   },
   {
     icon: Video,
     title: "Walkthrough Video",
     payout: "$75 – $150",
-    eta: "24 hours",
+    eta: "Varies by market",
     deliverables: ["Full interior walkthrough", "Narrated condition notes", "HD vertical or horizontal"],
-    tag: "Investor favorite",
+    tag: "Investor request",
   },
   {
     icon: ShieldCheck,
     title: "Occupancy Check",
     payout: "$25 – $50",
-    eta: "Same-day",
+    eta: "Varies by market",
     deliverables: ["Vacant / occupied / abandoned", "Exterior photos", "Written observations"],
   },
   {
     icon: MapPin,
     title: "Drive-By Report",
     payout: "$20 – $40",
-    eta: "Same-day",
+    eta: "Varies by market",
     deliverables: ["4–6 exterior photos", "Curbside condition notes", "Neighborhood snapshot"],
   },
   {
     icon: ClipboardList,
     title: "Lockbox Install",
     payout: "$30 – $60",
-    eta: "24–48 hours",
+    eta: "Varies by market",
     deliverables: ["Lockbox placed at agreed location", "Photo confirmation", "Code delivered securely"],
   },
   {
     icon: Send,
     title: "Yard Sign Placement",
     payout: "$20 – $35",
-    eta: "Same-day",
+    eta: "Varies by market",
     deliverables: ["Sign installed & photographed", "Geotagged proof", "Optional rider attached"],
   },
 ];
 
-// Realistic live-feed seed used by the activity ticker
-const ACTIVITY_FEED = [
-  { icon: CheckCircle2, text: "Walkthrough video completed in Atlanta, GA", time: "2m ago" },
-  { icon: Users, text: "New Founding Runner approved in Tampa, FL", time: "6m ago" },
-  { icon: Camera, text: "Property photo set delivered in Detroit, MI", time: "11m ago" },
-  { icon: ShieldCheck, text: "Occupancy check verified in Indianapolis, IN", time: "18m ago" },
-  { icon: MapPin, text: "Drive-by report uploaded in Dallas, TX", time: "24m ago" },
-  { icon: DollarSign, text: "Runner payout released in Phoenix, AZ", time: "32m ago" },
-  { icon: ClipboardList, text: "Lockbox installed in Cleveland, OH", time: "41m ago" },
-  { icon: Users, text: "Investor onboarded in Chicago, IL", time: "55m ago" },
+// Real marketplace updates only — no fabricated activity. Pull from live events when available.
+const MARKETPLACE_UPDATES = [
+  { icon: Users, text: "Beta applications now open for Founding Runners" },
+  { icon: Building2, text: "Investor waitlist accepting early-access applications" },
+  { icon: MapPin, text: "New cities being onboarded market-by-market" },
+  { icon: BadgeCheck, text: "Runner certification program launching" },
+  { icon: Sparkles, text: "Platform actively in beta — features rolling out weekly" },
 ];
 
 const STEPS = [
   { n: "01", icon: ClipboardList, title: "Investor Posts a Task", body: "An investor needs photos, a walkthrough video, an occupancy check, or a drive-by at a specific address." },
   { n: "02", icon: Send, title: "Local Runner Accepts", body: "A vetted runner in that city claims the task and heads to the property." },
-  { n: "03", icon: Camera, title: "Runner Completes & Uploads", body: "Photos, video, and notes are uploaded directly through REI Runner — usually same-day." },
+  { n: "03", icon: Camera, title: "Runner Completes & Uploads", body: "Photos, video, and notes are uploaded directly through REI Runner. Turnaround varies by market and runner availability." },
   { n: "04", icon: DollarSign, title: "Runner Gets Paid", body: "Payment is released per completed task. No quotas, no long-term commitment." },
 ];
 
@@ -172,7 +170,7 @@ const BENEFITS = [
   { icon: ShieldCheck, title: "No license required", body: "Field tasks like photos, videos, and drive-bys don't require a real estate license." },
   { icon: Network, title: "Repeat investor clients", body: "Build a reputation with active investors who post recurring tasks in your city." },
   { icon: Smartphone, title: "Everything in one place", body: "Accept jobs, upload deliverables, and get paid through one mobile-friendly platform." },
-  { icon: TrendingUp, title: "Growing nationwide", body: "More investors and more task volume every week, in every major US market." },
+  { icon: TrendingUp, title: "Expanding market-by-market", body: "We are onboarding investors and runners in new cities as coverage grows." },
 ];
 
 const SERVICES = [
@@ -184,29 +182,48 @@ const SERVICES = [
   { icon: Clock, title: "Custom Field Tasks", body: "Meet a contractor, take a measurement, check on a tenant turn — investors set the scope." },
 ];
 
-// Trust signals shown across the top of the marketplace
+// Trust signals — only claim what currently exists on the platform.
 const TRUST_BADGES = [
-  { icon: BadgeCheck, label: "ID-Verified Runners", detail: "Every Founding Runner completes identity verification before activation." },
-  { icon: Lock, label: "Escrow-Protected Payments", detail: "Investor funds are held until deliverables are uploaded and approved." },
-  { icon: ShieldCheck, label: "Background-Checked", detail: "Optional background checks available for higher-trust task tiers." },
+  { icon: BadgeCheck, label: "ID Verification Available", detail: "Verification options available for approved runners as part of onboarding." },
+  { icon: Lock, label: "Secure Payment Processing", detail: "Secure payment processing is being rolled out as the platform expands." },
+  { icon: ShieldCheck, label: "Background Check Option", detail: "Optional background checks available for runners pursuing higher-trust task tiers." },
   { icon: FileText, label: "Signed IC Agreement", detail: "Every runner signs an independent contractor agreement before working." },
   { icon: Building2, label: "US-Registered Business", detail: "REI Runner is a US-based platform with US-based support." },
 ];
 
-// Plain-English payment flow for both sides of the marketplace
+// Payment flow — no escrow claim until escrow is live.
 const PAYMENT_FLOW = [
-  { step: "01", icon: Wallet, title: "Investor funds the task", body: "When a task is posted, the payout amount is authorized and held in escrow — not released to anyone yet." },
+  { step: "01", icon: Wallet, title: "Investor funds the task", body: "When a task is posted, the investor sets the payout amount up front through our payments partner." },
   { step: "02", icon: Send, title: "Runner accepts & completes", body: "A local runner claims the task, completes it on-site, and uploads deliverables through the app." },
-  { step: "03", icon: CheckCircle2, title: "Investor reviews", body: "The investor reviews the photos, video, and notes. Approval typically happens within 24 hours." },
-  { step: "04", icon: DollarSign, title: "Runner gets paid", body: "Once approved, the payout is released directly to the runner. No invoices, no chasing, no payroll." },
+  { step: "03", icon: CheckCircle2, title: "Investor reviews", body: "The investor reviews the photos, video, and notes submitted by the runner." },
+  { step: "04", icon: DollarSign, title: "Runner gets paid", body: "Once the work is approved, the payout is released to the runner. No invoices, no chasing, no payroll." },
 ];
 
-// How runners are vetted — operational transparency
+// How runners are vetted — only what is in place today.
 const VETTING_STEPS = [
   { icon: FileText, title: "Application Review", body: "Every applicant is screened by the REI Runner team before they're invited to onboard." },
-  { icon: BadgeCheck, title: "Identity Verification", body: "Government-ID verification is required before a runner can accept their first task." },
-  { icon: Smartphone, title: "Mobile Onboarding", body: "Runners complete a short training inside the app covering deliverable standards and conduct." },
+  { icon: BadgeCheck, title: "Identity Verification Available", body: "Approved runners can complete ID verification to unlock more tasks." },
+  { icon: Smartphone, title: "In-App Onboarding", body: "Runners walk through deliverable standards and conduct expectations inside the app." },
   { icon: ShieldCheck, title: "Performance Tracking", body: "Ratings, response times, and approval rates are tracked. Underperformers are removed." },
+];
+
+// What every task includes — operational standards.
+const TASK_STANDARDS = [
+  { icon: MapPin, title: "Address verification" },
+  { icon: ClipboardList, title: "Required deliverables" },
+  { icon: Clock, title: "Timestamped uploads" },
+  { icon: FileText, title: "Task documentation" },
+  { icon: CheckCircle2, title: "Completion tracking" },
+];
+
+// What runners may NOT do — legal safety rules.
+const RUNNER_RESTRICTIONS = [
+  "Enter occupied properties without authorization",
+  "Negotiate contracts on behalf of investors",
+  "Provide legal advice",
+  "Provide real estate advice",
+  "Perform licensed inspections or appraisals",
+  "Misrepresent themselves as agents, brokers, or inspectors",
 ];
 
 const FAQS = [
@@ -214,10 +231,10 @@ const FAQS = [
   { q: "How do runners get paid?", a: "Runners are paid per completed task. Each job has a set price posted up front. Once your deliverables are uploaded and approved, payment is released to your account." },
   { q: "Do I need real estate experience or a license?", a: "No. Runners are independent contractors performing non-licensed field work — taking photos, recording videos, and reporting on what they observe. No real estate license required." },
   { q: "What kinds of tasks can investors post?", a: "Property photos, interior walkthrough videos, drive-by condition reports, occupancy checks, sign and lockbox installs, meeting a contractor on-site, measurements, and other simple on-site tasks." },
-  { q: "What cities is REI Runner available in?", a: "We're launching first in Detroit, Atlanta, Dallas, Phoenix, Tampa, Indianapolis, Cleveland, and Chicago — then expanding nationwide. Apply now to be a Founding Runner in your city." },
-  { q: "How fast are tasks completed?", a: "Most tasks are accepted within hours and completed same-day or next-day, depending on the runner's schedule and the task type." },
+  { q: "What cities is REI Runner available in?", a: "We are launching market-by-market, starting with Detroit, Atlanta, Dallas, Phoenix, Tampa, Indianapolis, Cleveland, and Chicago. Coverage depends on approved runner availability in each market. Apply now to be a Founding Runner in your city." },
+  { q: "How fast are tasks completed?", a: "Turnaround times vary by market, task type, and runner availability. We are working to expand local coverage so tasks can be completed quickly in every supported city." },
   { q: "Is there a mobile app?", a: "Yes. The REI Runner mobile app is in active development for iOS and Android. Founding Runners and early investors get first access." },
-  { q: "How do investors use the platform?", a: "Investors post a task with the address, task type, and any special instructions. A local runner accepts it, completes the work, and uploads photos/video/notes — usually within 24 hours." },
+  { q: "How do investors use the platform?", a: "Investors post a task with the address, task type, and any special instructions. A local runner accepts it, completes the work, and uploads photos, video, and notes through the app." },
 ];
 
 function scrollToId(id: string) {
