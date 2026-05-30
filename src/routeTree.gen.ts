@@ -47,6 +47,7 @@ import { Route as AuthenticatedSettingsIndexRouteImport } from './routes/_authen
 import { Route as AuthenticatedMessagesIndexRouteImport } from './routes/_authenticated/messages.index'
 import { Route as AuthenticatedDashboardIndexRouteImport } from './routes/_authenticated/dashboard.index'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
+import { Route as AuthenticatedAcademyIndexRouteImport } from './routes/_authenticated/academy.index'
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
 import { Route as AuthenticatedSettingsSupportRouteImport } from './routes/_authenticated/settings.support'
 import { Route as AuthenticatedSettingsSecurityRouteImport } from './routes/_authenticated/settings.security'
@@ -281,6 +282,12 @@ const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AuthenticatedAdminRoute,
 } as any)
+const AuthenticatedAcademyIndexRoute =
+  AuthenticatedAcademyIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedAcademyRoute,
+  } as any)
 const LovableEmailSuppressionRoute = LovableEmailSuppressionRouteImport.update({
   id: '/lovable/email/suppression',
   path: '/lovable/email/suppression',
@@ -556,6 +563,7 @@ export interface FileRoutesByFullPath {
   '/settings/security': typeof AuthenticatedSettingsSecurityRoute
   '/settings/support': typeof AuthenticatedSettingsSupportRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
+  '/academy/': typeof AuthenticatedAcademyIndexRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/dashboard/': typeof AuthenticatedDashboardIndexRoute
   '/messages/': typeof AuthenticatedMessagesIndexRoute
@@ -585,7 +593,6 @@ export interface FileRoutesByTo {
   '/tasks': typeof TasksRouteWithChildren
   '/terms': typeof TermsRoute
   '/waitlist': typeof WaitlistRoute
-  '/academy': typeof AuthenticatedAcademyRouteWithChildren
   '/activity': typeof AuthenticatedActivityRoute
   '/admin-dashboard': typeof AuthenticatedAdminDashboardRoute
   '/applications': typeof AuthenticatedApplicationsRoute
@@ -628,6 +635,7 @@ export interface FileRoutesByTo {
   '/settings/security': typeof AuthenticatedSettingsSecurityRoute
   '/settings/support': typeof AuthenticatedSettingsSupportRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
+  '/academy': typeof AuthenticatedAcademyIndexRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/dashboard': typeof AuthenticatedDashboardIndexRoute
   '/messages': typeof AuthenticatedMessagesIndexRoute
@@ -705,6 +713,7 @@ export interface FileRoutesById {
   '/_authenticated/settings/security': typeof AuthenticatedSettingsSecurityRoute
   '/_authenticated/settings/support': typeof AuthenticatedSettingsSupportRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
+  '/_authenticated/academy/': typeof AuthenticatedAcademyIndexRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/dashboard/': typeof AuthenticatedDashboardIndexRoute
   '/_authenticated/messages/': typeof AuthenticatedMessagesIndexRoute
@@ -782,6 +791,7 @@ export interface FileRouteTypes {
     | '/settings/security'
     | '/settings/support'
     | '/lovable/email/suppression'
+    | '/academy/'
     | '/admin/'
     | '/dashboard/'
     | '/messages/'
@@ -811,7 +821,6 @@ export interface FileRouteTypes {
     | '/tasks'
     | '/terms'
     | '/waitlist'
-    | '/academy'
     | '/activity'
     | '/admin-dashboard'
     | '/applications'
@@ -854,6 +863,7 @@ export interface FileRouteTypes {
     | '/settings/security'
     | '/settings/support'
     | '/lovable/email/suppression'
+    | '/academy'
     | '/admin'
     | '/dashboard'
     | '/messages'
@@ -930,6 +940,7 @@ export interface FileRouteTypes {
     | '/_authenticated/settings/security'
     | '/_authenticated/settings/support'
     | '/lovable/email/suppression'
+    | '/_authenticated/academy/'
     | '/_authenticated/admin/'
     | '/_authenticated/dashboard/'
     | '/_authenticated/messages/'
@@ -1241,6 +1252,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminIndexRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/academy/': {
+      id: '/_authenticated/academy/'
+      path: '/'
+      fullPath: '/academy/'
+      preLoaderRoute: typeof AuthenticatedAcademyIndexRouteImport
+      parentRoute: typeof AuthenticatedAcademyRoute
+    }
     '/lovable/email/suppression': {
       id: '/lovable/email/suppression'
       path: '/lovable/email/suppression'
@@ -1519,11 +1537,13 @@ const AuthenticatedAcademyCourseSlugRouteWithChildren =
 
 interface AuthenticatedAcademyRouteChildren {
   AuthenticatedAcademyCourseSlugRoute: typeof AuthenticatedAcademyCourseSlugRouteWithChildren
+  AuthenticatedAcademyIndexRoute: typeof AuthenticatedAcademyIndexRoute
 }
 
 const AuthenticatedAcademyRouteChildren: AuthenticatedAcademyRouteChildren = {
   AuthenticatedAcademyCourseSlugRoute:
     AuthenticatedAcademyCourseSlugRouteWithChildren,
+  AuthenticatedAcademyIndexRoute: AuthenticatedAcademyIndexRoute,
 }
 
 const AuthenticatedAcademyRouteWithChildren =
@@ -1705,3 +1725,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
