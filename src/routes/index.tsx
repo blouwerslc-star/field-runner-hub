@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { Button } from "@/components/ui/button";
 import {
@@ -34,7 +34,6 @@ import {
   ClipboardList,
   Clock,
   Smartphone,
-  Activity,
   CheckCircle2,
   Users,
   Zap,
@@ -442,7 +441,7 @@ function Index() {
             <span className="text-gradient">for Real Estate Investors</span>
           </h1>
           <p className="mt-6 max-w-2xl mx-auto text-base md:text-lg text-muted-foreground animate-fade-up" style={{ animationDelay: "0.2s" }}>
-            REI Runner is the on-demand marketplace where investors hire local runners for property photos, walkthrough videos, drive-bys, occupancy checks, and other field tasks — completed in hours, not days.
+            REI Runner is the on-demand marketplace where investors hire local runners for property photos, walkthrough videos, drive-bys, occupancy checks, and other field tasks. Turnaround varies by market and runner availability.
           </p>
           <div className="mt-9 flex flex-col sm:flex-row gap-3 justify-center animate-fade-up" style={{ animationDelay: "0.3s" }}>
             <Button size="lg" onClick={goApply} className="bg-gradient-primary shadow-glow text-base h-14 px-8">
@@ -556,8 +555,8 @@ function Index() {
       <Section id="payments">
         <SectionHeader
           eyebrow="How Payments Work"
-          title="Escrow-Protected. Pay on Delivery."
-          subtitle="Investors fund tasks up front. Runners get paid the moment deliverables are approved. No invoices, no waiting, no chargebacks."
+          title="Simple, Per-Task Payments"
+          subtitle="Investors fund tasks up front through our payments partner. Runners are paid once their work is approved."
         />
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
           {PAYMENT_FLOW.map((p, i) => (
@@ -576,7 +575,7 @@ function Index() {
         </div>
         <div className="mt-8 max-w-3xl mx-auto rounded-xl border border-border bg-muted/30 p-5 text-xs md:text-sm text-muted-foreground leading-relaxed text-center">
           <Lock className="inline size-4 text-primary mr-1.5 -mt-0.5" />
-          Payments are processed through a regulated US payments partner. Investor funds are held in escrow and never touched by REI Runner staff.
+          Payments are processed through a regulated US payments partner. Secure payment processing is being rolled out as the platform expands.
         </div>
       </Section>
 
@@ -681,7 +680,7 @@ function Index() {
 
       {/* MARKETS */}
       <Section id="markets">
-        <SectionHeader eyebrow="Nationwide Launch" title="Launching in Major Markets" subtitle="Starting in 8 high-volume investor markets and expanding fast. Don't see your city? Apply anyway — we open new markets weekly." />
+        <SectionHeader eyebrow="Expanding Coverage" title="Launching Market-by-Market" subtitle="Starting in 8 priority investor markets and building local coverage city-by-city. Don't see your city? Apply anyway — new markets open as runner coverage grows." />
         <div className="flex flex-wrap justify-center gap-3 max-w-3xl mx-auto">
           {MARKETS.map((m) => (
             <div key={m} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-border bg-card/60 backdrop-blur text-sm hover:border-primary/60 hover:shadow-glow transition">
@@ -690,6 +689,9 @@ function Index() {
             </div>
           ))}
         </div>
+        <p className="mt-6 text-center text-xs text-muted-foreground max-w-2xl mx-auto">
+          Coverage depends on approved runner availability in each market.
+        </p>
       </Section>
 
       {/* VIDEO */}
@@ -715,15 +717,15 @@ function Index() {
             <div className="text-xs font-semibold tracking-widest text-primary uppercase flex items-center gap-2">
               <Sparkles className="size-3.5" /> About REI Runner
             </div>
-            <h2 className="mt-3 text-3xl md:text-5xl font-bold">The On-Demand Field Services Marketplace for Real Estate</h2>
+            <h2 className="mt-3 text-3xl md:text-5xl font-bold">On-Demand Field Services For Real Estate Investors</h2>
             <p className="mt-5 text-muted-foreground text-base md:text-lg">
               Investing in property you can't physically visit is hard. REI Runner gives investors a vetted network of local runners they can hire on demand — for photos, videos, walkthroughs, drive-bys, and other on-site tasks — without flying out, hiring an agent, or chasing down contractors.
             </p>
             <p className="mt-3 text-muted-foreground text-base md:text-lg">
-              For runners, it's a way to earn per-task income with no license, no quotas, and no middlemen. Think Uber meets Fiverr — built specifically for real estate field work.
+              For runners, it's a way to earn per-task income with no license, no quotas, and no middlemen. We are positioning REI Runner as a nationwide real estate field operations marketplace — built specifically for the on-site work investors need done.
             </p>
             <div className="mt-6 flex flex-wrap gap-2">
-              {["On-Demand Marketplace", "Per-Task Pay", "Nationwide Launch", "Early Access Beta"].map((t) => (
+              {["On-Demand Marketplace", "Per-Task Pay", "Expanding Coverage", "Early Access Beta"].map((t) => (
                 <span key={t} className="text-xs px-3 py-1 rounded-full border border-border bg-background/40">{t}</span>
               ))}
             </div>
