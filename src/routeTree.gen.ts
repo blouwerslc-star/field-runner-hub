@@ -81,6 +81,7 @@ import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/e
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
+import { Route as AuthenticatedAcademyCourseSlugLessonSlugRouteImport } from './routes/_authenticated/academy.$courseSlug.$lessonSlug'
 
 const WaitlistRoute = WaitlistRouteImport.update({
   id: '/waitlist',
@@ -480,6 +481,12 @@ const ApiPublicPaymentsWebhookRoute =
     path: '/api/public/payments/webhook',
     getParentRoute: () => rootRouteImport,
   } as any)
+const AuthenticatedAcademyCourseSlugLessonSlugRoute =
+  AuthenticatedAcademyCourseSlugLessonSlugRouteImport.update({
+    id: '/$lessonSlug',
+    path: '/$lessonSlug',
+    getParentRoute: () => AuthenticatedAcademyCourseSlugRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -515,7 +522,7 @@ export interface FileRoutesByFullPath {
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/profile/$slug': typeof ProfileSlugRoute
   '/tasks/$taskId': typeof TasksTaskIdRoute
-  '/academy/$courseSlug': typeof AuthenticatedAcademyCourseSlugRoute
+  '/academy/$courseSlug': typeof AuthenticatedAcademyCourseSlugRouteWithChildren
   '/academy/$moduleId': typeof AuthenticatedAcademyModuleIdRoute
   '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
   '/admin/background-checks': typeof AuthenticatedAdminBackgroundChecksRoute
@@ -547,6 +554,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/': typeof AuthenticatedDashboardIndexRoute
   '/messages/': typeof AuthenticatedMessagesIndexRoute
   '/settings/': typeof AuthenticatedSettingsIndexRoute
+  '/academy/$courseSlug/$lessonSlug': typeof AuthenticatedAcademyCourseSlugLessonSlugRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -585,7 +593,7 @@ export interface FileRoutesByTo {
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/profile/$slug': typeof ProfileSlugRoute
   '/tasks/$taskId': typeof TasksTaskIdRoute
-  '/academy/$courseSlug': typeof AuthenticatedAcademyCourseSlugRoute
+  '/academy/$courseSlug': typeof AuthenticatedAcademyCourseSlugRouteWithChildren
   '/academy/$moduleId': typeof AuthenticatedAcademyModuleIdRoute
   '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
   '/admin/background-checks': typeof AuthenticatedAdminBackgroundChecksRoute
@@ -617,6 +625,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AuthenticatedDashboardIndexRoute
   '/messages': typeof AuthenticatedMessagesIndexRoute
   '/settings': typeof AuthenticatedSettingsIndexRoute
+  '/academy/$courseSlug/$lessonSlug': typeof AuthenticatedAcademyCourseSlugLessonSlugRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -660,7 +669,7 @@ export interface FileRoutesById {
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/profile/$slug': typeof ProfileSlugRoute
   '/tasks/$taskId': typeof TasksTaskIdRoute
-  '/_authenticated/academy/$courseSlug': typeof AuthenticatedAcademyCourseSlugRoute
+  '/_authenticated/academy/$courseSlug': typeof AuthenticatedAcademyCourseSlugRouteWithChildren
   '/_authenticated/academy/$moduleId': typeof AuthenticatedAcademyModuleIdRoute
   '/_authenticated/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
   '/_authenticated/admin/background-checks': typeof AuthenticatedAdminBackgroundChecksRoute
@@ -692,6 +701,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard/': typeof AuthenticatedDashboardIndexRoute
   '/_authenticated/messages/': typeof AuthenticatedMessagesIndexRoute
   '/_authenticated/settings/': typeof AuthenticatedSettingsIndexRoute
+  '/_authenticated/academy/$courseSlug/$lessonSlug': typeof AuthenticatedAcademyCourseSlugLessonSlugRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -767,6 +777,7 @@ export interface FileRouteTypes {
     | '/dashboard/'
     | '/messages/'
     | '/settings/'
+    | '/academy/$courseSlug/$lessonSlug'
     | '/api/public/payments/webhook'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -837,6 +848,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/messages'
     | '/settings'
+    | '/academy/$courseSlug/$lessonSlug'
     | '/api/public/payments/webhook'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -911,6 +923,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard/'
     | '/_authenticated/messages/'
     | '/_authenticated/settings/'
+    | '/_authenticated/academy/$courseSlug/$lessonSlug'
     | '/api/public/payments/webhook'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -1453,16 +1466,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicPaymentsWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/academy/$courseSlug/$lessonSlug': {
+      id: '/_authenticated/academy/$courseSlug/$lessonSlug'
+      path: '/$lessonSlug'
+      fullPath: '/academy/$courseSlug/$lessonSlug'
+      preLoaderRoute: typeof AuthenticatedAcademyCourseSlugLessonSlugRouteImport
+      parentRoute: typeof AuthenticatedAcademyCourseSlugRoute
+    }
   }
 }
 
+interface AuthenticatedAcademyCourseSlugRouteChildren {
+  AuthenticatedAcademyCourseSlugLessonSlugRoute: typeof AuthenticatedAcademyCourseSlugLessonSlugRoute
+}
+
+const AuthenticatedAcademyCourseSlugRouteChildren: AuthenticatedAcademyCourseSlugRouteChildren =
+  {
+    AuthenticatedAcademyCourseSlugLessonSlugRoute:
+      AuthenticatedAcademyCourseSlugLessonSlugRoute,
+  }
+
+const AuthenticatedAcademyCourseSlugRouteWithChildren =
+  AuthenticatedAcademyCourseSlugRoute._addFileChildren(
+    AuthenticatedAcademyCourseSlugRouteChildren,
+  )
+
 interface AuthenticatedAcademyRouteChildren {
-  AuthenticatedAcademyCourseSlugRoute: typeof AuthenticatedAcademyCourseSlugRoute
+  AuthenticatedAcademyCourseSlugRoute: typeof AuthenticatedAcademyCourseSlugRouteWithChildren
   AuthenticatedAcademyModuleIdRoute: typeof AuthenticatedAcademyModuleIdRoute
 }
 
 const AuthenticatedAcademyRouteChildren: AuthenticatedAcademyRouteChildren = {
-  AuthenticatedAcademyCourseSlugRoute: AuthenticatedAcademyCourseSlugRoute,
+  AuthenticatedAcademyCourseSlugRoute:
+    AuthenticatedAcademyCourseSlugRouteWithChildren,
   AuthenticatedAcademyModuleIdRoute: AuthenticatedAcademyModuleIdRoute,
 }
 
