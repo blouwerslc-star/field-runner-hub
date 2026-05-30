@@ -73,13 +73,16 @@ import { Route as AuthenticatedAdminMarketplaceHealthRouteImport } from './route
 import { Route as AuthenticatedAdminDispatchRouteImport } from './routes/_authenticated/admin.dispatch'
 import { Route as AuthenticatedAdminBackgroundChecksRouteImport } from './routes/_authenticated/admin.background-checks'
 import { Route as AuthenticatedAdminAnalyticsRouteImport } from './routes/_authenticated/admin.analytics'
-import { Route as AuthenticatedAcademyModuleIdRouteImport } from './routes/_authenticated/academy.$moduleId'
+import { Route as AuthenticatedAcademyCourseSlugRouteImport } from './routes/_authenticated/academy.$courseSlug'
 import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
+import { Route as AuthenticatedAcademyCourseSlugQuizRouteImport } from './routes/_authenticated/academy.$courseSlug.quiz'
+import { Route as AuthenticatedAcademyCourseSlugCertificateRouteImport } from './routes/_authenticated/academy.$courseSlug.certificate'
+import { Route as AuthenticatedAcademyCourseSlugLessonSlugRouteImport } from './routes/_authenticated/academy.$courseSlug.$lessonSlug'
 
 const WaitlistRoute = WaitlistRouteImport.update({
   id: '/waitlist',
@@ -433,10 +436,10 @@ const AuthenticatedAdminAnalyticsRoute =
     path: '/analytics',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
-const AuthenticatedAcademyModuleIdRoute =
-  AuthenticatedAcademyModuleIdRouteImport.update({
-    id: '/$moduleId',
-    path: '/$moduleId',
+const AuthenticatedAcademyCourseSlugRoute =
+  AuthenticatedAcademyCourseSlugRouteImport.update({
+    id: '/$courseSlug',
+    path: '/$courseSlug',
     getParentRoute: () => AuthenticatedAcademyRoute,
   } as any)
 const LovableEmailTransactionalSendRoute =
@@ -473,6 +476,24 @@ const ApiPublicPaymentsWebhookRoute =
     path: '/api/public/payments/webhook',
     getParentRoute: () => rootRouteImport,
   } as any)
+const AuthenticatedAcademyCourseSlugQuizRoute =
+  AuthenticatedAcademyCourseSlugQuizRouteImport.update({
+    id: '/quiz',
+    path: '/quiz',
+    getParentRoute: () => AuthenticatedAcademyCourseSlugRoute,
+  } as any)
+const AuthenticatedAcademyCourseSlugCertificateRoute =
+  AuthenticatedAcademyCourseSlugCertificateRouteImport.update({
+    id: '/certificate',
+    path: '/certificate',
+    getParentRoute: () => AuthenticatedAcademyCourseSlugRoute,
+  } as any)
+const AuthenticatedAcademyCourseSlugLessonSlugRoute =
+  AuthenticatedAcademyCourseSlugLessonSlugRouteImport.update({
+    id: '/$lessonSlug',
+    path: '/$lessonSlug',
+    getParentRoute: () => AuthenticatedAcademyCourseSlugRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -508,7 +529,7 @@ export interface FileRoutesByFullPath {
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/profile/$slug': typeof ProfileSlugRoute
   '/tasks/$taskId': typeof TasksTaskIdRoute
-  '/academy/$moduleId': typeof AuthenticatedAcademyModuleIdRoute
+  '/academy/$courseSlug': typeof AuthenticatedAcademyCourseSlugRouteWithChildren
   '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
   '/admin/background-checks': typeof AuthenticatedAdminBackgroundChecksRoute
   '/admin/dispatch': typeof AuthenticatedAdminDispatchRoute
@@ -539,6 +560,9 @@ export interface FileRoutesByFullPath {
   '/dashboard/': typeof AuthenticatedDashboardIndexRoute
   '/messages/': typeof AuthenticatedMessagesIndexRoute
   '/settings/': typeof AuthenticatedSettingsIndexRoute
+  '/academy/$courseSlug/$lessonSlug': typeof AuthenticatedAcademyCourseSlugLessonSlugRoute
+  '/academy/$courseSlug/certificate': typeof AuthenticatedAcademyCourseSlugCertificateRoute
+  '/academy/$courseSlug/quiz': typeof AuthenticatedAcademyCourseSlugQuizRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -577,7 +601,7 @@ export interface FileRoutesByTo {
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/profile/$slug': typeof ProfileSlugRoute
   '/tasks/$taskId': typeof TasksTaskIdRoute
-  '/academy/$moduleId': typeof AuthenticatedAcademyModuleIdRoute
+  '/academy/$courseSlug': typeof AuthenticatedAcademyCourseSlugRouteWithChildren
   '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
   '/admin/background-checks': typeof AuthenticatedAdminBackgroundChecksRoute
   '/admin/dispatch': typeof AuthenticatedAdminDispatchRoute
@@ -608,6 +632,9 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AuthenticatedDashboardIndexRoute
   '/messages': typeof AuthenticatedMessagesIndexRoute
   '/settings': typeof AuthenticatedSettingsIndexRoute
+  '/academy/$courseSlug/$lessonSlug': typeof AuthenticatedAcademyCourseSlugLessonSlugRoute
+  '/academy/$courseSlug/certificate': typeof AuthenticatedAcademyCourseSlugCertificateRoute
+  '/academy/$courseSlug/quiz': typeof AuthenticatedAcademyCourseSlugQuizRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -651,7 +678,7 @@ export interface FileRoutesById {
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/profile/$slug': typeof ProfileSlugRoute
   '/tasks/$taskId': typeof TasksTaskIdRoute
-  '/_authenticated/academy/$moduleId': typeof AuthenticatedAcademyModuleIdRoute
+  '/_authenticated/academy/$courseSlug': typeof AuthenticatedAcademyCourseSlugRouteWithChildren
   '/_authenticated/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
   '/_authenticated/admin/background-checks': typeof AuthenticatedAdminBackgroundChecksRoute
   '/_authenticated/admin/dispatch': typeof AuthenticatedAdminDispatchRoute
@@ -682,6 +709,9 @@ export interface FileRoutesById {
   '/_authenticated/dashboard/': typeof AuthenticatedDashboardIndexRoute
   '/_authenticated/messages/': typeof AuthenticatedMessagesIndexRoute
   '/_authenticated/settings/': typeof AuthenticatedSettingsIndexRoute
+  '/_authenticated/academy/$courseSlug/$lessonSlug': typeof AuthenticatedAcademyCourseSlugLessonSlugRoute
+  '/_authenticated/academy/$courseSlug/certificate': typeof AuthenticatedAcademyCourseSlugCertificateRoute
+  '/_authenticated/academy/$courseSlug/quiz': typeof AuthenticatedAcademyCourseSlugQuizRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -725,7 +755,7 @@ export interface FileRouteTypes {
     | '/email/unsubscribe'
     | '/profile/$slug'
     | '/tasks/$taskId'
-    | '/academy/$moduleId'
+    | '/academy/$courseSlug'
     | '/admin/analytics'
     | '/admin/background-checks'
     | '/admin/dispatch'
@@ -756,6 +786,9 @@ export interface FileRouteTypes {
     | '/dashboard/'
     | '/messages/'
     | '/settings/'
+    | '/academy/$courseSlug/$lessonSlug'
+    | '/academy/$courseSlug/certificate'
+    | '/academy/$courseSlug/quiz'
     | '/api/public/payments/webhook'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -794,7 +827,7 @@ export interface FileRouteTypes {
     | '/email/unsubscribe'
     | '/profile/$slug'
     | '/tasks/$taskId'
-    | '/academy/$moduleId'
+    | '/academy/$courseSlug'
     | '/admin/analytics'
     | '/admin/background-checks'
     | '/admin/dispatch'
@@ -825,6 +858,9 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/messages'
     | '/settings'
+    | '/academy/$courseSlug/$lessonSlug'
+    | '/academy/$courseSlug/certificate'
+    | '/academy/$courseSlug/quiz'
     | '/api/public/payments/webhook'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -867,7 +903,7 @@ export interface FileRouteTypes {
     | '/email/unsubscribe'
     | '/profile/$slug'
     | '/tasks/$taskId'
-    | '/_authenticated/academy/$moduleId'
+    | '/_authenticated/academy/$courseSlug'
     | '/_authenticated/admin/analytics'
     | '/_authenticated/admin/background-checks'
     | '/_authenticated/admin/dispatch'
@@ -898,6 +934,9 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard/'
     | '/_authenticated/messages/'
     | '/_authenticated/settings/'
+    | '/_authenticated/academy/$courseSlug/$lessonSlug'
+    | '/_authenticated/academy/$courseSlug/certificate'
+    | '/_authenticated/academy/$courseSlug/quiz'
     | '/api/public/payments/webhook'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -1384,11 +1423,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminAnalyticsRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
-    '/_authenticated/academy/$moduleId': {
-      id: '/_authenticated/academy/$moduleId'
-      path: '/$moduleId'
-      fullPath: '/academy/$moduleId'
-      preLoaderRoute: typeof AuthenticatedAcademyModuleIdRouteImport
+    '/_authenticated/academy/$courseSlug': {
+      id: '/_authenticated/academy/$courseSlug'
+      path: '/$courseSlug'
+      fullPath: '/academy/$courseSlug'
+      preLoaderRoute: typeof AuthenticatedAcademyCourseSlugRouteImport
       parentRoute: typeof AuthenticatedAcademyRoute
     }
     '/lovable/email/transactional/send': {
@@ -1433,15 +1472,58 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicPaymentsWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/academy/$courseSlug/quiz': {
+      id: '/_authenticated/academy/$courseSlug/quiz'
+      path: '/quiz'
+      fullPath: '/academy/$courseSlug/quiz'
+      preLoaderRoute: typeof AuthenticatedAcademyCourseSlugQuizRouteImport
+      parentRoute: typeof AuthenticatedAcademyCourseSlugRoute
+    }
+    '/_authenticated/academy/$courseSlug/certificate': {
+      id: '/_authenticated/academy/$courseSlug/certificate'
+      path: '/certificate'
+      fullPath: '/academy/$courseSlug/certificate'
+      preLoaderRoute: typeof AuthenticatedAcademyCourseSlugCertificateRouteImport
+      parentRoute: typeof AuthenticatedAcademyCourseSlugRoute
+    }
+    '/_authenticated/academy/$courseSlug/$lessonSlug': {
+      id: '/_authenticated/academy/$courseSlug/$lessonSlug'
+      path: '/$lessonSlug'
+      fullPath: '/academy/$courseSlug/$lessonSlug'
+      preLoaderRoute: typeof AuthenticatedAcademyCourseSlugLessonSlugRouteImport
+      parentRoute: typeof AuthenticatedAcademyCourseSlugRoute
+    }
   }
 }
 
+interface AuthenticatedAcademyCourseSlugRouteChildren {
+  AuthenticatedAcademyCourseSlugLessonSlugRoute: typeof AuthenticatedAcademyCourseSlugLessonSlugRoute
+  AuthenticatedAcademyCourseSlugCertificateRoute: typeof AuthenticatedAcademyCourseSlugCertificateRoute
+  AuthenticatedAcademyCourseSlugQuizRoute: typeof AuthenticatedAcademyCourseSlugQuizRoute
+}
+
+const AuthenticatedAcademyCourseSlugRouteChildren: AuthenticatedAcademyCourseSlugRouteChildren =
+  {
+    AuthenticatedAcademyCourseSlugLessonSlugRoute:
+      AuthenticatedAcademyCourseSlugLessonSlugRoute,
+    AuthenticatedAcademyCourseSlugCertificateRoute:
+      AuthenticatedAcademyCourseSlugCertificateRoute,
+    AuthenticatedAcademyCourseSlugQuizRoute:
+      AuthenticatedAcademyCourseSlugQuizRoute,
+  }
+
+const AuthenticatedAcademyCourseSlugRouteWithChildren =
+  AuthenticatedAcademyCourseSlugRoute._addFileChildren(
+    AuthenticatedAcademyCourseSlugRouteChildren,
+  )
+
 interface AuthenticatedAcademyRouteChildren {
-  AuthenticatedAcademyModuleIdRoute: typeof AuthenticatedAcademyModuleIdRoute
+  AuthenticatedAcademyCourseSlugRoute: typeof AuthenticatedAcademyCourseSlugRouteWithChildren
 }
 
 const AuthenticatedAcademyRouteChildren: AuthenticatedAcademyRouteChildren = {
-  AuthenticatedAcademyModuleIdRoute: AuthenticatedAcademyModuleIdRoute,
+  AuthenticatedAcademyCourseSlugRoute:
+    AuthenticatedAcademyCourseSlugRouteWithChildren,
 }
 
 const AuthenticatedAcademyRouteWithChildren =

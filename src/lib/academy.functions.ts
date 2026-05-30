@@ -281,3 +281,58 @@ export const recomputeMyCertification = createServerFn({ method: "POST" })
   .handler(async ({ context }) => {
     return recomputeCertification(context.userId);
   });
+
+export const getLessonContext = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i: unknown) =>
+    z
+      .object({
+        courseSlug: z.enum(moduleIds),
+        lessonSlug: z.string().min(1).max(80),
+      })
+      .parse(i),
+  )
+  .handler(async ({ context, data }) => {
+    const { userId } = context;
+    const mod = getModule(data.courseSlug);
+    if (!mod) throw new Error("Course not found");
+    const idx = mod.sections.findIndex((s) => s.id === data.lessonSlug);
+    if (idx === -1) throw new Error("Lesson not found");
+    const lesson = mod.sections[idx];
+    const prev = idx > 0 ? mod.sections[idx - 1] : null;
+    const next = idx < mod.sections.length - 1 ? mod.sections[idx + 1] : null;
+
+    const { data: p } = await supabaseAdmin
+      .from("academy_progress")
+      .select("sections_completed, passed, quiz_score")
+      .eq("user_id", userId)
+      .eq("module_id", mod.id)
+      .maybeSingle();
+
+    const sectionsCompleted: string[] = (p as any)?.sections_completed ?? [];
+    const allSectionsDone = mod.sections.every((s) => sectionsCompleted.includes(s.id));
+
+    return {
+      course: {
+        slug: mod.id,
+        title: mod.title,
+        order: mod.order,
+        total_lessons: mod.sections.length,
+      },
+      lesson: {
+        slug: lesson.id,
+        title: lesson.title,
+        body: lesson.body,
+        videoUrl: lesson.videoUrl ?? null,
+        pdfUrl: lesson.pdfUrl ?? null,
+        index: idx + 1,
+      },
+      prev: prev ? { slug: prev.id, title: prev.title } : null,
+      next: next ? { slug: next.id, title: next.title } : null,
+      completed: sectionsCompleted.includes(lesson.id),
+      sections_completed: sectionsCompleted,
+      all_sections_done: allSectionsDone,
+      passed: !!(p as any)?.passed,
+      quiz_score: (p as any)?.quiz_score ?? null,
+    };
+  });
