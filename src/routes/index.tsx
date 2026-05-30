@@ -282,18 +282,15 @@ function StatCounter({ value, suffix, label }: { value: number; suffix: string; 
   );
 }
 
-function LiveActivityTicker() {
-  // Duplicate the feed so the marquee loops seamlessly
-  const items = [...ACTIVITY_FEED, ...ACTIVITY_FEED];
+function MarketplaceUpdatesTicker() {
+  // Duplicate the list so the marquee loops seamlessly
+  const items = [...MARKETPLACE_UPDATES, ...MARKETPLACE_UPDATES];
   return (
-    <section aria-label="Live platform activity" className="border-y border-border/60 bg-card/40 backdrop-blur overflow-hidden">
+    <section aria-label="Marketplace updates" className="border-y border-border/60 bg-card/40 backdrop-blur overflow-hidden">
       <div className="mx-auto max-w-7xl px-5 py-3 flex items-center gap-4">
         <div className="flex items-center gap-2 shrink-0 pr-4 border-r border-border/60">
-          <span className="relative flex size-2.5">
-            <span className="absolute inline-flex h-full w-full rounded-full bg-primary opacity-75 animate-ping" />
-            <span className="relative inline-flex rounded-full size-2.5 bg-primary" />
-          </span>
-          <span className="text-[11px] font-mono uppercase tracking-widest text-primary">Live</span>
+          <Sparkles className="size-3.5 text-primary" />
+          <span className="text-[11px] font-mono uppercase tracking-widest text-primary">Updates</span>
         </div>
         <div className="flex-1 overflow-hidden relative">
           <div className="flex gap-10 animate-ticker whitespace-nowrap will-change-transform">
@@ -301,7 +298,6 @@ function LiveActivityTicker() {
               <div key={i} className="flex items-center gap-2 text-xs md:text-sm text-muted-foreground">
                 <it.icon className="size-3.5 text-primary shrink-0" />
                 <span className="text-foreground/90">{it.text}</span>
-                <span className="text-muted-foreground/70">· {it.time}</span>
               </div>
             ))}
           </div>
@@ -311,55 +307,25 @@ function LiveActivityTicker() {
   );
 }
 
-function LivePlatformStats() {
-  // Lightweight "live" pulse values that drift slightly to feel alive
-  const [online, setOnline] = useState(47);
-  const [tasksToday, setTasksToday] = useState(31);
-  const [citiesActive] = useState(12);
-  const [approvedRunners, setApprovedRunners] = useState(183);
-
-  useEffect(() => {
-    const t = setInterval(() => {
-      setOnline((v) => Math.max(38, Math.min(72, v + (Math.random() > 0.5 ? 1 : -1))));
-      if (Math.random() > 0.75) setTasksToday((v) => v + 1);
-      if (Math.random() > 0.92) setApprovedRunners((v) => v + 1);
-    }, 3500);
-    return () => clearInterval(t);
-  }, []);
-
-  const items = [
-    { icon: Activity, label: "Runners online now", value: online, live: true },
-    { icon: CheckCircle2, label: "Tasks completed today", value: tasksToday, live: true },
-    { icon: MapPin, label: "Cities currently active", value: citiesActive, live: false },
-    { icon: Users, label: "Founding Runners approved", value: approvedRunners, live: false },
-  ];
-
+function BetaStatusBoard() {
   return (
     <section className="mx-auto max-w-7xl px-5 pt-10 md:pt-14">
       <div className="rounded-2xl border border-border bg-card/60 backdrop-blur p-5 md:p-7 shadow-card">
         <div className="flex items-center justify-between mb-5">
           <div className="flex items-center gap-2">
-            <Zap className="size-4 text-primary" />
-            <span className="text-xs font-mono uppercase tracking-widest text-primary">Live Platform</span>
+            <Sparkles className="size-4 text-primary" />
+            <span className="text-xs font-mono uppercase tracking-widest text-primary">Beta Status</span>
           </div>
-          <span className="text-[11px] text-muted-foreground hidden sm:inline">Updated in real time</span>
+          <span className="text-[11px] text-muted-foreground hidden sm:inline">Early-access marketplace</span>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-          {items.map((it) => (
+          {BETA_STATUS.map((it) => (
             <div key={it.label} className="flex items-start gap-3">
               <div className="size-10 rounded-xl bg-primary/10 grid place-items-center shrink-0">
                 <it.icon className="size-5 text-primary" />
               </div>
               <div className="min-w-0">
-                <div className="flex items-center gap-2">
-                  <div className="text-2xl md:text-3xl font-bold tabular-nums">{it.value.toLocaleString()}</div>
-                  {it.live && (
-                    <span className="relative flex size-2 mt-1">
-                      <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75 animate-ping" />
-                      <span className="relative inline-flex rounded-full size-2 bg-emerald-400" />
-                    </span>
-                  )}
-                </div>
+                <div className="text-lg md:text-xl font-semibold leading-tight">{it.value}</div>
                 <div className="text-xs text-muted-foreground mt-1 leading-tight">{it.label}</div>
               </div>
             </div>
