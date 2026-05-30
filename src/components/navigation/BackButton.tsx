@@ -24,7 +24,7 @@ export function BackButton() {
       type="button"
       onClick={handleBack}
       aria-label="Go back"
-      className="fixed bottom-4 left-4 z-50 inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-background/80 backdrop-blur px-3.5 py-2 text-sm font-medium text-foreground shadow-md hover:bg-accent hover:text-accent-foreground transition-colors"
+      className="hidden md:inline-flex fixed bottom-4 left-4 z-50 items-center gap-1.5 rounded-full border border-border/60 bg-background/80 backdrop-blur px-3.5 py-2 text-sm font-medium text-foreground shadow-md hover:bg-accent hover:text-accent-foreground transition-colors"
     >
       <ArrowLeft className="size-4" />
       <span>Back</span>
