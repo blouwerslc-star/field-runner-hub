@@ -5,7 +5,8 @@ import { useState } from "react";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { Button } from "@/components/ui/button";
 import { getModuleDetail, markSectionComplete, submitQuiz } from "@/lib/academy.functions";
-import { Loader2, CheckCircle2, ArrowLeft, ArrowRight, FileText, Video, BookOpen } from "lucide-react";
+import { generateCertificatePdf } from "@/lib/academy/certificate.functions";
+import { Loader2, CheckCircle2, ArrowLeft, ArrowRight, FileText, Video, BookOpen, Download } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/academy/$moduleId")({
@@ -20,6 +21,8 @@ function ModulePage() {
   const fetchDetail = useServerFn(getModuleDetail);
   const completeFn = useServerFn(markSectionComplete);
   const submitFn = useServerFn(submitQuiz);
+  const certFn = useServerFn(generateCertificatePdf);
+  const [downloading, setDownloading] = useState(false);
 
   const { data, isLoading } = useQuery({
     queryKey: ["academy-module", moduleId],
@@ -57,12 +60,53 @@ function ModulePage() {
   const done: string[] = data.progress?.sections_completed ?? [];
   const allSectionsDone = mod.sections.every((s: any) => done.includes(s.id));
   const allAnswered = mod.quiz.every((q: any) => typeof answers[q.id] === "number");
+  const alreadyPassed = !!data.progress?.passed;
+
+  async function downloadCertificate() {
+    try {
+      setDownloading(true);
+      const res = await certFn({ data: { moduleId } });
+      const bin = atob(res.base64);
+      const bytes = new Uint8Array(bin.length);
+      for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+      const blob = new Blob([bytes], { type: res.contentType });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = res.filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch (e: any) {
+      toast.error(e?.message ?? "Could not generate certificate");
+    } finally {
+      setDownloading(false);
+    }
+  }
 
   return (
     <DashboardShell title={mod.title} subtitle={mod.summary}>
       <Link to="/academy" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-4">
         <ArrowLeft className="size-4" /> Back to Academy
       </Link>
+
+      {alreadyPassed && (
+        <div className="mb-6 rounded-2xl border border-emerald-500/40 bg-emerald-500/5 p-4 flex items-center justify-between gap-3 flex-wrap">
+          <div className="flex items-center gap-3">
+            <div className="size-9 rounded-full bg-emerald-500/15 grid place-items-center">
+              <CheckCircle2 className="size-5 text-emerald-300" />
+            </div>
+            <div>
+              <div className="text-sm font-semibold text-emerald-200">Module passed</div>
+              <div className="text-xs text-muted-foreground">Best score {data.progress?.quiz_score}% — download your certificate below.</div>
+            </div>
+          </div>
+          <Button onClick={downloadCertificate} disabled={downloading} variant="outline" className="border-emerald-500/40 hover:bg-emerald-500/10">
+            {downloading ? <Loader2 className="size-4 animate-spin" /> : <><Download className="size-4 mr-1.5" /> Download certificate</>}
+          </Button>
+        </div>
+      )}
 
       {/* LESSONS */}
       <div className="space-y-3 mb-8">
