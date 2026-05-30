@@ -199,6 +199,11 @@ function CoursePage() {
           </Link>
         </li>
       </ol>
+
+      <AffiliateProductList
+        products={((data as any).products ?? [])}
+        heading="Recommended gear for this course"
+      />
     </DashboardShell>
   );
 }
