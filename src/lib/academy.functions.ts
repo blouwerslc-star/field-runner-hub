@@ -31,7 +31,7 @@ async function ensureRunnerProfile(userId: string) {
 
 async function recomputeCertification(userId: string) {
   // Gather inputs
-  const [{ data: progress }, { data: profile }, { data: runner }, { data: tasksDone }] = await Promise.all([
+  const [{ data: progress }, { data: profile }, { data: runner }, tasksRes] = await Promise.all([
     supabaseAdmin.from("academy_progress").select("module_id, passed").eq("user_id", userId),
     supabaseAdmin
       .from("profiles")
@@ -55,7 +55,7 @@ async function recomputeCertification(userId: string) {
 
   const idVerified = !!(profile as any)?.identity_verified;
   const bgVerified = !!(profile as any)?.background_check_verified;
-  const tasksCount = tasksDone?.count ?? (profile as any)?.completed_tasks_count ?? 0;
+  const tasksCount = (tasksRes as any)?.count ?? (profile as any)?.completed_tasks_count ?? 0;
   const rating = Number((profile as any)?.average_rating ?? 0);
 
   let level = 0;
