@@ -1,7 +1,7 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { LogOut, UserCog, Compass, Settings, MessageSquare, Store, Briefcase, Wallet, Activity, ShieldAlert, Menu, DollarSign, BarChart3, ShieldCheck } from "lucide-react";
+import { LogOut, UserCog, Compass, Settings, MessageSquare, Store, Briefcase, Wallet, Activity, ShieldAlert, Menu, DollarSign, BarChart3, ShieldCheck, GraduationCap } from "lucide-react";
 import { BrandLogo } from "@/components/brand/BrandLogo";
 import { Toaster } from "@/components/ui/sonner";
 import { NotificationBell } from "@/components/dashboard/NotificationBell";
@@ -14,6 +14,7 @@ import { useState } from "react";
 const NAV_ITEMS = [
   { to: "/profiles", label: "Browse", icon: Compass },
   { to: "/tasks", label: "Marketplace", icon: Store },
+  { to: "/academy", label: "Academy", icon: GraduationCap },
   { to: "/applications", label: "Applications", icon: Briefcase },
   { to: "/earnings", label: "Earnings", icon: DollarSign },
   { to: "/performance", label: "Performance", icon: BarChart3 },
