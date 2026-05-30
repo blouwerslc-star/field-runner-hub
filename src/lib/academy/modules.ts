@@ -215,6 +215,73 @@ export const ACADEMY_MODULES: AcademyModule[] = [
       { id: "q5", prompt: "If asked who you are, you say…", options: ["A real estate agent", "An inspector", "An REI Runner field contractor", "Whatever sounds best"], correct: 2 },
     ],
   },
+  {
+    id: "condition-reporting",
+    order: 7,
+    title: "Property Condition Reporting",
+    summary: "Identify damage, occupancy indicators, and safety issues — and report them objectively.",
+    duration: "12 min",
+    sections: [
+      {
+        id: "damage-id",
+        title: "Identifying damage",
+        body: "Look for: water staining on ceilings/walls, sagging floors, foundation cracks wider than a credit card, missing roof shingles, broken windows, evidence of fire or smoke, mold, and pest activity. Photograph each finding individually with context (wide shot) and a close-up.",
+      },
+      {
+        id: "occupancy-indicators",
+        title: "Occupancy indicators",
+        body: "Document signs that point to occupied, vacant, or abandoned status. Note utility meter movement, mail accumulation, lawn condition, and presence of vehicles. Pair every claim with a photo.",
+      },
+      {
+        id: "safety-flags",
+        title: "Safety and hazard flags",
+        body: "Flag immediate hazards: exposed wiring, gas smell, standing water near electrical, structural collapse risk, aggressive animals, squatters. Do not enter or approach. Photograph from a safe distance and note the hazard in the report.",
+      },
+      {
+        id: "objectivity",
+        title: "Stay objective",
+        body: "Report what you see, not what you think it means. \"Brown ceiling stain, approximately 2ft diameter\" — not \"roof needs replacement.\" Investors rely on observations, not opinions.",
+      },
+    ],
+    quiz: [
+      { id: "q1", prompt: "When you find damage you should photograph…", options: ["A wide shot only", "A close-up only", "Both wide and close-up", "Nothing"], correct: 2 },
+      { id: "q2", prompt: "If you smell gas you should…", options: ["Investigate the source", "Light a match to confirm", "Leave immediately and flag the hazard", "Open all windows yourself"], correct: 2 },
+      { id: "q3", prompt: "A correct condition note reads…", options: ["\"Roof is shot, needs $15k\"", "\"Brown ceiling stain ~2ft diameter\"", "\"Probably mold\"", "\"Cheap fix\""], correct: 1 },
+      { id: "q4", prompt: "Foundation cracks become a concern when…", options: ["They are hairline", "They are wider than a credit card", "They appear on driveways", "Any crack exists"], correct: 1 },
+      { id: "q5", prompt: "Your job is to report…", options: ["Repair estimates", "Property value", "What you see, objectively", "Whether to buy"], correct: 2 },
+    ],
+  },
+  {
+    id: "client-communication",
+    order: 8,
+    title: "Client Communication",
+    summary: "Respond quickly, write professionally, and handle escalations the right way.",
+    duration: "10 min",
+    sections: [
+      {
+        id: "response-time",
+        title: "Response time standards",
+        body: "Acknowledge new messages within 2 business hours during the day. If you accept a task, confirm receipt within 30 minutes. Late or silent runners lose repeat work faster than any other failure mode.",
+      },
+      {
+        id: "writing",
+        title: "Professional messaging",
+        body: "Use complete sentences. No slang. No emojis in task threads. Confirm specifics in writing (date, time, address). When uploading deliverables, post a one-line summary: \"Exterior photos uploaded — front door access blocked by debris, noted in photos.\"",
+      },
+      {
+        id: "escalation",
+        title: "Handling difficult situations",
+        body: "If a task can't be completed (locked gate, occupied, unsafe), message the investor immediately with a photo of the obstacle and ask how they want to proceed. Never abandon a task without notice. If a dispute arises, keep the conversation inside REI Runner messaging — do not escalate to personal channels.",
+      },
+    ],
+    quiz: [
+      { id: "q1", prompt: "After accepting a task you should confirm receipt within…", options: ["30 minutes", "1 day", "Whenever convenient", "Only if asked"], correct: 0 },
+      { id: "q2", prompt: "Where should all client messaging happen?", options: ["Inside REI Runner messaging", "Personal text", "WhatsApp", "Email"], correct: 0 },
+      { id: "q3", prompt: "If a property is inaccessible you should…", options: ["Cancel silently", "Show up later without notice", "Message the investor with a photo and ask how to proceed", "Force entry"], correct: 2 },
+      { id: "q4", prompt: "When uploading deliverables include…", options: ["Nothing extra", "A one-line summary of what was done and any issues", "An invoice", "A repair estimate"], correct: 1 },
+      { id: "q5", prompt: "Emojis in task threads are…", options: ["Encouraged", "Required", "Not appropriate — keep messaging professional", "Allowed only on Fridays"], correct: 2 },
+    ],
+  },
 ];
 
 export function getModule(id: string): AcademyModule | undefined {

@@ -3,6 +3,8 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { ACADEMY_MODULES, getModule, PASS_THRESHOLD } from "@/lib/academy/modules";
+import { earnedSkillBadges } from "@/lib/academy/badges";
+import { computeXp, levelFromXp } from "@/lib/academy/xp";
 
 const moduleIds = ACADEMY_MODULES.map((m) => m.id) as [string, ...string[]];
 
@@ -107,8 +109,7 @@ export const getAcademyState = createServerFn({ method: "GET" })
     const byModule = new Map<string, any>();
     for (const row of progress ?? []) byModule.set((row as any).module_id, row);
 
-    return {
-      modules: ACADEMY_MODULES.map((m) => {
+    const modules = ACADEMY_MODULES.map((m) => {
         const p = byModule.get(m.id);
         return {
           id: m.id,
@@ -124,10 +125,25 @@ export const getAcademyState = createServerFn({ method: "GET" })
           passed: !!p?.passed,
           completed_at: p?.completed_at ?? null,
         };
-      }),
+      });
+
+    const passedIds = modules.filter((m) => m.passed).map((m) => m.id);
+    const sectionsCompletedTotal = modules.reduce((acc, m) => acc + m.sections_completed.length, 0);
+    const xp = computeXp({ sectionsCompleted: sectionsCompletedTotal, modulesPassed: passedIds.length });
+    const lvl = levelFromXp(xp);
+    const nextModule = modules.find((m) => !m.passed) ?? null;
+    const earned = earnedSkillBadges(passedIds).map((b) => ({ id: b.id, moduleId: b.moduleId, label: b.label }));
+
+    return {
+      modules,
       runner: (runner as any) ?? { certification_level: 0, certification_status: "none" },
       profile: (profile as any) ?? {},
       pass_threshold: PASS_THRESHOLD,
+      xp,
+      level: lvl.level,
+      level_progress: lvl,
+      next_module: nextModule ? { id: nextModule.id, title: nextModule.title } : null,
+      earned_badges: earned,
     };
   });
 
