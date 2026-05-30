@@ -499,10 +499,10 @@ function Index() {
       </section>
 
       {/* LIVE ACTIVITY TICKER */}
-      <LiveActivityTicker />
+      <MarketplaceUpdatesTicker />
 
-      {/* LIVE PLATFORM INDICATORS */}
-      <LivePlatformStats />
+      {/* BETA STATUS BOARD */}
+      <BetaStatusBoard />
 
       {/* TRUST BADGES STRIP */}
       <section aria-label="Platform trust signals" className="mx-auto max-w-7xl px-5 pt-8 md:pt-10">
@@ -523,14 +523,24 @@ function Index() {
         </div>
       </section>
 
-      {/* STATS */}
-      <section className="border-y border-border/60 bg-card/30 backdrop-blur">
-        <div className="mx-auto max-w-6xl px-5 py-12 grid grid-cols-2 md:grid-cols-4 gap-8">
-          {STATS.map((s) => (
-            <StatCounter key={s.label} value={s.value} suffix={s.suffix} label={s.label} />
+      {/* SERVICE QUALITY STANDARDS */}
+      <Section id="standards">
+        <SectionHeader
+          eyebrow="Every Task Includes"
+          title="Operational Standards on Every Job"
+          subtitle="REI Runner tasks follow a consistent structure so investors know exactly what they are getting."
+        />
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+          {TASK_STANDARDS.map((s) => (
+            <div key={s.title} className="rounded-2xl border border-border bg-card/60 backdrop-blur p-5 text-center">
+              <div className="size-10 rounded-xl bg-primary/10 grid place-items-center mx-auto mb-3">
+                <s.icon className="size-5 text-primary" />
+              </div>
+              <div className="text-sm font-medium">{s.title}</div>
+            </div>
           ))}
         </div>
-      </section>
+      </Section>
 
       {/* EXAMPLE FIELD TASKS */}
       <Section id="example-tasks">
