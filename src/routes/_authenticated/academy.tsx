@@ -1,46 +1,9 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { useServerFn } from "@tanstack/react-start";
-import { useQuery } from "@tanstack/react-query";
-import { DashboardShell } from "@/components/dashboard/DashboardShell";
-import { getAcademyState } from "@/lib/academy.functions";
-import { CertificationBadge, CERTIFICATION_LABELS } from "@/components/academy/CertificationBadge";
-import { XPBar } from "@/components/academy/XPBar";
-import { StatCard } from "@/components/academy/StatCard";
-import { SkillBadge } from "@/components/academy/SkillBadge";
-import { SKILL_BADGES } from "@/lib/academy/badges";
-import { Button } from "@/components/ui/button";
-import {
-  Loader2, BookOpen, CheckCircle2, ArrowRight, Lock, Award, ShieldCheck, Crown,
-  Trophy, Sparkles, Briefcase, ShieldQuestion,
-} from "lucide-react";
+import { createFileRoute, Outlet } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_authenticated/academy")({
-  component: AcademyIndex,
+  component: () => <Outlet />,
   head: () => ({ meta: [{ title: "REI Runner Academy" }] }),
 });
-
-function AcademyIndex() {
-  const fn = useServerFn(getAcademyState);
-  const { data, isLoading, error, refetch, isFetching } = useQuery({
-    queryKey: ["academy-state"],
-    queryFn: () => fn(),
-    retry: 1,
-  });
-
-  if (isLoading) {
-    return (
-      <DashboardShell title="REI Runner Academy" subtitle="Training & certification for field runners.">
-        <Loader2 className="size-6 animate-spin text-primary" />
-      </DashboardShell>
-    );
-  }
-
-  if (error || !data) {
-    const message = (error as any)?.message ?? "We couldn't load your Academy progress.";
-    const isAuth = /unauthor/i.test(message);
-    return (
-      <DashboardShell title="REI Runner Academy" subtitle="Training & certification for field runners.">
-        <div className="rounded-2xl border border-border bg-card/60 p-6 max-w-xl">
           <div className="text-sm font-semibold mb-1">
             {isAuth ? "Please sign in to access the Academy" : "Couldn't load Academy"}
           </div>
