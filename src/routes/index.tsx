@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { Button } from "@/components/ui/button";
 import {
@@ -34,7 +34,6 @@ import {
   ClipboardList,
   Clock,
   Smartphone,
-  Activity,
   CheckCircle2,
   Users,
   Zap,
@@ -92,11 +91,12 @@ const MARKETS = [
   "Tampa", "Indianapolis", "Cleveland", "Chicago",
 ];
 
-const STATS = [
-  { value: 240, suffix: "+", label: "Runner Applications" },
-  { value: 12, suffix: "", label: "Cities Covered" },
-  { value: 38, suffix: "", label: "Investors Onboarding" },
-  { value: 8, suffix: "", label: "Service Types" },
+// Beta status items — no fabricated metrics. Replace with real DB-backed numbers when available.
+const BETA_STATUS = [
+  { icon: Users, label: "Founding Runner Applications", value: "Open" },
+  { icon: Building2, label: "Investor Applications", value: "Open" },
+  { icon: MapPin, label: "Market Coverage", value: "Expanding" },
+  { icon: Zap, label: "Marketplace", value: "Early Access" },
 ];
 
 // Example field-task catalog with payouts, turnaround, and deliverables
@@ -105,64 +105,61 @@ const EXAMPLE_TASKS = [
     icon: Camera,
     title: "Property Photo Set",
     payout: "$45 – $85",
-    eta: "Same-day",
+    eta: "Varies by market",
     deliverables: ["20+ exterior & interior photos", "Geotagged + timestamped", "Uploaded via mobile app"],
-    tag: "Most popular",
+    tag: "Common request",
   },
   {
     icon: Video,
     title: "Walkthrough Video",
     payout: "$75 – $150",
-    eta: "24 hours",
+    eta: "Varies by market",
     deliverables: ["Full interior walkthrough", "Narrated condition notes", "HD vertical or horizontal"],
-    tag: "Investor favorite",
+    tag: "Investor request",
   },
   {
     icon: ShieldCheck,
     title: "Occupancy Check",
     payout: "$25 – $50",
-    eta: "Same-day",
+    eta: "Varies by market",
     deliverables: ["Vacant / occupied / abandoned", "Exterior photos", "Written observations"],
   },
   {
     icon: MapPin,
     title: "Drive-By Report",
     payout: "$20 – $40",
-    eta: "Same-day",
+    eta: "Varies by market",
     deliverables: ["4–6 exterior photos", "Curbside condition notes", "Neighborhood snapshot"],
   },
   {
     icon: ClipboardList,
     title: "Lockbox Install",
     payout: "$30 – $60",
-    eta: "24–48 hours",
+    eta: "Varies by market",
     deliverables: ["Lockbox placed at agreed location", "Photo confirmation", "Code delivered securely"],
   },
   {
     icon: Send,
     title: "Yard Sign Placement",
     payout: "$20 – $35",
-    eta: "Same-day",
+    eta: "Varies by market",
     deliverables: ["Sign installed & photographed", "Geotagged proof", "Optional rider attached"],
   },
 ];
 
-// Realistic live-feed seed used by the activity ticker
-const ACTIVITY_FEED = [
-  { icon: CheckCircle2, text: "Walkthrough video completed in Atlanta, GA", time: "2m ago" },
-  { icon: Users, text: "New Founding Runner approved in Tampa, FL", time: "6m ago" },
-  { icon: Camera, text: "Property photo set delivered in Detroit, MI", time: "11m ago" },
-  { icon: ShieldCheck, text: "Occupancy check verified in Indianapolis, IN", time: "18m ago" },
-  { icon: MapPin, text: "Drive-by report uploaded in Dallas, TX", time: "24m ago" },
-  { icon: DollarSign, text: "Runner payout released in Phoenix, AZ", time: "32m ago" },
-  { icon: ClipboardList, text: "Lockbox installed in Cleveland, OH", time: "41m ago" },
-  { icon: Users, text: "Investor onboarded in Chicago, IL", time: "55m ago" },
+// Real marketplace updates only — no fabricated activity. Pull from live events when available.
+const MARKETPLACE_UPDATES = [
+  { icon: Users, text: "Beta applications now open for Founding Runners" },
+  { icon: Building2, text: "Investor waitlist accepting early-access applications" },
+  { icon: MapPin, text: "New cities being onboarded market-by-market" },
+  { icon: BadgeCheck, text: "Runner certification program launching" },
+  { icon: Sparkles, text: "Platform actively in beta — features rolling out weekly" },
 ];
 
 const STEPS = [
   { n: "01", icon: ClipboardList, title: "Investor Posts a Task", body: "An investor needs photos, a walkthrough video, an occupancy check, or a drive-by at a specific address." },
   { n: "02", icon: Send, title: "Local Runner Accepts", body: "A vetted runner in that city claims the task and heads to the property." },
-  { n: "03", icon: Camera, title: "Runner Completes & Uploads", body: "Photos, video, and notes are uploaded directly through REI Runner — usually same-day." },
+  { n: "03", icon: Camera, title: "Runner Completes & Uploads", body: "Photos, video, and notes are uploaded directly through REI Runner. Turnaround varies by market and runner availability." },
   { n: "04", icon: DollarSign, title: "Runner Gets Paid", body: "Payment is released per completed task. No quotas, no long-term commitment." },
 ];
 
@@ -172,7 +169,7 @@ const BENEFITS = [
   { icon: ShieldCheck, title: "No license required", body: "Field tasks like photos, videos, and drive-bys don't require a real estate license." },
   { icon: Network, title: "Repeat investor clients", body: "Build a reputation with active investors who post recurring tasks in your city." },
   { icon: Smartphone, title: "Everything in one place", body: "Accept jobs, upload deliverables, and get paid through one mobile-friendly platform." },
-  { icon: TrendingUp, title: "Growing nationwide", body: "More investors and more task volume every week, in every major US market." },
+  { icon: TrendingUp, title: "Expanding market-by-market", body: "We are onboarding investors and runners in new cities as coverage grows." },
 ];
 
 const SERVICES = [
@@ -184,29 +181,48 @@ const SERVICES = [
   { icon: Clock, title: "Custom Field Tasks", body: "Meet a contractor, take a measurement, check on a tenant turn — investors set the scope." },
 ];
 
-// Trust signals shown across the top of the marketplace
+// Trust signals — only claim what currently exists on the platform.
 const TRUST_BADGES = [
-  { icon: BadgeCheck, label: "ID-Verified Runners", detail: "Every Founding Runner completes identity verification before activation." },
-  { icon: Lock, label: "Escrow-Protected Payments", detail: "Investor funds are held until deliverables are uploaded and approved." },
-  { icon: ShieldCheck, label: "Background-Checked", detail: "Optional background checks available for higher-trust task tiers." },
+  { icon: BadgeCheck, label: "ID Verification Available", detail: "Verification options available for approved runners as part of onboarding." },
+  { icon: Lock, label: "Secure Payment Processing", detail: "Secure payment processing is being rolled out as the platform expands." },
+  { icon: ShieldCheck, label: "Background Check Option", detail: "Optional background checks available for runners pursuing higher-trust task tiers." },
   { icon: FileText, label: "Signed IC Agreement", detail: "Every runner signs an independent contractor agreement before working." },
   { icon: Building2, label: "US-Registered Business", detail: "REI Runner is a US-based platform with US-based support." },
 ];
 
-// Plain-English payment flow for both sides of the marketplace
+// Payment flow — no escrow claim until escrow is live.
 const PAYMENT_FLOW = [
-  { step: "01", icon: Wallet, title: "Investor funds the task", body: "When a task is posted, the payout amount is authorized and held in escrow — not released to anyone yet." },
+  { step: "01", icon: Wallet, title: "Investor funds the task", body: "When a task is posted, the investor sets the payout amount up front through our payments partner." },
   { step: "02", icon: Send, title: "Runner accepts & completes", body: "A local runner claims the task, completes it on-site, and uploads deliverables through the app." },
-  { step: "03", icon: CheckCircle2, title: "Investor reviews", body: "The investor reviews the photos, video, and notes. Approval typically happens within 24 hours." },
-  { step: "04", icon: DollarSign, title: "Runner gets paid", body: "Once approved, the payout is released directly to the runner. No invoices, no chasing, no payroll." },
+  { step: "03", icon: CheckCircle2, title: "Investor reviews", body: "The investor reviews the photos, video, and notes submitted by the runner." },
+  { step: "04", icon: DollarSign, title: "Runner gets paid", body: "Once the work is approved, the payout is released to the runner. No invoices, no chasing, no payroll." },
 ];
 
-// How runners are vetted — operational transparency
+// How runners are vetted — only what is in place today.
 const VETTING_STEPS = [
   { icon: FileText, title: "Application Review", body: "Every applicant is screened by the REI Runner team before they're invited to onboard." },
-  { icon: BadgeCheck, title: "Identity Verification", body: "Government-ID verification is required before a runner can accept their first task." },
-  { icon: Smartphone, title: "Mobile Onboarding", body: "Runners complete a short training inside the app covering deliverable standards and conduct." },
+  { icon: BadgeCheck, title: "Identity Verification Available", body: "Approved runners can complete ID verification to unlock more tasks." },
+  { icon: Smartphone, title: "In-App Onboarding", body: "Runners walk through deliverable standards and conduct expectations inside the app." },
   { icon: ShieldCheck, title: "Performance Tracking", body: "Ratings, response times, and approval rates are tracked. Underperformers are removed." },
+];
+
+// What every task includes — operational standards.
+const TASK_STANDARDS = [
+  { icon: MapPin, title: "Address verification" },
+  { icon: ClipboardList, title: "Required deliverables" },
+  { icon: Clock, title: "Timestamped uploads" },
+  { icon: FileText, title: "Task documentation" },
+  { icon: CheckCircle2, title: "Completion tracking" },
+];
+
+// What runners may NOT do — legal safety rules.
+const RUNNER_RESTRICTIONS = [
+  "Enter occupied properties without authorization",
+  "Negotiate contracts on behalf of investors",
+  "Provide legal advice",
+  "Provide real estate advice",
+  "Perform licensed inspections or appraisals",
+  "Misrepresent themselves as agents, brokers, or inspectors",
 ];
 
 const FAQS = [
@@ -214,10 +230,10 @@ const FAQS = [
   { q: "How do runners get paid?", a: "Runners are paid per completed task. Each job has a set price posted up front. Once your deliverables are uploaded and approved, payment is released to your account." },
   { q: "Do I need real estate experience or a license?", a: "No. Runners are independent contractors performing non-licensed field work — taking photos, recording videos, and reporting on what they observe. No real estate license required." },
   { q: "What kinds of tasks can investors post?", a: "Property photos, interior walkthrough videos, drive-by condition reports, occupancy checks, sign and lockbox installs, meeting a contractor on-site, measurements, and other simple on-site tasks." },
-  { q: "What cities is REI Runner available in?", a: "We're launching first in Detroit, Atlanta, Dallas, Phoenix, Tampa, Indianapolis, Cleveland, and Chicago — then expanding nationwide. Apply now to be a Founding Runner in your city." },
-  { q: "How fast are tasks completed?", a: "Most tasks are accepted within hours and completed same-day or next-day, depending on the runner's schedule and the task type." },
+  { q: "What cities is REI Runner available in?", a: "We are launching market-by-market, starting with Detroit, Atlanta, Dallas, Phoenix, Tampa, Indianapolis, Cleveland, and Chicago. Coverage depends on approved runner availability in each market. Apply now to be a Founding Runner in your city." },
+  { q: "How fast are tasks completed?", a: "Turnaround times vary by market, task type, and runner availability. We are working to expand local coverage so tasks can be completed quickly in every supported city." },
   { q: "Is there a mobile app?", a: "Yes. The REI Runner mobile app is in active development for iOS and Android. Founding Runners and early investors get first access." },
-  { q: "How do investors use the platform?", a: "Investors post a task with the address, task type, and any special instructions. A local runner accepts it, completes the work, and uploads photos/video/notes — usually within 24 hours." },
+  { q: "How do investors use the platform?", a: "Investors post a task with the address, task type, and any special instructions. A local runner accepts it, completes the work, and uploads photos, video, and notes through the app." },
 ];
 
 function scrollToId(id: string) {
@@ -225,58 +241,15 @@ function scrollToId(id: string) {
   if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
-function useCountUp(target: number, duration = 1600) {
-  const ref = useRef<HTMLDivElement | null>(null);
-  const [val, setVal] = useState(0);
-  const started = useRef(false);
-  useEffect(() => {
-    if (!ref.current) return;
-    const io = new IntersectionObserver((entries) => {
-      entries.forEach((e) => {
-        if (e.isIntersecting && !started.current) {
-          started.current = true;
-          const start = performance.now();
-          const step = (now: number) => {
-            const t = Math.min(1, (now - start) / duration);
-            const eased = 1 - Math.pow(1 - t, 3);
-            setVal(Math.floor(eased * target));
-            if (t < 1) requestAnimationFrame(step);
-            else setVal(target);
-          };
-          requestAnimationFrame(step);
-        }
-      });
-    }, { threshold: 0.4 });
-    io.observe(ref.current);
-    return () => io.disconnect();
-  }, [target, duration]);
-  return { ref, val };
-}
-
-function StatCounter({ value, suffix, label }: { value: number; suffix: string; label: string }) {
-  const { ref, val } = useCountUp(value);
+function MarketplaceUpdatesTicker() {
+  // Duplicate the list so the marquee loops seamlessly
+  const items = [...MARKETPLACE_UPDATES, ...MARKETPLACE_UPDATES];
   return (
-    <div ref={ref} className="text-center">
-      <div className="text-3xl md:text-5xl font-bold text-gradient tabular-nums">
-        {val.toLocaleString()}{suffix}
-      </div>
-      <div className="mt-2 text-xs md:text-sm text-muted-foreground uppercase tracking-wider">{label}</div>
-    </div>
-  );
-}
-
-function LiveActivityTicker() {
-  // Duplicate the feed so the marquee loops seamlessly
-  const items = [...ACTIVITY_FEED, ...ACTIVITY_FEED];
-  return (
-    <section aria-label="Live platform activity" className="border-y border-border/60 bg-card/40 backdrop-blur overflow-hidden">
+    <section aria-label="Marketplace updates" className="border-y border-border/60 bg-card/40 backdrop-blur overflow-hidden">
       <div className="mx-auto max-w-7xl px-5 py-3 flex items-center gap-4">
         <div className="flex items-center gap-2 shrink-0 pr-4 border-r border-border/60">
-          <span className="relative flex size-2.5">
-            <span className="absolute inline-flex h-full w-full rounded-full bg-primary opacity-75 animate-ping" />
-            <span className="relative inline-flex rounded-full size-2.5 bg-primary" />
-          </span>
-          <span className="text-[11px] font-mono uppercase tracking-widest text-primary">Live</span>
+          <Sparkles className="size-3.5 text-primary" />
+          <span className="text-[11px] font-mono uppercase tracking-widest text-primary">Updates</span>
         </div>
         <div className="flex-1 overflow-hidden relative">
           <div className="flex gap-10 animate-ticker whitespace-nowrap will-change-transform">
@@ -284,7 +257,6 @@ function LiveActivityTicker() {
               <div key={i} className="flex items-center gap-2 text-xs md:text-sm text-muted-foreground">
                 <it.icon className="size-3.5 text-primary shrink-0" />
                 <span className="text-foreground/90">{it.text}</span>
-                <span className="text-muted-foreground/70">· {it.time}</span>
               </div>
             ))}
           </div>
@@ -294,55 +266,25 @@ function LiveActivityTicker() {
   );
 }
 
-function LivePlatformStats() {
-  // Lightweight "live" pulse values that drift slightly to feel alive
-  const [online, setOnline] = useState(47);
-  const [tasksToday, setTasksToday] = useState(31);
-  const [citiesActive] = useState(12);
-  const [approvedRunners, setApprovedRunners] = useState(183);
-
-  useEffect(() => {
-    const t = setInterval(() => {
-      setOnline((v) => Math.max(38, Math.min(72, v + (Math.random() > 0.5 ? 1 : -1))));
-      if (Math.random() > 0.75) setTasksToday((v) => v + 1);
-      if (Math.random() > 0.92) setApprovedRunners((v) => v + 1);
-    }, 3500);
-    return () => clearInterval(t);
-  }, []);
-
-  const items = [
-    { icon: Activity, label: "Runners online now", value: online, live: true },
-    { icon: CheckCircle2, label: "Tasks completed today", value: tasksToday, live: true },
-    { icon: MapPin, label: "Cities currently active", value: citiesActive, live: false },
-    { icon: Users, label: "Founding Runners approved", value: approvedRunners, live: false },
-  ];
-
+function BetaStatusBoard() {
   return (
     <section className="mx-auto max-w-7xl px-5 pt-10 md:pt-14">
       <div className="rounded-2xl border border-border bg-card/60 backdrop-blur p-5 md:p-7 shadow-card">
         <div className="flex items-center justify-between mb-5">
           <div className="flex items-center gap-2">
-            <Zap className="size-4 text-primary" />
-            <span className="text-xs font-mono uppercase tracking-widest text-primary">Live Platform</span>
+            <Sparkles className="size-4 text-primary" />
+            <span className="text-xs font-mono uppercase tracking-widest text-primary">Beta Status</span>
           </div>
-          <span className="text-[11px] text-muted-foreground hidden sm:inline">Updated in real time</span>
+          <span className="text-[11px] text-muted-foreground hidden sm:inline">Early-access marketplace</span>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-          {items.map((it) => (
+          {BETA_STATUS.map((it) => (
             <div key={it.label} className="flex items-start gap-3">
               <div className="size-10 rounded-xl bg-primary/10 grid place-items-center shrink-0">
                 <it.icon className="size-5 text-primary" />
               </div>
               <div className="min-w-0">
-                <div className="flex items-center gap-2">
-                  <div className="text-2xl md:text-3xl font-bold tabular-nums">{it.value.toLocaleString()}</div>
-                  {it.live && (
-                    <span className="relative flex size-2 mt-1">
-                      <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75 animate-ping" />
-                      <span className="relative inline-flex rounded-full size-2 bg-emerald-400" />
-                    </span>
-                  )}
-                </div>
+                <div className="text-lg md:text-xl font-semibold leading-tight">{it.value}</div>
                 <div className="text-xs text-muted-foreground mt-1 leading-tight">{it.label}</div>
               </div>
             </div>
@@ -499,7 +441,7 @@ function Index() {
             <span className="text-gradient">for Real Estate Investors</span>
           </h1>
           <p className="mt-6 max-w-2xl mx-auto text-base md:text-lg text-muted-foreground animate-fade-up" style={{ animationDelay: "0.2s" }}>
-            REI Runner is the on-demand marketplace where investors hire local runners for property photos, walkthrough videos, drive-bys, occupancy checks, and other field tasks — completed in hours, not days.
+            REI Runner is the on-demand marketplace where investors hire local runners for property photos, walkthrough videos, drive-bys, occupancy checks, and other field tasks. Turnaround varies by market and runner availability.
           </p>
           <div className="mt-9 flex flex-col sm:flex-row gap-3 justify-center animate-fade-up" style={{ animationDelay: "0.3s" }}>
             <Button size="lg" onClick={goApply} className="bg-gradient-primary shadow-glow text-base h-14 px-8">
@@ -516,10 +458,10 @@ function Index() {
       </section>
 
       {/* LIVE ACTIVITY TICKER */}
-      <LiveActivityTicker />
+      <MarketplaceUpdatesTicker />
 
-      {/* LIVE PLATFORM INDICATORS */}
-      <LivePlatformStats />
+      {/* BETA STATUS BOARD */}
+      <BetaStatusBoard />
 
       {/* TRUST BADGES STRIP */}
       <section aria-label="Platform trust signals" className="mx-auto max-w-7xl px-5 pt-8 md:pt-10">
@@ -540,14 +482,24 @@ function Index() {
         </div>
       </section>
 
-      {/* STATS */}
-      <section className="border-y border-border/60 bg-card/30 backdrop-blur">
-        <div className="mx-auto max-w-6xl px-5 py-12 grid grid-cols-2 md:grid-cols-4 gap-8">
-          {STATS.map((s) => (
-            <StatCounter key={s.label} value={s.value} suffix={s.suffix} label={s.label} />
+      {/* SERVICE QUALITY STANDARDS */}
+      <Section id="standards">
+        <SectionHeader
+          eyebrow="Every Task Includes"
+          title="Operational Standards on Every Job"
+          subtitle="REI Runner tasks follow a consistent structure so investors know exactly what they are getting."
+        />
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+          {TASK_STANDARDS.map((s) => (
+            <div key={s.title} className="rounded-2xl border border-border bg-card/60 backdrop-blur p-5 text-center">
+              <div className="size-10 rounded-xl bg-primary/10 grid place-items-center mx-auto mb-3">
+                <s.icon className="size-5 text-primary" />
+              </div>
+              <div className="text-sm font-medium">{s.title}</div>
+            </div>
           ))}
         </div>
-      </section>
+      </Section>
 
       {/* EXAMPLE FIELD TASKS */}
       <Section id="example-tasks">
@@ -603,8 +555,8 @@ function Index() {
       <Section id="payments">
         <SectionHeader
           eyebrow="How Payments Work"
-          title="Escrow-Protected. Pay on Delivery."
-          subtitle="Investors fund tasks up front. Runners get paid the moment deliverables are approved. No invoices, no waiting, no chargebacks."
+          title="Simple, Per-Task Payments"
+          subtitle="Investors fund tasks up front through our payments partner. Runners are paid once their work is approved."
         />
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
           {PAYMENT_FLOW.map((p, i) => (
@@ -623,7 +575,7 @@ function Index() {
         </div>
         <div className="mt-8 max-w-3xl mx-auto rounded-xl border border-border bg-muted/30 p-5 text-xs md:text-sm text-muted-foreground leading-relaxed text-center">
           <Lock className="inline size-4 text-primary mr-1.5 -mt-0.5" />
-          Payments are processed through a regulated US payments partner. Investor funds are held in escrow and never touched by REI Runner staff.
+          Payments are processed through a regulated US payments partner. Secure payment processing is being rolled out as the platform expands.
         </div>
       </Section>
 
@@ -728,7 +680,7 @@ function Index() {
 
       {/* MARKETS */}
       <Section id="markets">
-        <SectionHeader eyebrow="Nationwide Launch" title="Launching in Major Markets" subtitle="Starting in 8 high-volume investor markets and expanding fast. Don't see your city? Apply anyway — we open new markets weekly." />
+        <SectionHeader eyebrow="Expanding Coverage" title="Launching Market-by-Market" subtitle="Starting in 8 priority investor markets and building local coverage city-by-city. Don't see your city? Apply anyway — new markets open as runner coverage grows." />
         <div className="flex flex-wrap justify-center gap-3 max-w-3xl mx-auto">
           {MARKETS.map((m) => (
             <div key={m} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-border bg-card/60 backdrop-blur text-sm hover:border-primary/60 hover:shadow-glow transition">
@@ -737,6 +689,9 @@ function Index() {
             </div>
           ))}
         </div>
+        <p className="mt-6 text-center text-xs text-muted-foreground max-w-2xl mx-auto">
+          Coverage depends on approved runner availability in each market.
+        </p>
       </Section>
 
       {/* VIDEO */}
@@ -762,15 +717,15 @@ function Index() {
             <div className="text-xs font-semibold tracking-widest text-primary uppercase flex items-center gap-2">
               <Sparkles className="size-3.5" /> About REI Runner
             </div>
-            <h2 className="mt-3 text-3xl md:text-5xl font-bold">The On-Demand Field Services Marketplace for Real Estate</h2>
+            <h2 className="mt-3 text-3xl md:text-5xl font-bold">On-Demand Field Services For Real Estate Investors</h2>
             <p className="mt-5 text-muted-foreground text-base md:text-lg">
               Investing in property you can't physically visit is hard. REI Runner gives investors a vetted network of local runners they can hire on demand — for photos, videos, walkthroughs, drive-bys, and other on-site tasks — without flying out, hiring an agent, or chasing down contractors.
             </p>
             <p className="mt-3 text-muted-foreground text-base md:text-lg">
-              For runners, it's a way to earn per-task income with no license, no quotas, and no middlemen. Think Uber meets Fiverr — built specifically for real estate field work.
+              For runners, it's a way to earn per-task income with no license, no quotas, and no middlemen. We are positioning REI Runner as a nationwide real estate field operations marketplace — built specifically for the on-site work investors need done.
             </p>
             <div className="mt-6 flex flex-wrap gap-2">
-              {["On-Demand Marketplace", "Per-Task Pay", "Nationwide Launch", "Early Access Beta"].map((t) => (
+              {["On-Demand Marketplace", "Per-Task Pay", "Expanding Coverage", "Early Access Beta"].map((t) => (
                 <span key={t} className="text-xs px-3 py-1 rounded-full border border-border bg-background/40">{t}</span>
               ))}
             </div>
@@ -783,32 +738,80 @@ function Index() {
         <div className="grid lg:grid-cols-5 gap-8 items-start">
           <div className="lg:col-span-2">
             <div className="text-xs font-mono text-primary uppercase tracking-widest mb-3 flex items-center gap-2">
-              <HeartHandshake className="size-3.5" /> Our Mission
+              <HeartHandshake className="size-3.5" /> Meet the Founder
             </div>
             <h2 className="text-3xl md:text-4xl font-bold leading-tight">
-              Building the nationwide field operations layer for real estate.
+              Built by an operator who lived the problem.
             </h2>
             <p className="mt-5 text-muted-foreground">
-              Real estate runs on people who show up to properties. Today that's a fragmented mess of agents, wholesalers, contractors, and favors. REI Runner replaces it with a single, vetted, on-demand network — so investors can operate in any market without flying out, and locals can earn real income without a license or a long-term commitment.
+              REI Runner was started by Brian Louwers, a real estate operator who got tired of cold-calling friends-of-friends every time he needed a property checked in another city. The vision is simple: a single, vetted, on-demand network for real estate field work — so investors can operate confidently in any market, and locals can earn real income without a license or a long-term commitment.
+            </p>
+            <p className="mt-3 text-xs text-muted-foreground">
+              REI Runner is in active beta. We are building this market-by-market, with the people we serve.
             </p>
           </div>
           <div className="lg:col-span-3">
             <div className="relative rounded-3xl border border-border bg-card/60 backdrop-blur p-7 md:p-9 shadow-card">
               <Quote className="absolute -top-3 -left-3 size-8 text-primary bg-background rounded-full p-1.5 border border-border" />
               <p className="text-base md:text-lg leading-relaxed text-foreground/90">
-                "We built REI Runner because we lived the problem. Buying a property in another city used to mean calling a friend of a friend to drive by. That doesn't scale — and it shouldn't be how a trillion-dollar industry operates. Our job is to make local field work as reliable as ordering a ride."
+                "I built REI Runner because I lived the problem. Buying a property in another city used to mean calling a friend of a friend to drive by. That doesn't scale — and it shouldn't be how a trillion-dollar industry operates. My job is to make local field work reliable, transparent, and fair to everyone involved."
               </p>
               <div className="mt-6 flex items-center gap-4">
-                <div className="size-12 rounded-full bg-gradient-primary grid place-items-center shadow-glow">
-                  <span className="text-primary-foreground font-bold">RR</span>
+                <div className="size-14 rounded-full bg-gradient-primary grid place-items-center shadow-glow">
+                  <span className="text-primary-foreground font-bold">BL</span>
                 </div>
                 <div>
-                  <div className="font-semibold">The REI Runner Team</div>
-                  <div className="text-xs text-muted-foreground">Real estate operators &amp; technology builders · United States</div>
+                  <div className="font-semibold">Brian Louwers</div>
+                  <div className="text-xs text-muted-foreground">Founder · REI Runner · United States</div>
                 </div>
               </div>
             </div>
           </div>
+        </div>
+      </Section>
+
+      {/* RUNNER RESTRICTIONS / SAFETY RULES */}
+      <Section id="safety">
+        <SectionHeader
+          eyebrow="Safety &amp; Scope"
+          title="What Runners May Not Do"
+          subtitle="Runners are independent contractors performing non-licensed field tasks. The following activities are out of scope."
+        />
+        <div className="max-w-3xl mx-auto rounded-2xl border border-border bg-card/60 backdrop-blur p-6 md:p-8">
+          <ul className="space-y-3">
+            {RUNNER_RESTRICTIONS.map((r) => (
+              <li key={r} className="flex items-start gap-3 text-sm md:text-base text-foreground/90">
+                <span className="mt-1 size-4 rounded-full border border-destructive/60 text-destructive grid place-items-center text-[10px] shrink-0">✕</span>
+                <span>{r}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </Section>
+
+      {/* CONTACT / SUPPORT */}
+      <Section id="contact">
+        <SectionHeader
+          eyebrow="Support &amp; Contact"
+          title="Talk To a Real Person"
+          subtitle="We are a small, hands-on team. Reach out — we read everything."
+        />
+        <div className="grid md:grid-cols-3 gap-4 max-w-4xl mx-auto">
+          <a href="mailto:support@reirunner.com" className="rounded-2xl border border-border bg-card/60 backdrop-blur p-6 hover:border-primary/50 transition block">
+            <Mail className="size-5 text-primary mb-3" />
+            <div className="text-sm font-semibold">Support email</div>
+            <div className="text-xs text-muted-foreground mt-1">support@reirunner.com</div>
+          </a>
+          <Link to="/faq" className="rounded-2xl border border-border bg-card/60 backdrop-blur p-6 hover:border-primary/50 transition block">
+            <HelpCircle className="size-5 text-primary mb-3" />
+            <div className="text-sm font-semibold">Help center &amp; FAQ</div>
+            <div className="text-xs text-muted-foreground mt-1">Answers to the most common questions.</div>
+          </Link>
+          <a href="mailto:support@reirunner.com?subject=Report%20a%20problem" className="rounded-2xl border border-border bg-card/60 backdrop-blur p-6 hover:border-primary/50 transition block">
+            <ShieldCheck className="size-5 text-primary mb-3" />
+            <div className="text-sm font-semibold">Report a problem</div>
+            <div className="text-xs text-muted-foreground mt-1">Safety, conduct, or platform issues.</div>
+          </a>
         </div>
       </Section>
 
@@ -891,7 +894,7 @@ function Index() {
                 <Clock className="size-4 text-primary" /> Support hours: Mon–Fri, 8am–6pm CT
               </div>
               <div className="flex items-center gap-2">
-                <Building2 className="size-4 text-primary" /> US-registered platform · Operating nationwide
+                <Building2 className="size-4 text-primary" /> US-registered platform · Expanding market-by-market
               </div>
             </div>
           </div>
@@ -921,7 +924,7 @@ function Index() {
         </div>
         <div className="border-t border-border/60">
           <div className="mx-auto max-w-7xl px-5 py-5 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-muted-foreground">
-            <div>© {new Date().getFullYear()} REI Runner, Inc. · A nationwide real estate field operations marketplace.</div>
+            <div>© {new Date().getFullYear()} REI Runner, Inc. · Real estate field operations marketplace (beta).</div>
             <div>Built in the USA 🇺🇸</div>
           </div>
         </div>
