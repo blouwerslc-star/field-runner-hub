@@ -84,7 +84,7 @@ export const getCourseDetail = createServerFn({ method: "POST" })
     if (!course) throw new Error("Course not found");
     const courseId = (course as any).id;
 
-    const [{ data: lessons }, { data: progress }, { data: quiz }, { data: cert }, { data: results }] =
+    const [{ data: lessons }, { data: progress }, { data: quiz }, { data: cert }, { data: results }, { data: products }] =
       await Promise.all([
         supabaseAdmin
           .from("academy_lessons")
@@ -113,6 +113,13 @@ export const getCourseDetail = createServerFn({ method: "POST" })
           .eq("user_id", userId)
           .eq("course_id", courseId)
           .order("completed_at", { ascending: false }),
+        supabaseAdmin
+          .from("academy_products" as any)
+          .select("id, title, description, vendor, image_url, affiliate_url, price_display, audience, sort_order, lesson_id")
+          .eq("course_id", courseId)
+          .is("lesson_id", null)
+          .eq("active", true)
+          .order("sort_order", { ascending: true }),
       ]);
 
     const completedSet = new Set((progress ?? []).filter((p: any) => p.completed).map((p: any) => p.lesson_id));
@@ -143,6 +150,7 @@ export const getCourseDetail = createServerFn({ method: "POST" })
       attempts,
       passed,
       all_lessons_done: allLessonsDone,
+      products: (products ?? []) as any[],
     };
   });
 
@@ -198,6 +206,15 @@ export const getLessonDetail = createServerFn({ method: "POST" })
       next: next ? { slug: next.slug, title: next.title } : null,
       completed: completedSet.has(lesson.id),
       completed_lessons: completedSet.size,
+      products: await (async () => {
+        const { data: products } = await supabaseAdmin
+          .from("academy_products" as any)
+          .select("id, title, description, vendor, image_url, affiliate_url, price_display, audience, sort_order")
+          .eq("lesson_id", lesson.id)
+          .eq("active", true)
+          .order("sort_order", { ascending: true });
+        return (products ?? []) as any[];
+      })(),
     };
   });
 
