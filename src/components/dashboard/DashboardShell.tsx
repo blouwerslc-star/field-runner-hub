@@ -41,8 +41,16 @@ export function DashboardShell({
   const unreadFn = useServerFn(getUnreadCount);
   const { data: unread } = useQuery({
     queryKey: ["messages-unread"],
-    queryFn: () => unreadFn(),
+    queryFn: async () => {
+      try {
+        return await unreadFn();
+      } catch {
+        return { total: 0 };
+      }
+    },
     refetchInterval: 60_000,
+    retry: false,
+    enabled: typeof window !== "undefined",
   });
   const unreadTotal = unread?.total ?? 0;
 
