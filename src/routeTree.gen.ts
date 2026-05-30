@@ -42,6 +42,7 @@ import { Route as AuthenticatedApplicationsRouteImport } from './routes/_authent
 import { Route as AuthenticatedAdminDashboardRouteImport } from './routes/_authenticated/admin-dashboard'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedActivityRouteImport } from './routes/_authenticated/activity'
+import { Route as AuthenticatedAcademyRouteImport } from './routes/_authenticated/academy'
 import { Route as AuthenticatedSettingsIndexRouteImport } from './routes/_authenticated/settings.index'
 import { Route as AuthenticatedMessagesIndexRouteImport } from './routes/_authenticated/messages.index'
 import { Route as AuthenticatedDashboardIndexRouteImport } from './routes/_authenticated/dashboard.index'
@@ -72,6 +73,7 @@ import { Route as AuthenticatedAdminMarketplaceHealthRouteImport } from './route
 import { Route as AuthenticatedAdminDispatchRouteImport } from './routes/_authenticated/admin.dispatch'
 import { Route as AuthenticatedAdminBackgroundChecksRouteImport } from './routes/_authenticated/admin.background-checks'
 import { Route as AuthenticatedAdminAnalyticsRouteImport } from './routes/_authenticated/admin.analytics'
+import { Route as AuthenticatedAcademyModuleIdRouteImport } from './routes/_authenticated/academy.$moduleId'
 import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
@@ -246,6 +248,11 @@ const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
 const AuthenticatedActivityRoute = AuthenticatedActivityRouteImport.update({
   id: '/activity',
   path: '/activity',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedAcademyRoute = AuthenticatedAcademyRouteImport.update({
+  id: '/academy',
+  path: '/academy',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
 const AuthenticatedSettingsIndexRoute =
@@ -426,6 +433,12 @@ const AuthenticatedAdminAnalyticsRoute =
     path: '/analytics',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAcademyModuleIdRoute =
+  AuthenticatedAcademyModuleIdRouteImport.update({
+    id: '/$moduleId',
+    path: '/$moduleId',
+    getParentRoute: () => AuthenticatedAcademyRoute,
+  } as any)
 const LovableEmailTransactionalSendRoute =
   LovableEmailTransactionalSendRouteImport.update({
     id: '/lovable/email/transactional/send',
@@ -476,6 +489,7 @@ export interface FileRoutesByFullPath {
   '/tasks': typeof TasksRouteWithChildren
   '/terms': typeof TermsRoute
   '/waitlist': typeof WaitlistRoute
+  '/academy': typeof AuthenticatedAcademyRouteWithChildren
   '/activity': typeof AuthenticatedActivityRoute
   '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/admin-dashboard': typeof AuthenticatedAdminDashboardRoute
@@ -494,6 +508,7 @@ export interface FileRoutesByFullPath {
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/profile/$slug': typeof ProfileSlugRoute
   '/tasks/$taskId': typeof TasksTaskIdRoute
+  '/academy/$moduleId': typeof AuthenticatedAcademyModuleIdRoute
   '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
   '/admin/background-checks': typeof AuthenticatedAdminBackgroundChecksRoute
   '/admin/dispatch': typeof AuthenticatedAdminDispatchRoute
@@ -546,6 +561,7 @@ export interface FileRoutesByTo {
   '/tasks': typeof TasksRouteWithChildren
   '/terms': typeof TermsRoute
   '/waitlist': typeof WaitlistRoute
+  '/academy': typeof AuthenticatedAcademyRouteWithChildren
   '/activity': typeof AuthenticatedActivityRoute
   '/admin-dashboard': typeof AuthenticatedAdminDashboardRoute
   '/applications': typeof AuthenticatedApplicationsRoute
@@ -561,6 +577,7 @@ export interface FileRoutesByTo {
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/profile/$slug': typeof ProfileSlugRoute
   '/tasks/$taskId': typeof TasksTaskIdRoute
+  '/academy/$moduleId': typeof AuthenticatedAcademyModuleIdRoute
   '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
   '/admin/background-checks': typeof AuthenticatedAdminBackgroundChecksRoute
   '/admin/dispatch': typeof AuthenticatedAdminDispatchRoute
@@ -615,6 +632,7 @@ export interface FileRoutesById {
   '/tasks': typeof TasksRouteWithChildren
   '/terms': typeof TermsRoute
   '/waitlist': typeof WaitlistRoute
+  '/_authenticated/academy': typeof AuthenticatedAcademyRouteWithChildren
   '/_authenticated/activity': typeof AuthenticatedActivityRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
   '/_authenticated/admin-dashboard': typeof AuthenticatedAdminDashboardRoute
@@ -633,6 +651,7 @@ export interface FileRoutesById {
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/profile/$slug': typeof ProfileSlugRoute
   '/tasks/$taskId': typeof TasksTaskIdRoute
+  '/_authenticated/academy/$moduleId': typeof AuthenticatedAcademyModuleIdRoute
   '/_authenticated/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
   '/_authenticated/admin/background-checks': typeof AuthenticatedAdminBackgroundChecksRoute
   '/_authenticated/admin/dispatch': typeof AuthenticatedAdminDispatchRoute
@@ -687,6 +706,7 @@ export interface FileRouteTypes {
     | '/tasks'
     | '/terms'
     | '/waitlist'
+    | '/academy'
     | '/activity'
     | '/admin'
     | '/admin-dashboard'
@@ -705,6 +725,7 @@ export interface FileRouteTypes {
     | '/email/unsubscribe'
     | '/profile/$slug'
     | '/tasks/$taskId'
+    | '/academy/$moduleId'
     | '/admin/analytics'
     | '/admin/background-checks'
     | '/admin/dispatch'
@@ -757,6 +778,7 @@ export interface FileRouteTypes {
     | '/tasks'
     | '/terms'
     | '/waitlist'
+    | '/academy'
     | '/activity'
     | '/admin-dashboard'
     | '/applications'
@@ -772,6 +794,7 @@ export interface FileRouteTypes {
     | '/email/unsubscribe'
     | '/profile/$slug'
     | '/tasks/$taskId'
+    | '/academy/$moduleId'
     | '/admin/analytics'
     | '/admin/background-checks'
     | '/admin/dispatch'
@@ -825,6 +848,7 @@ export interface FileRouteTypes {
     | '/tasks'
     | '/terms'
     | '/waitlist'
+    | '/_authenticated/academy'
     | '/_authenticated/activity'
     | '/_authenticated/admin'
     | '/_authenticated/admin-dashboard'
@@ -843,6 +867,7 @@ export interface FileRouteTypes {
     | '/email/unsubscribe'
     | '/profile/$slug'
     | '/tasks/$taskId'
+    | '/_authenticated/academy/$moduleId'
     | '/_authenticated/admin/analytics'
     | '/_authenticated/admin/background-checks'
     | '/_authenticated/admin/dispatch'
@@ -1142,6 +1167,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedActivityRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/academy': {
+      id: '/_authenticated/academy'
+      path: '/academy'
+      fullPath: '/academy'
+      preLoaderRoute: typeof AuthenticatedAcademyRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/settings/': {
       id: '/_authenticated/settings/'
       path: '/'
@@ -1352,6 +1384,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminAnalyticsRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/academy/$moduleId': {
+      id: '/_authenticated/academy/$moduleId'
+      path: '/$moduleId'
+      fullPath: '/academy/$moduleId'
+      preLoaderRoute: typeof AuthenticatedAcademyModuleIdRouteImport
+      parentRoute: typeof AuthenticatedAcademyRoute
+    }
     '/lovable/email/transactional/send': {
       id: '/lovable/email/transactional/send'
       path: '/lovable/email/transactional/send'
@@ -1396,6 +1435,17 @@ declare module '@tanstack/react-router' {
     }
   }
 }
+
+interface AuthenticatedAcademyRouteChildren {
+  AuthenticatedAcademyModuleIdRoute: typeof AuthenticatedAcademyModuleIdRoute
+}
+
+const AuthenticatedAcademyRouteChildren: AuthenticatedAcademyRouteChildren = {
+  AuthenticatedAcademyModuleIdRoute: AuthenticatedAcademyModuleIdRoute,
+}
+
+const AuthenticatedAcademyRouteWithChildren =
+  AuthenticatedAcademyRoute._addFileChildren(AuthenticatedAcademyRouteChildren)
 
 interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminAnalyticsRoute: typeof AuthenticatedAdminAnalyticsRoute
@@ -1478,6 +1528,7 @@ const AuthenticatedSettingsRouteWithChildren =
   )
 
 interface AuthenticatedRouteChildren {
+  AuthenticatedAcademyRoute: typeof AuthenticatedAcademyRouteWithChildren
   AuthenticatedActivityRoute: typeof AuthenticatedActivityRoute
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRouteWithChildren
   AuthenticatedAdminDashboardRoute: typeof AuthenticatedAdminDashboardRoute
@@ -1502,6 +1553,7 @@ interface AuthenticatedRouteChildren {
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
+  AuthenticatedAcademyRoute: AuthenticatedAcademyRouteWithChildren,
   AuthenticatedActivityRoute: AuthenticatedActivityRoute,
   AuthenticatedAdminRoute: AuthenticatedAdminRouteWithChildren,
   AuthenticatedAdminDashboardRoute: AuthenticatedAdminDashboardRoute,
