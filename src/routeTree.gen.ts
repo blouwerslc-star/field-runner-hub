@@ -76,6 +76,7 @@ import { Route as AuthenticatedAdminRunnerApprovalsRouteImport } from './routes/
 import { Route as AuthenticatedAdminProfilesRouteImport } from './routes/_authenticated/admin.profiles'
 import { Route as AuthenticatedAdminModerationRouteImport } from './routes/_authenticated/admin.moderation'
 import { Route as AuthenticatedAdminMarketplaceHealthRouteImport } from './routes/_authenticated/admin.marketplace-health'
+import { Route as AuthenticatedAdminEmailMonitorRouteImport } from './routes/_authenticated/admin.email-monitor'
 import { Route as AuthenticatedAdminDispatchRouteImport } from './routes/_authenticated/admin.dispatch'
 import { Route as AuthenticatedAdminBroadcastsRouteImport } from './routes/_authenticated/admin.broadcasts'
 import { Route as AuthenticatedAdminBackgroundChecksRouteImport } from './routes/_authenticated/admin.background-checks'
@@ -458,6 +459,12 @@ const AuthenticatedAdminMarketplaceHealthRoute =
     path: '/marketplace-health',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminEmailMonitorRoute =
+  AuthenticatedAdminEmailMonitorRouteImport.update({
+    id: '/email-monitor',
+    path: '/email-monitor',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminDispatchRoute =
   AuthenticatedAdminDispatchRouteImport.update({
     id: '/dispatch',
@@ -590,6 +597,7 @@ export interface FileRoutesByFullPath {
   '/admin/background-checks': typeof AuthenticatedAdminBackgroundChecksRoute
   '/admin/broadcasts': typeof AuthenticatedAdminBroadcastsRoute
   '/admin/dispatch': typeof AuthenticatedAdminDispatchRoute
+  '/admin/email-monitor': typeof AuthenticatedAdminEmailMonitorRoute
   '/admin/marketplace-health': typeof AuthenticatedAdminMarketplaceHealthRoute
   '/admin/moderation': typeof AuthenticatedAdminModerationRoute
   '/admin/profiles': typeof AuthenticatedAdminProfilesRoute
@@ -668,6 +676,7 @@ export interface FileRoutesByTo {
   '/admin/background-checks': typeof AuthenticatedAdminBackgroundChecksRoute
   '/admin/broadcasts': typeof AuthenticatedAdminBroadcastsRoute
   '/admin/dispatch': typeof AuthenticatedAdminDispatchRoute
+  '/admin/email-monitor': typeof AuthenticatedAdminEmailMonitorRoute
   '/admin/marketplace-health': typeof AuthenticatedAdminMarketplaceHealthRoute
   '/admin/moderation': typeof AuthenticatedAdminModerationRoute
   '/admin/profiles': typeof AuthenticatedAdminProfilesRoute
@@ -753,6 +762,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/background-checks': typeof AuthenticatedAdminBackgroundChecksRoute
   '/_authenticated/admin/broadcasts': typeof AuthenticatedAdminBroadcastsRoute
   '/_authenticated/admin/dispatch': typeof AuthenticatedAdminDispatchRoute
+  '/_authenticated/admin/email-monitor': typeof AuthenticatedAdminEmailMonitorRoute
   '/_authenticated/admin/marketplace-health': typeof AuthenticatedAdminMarketplaceHealthRoute
   '/_authenticated/admin/moderation': typeof AuthenticatedAdminModerationRoute
   '/_authenticated/admin/profiles': typeof AuthenticatedAdminProfilesRoute
@@ -838,6 +848,7 @@ export interface FileRouteTypes {
     | '/admin/background-checks'
     | '/admin/broadcasts'
     | '/admin/dispatch'
+    | '/admin/email-monitor'
     | '/admin/marketplace-health'
     | '/admin/moderation'
     | '/admin/profiles'
@@ -916,6 +927,7 @@ export interface FileRouteTypes {
     | '/admin/background-checks'
     | '/admin/broadcasts'
     | '/admin/dispatch'
+    | '/admin/email-monitor'
     | '/admin/marketplace-health'
     | '/admin/moderation'
     | '/admin/profiles'
@@ -1000,6 +1012,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/background-checks'
     | '/_authenticated/admin/broadcasts'
     | '/_authenticated/admin/dispatch'
+    | '/_authenticated/admin/email-monitor'
     | '/_authenticated/admin/marketplace-health'
     | '/_authenticated/admin/moderation'
     | '/_authenticated/admin/profiles'
@@ -1544,6 +1557,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminMarketplaceHealthRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/email-monitor': {
+      id: '/_authenticated/admin/email-monitor'
+      path: '/email-monitor'
+      fullPath: '/admin/email-monitor'
+      preLoaderRoute: typeof AuthenticatedAdminEmailMonitorRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/dispatch': {
       id: '/_authenticated/admin/dispatch'
       path: '/dispatch'
@@ -1695,6 +1715,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminBackgroundChecksRoute: typeof AuthenticatedAdminBackgroundChecksRoute
   AuthenticatedAdminBroadcastsRoute: typeof AuthenticatedAdminBroadcastsRoute
   AuthenticatedAdminDispatchRoute: typeof AuthenticatedAdminDispatchRoute
+  AuthenticatedAdminEmailMonitorRoute: typeof AuthenticatedAdminEmailMonitorRoute
   AuthenticatedAdminMarketplaceHealthRoute: typeof AuthenticatedAdminMarketplaceHealthRoute
   AuthenticatedAdminModerationRoute: typeof AuthenticatedAdminModerationRoute
   AuthenticatedAdminProfilesRoute: typeof AuthenticatedAdminProfilesRoute
@@ -1709,6 +1730,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
     AuthenticatedAdminBackgroundChecksRoute,
   AuthenticatedAdminBroadcastsRoute: AuthenticatedAdminBroadcastsRoute,
   AuthenticatedAdminDispatchRoute: AuthenticatedAdminDispatchRoute,
+  AuthenticatedAdminEmailMonitorRoute: AuthenticatedAdminEmailMonitorRoute,
   AuthenticatedAdminMarketplaceHealthRoute:
     AuthenticatedAdminMarketplaceHealthRoute,
   AuthenticatedAdminModerationRoute: AuthenticatedAdminModerationRoute,
