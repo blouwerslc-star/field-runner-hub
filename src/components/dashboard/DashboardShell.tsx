@@ -10,6 +10,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { getUnreadCount } from "@/lib/messages.functions";
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { useState } from "react";
+import { MobileBottomNav } from "@/components/dashboard/MobileBottomNav";
 
 const NAV_ITEMS = [
   { to: "/profiles", label: "Browse", icon: Compass },
@@ -88,9 +89,9 @@ export function DashboardShell({
           </div>
           {/* Mobile + tablet nav (<xl) */}
           <div className="flex xl:hidden items-center gap-1">
-            <Button asChild variant="ghost" size="sm" className="relative">
+            <Button asChild variant="ghost" size="icon" className="relative min-h-11 min-w-11">
               <Link to="/messages" aria-label="Messages">
-                <MessageSquare className="size-4" />
+                <MessageSquare className="size-5" />
                 {unreadTotal > 0 && (
                   <span className="absolute -top-0.5 -right-0.5 size-4 rounded-full bg-primary text-[9px] font-bold text-primary-foreground grid place-items-center">
                     {unreadTotal > 9 ? "9+" : unreadTotal}
@@ -101,7 +102,7 @@ export function DashboardShell({
             <NotificationBell />
             <Sheet open={open} onOpenChange={setOpen}>
               <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" aria-label="Open menu">
+                <Button variant="ghost" size="icon" aria-label="Open menu" className="min-h-11 min-w-11">
                   <Menu className="size-5" />
                 </Button>
               </SheetTrigger>
@@ -137,13 +138,14 @@ export function DashboardShell({
           </div>
         </div>
       </header>
-      <main className="mx-auto max-w-5xl px-5 py-10 md:py-14">
+      <main className="mx-auto max-w-5xl px-5 pt-8 pb-28 md:py-14">
         <div className="mb-8">
           <h1 className="text-3xl md:text-4xl font-bold tracking-tight">{title}</h1>
           {subtitle && <p className="mt-2 text-muted-foreground">{subtitle}</p>}
         </div>
         {children}
       </main>
+      <MobileBottomNav onOpenMenu={() => setOpen(true)} unreadTotal={unreadTotal} />
     </div>
   );
 }
