@@ -50,6 +50,9 @@ import {
 import { useNavigate } from "@tanstack/react-router";
 import { BrandLogo } from "@/components/brand/BrandLogo";
 import heroBg from "@/assets/hero-bg.jpg";
+import { useServerFn } from "@tanstack/react-start";
+import { useQuery } from "@tanstack/react-query";
+import { listActivity } from "@/lib/activity.functions";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -242,14 +245,26 @@ function scrollToId(id: string) {
 }
 
 function MarketplaceUpdatesTicker() {
-  // Duplicate the list so the marquee loops seamlessly
-  const items = [...MARKETPLACE_UPDATES, ...MARKETPLACE_UPDATES];
+  // Pull real platform events; fall back to honest static platform updates. Never invent activity.
+  const fetchActivity = useServerFn(listActivity);
+  const { data } = useQuery({
+    queryKey: ["home-activity-ticker"],
+    queryFn: () => fetchActivity({ data: { limit: 12 } }),
+    staleTime: 60_000,
+    retry: false,
+  });
+  const liveItems = (data?.events ?? [])
+    .filter((e: any) => e?.title)
+    .map((e: any) => ({ icon: Sparkles, text: e.title as string }));
+  const source = liveItems.length >= 3 ? liveItems : MARKETPLACE_UPDATES;
+  const items = [...source, ...source];
+  const isLive = liveItems.length >= 3;
   return (
     <section aria-label="Marketplace updates" className="border-y border-border/60 bg-card/40 backdrop-blur overflow-hidden">
       <div className="mx-auto max-w-7xl px-5 py-3 flex items-center gap-4">
         <div className="flex items-center gap-2 shrink-0 pr-4 border-r border-border/60">
           <Sparkles className="size-3.5 text-primary" />
-          <span className="text-[11px] font-mono uppercase tracking-widest text-primary">Updates</span>
+          <span className="text-[11px] font-mono uppercase tracking-widest text-primary">{isLive ? "Live" : "Updates"}</span>
         </div>
         <div className="flex-1 overflow-hidden relative">
           <div className="flex gap-10 animate-ticker whitespace-nowrap will-change-transform">
@@ -339,10 +354,11 @@ function Index() {
           </a>
           <nav className="hidden md:flex items-center gap-7 text-sm text-muted-foreground">
             <button onClick={() => scrollToId("how")} className="hover:text-foreground transition">How it works</button>
+            <Link to="/pricing" className="hover:text-foreground transition">Pricing</Link>
+            <Link to="/trust" className="hover:text-foreground transition">Trust & Safety</Link>
+            <Link to="/story" className="hover:text-foreground transition">Our Story</Link>
             <button onClick={() => scrollToId("services")} className="hover:text-foreground transition">Services</button>
-            <button onClick={() => scrollToId("why")} className="hover:text-foreground transition">Why join</button>
-            <button onClick={() => scrollToId("markets")} className="hover:text-foreground transition">Markets</button>
-            <button onClick={() => scrollToId("faq")} className="hover:text-foreground transition">FAQ</button>
+            <Link to="/faq" className="hover:text-foreground transition">FAQ</Link>
           </nav>
           <div className="flex items-center gap-2">
             <Link to="/login" className="hidden sm:inline text-sm text-muted-foreground hover:text-foreground transition">Sign in</Link>
@@ -914,7 +930,9 @@ function Index() {
           <div>
             <div className="text-xs font-semibold uppercase tracking-widest text-foreground mb-3">Company</div>
             <ul className="space-y-2 text-sm text-muted-foreground">
-              <li><button onClick={() => scrollToId("mission")} className="hover:text-foreground">Our mission</button></li>
+              <li><Link to="/story" className="hover:text-foreground">Our story</Link></li>
+              <li><Link to="/trust" className="hover:text-foreground">Trust & Safety</Link></li>
+              <li><Link to="/pricing" className="hover:text-foreground">Pricing</Link></li>
               <li><Link to="/investors" className="hover:text-foreground">For investors</Link></li>
               <li><Link to="/faq" className="hover:text-foreground">FAQ</Link></li>
               <li><a href="mailto:support@reirunner.com" className="hover:text-foreground inline-flex items-center gap-1.5"><HelpCircle className="size-3.5" /> Contact support</a></li>
