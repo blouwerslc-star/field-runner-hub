@@ -885,7 +885,8 @@ function Index() {
             </p>
             <div className="mt-5 space-y-2.5 text-sm text-muted-foreground">
               <a href="mailto:support@reirunner.com" className="flex items-center gap-2 hover:text-foreground transition">
-                <Mail className="size-4 text-primary" /> support@reirunner.com
+                <Mail className="size-4 text-primary" />
+                <span>support@reirunner.com</span>
               </a>
               <a href="tel:+18338734786" className="flex items-center gap-2 hover:text-foreground transition">
                 <Phone className="size-4 text-primary" /> (833) 873-RUNR
