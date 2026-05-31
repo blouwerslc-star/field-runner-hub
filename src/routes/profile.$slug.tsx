@@ -1,15 +1,24 @@
-import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { createFileRoute, Link, notFound, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { useState, useEffect } from "react";
 import { getPublicProfileBySlug } from "@/lib/profiles.functions";
+import { toggleFavorite, isFavorite } from "@/lib/profile-extras.functions";
 import { Button } from "@/components/ui/button";
-import { RoleBadge, VerifiedBadge, AvailabilityBadge, StarRating, LocationLine } from "@/components/profiles/ProfileBadges";
+import { RoleBadge, AvailabilityBadge, StarRating, LocationLine } from "@/components/profiles/ProfileBadges";
 import { BrandLogo } from "@/components/brand/BrandLogo";
 import { CertificationBadge } from "@/components/academy/CertificationBadge";
-import { SKILL_BADGES } from "@/lib/academy/badges";
-import { Loader2, MessageSquare, Send, Clock, Award } from "lucide-react";
+import { TrustBadgeRow } from "@/components/profiles/TrustBadgeRow";
+import { PerformanceMetrics } from "@/components/profiles/PerformanceMetrics";
+import { PortfolioGallery } from "@/components/profiles/PortfolioGallery";
+import { ProfileReviewsList } from "@/components/profiles/ProfileReviewsList";
+import { ServiceAreaMap, parseRadius } from "@/components/profiles/ServiceAreaMap";
+import { Progress } from "@/components/ui/progress";
+import { SPECIALTY_OPTIONS, PRICING_SERVICES, EXPERIENCE_FIELDS, isOnline, trustScore } from "@/lib/profile-constants";
+import { Loader2, MessageSquare, Send, Heart, BookmarkPlus, CalendarDays, ShieldCheck, MapPin } from "lucide-react";
 import { toast } from "sonner";
 import { Toaster } from "@/components/ui/sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/profile/$slug")({
   component: PublicProfilePage,
@@ -27,38 +36,6 @@ export const Route = createFileRoute("/profile/$slug")({
   ),
 });
 
-type Profile = {
-  user_id: string;
-  profile_slug: string | null;
-  full_name: string | null;
-  city: string | null;
-  state: string | null;
-  profile_photo_url: string | null;
-  cover_photo_url: string | null;
-  headline: string | null;
-  bio: string | null;
-  services_offered: string[] | null;
-  markets_served: string | null;
-  experience_level: string | null;
-  years_experience: number | null;
-  task_rate: number | null;
-  hourly_rate: number | null;
-  availability_status: string | null;
-  average_rating: number;
-  review_count: number;
-  completed_tasks_count: number;
-  response_time: string | null;
-  verified_status: boolean;
-  featured: boolean;
-  turnaround_time: string | null;
-  task_types: string[] | null;
-  service_radius: string | null;
-  company_name: string | null;
-  company_description: string | null;
-  monthly_deal_volume: string | null;
-  created_at: string;
-};
-
 function initials(name: string | null) {
   if (!name) return "?";
   return name.split(/\s+/).map((s) => s[0]).filter(Boolean).slice(0, 2).join("").toUpperCase();
@@ -66,27 +43,57 @@ function initials(name: string | null) {
 
 function PublicProfilePage() {
   const { slug } = Route.useParams();
+  const navigate = useNavigate();
   const fetchFn = useServerFn(getPublicProfileBySlug);
+  const favCheck = useServerFn(isFavorite);
+  const favToggle = useServerFn(toggleFavorite);
+
   const { data, isLoading } = useQuery({
     queryKey: ["publicProfile", slug],
     queryFn: () => fetchFn({ data: { slug } }),
   });
 
+  const [authed, setAuthed] = useState(false);
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: s }) => setAuthed(!!s.session));
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => setAuthed(!!s));
+    return () => sub.subscription.unsubscribe();
+  }, []);
+
+  const userId = (data as any)?.profile?.user_id as string | undefined;
+  const { data: favData, refetch: refetchFav } = useQuery({
+    enabled: authed && !!userId,
+    queryKey: ["isFavorite", userId],
+    queryFn: () => favCheck({ data: { runnerId: userId! } }),
+  });
+  const toggleMut = useMutation({
+    mutationFn: () => favToggle({ data: { runnerId: userId! } }),
+    onSuccess: (r) => { toast.success(r.favorited ? "Saved to favorites" : "Removed from favorites"); void refetchFav(); },
+    onError: (e: any) => toast.error(e.message || "Failed"),
+  });
+
   if (isLoading) {
-    return (
-      <div className="min-h-screen grid place-items-center"><Loader2 className="size-6 animate-spin text-primary" /></div>
-    );
+    return <div className="min-h-screen grid place-items-center"><Loader2 className="size-6 animate-spin text-primary" /></div>;
   }
   if (!data?.profile) throw notFound();
 
-  const p = data.profile as Profile;
-  const roles = data.roles ?? [];
+  const p = data.profile as any;
+  const roles: string[] = (data as any).roles ?? [];
+  const portfolio = (data as any).portfolio ?? [];
+  const reviews = (data as any).reviews ?? [];
+  const blocks = (data as any).availability_blocks ?? [];
+  const metrics = (data as any).metrics ?? {};
   const isRunner = roles.includes("runner");
   const isInvestor = roles.includes("investor");
+  const certLevel = (data as any).runner?.certification_level ?? 0;
   const memberSince = new Date(p.created_at).toLocaleDateString(undefined, { year: "numeric", month: "long" });
-  const certLevel: number = (data as any).runner?.certification_level ?? 0;
-  const earnedBadges: { id: string; label: string }[] = (data as any).academy?.earned_badges ?? [];
-  const earnedSet = new Set(earnedBadges.map((b) => b.id));
+  const online = isOnline(metrics.last_activity_at ?? p.last_active_at);
+  const score = trustScore(p);
+  const radiusMiles = parseRadius(p.service_radius);
+  const specialties: string[] = (p.specialties && p.specialties.length ? p.specialties : (p.services_offered ?? [])).filter((s: string) => !!s);
+
+  const pricing = PRICING_SERVICES.filter((s) => p[s.key] != null);
+  const experience = EXPERIENCE_FIELDS.filter((f) => p[f.key]);
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -103,117 +110,212 @@ function PublicProfilePage() {
         style={p.cover_photo_url ? { backgroundImage: `url(${p.cover_photo_url})`, backgroundSize: "cover", backgroundPosition: "center" } : undefined}
       />
 
-      <main className="mx-auto max-w-6xl px-5 pb-16">
+      <main className="mx-auto max-w-6xl px-5 pb-24">
         <div className="grid md:grid-cols-[2fr,1fr] gap-8 -mt-16 md:-mt-20">
-          <div>
+          {/* MAIN */}
+          <div className="space-y-8">
+            {/* HEADER */}
             <div className="flex items-end gap-4">
-              <div className="size-28 md:size-32 rounded-full border-4 border-background bg-muted overflow-hidden flex items-center justify-center text-2xl font-bold text-muted-foreground shrink-0">
-                {p.profile_photo_url ? (
-                  <img src={p.profile_photo_url} alt={p.full_name ?? ""} className="size-full object-cover" />
-                ) : (
-                  initials(p.full_name)
-                )}
-              </div>
-              <div className="pb-2">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <h1 className="text-2xl md:text-3xl font-bold">{p.full_name ?? "Unnamed"}</h1>
-                  <RoleBadge roles={roles} />
-                  {p.verified_status && <VerifiedBadge />}
+              <div className="relative">
+                <div className="size-28 md:size-36 rounded-full border-4 border-background bg-muted overflow-hidden flex items-center justify-center text-2xl font-bold text-muted-foreground shrink-0">
+                  {p.profile_photo_url ? (
+                    <img src={p.profile_photo_url} alt={p.full_name ?? ""} className="size-full object-cover" />
+                  ) : (
+                    initials(p.full_name)
+                  )}
                 </div>
-                <div className="mt-1 flex items-center gap-3 flex-wrap">
+                <span
+                  className={`absolute bottom-2 right-2 size-4 rounded-full border-2 border-background ${online ? "bg-emerald-400" : "bg-zinc-500"}`}
+                  title={online ? "Online now" : "Offline"}
+                />
+              </div>
+              <div className="pb-2 flex-1 min-w-0">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h1 className="text-2xl md:text-3xl font-bold truncate">{p.full_name ?? "Unnamed"}</h1>
+                  <RoleBadge roles={roles} />
+                </div>
+                <div className="mt-1 flex items-center gap-3 flex-wrap text-sm">
                   <LocationLine city={p.city} state={p.state} />
+                  {p.service_radius && <span className="inline-flex items-center gap-1 text-xs text-muted-foreground"><MapPin className="size-3" /> {radiusMiles}mi radius</span>}
                   <AvailabilityBadge status={p.availability_status} />
                   <StarRating rating={p.average_rating} count={p.review_count} />
                   {isRunner && <CertificationBadge level={certLevel} hideWhenZero />}
+                  <span className="text-xs text-muted-foreground">Member since {memberSince}</span>
                 </div>
+                <div className="mt-3"><TrustBadgeRow {...p} /></div>
               </div>
             </div>
-            {p.headline && <p className="mt-6 text-lg text-foreground">{p.headline}</p>}
-            {p.bio && <p className="mt-3 text-muted-foreground whitespace-pre-wrap">{p.bio}</p>}
 
-            {isRunner && earnedBadges.length > 0 && (
-              <Section title="Academy certifications">
-                <div className="flex flex-wrap gap-2">
-                  {SKILL_BADGES.filter((b) => earnedSet.has(b.id)).map((b) => {
-                    const { Icon } = b;
-                    return (
-                      <span
-                        key={b.id}
-                        className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold ${b.cls}`}
-                        title={b.description}
-                      >
-                        <Icon className="size-3.5" /> {b.label}
-                      </span>
-                    );
-                  })}
-                </div>
+            {p.headline && <p className="text-lg">{p.headline}</p>}
+            {p.bio && <p className="text-muted-foreground whitespace-pre-wrap">{p.bio}</p>}
+
+            {/* PERFORMANCE METRICS */}
+            {isRunner && (
+              <Section title="Performance">
+                <PerformanceMetrics
+                  completed_tasks_count={p.completed_tasks_count}
+                  average_rating={Number(p.average_rating ?? 0)}
+                  review_count={p.review_count}
+                  response_time={p.response_time}
+                  response_time_minutes={p.response_time_minutes}
+                  completion_rate={Number(metrics.completion_rate ?? p.completion_rate ?? 0)}
+                  repeat_client_rate={Number(metrics.repeat_client_rate ?? p.repeat_client_rate ?? 0)}
+                  last_activity_at={metrics.last_activity_at ?? p.last_active_at}
+                />
               </Section>
             )}
 
-            {(p.services_offered ?? []).length > 0 && (
-              <Section title="Services">
+            {/* SPECIALTIES */}
+            {specialties.length > 0 && (
+              <Section title="Specialties">
                 <div className="flex flex-wrap gap-2">
-                  {(p.services_offered ?? []).map((s) => (
-                    <span key={s} className="rounded-full bg-muted px-3 py-1 text-sm">{s}</span>
+                  {specialties.map((s) => (
+                    <span key={s} className="rounded-full border border-primary/30 bg-primary/10 text-primary px-3 py-1 text-sm">
+                      {s}
+                    </span>
                   ))}
                 </div>
               </Section>
             )}
 
-            {(p.task_types ?? []).length > 0 && (
-              <Section title="Task types">
-                <div className="flex flex-wrap gap-2">
-                  {(p.task_types ?? []).map((s) => (
-                    <span key={s} className="rounded-full bg-muted px-3 py-1 text-sm">{s}</span>
-                  ))}
-                </div>
+            {/* PORTFOLIO */}
+            {isRunner && (
+              <Section title="Portfolio">
+                <PortfolioGallery items={portfolio} />
               </Section>
             )}
 
-            {p.markets_served && (
-              <Section title="Markets served"><p className="text-sm text-muted-foreground">{p.markets_served}</p></Section>
+            {/* SERVICE AREA */}
+            {isRunner && (
+              <Section title="Service area">
+                <ServiceAreaMap lat={p.home_lat} lng={p.home_lng} city={p.city} state={p.state} radiusMiles={radiusMiles} />
+              </Section>
             )}
 
+            {/* AVAILABILITY */}
+            {isRunner && (
+              <Section title="Availability">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                  <AvailChip on={p.avail_today} label="Available today" />
+                  <AvailChip on={p.avail_this_week} label="This week" />
+                  <AvailChip on={p.avail_weekends} label="Weekends" />
+                  <AvailChip on={p.avail_emergency} label="Emergency requests" />
+                </div>
+                {blocks.length > 0 && (
+                  <div className="mt-4 rounded-lg border border-border/60 p-3 text-sm">
+                    <div className="flex items-center gap-2 text-muted-foreground text-xs mb-2"><CalendarDays className="size-3.5" /> Unavailable dates</div>
+                    <div className="flex flex-wrap gap-1.5">
+                      {blocks.slice(0, 20).map((b: any) => (
+                        <span key={b.blocked_date} className="rounded-md bg-muted px-2 py-0.5 text-xs">
+                          {new Date(b.blocked_date).toLocaleDateString(undefined, { month: "short", day: "numeric" })}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </Section>
+            )}
+
+            {/* EXPERIENCE */}
+            {isRunner && experience.length > 0 && (
+              <Section title="Experience">
+                <ul className="grid gap-2 md:grid-cols-2">
+                  {experience.map((f) => (
+                    <li key={f.key} className="rounded-lg border border-border/60 p-3 flex items-center justify-between">
+                      <span className="text-sm">{f.label}</span>
+                      <span className="text-xs text-muted-foreground">{p[f.yearsKey] != null ? `${p[f.yearsKey]} yrs` : "Yes"}</span>
+                    </li>
+                  ))}
+                </ul>
+              </Section>
+            )}
+
+            {/* PRICING */}
+            {isRunner && pricing.length > 0 && (
+              <Section title="Starting rates">
+                <ul className="rounded-xl border border-border/60 divide-y divide-border/60">
+                  {pricing.map((s) => (
+                    <li key={s.key} className="flex items-center justify-between px-4 py-2.5">
+                      <span className="text-sm">{s.label}</span>
+                      <span className="font-semibold">${Number(p[s.key]).toFixed(0)}</span>
+                    </li>
+                  ))}
+                </ul>
+                <p className="mt-2 text-xs text-muted-foreground">Estimates only — final pricing confirmed at booking.</p>
+              </Section>
+            )}
+
+            {/* REVIEWS */}
+            <Section title="Reviews">
+              <ProfileReviewsList reviews={reviews} />
+            </Section>
+
+            {/* INVESTOR DETAILS */}
             {isInvestor && p.company_description && (
               <Section title={p.company_name ?? "Company"}>
                 <p className="text-sm text-muted-foreground whitespace-pre-wrap">{p.company_description}</p>
               </Section>
             )}
-
-            <Section title="Reviews">
-              <div className="rounded-lg border border-dashed border-border/60 p-6 text-center text-sm text-muted-foreground">
-                No reviews yet. Reviews appear after completed tasks.
-              </div>
-            </Section>
           </div>
 
+          {/* STICKY QUICK HIRE PANEL */}
           <aside className="md:pt-24">
-            <div className="rounded-xl border border-border/60 bg-card/40 p-5 sticky top-24 space-y-4">
+            <div className="rounded-xl border border-border/60 bg-card/40 p-5 md:sticky md:top-24 space-y-4">
+              {isRunner && p.task_rate != null && (
+                <div>
+                  <div className="text-xs text-muted-foreground uppercase tracking-wide">Starting at</div>
+                  <div className="text-3xl font-bold">${Number(p.task_rate).toFixed(0)}<span className="text-sm text-muted-foreground"> / task</span></div>
+                </div>
+              )}
+
               {isRunner ? (
                 <>
-                  {p.task_rate && (
-                    <div>
-                      <div className="text-xs text-muted-foreground uppercase tracking-wide">Starting at</div>
-                      <div className="text-2xl font-bold">${p.task_rate}<span className="text-sm text-muted-foreground"> / task</span></div>
-                    </div>
-                  )}
-                  <Button className="w-full" onClick={() => toast.info("Task invitation flow coming soon — assign through your dashboard.")}>
-                    <Send className="size-4 mr-1.5" /> Invite Runner To Task
+                  <Button className="w-full" onClick={() => navigate({ to: "/messages/new" })}>
+                    <Send className="size-4 mr-1.5" /> Request Service
                   </Button>
+                  <Button variant="outline" className="w-full" onClick={() => navigate({ to: "/messages/new" })}>
+                    <MessageSquare className="size-4 mr-1.5" /> Message Runner
+                  </Button>
+                  <div className="grid grid-cols-2 gap-2">
+                    <Button
+                      variant="ghost"
+                      className="w-full"
+                      onClick={() => {
+                        if (!authed) { toast.info("Sign in to save runners"); return; }
+                        toggleMut.mutate();
+                      }}
+                    >
+                      <Heart className={`size-4 mr-1.5 ${favData?.favorited ? "fill-rose-400 text-rose-400" : ""}`} />
+                      {favData?.favorited ? "Saved" : "Save"}
+                    </Button>
+                    <Button variant="ghost" className="w-full" onClick={() => toast.info("Future-jobs invites coming soon.")}>
+                      <BookmarkPlus className="size-4 mr-1.5" /> Invite
+                    </Button>
+                  </div>
                 </>
               ) : (
-                <Button className="w-full" onClick={() => toast.info("Direct messaging coming soon.")}>
-                  <MessageSquare className="size-4 mr-1.5" /> Connect With Investor
+                <Button className="w-full" onClick={() => navigate({ to: "/messages/new" })}>
+                  <MessageSquare className="size-4 mr-1.5" /> Message
                 </Button>
               )}
 
-              <dl className="text-sm space-y-2 pt-2 border-t border-border/60">
-                <Row icon={<Award className="size-3.5" />} label="Completed tasks" value={String(p.completed_tasks_count)} />
-                {p.response_time && <Row icon={<Clock className="size-3.5" />} label="Response time" value={p.response_time} />}
-                {p.turnaround_time && <Row icon={<Clock className="size-3.5" />} label="Turnaround" value={p.turnaround_time} />}
-                {p.experience_level && <Row label="Experience" value={p.experience_level} />}
-                {p.years_experience != null && <Row label="Years" value={String(p.years_experience)} />}
-                {p.service_radius && <Row label="Service radius" value={p.service_radius} />}
+              {/* Trust score */}
+              {isRunner && (
+                <div className="pt-3 border-t border-border/60">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="inline-flex items-center gap-2 text-muted-foreground"><ShieldCheck className="size-4" /> Trust score</span>
+                    <span className="font-semibold">{score}/100</span>
+                  </div>
+                  <Progress value={score} className="mt-2" />
+                </div>
+              )}
+
+              <dl className="text-sm space-y-1.5 pt-3 border-t border-border/60">
+                <Row label="Completed" value={String(p.completed_tasks_count)} />
+                {metrics.unique_clients ? <Row label="Unique clients" value={String(metrics.unique_clients)} /> : null}
+                {metrics.favorite_count ? <Row label="Saved by" value={`${metrics.favorite_count} investors`} /> : null}
+                {p.response_time && <Row label="Response time" value={p.response_time} />}
+                {p.service_radius && <Row label="Service radius" value={`${radiusMiles}mi`} />}
                 <Row label="Member since" value={memberSince} />
               </dl>
             </div>
@@ -226,18 +328,26 @@ function PublicProfilePage() {
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <section className="mt-8">
+    <section>
       <h2 className="text-lg font-semibold mb-3">{title}</h2>
       {children}
     </section>
   );
 }
-
-function Row({ icon, label, value }: { icon?: React.ReactNode; label: string; value: string }) {
+function Row({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-center justify-between text-sm">
-      <dt className="text-muted-foreground inline-flex items-center gap-1.5">{icon}{label}</dt>
+      <dt className="text-muted-foreground">{label}</dt>
       <dd className="font-medium">{value}</dd>
     </div>
   );
 }
+function AvailChip({ on, label }: { on?: boolean | null; label: string }) {
+  return (
+    <span className={`rounded-lg border px-3 py-2 text-center text-sm ${on ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-300" : "border-border/60 bg-muted/30 text-muted-foreground"}`}>
+      {label}
+    </span>
+  );
+}
+// Avoid unused warnings
+void SPECIALTY_OPTIONS;

@@ -713,6 +713,33 @@ export type Database = {
         }
         Relationships: []
       }
+      favorite_runners: {
+        Row: {
+          created_at: string
+          id: string
+          investor_id: string
+          list_name: string
+          notes: string | null
+          runner_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          investor_id: string
+          list_name?: string
+          notes?: string | null
+          runner_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          investor_id?: string
+          list_name?: string
+          notes?: string | null
+          runner_id?: string
+        }
+        Relationships: []
+      }
       field_runner_applications: {
         Row: {
           admin_notes: string | null
@@ -1121,9 +1148,46 @@ export type Database = {
         }
         Relationships: []
       }
+      profile_portfolio: {
+        Row: {
+          caption: string | null
+          created_at: string
+          id: string
+          kind: string
+          sort_order: number
+          thumb_url: string | null
+          url: string
+          user_id: string
+        }
+        Insert: {
+          caption?: string | null
+          created_at?: string
+          id?: string
+          kind?: string
+          sort_order?: number
+          thumb_url?: string | null
+          url: string
+          user_id: string
+        }
+        Update: {
+          caption?: string | null
+          created_at?: string
+          id?: string
+          kind?: string
+          sort_order?: number
+          thumb_url?: string | null
+          url?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           account_status: string
+          avail_emergency: boolean
+          avail_this_week: boolean
+          avail_today: boolean
+          avail_weekends: boolean
           availability_status: string
           avatar_url: string | null
           average_rating: number
@@ -1139,6 +1203,9 @@ export type Database = {
           company_name: string | null
           company_verified: boolean
           completed_tasks_count: number
+          completion_rate: number
+          contractor_experience: boolean
+          contractor_years: number | null
           cover_photo_url: string | null
           created_at: string
           dashboard_prefs: Json
@@ -1149,9 +1216,14 @@ export type Database = {
           featured: boolean
           full_name: string | null
           headline: string | null
+          home_lat: number | null
+          home_lng: number | null
           hourly_rate: number | null
           id: string
           identity_verified: boolean
+          insurance_verified: boolean
+          insurance_verified_at: string | null
+          last_active_at: string | null
           markets_served: string | null
           monthly_deal_volume: string | null
           notification_prefs: Json
@@ -1165,12 +1237,26 @@ export type Database = {
           privacy_prefs: Json
           profile_photo_url: string | null
           profile_slug: string | null
+          property_management_experience: boolean
+          property_management_years: number | null
           public_profile_enabled: boolean
+          rate_lockbox_install: number | null
+          rate_occupancy_check: number | null
+          rate_property_photos: number | null
+          rate_sign_placement: number | null
+          rate_video_walkthrough: number | null
+          real_estate_experience: boolean
+          real_estate_years: number | null
+          realtor_experience: boolean
+          realtor_years: number | null
           repeat_client_count: number
+          repeat_client_rate: number
           response_time: string | null
+          response_time_minutes: number | null
           review_count: number
           service_radius: string | null
           services_offered: string[]
+          specialties: string[]
           state: string | null
           stripe_customer_id: string | null
           suspended: boolean
@@ -1178,6 +1264,7 @@ export type Database = {
           task_types: string[]
           theme_preference: string | null
           timezone: string | null
+          top_runner: boolean
           transportation_available: boolean | null
           turnaround_time: string | null
           updated_at: string
@@ -1193,6 +1280,10 @@ export type Database = {
         }
         Insert: {
           account_status?: string
+          avail_emergency?: boolean
+          avail_this_week?: boolean
+          avail_today?: boolean
+          avail_weekends?: boolean
           availability_status?: string
           avatar_url?: string | null
           average_rating?: number
@@ -1208,6 +1299,9 @@ export type Database = {
           company_name?: string | null
           company_verified?: boolean
           completed_tasks_count?: number
+          completion_rate?: number
+          contractor_experience?: boolean
+          contractor_years?: number | null
           cover_photo_url?: string | null
           created_at?: string
           dashboard_prefs?: Json
@@ -1218,9 +1312,14 @@ export type Database = {
           featured?: boolean
           full_name?: string | null
           headline?: string | null
+          home_lat?: number | null
+          home_lng?: number | null
           hourly_rate?: number | null
           id?: string
           identity_verified?: boolean
+          insurance_verified?: boolean
+          insurance_verified_at?: string | null
+          last_active_at?: string | null
           markets_served?: string | null
           monthly_deal_volume?: string | null
           notification_prefs?: Json
@@ -1234,12 +1333,26 @@ export type Database = {
           privacy_prefs?: Json
           profile_photo_url?: string | null
           profile_slug?: string | null
+          property_management_experience?: boolean
+          property_management_years?: number | null
           public_profile_enabled?: boolean
+          rate_lockbox_install?: number | null
+          rate_occupancy_check?: number | null
+          rate_property_photos?: number | null
+          rate_sign_placement?: number | null
+          rate_video_walkthrough?: number | null
+          real_estate_experience?: boolean
+          real_estate_years?: number | null
+          realtor_experience?: boolean
+          realtor_years?: number | null
           repeat_client_count?: number
+          repeat_client_rate?: number
           response_time?: string | null
+          response_time_minutes?: number | null
           review_count?: number
           service_radius?: string | null
           services_offered?: string[]
+          specialties?: string[]
           state?: string | null
           stripe_customer_id?: string | null
           suspended?: boolean
@@ -1247,6 +1360,7 @@ export type Database = {
           task_types?: string[]
           theme_preference?: string | null
           timezone?: string | null
+          top_runner?: boolean
           transportation_available?: boolean | null
           turnaround_time?: string | null
           updated_at?: string
@@ -1262,6 +1376,10 @@ export type Database = {
         }
         Update: {
           account_status?: string
+          avail_emergency?: boolean
+          avail_this_week?: boolean
+          avail_today?: boolean
+          avail_weekends?: boolean
           availability_status?: string
           avatar_url?: string | null
           average_rating?: number
@@ -1277,6 +1395,9 @@ export type Database = {
           company_name?: string | null
           company_verified?: boolean
           completed_tasks_count?: number
+          completion_rate?: number
+          contractor_experience?: boolean
+          contractor_years?: number | null
           cover_photo_url?: string | null
           created_at?: string
           dashboard_prefs?: Json
@@ -1287,9 +1408,14 @@ export type Database = {
           featured?: boolean
           full_name?: string | null
           headline?: string | null
+          home_lat?: number | null
+          home_lng?: number | null
           hourly_rate?: number | null
           id?: string
           identity_verified?: boolean
+          insurance_verified?: boolean
+          insurance_verified_at?: string | null
+          last_active_at?: string | null
           markets_served?: string | null
           monthly_deal_volume?: string | null
           notification_prefs?: Json
@@ -1303,12 +1429,26 @@ export type Database = {
           privacy_prefs?: Json
           profile_photo_url?: string | null
           profile_slug?: string | null
+          property_management_experience?: boolean
+          property_management_years?: number | null
           public_profile_enabled?: boolean
+          rate_lockbox_install?: number | null
+          rate_occupancy_check?: number | null
+          rate_property_photos?: number | null
+          rate_sign_placement?: number | null
+          rate_video_walkthrough?: number | null
+          real_estate_experience?: boolean
+          real_estate_years?: number | null
+          realtor_experience?: boolean
+          realtor_years?: number | null
           repeat_client_count?: number
+          repeat_client_rate?: number
           response_time?: string | null
+          response_time_minutes?: number | null
           review_count?: number
           service_radius?: string | null
           services_offered?: string[]
+          specialties?: string[]
           state?: string | null
           stripe_customer_id?: string | null
           suspended?: boolean
@@ -1316,6 +1456,7 @@ export type Database = {
           task_types?: string[]
           theme_preference?: string | null
           timezone?: string | null
+          top_runner?: boolean
           transportation_available?: boolean | null
           turnaround_time?: string | null
           updated_at?: string
@@ -1463,6 +1604,30 @@ export type Database = {
           reviewer_id?: string
           task_id?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      runner_availability_blocks: {
+        Row: {
+          blocked_date: string
+          created_at: string
+          id: string
+          reason: string | null
+          runner_id: string
+        }
+        Insert: {
+          blocked_date: string
+          created_at?: string
+          id?: string
+          reason?: string | null
+          runner_id: string
+        }
+        Update: {
+          blocked_date?: string
+          created_at?: string
+          id?: string
+          reason?: string | null
+          runner_id?: string
         }
         Relationships: []
       }
