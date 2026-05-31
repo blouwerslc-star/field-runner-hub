@@ -19,6 +19,10 @@ import {
 import { Loader2, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
 import { PhotoUploader } from "@/components/profiles/PhotoUploader";
+import { PortfolioEditor } from "@/components/profiles/PortfolioEditor";
+import { AvailabilityBlockEditor } from "@/components/profiles/AvailabilityBlockEditor";
+import { Checkbox } from "@/components/ui/checkbox";
+import { SPECIALTY_OPTIONS, PRICING_SERVICES, EXPERIENCE_FIELDS } from "@/lib/profile-constants";
 
 export const Route = createFileRoute("/_authenticated/profile/edit")({
   component: ProfileEditPage,
@@ -75,12 +79,26 @@ function ProfileEditPage() {
         "availability_status","hourly_rate","task_rate","turnaround_time","response_time",
         "phone_public","public_profile_enabled","transportation_available","task_types",
         "preferred_payout_min","preferred_payout_max","company_name","company_description","monthly_deal_volume",
+        // Profiles 2.0
+        "specialties","insurance_verified",
+        "real_estate_experience","real_estate_years",
+        "contractor_experience","contractor_years",
+        "property_management_experience","property_management_years",
+        "realtor_experience","realtor_years",
+        "rate_lockbox_install","rate_occupancy_check","rate_property_photos","rate_video_walkthrough","rate_sign_placement",
+        "avail_today","avail_this_week","avail_weekends","avail_emergency",
+        "home_lat","home_lng",
       ];
       for (const k of keys) {
         if (k in form) payload[k] = form[k] === "" ? null : form[k];
       }
       // coerce numerics
-      for (const k of ["years_experience","hourly_rate","task_rate","preferred_payout_min","preferred_payout_max"]) {
+      for (const k of [
+        "years_experience","hourly_rate","task_rate","preferred_payout_min","preferred_payout_max",
+        "real_estate_years","contractor_years","property_management_years","realtor_years",
+        "rate_lockbox_install","rate_occupancy_check","rate_property_photos","rate_video_walkthrough","rate_sign_placement",
+        "home_lat","home_lng",
+      ]) {
         if (payload[k] != null && payload[k] !== "") payload[k] = Number(payload[k]);
         else if (payload[k] === "" || Number.isNaN(payload[k])) payload[k] = null;
       }
