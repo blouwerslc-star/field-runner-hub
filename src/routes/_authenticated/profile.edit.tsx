@@ -215,6 +215,135 @@ function ProfileEditPage() {
           </section>
         )}
 
+        {isRunner && (
+          <section>
+            <h2 className="text-lg font-semibold mb-3">Specialties</h2>
+            <p className="text-sm text-muted-foreground mb-3">Pick the services you offer. Investors filter by these.</p>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+              {SPECIALTY_OPTIONS.map((opt) => {
+                const list = (form.specialties as string[] | undefined) ?? [];
+                const checked = list.includes(opt);
+                return (
+                  <label key={opt} className="flex items-center gap-2 rounded-md border border-border/60 px-3 py-2 text-sm cursor-pointer hover:bg-muted/40">
+                    <Checkbox
+                      checked={checked}
+                      onCheckedChange={(c) => {
+                        const next = new Set(list);
+                        if (c) next.add(opt); else next.delete(opt);
+                        update("specialties", Array.from(next));
+                      }}
+                    />
+                    {opt}
+                  </label>
+                );
+              })}
+            </div>
+          </section>
+        )}
+
+        {isRunner && (
+          <section>
+            <h2 className="text-lg font-semibold mb-3">Industry experience</h2>
+            <div className="grid gap-3 md:grid-cols-2">
+              {EXPERIENCE_FIELDS.map(({ key, yearsKey, label }) => (
+                <div key={key} className="flex items-center gap-3 rounded-lg border border-border/60 p-3">
+                  <Switch checked={bool(key)} onCheckedChange={(c) => update(key, c)} />
+                  <div className="flex-1 text-sm font-medium">{label}</div>
+                  <Input
+                    type="number"
+                    min={0}
+                    placeholder="Years"
+                    className="w-24"
+                    disabled={!bool(key)}
+                    value={val(yearsKey) as number}
+                    onChange={(e) => update(yearsKey, e.target.value)}
+                  />
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {isRunner && (
+          <section>
+            <h2 className="text-lg font-semibold mb-3">Per-service pricing</h2>
+            <p className="text-sm text-muted-foreground mb-3">Optional starting prices per service. Leave blank to negotiate per task.</p>
+            <div className="grid gap-4 md:grid-cols-2">
+              {PRICING_SERVICES.map(({ key, label }) => (
+                <Field key={key} label={`${label} ($)`}>
+                  <Input
+                    type="number"
+                    min={0}
+                    step="0.01"
+                    value={val(key) as number}
+                    onChange={(e) => update(key, e.target.value)}
+                  />
+                </Field>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {isRunner && (
+          <section>
+            <h2 className="text-lg font-semibold mb-3">Availability</h2>
+            <div className="grid gap-3 md:grid-cols-2">
+              <ToggleRow label="Available today" hint="Same-day jobs are OK."
+                checked={bool("avail_today")} onChange={(c) => update("avail_today", c)} />
+              <ToggleRow label="Available this week" hint="Open for new bookings this week."
+                checked={bool("avail_this_week")} onChange={(c) => update("avail_this_week", c)} />
+              <ToggleRow label="Weekends" hint="Will take Saturday/Sunday jobs."
+                checked={bool("avail_weekends")} onChange={(c) => update("avail_weekends", c)} />
+              <ToggleRow label="Emergency / rush jobs" hint="Available for urgent same-hour requests."
+                checked={bool("avail_emergency")} onChange={(c) => update("avail_emergency", c)} />
+            </div>
+            <div className="mt-5">
+              <h3 className="text-sm font-semibold mb-2">Blocked dates</h3>
+              {userId && <AvailabilityBlockEditor runnerId={userId} />}
+            </div>
+          </section>
+        )}
+
+        {isRunner && (
+          <section>
+            <h2 className="text-lg font-semibold mb-3">Service area map</h2>
+            <p className="text-sm text-muted-foreground mb-3">
+              Drop your home base coordinates so investors can see your radius on a map. Get lat/lng from{" "}
+              <a className="underline" href="https://www.latlong.net/" target="_blank" rel="noreferrer">latlong.net</a>.
+            </p>
+            <div className="grid gap-4 md:grid-cols-2">
+              <Field label="Home latitude">
+                <Input type="number" step="0.000001" placeholder="33.4484" value={val("home_lat") as number} onChange={(e) => update("home_lat", e.target.value)} />
+              </Field>
+              <Field label="Home longitude">
+                <Input type="number" step="0.000001" placeholder="-112.0740" value={val("home_lng") as number} onChange={(e) => update("home_lng", e.target.value)} />
+              </Field>
+            </div>
+          </section>
+        )}
+
+        {isRunner && (
+          <section>
+            <h2 className="text-lg font-semibold mb-3">Portfolio</h2>
+            <p className="text-sm text-muted-foreground mb-3">Photos and videos of completed jobs build trust and win bookings.</p>
+            {userId && <PortfolioEditor userId={userId} />}
+          </section>
+        )}
+
+        {isRunner && (
+          <section>
+            <h2 className="text-lg font-semibold mb-3">Verifications</h2>
+            <div className="grid gap-3 md:grid-cols-2">
+              <ToggleRow
+                label="I carry insurance"
+                hint="Mark on once your insurance certificate has been verified by REI Runner."
+                checked={bool("insurance_verified")}
+                onChange={(c) => update("insurance_verified", c)}
+              />
+            </div>
+          </section>
+        )}
+
         <section>
           <h2 className="text-lg font-semibold mb-3">Privacy</h2>
           <div className="grid gap-3 md:grid-cols-2">
