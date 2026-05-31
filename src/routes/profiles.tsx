@@ -54,8 +54,6 @@ function ProfilesDirectory() {
     title: p.full_name ?? "Runner",
     subtitle: [p.city, p.state].filter(Boolean).join(", ") || p.headline || null,
     href: p.profile_slug ? `/profile/${p.profile_slug}` : null,
-    lat: p.home_lat,
-    lng: p.home_lng,
     city: p.city,
     state: p.state,
     badge: p.top_runner ? "Top Runner" : p.availability_status === "available" ? "Available" : null,
