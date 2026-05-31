@@ -1753,6 +1753,39 @@ export type Database = {
           },
         ]
       }
+      signup_attempts: {
+        Row: {
+          blocked: boolean
+          created_at: string
+          email: string | null
+          id: string
+          ip_hash: string | null
+          reason: string | null
+          role: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          blocked?: boolean
+          created_at?: string
+          email?: string | null
+          id?: string
+          ip_hash?: string | null
+          reason?: string | null
+          role?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          blocked?: boolean
+          created_at?: string
+          email?: string | null
+          id?: string
+          ip_hash?: string | null
+          reason?: string | null
+          role?: string | null
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
       support_requests: {
         Row: {
           admin_notes: string | null
