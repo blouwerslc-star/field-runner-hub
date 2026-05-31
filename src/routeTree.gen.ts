@@ -72,6 +72,7 @@ import { Route as AuthenticatedAdminProfilesRouteImport } from './routes/_authen
 import { Route as AuthenticatedAdminModerationRouteImport } from './routes/_authenticated/admin.moderation'
 import { Route as AuthenticatedAdminMarketplaceHealthRouteImport } from './routes/_authenticated/admin.marketplace-health'
 import { Route as AuthenticatedAdminDispatchRouteImport } from './routes/_authenticated/admin.dispatch'
+import { Route as AuthenticatedAdminBroadcastsRouteImport } from './routes/_authenticated/admin.broadcasts'
 import { Route as AuthenticatedAdminBackgroundChecksRouteImport } from './routes/_authenticated/admin.background-checks'
 import { Route as AuthenticatedAdminAnalyticsRouteImport } from './routes/_authenticated/admin.analytics'
 import { Route as AuthenticatedAcademyCourseSlugRouteImport } from './routes/_authenticated/academy.$courseSlug'
@@ -432,6 +433,12 @@ const AuthenticatedAdminDispatchRoute =
     path: '/dispatch',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminBroadcastsRoute =
+  AuthenticatedAdminBroadcastsRouteImport.update({
+    id: '/broadcasts',
+    path: '/broadcasts',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminBackgroundChecksRoute =
   AuthenticatedAdminBackgroundChecksRouteImport.update({
     id: '/background-checks',
@@ -546,6 +553,7 @@ export interface FileRoutesByFullPath {
   '/academy/$courseSlug': typeof AuthenticatedAcademyCourseSlugRouteWithChildren
   '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
   '/admin/background-checks': typeof AuthenticatedAdminBackgroundChecksRoute
+  '/admin/broadcasts': typeof AuthenticatedAdminBroadcastsRoute
   '/admin/dispatch': typeof AuthenticatedAdminDispatchRoute
   '/admin/marketplace-health': typeof AuthenticatedAdminMarketplaceHealthRoute
   '/admin/moderation': typeof AuthenticatedAdminModerationRoute
@@ -618,6 +626,7 @@ export interface FileRoutesByTo {
   '/tasks/$taskId': typeof TasksTaskIdRoute
   '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
   '/admin/background-checks': typeof AuthenticatedAdminBackgroundChecksRoute
+  '/admin/broadcasts': typeof AuthenticatedAdminBroadcastsRoute
   '/admin/dispatch': typeof AuthenticatedAdminDispatchRoute
   '/admin/marketplace-health': typeof AuthenticatedAdminMarketplaceHealthRoute
   '/admin/moderation': typeof AuthenticatedAdminModerationRoute
@@ -697,6 +706,7 @@ export interface FileRoutesById {
   '/_authenticated/academy/$courseSlug': typeof AuthenticatedAcademyCourseSlugRouteWithChildren
   '/_authenticated/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
   '/_authenticated/admin/background-checks': typeof AuthenticatedAdminBackgroundChecksRoute
+  '/_authenticated/admin/broadcasts': typeof AuthenticatedAdminBroadcastsRoute
   '/_authenticated/admin/dispatch': typeof AuthenticatedAdminDispatchRoute
   '/_authenticated/admin/marketplace-health': typeof AuthenticatedAdminMarketplaceHealthRoute
   '/_authenticated/admin/moderation': typeof AuthenticatedAdminModerationRoute
@@ -776,6 +786,7 @@ export interface FileRouteTypes {
     | '/academy/$courseSlug'
     | '/admin/analytics'
     | '/admin/background-checks'
+    | '/admin/broadcasts'
     | '/admin/dispatch'
     | '/admin/marketplace-health'
     | '/admin/moderation'
@@ -848,6 +859,7 @@ export interface FileRouteTypes {
     | '/tasks/$taskId'
     | '/admin/analytics'
     | '/admin/background-checks'
+    | '/admin/broadcasts'
     | '/admin/dispatch'
     | '/admin/marketplace-health'
     | '/admin/moderation'
@@ -926,6 +938,7 @@ export interface FileRouteTypes {
     | '/_authenticated/academy/$courseSlug'
     | '/_authenticated/admin/analytics'
     | '/_authenticated/admin/background-checks'
+    | '/_authenticated/admin/broadcasts'
     | '/_authenticated/admin/dispatch'
     | '/_authenticated/admin/marketplace-health'
     | '/_authenticated/admin/moderation'
@@ -1438,6 +1451,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminDispatchRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/broadcasts': {
+      id: '/_authenticated/admin/broadcasts'
+      path: '/broadcasts'
+      fullPath: '/admin/broadcasts'
+      preLoaderRoute: typeof AuthenticatedAdminBroadcastsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/background-checks': {
       id: '/_authenticated/admin/background-checks'
       path: '/background-checks'
@@ -1573,6 +1593,7 @@ const AuthenticatedAcademyRouteWithChildren =
 interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminAnalyticsRoute: typeof AuthenticatedAdminAnalyticsRoute
   AuthenticatedAdminBackgroundChecksRoute: typeof AuthenticatedAdminBackgroundChecksRoute
+  AuthenticatedAdminBroadcastsRoute: typeof AuthenticatedAdminBroadcastsRoute
   AuthenticatedAdminDispatchRoute: typeof AuthenticatedAdminDispatchRoute
   AuthenticatedAdminMarketplaceHealthRoute: typeof AuthenticatedAdminMarketplaceHealthRoute
   AuthenticatedAdminModerationRoute: typeof AuthenticatedAdminModerationRoute
@@ -1586,6 +1607,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminAnalyticsRoute: AuthenticatedAdminAnalyticsRoute,
   AuthenticatedAdminBackgroundChecksRoute:
     AuthenticatedAdminBackgroundChecksRoute,
+  AuthenticatedAdminBroadcastsRoute: AuthenticatedAdminBroadcastsRoute,
   AuthenticatedAdminDispatchRoute: AuthenticatedAdminDispatchRoute,
   AuthenticatedAdminMarketplaceHealthRoute:
     AuthenticatedAdminMarketplaceHealthRoute,
@@ -1746,13 +1768,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
