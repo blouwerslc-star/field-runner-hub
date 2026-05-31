@@ -62,6 +62,18 @@ function MarketplacePage() {
     badge: t.payout_amount != null ? `$${Number(t.payout_amount).toFixed(0)}` : t.task_type ?? null,
   }));
 
+  const payouts = (tasks as any[])
+    .map((t) => (t.payout_amount != null ? Number(t.payout_amount) : null))
+    .filter((n): n is number => n != null && !Number.isNaN(n));
+  const totalPayout = payouts.reduce((sum, n) => sum + n, 0);
+  const avgPayout = payouts.length ? Math.round(totalPayout / payouts.length) : 0;
+  const uniqueMarkets = new Set(
+    (tasks as any[])
+      .map((t) => [t.city, t.state].filter(Boolean).join(", "))
+      .filter(Boolean)
+  ).size;
+  const verifiedCount = (tasks as any[]).filter((t) => t.investor?.verified).length;
+
   function reset() {
     setQ(""); setCity(""); setState(""); setTaskType("all");
     setMinPayout(""); setMaxPayout(""); setBeforeDue(""); setSort("newest");
@@ -74,14 +86,37 @@ function MarketplacePage() {
           <Link to="/" aria-label="REI Runner home"><BrandLogo /></Link>
           <div className="flex items-center gap-3 text-sm">
             <Link to="/profiles" className="text-muted-foreground hover:text-foreground">Browse runners</Link>
+            <Link to="/investors" className="text-muted-foreground hover:text-foreground">Post a task</Link>
             <Link to="/login" className="text-muted-foreground hover:text-foreground">Sign in</Link>
           </div>
         </div>
       </header>
       <main className="mx-auto max-w-6xl px-5 py-10">
-        <div className="mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold tracking-tight">Open tasks</h1>
-          <p className="mt-2 text-muted-foreground">Real-time marketplace of property visits, photos, occupancy checks, and more.</p>
+        <div className="mb-8 flex flex-wrap items-end justify-between gap-6">
+          <div>
+            <h1 className="text-3xl md:text-4xl font-bold tracking-tight">Open tasks</h1>
+            <p className="mt-2 text-muted-foreground">Real-time marketplace of property visits, photos, occupancy checks, and more.</p>
+          </div>
+          {!isLoading && tasks.length > 0 && (
+            <dl className="grid grid-cols-4 gap-6 text-sm">
+              <div>
+                <dt className="text-muted-foreground text-xs uppercase tracking-wide">Open</dt>
+                <dd className="text-2xl font-bold tabular-nums">{tasks.length}</dd>
+              </div>
+              <div>
+                <dt className="text-muted-foreground text-xs uppercase tracking-wide">Markets</dt>
+                <dd className="text-2xl font-bold tabular-nums">{uniqueMarkets}</dd>
+              </div>
+              <div>
+                <dt className="text-muted-foreground text-xs uppercase tracking-wide">Avg payout</dt>
+                <dd className="text-2xl font-bold tabular-nums">{avgPayout ? `$${avgPayout}` : "—"}</dd>
+              </div>
+              <div>
+                <dt className="text-muted-foreground text-xs uppercase tracking-wide">Verified</dt>
+                <dd className="text-2xl font-bold tabular-nums">{verifiedCount}</dd>
+              </div>
+            </dl>
+          )}
         </div>
 
         <div className="mb-6">
