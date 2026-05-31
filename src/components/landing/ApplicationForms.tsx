@@ -1,9 +1,10 @@
-import { useState, useId, cloneElement, isValidElement } from "react";
+import { useState, useId, useRef, useEffect, cloneElement, isValidElement } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { finalizeSignupProfile } from "@/lib/signup.functions";
+import { precheckSignupAttempt } from "@/lib/spam-protection.functions";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
