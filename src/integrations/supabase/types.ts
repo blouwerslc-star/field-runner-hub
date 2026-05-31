@@ -677,6 +677,42 @@ export type Database = {
         }
         Relationships: []
       }
+      facebook_leads: {
+        Row: {
+          channel: string | null
+          email: string
+          full_name: string
+          id: string
+          imported_at: string
+          lead_created_at: string | null
+          notes: string | null
+          source: string | null
+          stage: string | null
+        }
+        Insert: {
+          channel?: string | null
+          email: string
+          full_name: string
+          id?: string
+          imported_at?: string
+          lead_created_at?: string | null
+          notes?: string | null
+          source?: string | null
+          stage?: string | null
+        }
+        Update: {
+          channel?: string | null
+          email?: string
+          full_name?: string
+          id?: string
+          imported_at?: string
+          lead_created_at?: string | null
+          notes?: string | null
+          source?: string | null
+          stage?: string | null
+        }
+        Relationships: []
+      }
       field_runner_applications: {
         Row: {
           admin_notes: string | null
