@@ -26,11 +26,42 @@ export type Applicant = {
 
 export const listApplicants = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { audience: "runner" | "investor" }) =>
-    z.object({ audience: z.enum(["runner", "investor"]) }).parse(d),
+  .inputValidator((d: { audience: "runner" | "investor" | "lead" }) =>
+    z.object({ audience: z.enum(["runner", "investor", "lead"]) }).parse(d),
   )
   .handler(async ({ data, context }): Promise<{ applicants: Applicant[] }> => {
     await assertAdmin(context.supabase, context.userId);
+    if (data.audience === "lead") {
+      const [{ data: leads, error: lErr }, { data: runnerApps }, { data: investorApps }, { data: profs }] = await Promise.all([
+        supabaseAdmin
+          .from("facebook_leads")
+          .select("id, full_name, email, lead_created_at, imported_at")
+          .order("lead_created_at", { ascending: false }),
+        supabaseAdmin.from("field_runner_applications").select("email"),
+        supabaseAdmin.from("real_estate_pro_applications").select("email"),
+        supabaseAdmin.from("profiles").select("email"),
+      ]);
+      if (lErr) throw new Error(lErr.message);
+      const norm = (e?: string | null) => (e ?? "").trim().toLowerCase();
+      const existing = new Set<string>();
+      for (const r of runnerApps ?? []) existing.add(norm(r.email));
+      for (const r of investorApps ?? []) existing.add(norm(r.email));
+      const accounts = new Set<string>();
+      for (const p of profs ?? []) if (p.email) accounts.add(norm(p.email));
+      return {
+        applicants: (leads ?? [])
+          .filter((l) => l.email && !existing.has(norm(l.email)))
+          .map((l) => ({
+            id: l.id,
+            full_name: l.full_name,
+            email: l.email,
+            city: null,
+            state: null,
+            has_account: accounts.has(norm(l.email)),
+            created_at: l.lead_created_at ?? l.imported_at,
+          })),
+      };
+    }
     if (data.audience === "runner") {
       const { data: rows, error } = await supabaseAdmin
         .from("field_runner_applications")
@@ -68,7 +99,7 @@ export const listApplicants = createServerFn({ method: "GET" })
   });
 
 const sendSchema = z.object({
-  audience: z.enum(["runner", "investor"]),
+  audience: z.enum(["runner", "investor", "lead"]),
   subject: z.string().min(1).max(300),
   htmlContent: z.string().min(1).max(100_000),
   senderEmail: z.string().email(),
@@ -88,22 +119,37 @@ export const sendBroadcast = createServerFn({ method: "POST" })
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
     if (!BREVO_API_KEY) throw new Error("BREVO_API_KEY is not configured");
 
-    const table =
-      data.audience === "runner"
-        ? "field_runner_applications"
-        : "real_estate_pro_applications";
-
-    const { data: rows, error } = await supabaseAdmin
-      .from(table)
-      .select("id, full_name, email, user_id")
-      .in("id", data.recipientIds);
-    if (error) throw new Error(error.message);
-
-    const recipients = (rows ?? []).filter((r) => {
-      if (!r.email) return false;
-      if (data.onlyWithoutAccount && r.user_id) return false;
-      return true;
-    });
+    let recipients: { full_name: string | null; email: string; user_id?: string | null }[] = [];
+    if (data.audience === "lead") {
+      const { data: rows, error } = await supabaseAdmin
+        .from("facebook_leads")
+        .select("id, full_name, email")
+        .in("id", data.recipientIds);
+      if (error) throw new Error(error.message);
+      let accountEmails = new Set<string>();
+      if (data.onlyWithoutAccount) {
+        const { data: profs } = await supabaseAdmin.from("profiles").select("email");
+        for (const p of profs ?? []) if (p.email) accountEmails.add(p.email.trim().toLowerCase());
+      }
+      recipients = (rows ?? [])
+        .filter((r) => r.email && (!data.onlyWithoutAccount || !accountEmails.has(r.email.trim().toLowerCase())))
+        .map((r) => ({ full_name: r.full_name, email: r.email }));
+    } else {
+      const table =
+        data.audience === "runner"
+          ? "field_runner_applications"
+          : "real_estate_pro_applications";
+      const { data: rows, error } = await supabaseAdmin
+        .from(table)
+        .select("id, full_name, email, user_id")
+        .in("id", data.recipientIds);
+      if (error) throw new Error(error.message);
+      recipients = (rows ?? []).filter((r) => {
+        if (!r.email) return false;
+        if (data.onlyWithoutAccount && r.user_id) return false;
+        return true;
+      });
+    }
 
     const GATEWAY_URL = "https://connector-gateway.lovable.dev/brevo";
     const results: { email: string; status: "sent" | "failed"; error?: string }[] = [];
