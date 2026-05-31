@@ -1,9 +1,10 @@
-import { useState, useId, cloneElement, isValidElement } from "react";
+import { useState, useId, useRef, useEffect, cloneElement, isValidElement } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { finalizeSignupProfile } from "@/lib/signup.functions";
+import { precheckSignupAttempt } from "@/lib/spam-protection.functions";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -178,6 +179,36 @@ function TaskTypesGrid({
   );
 }
 
+/**
+ * Hidden honeypot field. Real users never see or fill it; bots that
+ * auto-fill every input do. Server-side precheck rejects any submission
+ * where this comes back non-empty.
+ */
+function HoneypotField() {
+  return (
+    <div
+      aria-hidden="true"
+      style={{
+        position: "absolute",
+        left: "-10000px",
+        width: "1px",
+        height: "1px",
+        overflow: "hidden",
+      }}
+    >
+      <label>
+        Website
+        <input
+          type="text"
+          name="website_url"
+          tabIndex={-1}
+          autoComplete="off"
+        />
+      </label>
+    </div>
+  );
+}
+
 function SuccessCard({
   onReset,
   needsEmailVerification,
@@ -229,6 +260,11 @@ function SuccessCard({
 export function FieldRunnerForm() {
   const navigate = useNavigate();
   const finalizeProfile = useServerFn(finalizeSignupProfile);
+  const precheck = useServerFn(precheckSignupAttempt);
+  const formMountedAt = useRef<number>(Date.now());
+  useEffect(() => {
+    formMountedAt.current = Date.now();
+  }, []);
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
   const [needsEmailVerification, setNeedsEmailVerification] = useState(false);
@@ -268,6 +304,7 @@ export function FieldRunnerForm() {
     const phone = String(f.get("phone") || "").trim();
     const city = String(f.get("city") || "").trim();
     const state = String(f.get("state") || "").trim();
+    const honeypot = String(f.get("website_url") || "");
 
     if (!full_name || !email || !phone || !city || !state) {
       toast.error("Please complete all required fields.");
@@ -288,6 +325,16 @@ export function FieldRunnerForm() {
 
     setSubmitting(true);
     try {
+      const elapsed_ms = Date.now() - formMountedAt.current;
+      const check = await precheck({
+        data: { email, role: "runner", honeypot, elapsed_ms },
+      });
+      if (!check.ok) {
+        setFormError(check.reason);
+        toast.error(check.reason);
+        setSubmitting(false);
+        return;
+      }
       const { hasSession, debug } = await createAccount({
         email,
         password,
@@ -335,6 +382,7 @@ export function FieldRunnerForm() {
 
   return (
     <form key={reset} onSubmit={handleSubmit} className="space-y-5">
+      <HoneypotField />
       {formError && (
         <Alert variant="destructive">
           <AlertCircle className="size-4" />
@@ -396,6 +444,11 @@ export function FieldRunnerForm() {
 export function ProForm() {
   const navigate = useNavigate();
   const finalizeProfile = useServerFn(finalizeSignupProfile);
+  const precheck = useServerFn(precheckSignupAttempt);
+  const formMountedAt = useRef<number>(Date.now());
+  useEffect(() => {
+    formMountedAt.current = Date.now();
+  }, []);
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
   const [needsEmailVerification, setNeedsEmailVerification] = useState(false);
@@ -426,6 +479,7 @@ export function ProForm() {
     const phone = String(f.get("phone") || "").trim();
     const company_name = String(f.get("company_name") || "").trim();
     const markets_served = String(f.get("markets_served") || "").trim();
+    const honeypot = String(f.get("website_url") || "");
 
     if (!full_name || !email || !phone || !markets_served) {
       toast.error("Please complete all required fields.");
@@ -442,6 +496,16 @@ export function ProForm() {
 
     setSubmitting(true);
     try {
+      const elapsed_ms = Date.now() - formMountedAt.current;
+      const check = await precheck({
+        data: { email, role: "investor", honeypot, elapsed_ms },
+      });
+      if (!check.ok) {
+        setFormError(check.reason);
+        toast.error(check.reason);
+        setSubmitting(false);
+        return;
+      }
       const { hasSession, debug } = await createAccount({
         email,
         password,
@@ -487,6 +551,7 @@ export function ProForm() {
 
   return (
     <form key={reset} onSubmit={handleSubmit} className="space-y-5">
+      <HoneypotField />
       {formError && (
         <Alert variant="destructive">
           <AlertCircle className="size-4" />
