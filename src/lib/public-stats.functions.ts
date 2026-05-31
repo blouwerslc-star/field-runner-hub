@@ -37,3 +37,66 @@ export const getPublicStats = createServerFn({ method: "GET" }).handler(async ()
     cities_active: cityKeys.size,
   };
 });
+
+/**
+ * City-level coverage points (no precise coords, no PII).
+ * Used for the homepage "market coverage" map.
+ * Aggregates open tasks + active runners by city/state.
+ */
+export const getCoveragePoints = createServerFn({ method: "GET" }).handler(async () => {
+  const [runners, tasks] = await Promise.all([
+    supabaseAdmin
+      .from("profiles")
+      .select("user_id, city, state")
+      .not("city", "is", null)
+      .not("state", "is", null)
+      .in(
+        "user_id",
+        (
+          (await supabaseAdmin.from("user_roles").select("user_id").eq("role", "runner"))
+            .data ?? []
+        ).map((r: any) => r.user_id),
+      ),
+    supabaseAdmin
+      .from("tasks")
+      .select("city, state, status")
+      .eq("status", "open")
+      .not("city", "is", null)
+      .not("state", "is", null)
+      .limit(500),
+  ]);
+
+  type Bucket = { city: string; state: string; runners: number; tasks: number };
+  const buckets = new Map<string, Bucket>();
+  const norm = (c?: string | null, s?: string | null) => {
+    const cc = (c || "").trim();
+    const ss = (s || "").trim();
+    if (!cc || !ss) return null;
+    return { key: `${cc.toLowerCase()}|${ss.toLowerCase()}`, city: cc, state: ss };
+  };
+
+  for (const r of runners.data ?? []) {
+    const n = norm((r as any).city, (r as any).state);
+    if (!n) continue;
+    const b = buckets.get(n.key) ?? { city: n.city, state: n.state, runners: 0, tasks: 0 };
+    b.runners += 1;
+    buckets.set(n.key, b);
+  }
+  for (const t of tasks.data ?? []) {
+    const n = norm((t as any).city, (t as any).state);
+    if (!n) continue;
+    const b = buckets.get(n.key) ?? { city: n.city, state: n.state, runners: 0, tasks: 0 };
+    b.tasks += 1;
+    buckets.set(n.key, b);
+  }
+
+  const points = Array.from(buckets.values()).map((b, i) => ({
+    id: `coverage-${i}`,
+    city: b.city,
+    state: b.state,
+    runners: b.runners,
+    tasks: b.tasks,
+  }));
+
+  return { points };
+});
