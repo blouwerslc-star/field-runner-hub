@@ -325,6 +325,59 @@ function PlatformStatsStrip() {
 }
 
 function _BetaStatusBoardImpl() {
+  return _BetaImplInner();
+}
+
+function CoverageMapSection() {
+  const fetchCoverage = useServerFn(getCoveragePoints);
+  const { data } = useQuery({
+    queryKey: ["home-coverage"],
+    queryFn: () => fetchCoverage(),
+    staleTime: 10 * 60_000,
+    retry: false,
+  });
+  const points: MapPoint[] = (data?.points ?? []).flatMap((p: any) => {
+    const out: MapPoint[] = [];
+    if (p.runners > 0) {
+      out.push({
+        id: `r-${p.id}`,
+        kind: "runner",
+        title: `${p.runners} runner${p.runners === 1 ? "" : "s"}`,
+        subtitle: `${p.city}, ${p.state}`,
+        city: p.city,
+        state: p.state,
+        badge: "Active market",
+      });
+    }
+    if (p.tasks > 0) {
+      out.push({
+        id: `t-${p.id}`,
+        kind: "task",
+        title: `${p.tasks} open task${p.tasks === 1 ? "" : "s"}`,
+        subtitle: `${p.city}, ${p.state}`,
+        href: "/tasks",
+        city: p.city,
+        state: p.state,
+      });
+    }
+    return out;
+  });
+  return (
+    <section aria-label="Market coverage" className="mx-auto max-w-7xl px-5 pt-8 md:pt-10">
+      <MarketplaceMap
+        points={points}
+        title="Live market coverage"
+        emptyMessage="No active cities yet — be the first market to launch."
+        height={380}
+      />
+      <p className="mt-2 text-[11px] text-muted-foreground text-center">
+        Pins show city-level aggregates only. Runner home addresses are never displayed.
+      </p>
+    </section>
+  );
+}
+
+function _BetaImplInner() {
   return (
     <section className="mx-auto max-w-7xl px-5 pt-10 md:pt-14">
       <div className="rounded-2xl border border-border bg-card/60 backdrop-blur p-5 md:p-7 shadow-card">
