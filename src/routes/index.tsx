@@ -398,7 +398,8 @@ function Index() {
             <Link to="/pricing" className="hover:text-foreground transition">Pricing</Link>
             <Link to="/trust" className="hover:text-foreground transition">Trust & Safety</Link>
             <Link to="/story" className="hover:text-foreground transition">Our Story</Link>
-            <button onClick={() => scrollToId("services")} className="hover:text-foreground transition">Services</button>
+            <Link to="/runners" className="hover:text-foreground transition">For Runners</Link>
+            <Link to="/investors" className="hover:text-foreground transition">For Investors</Link>
             <Link to="/faq" className="hover:text-foreground transition">FAQ</Link>
           </nav>
           <div className="flex items-center gap-2">
