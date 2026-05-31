@@ -979,6 +979,7 @@ function Index() {
               <li><Link to="/trust" className="hover:text-foreground">Trust & Safety</Link></li>
               <li><Link to="/pricing" className="hover:text-foreground">Pricing</Link></li>
               <li><Link to="/investors" className="hover:text-foreground">For investors</Link></li>
+              <li><Link to="/runners" className="hover:text-foreground">For runners</Link></li>
               <li><Link to="/faq" className="hover:text-foreground">FAQ</Link></li>
               <li><a href="mailto:support@reirunner.com" className="hover:text-foreground inline-flex items-center gap-1.5"><HelpCircle className="size-3.5" /> Contact support</a></li>
               <li><Link to="/terms" className="hover:text-foreground">Terms</Link></li>
