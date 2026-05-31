@@ -9,7 +9,7 @@ import { MarketplaceMap, type MapPoint } from "@/components/maps/MarketplaceMap"
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { Loader2, Search } from "lucide-react";
+import { Loader2, Search, BadgeCheck, Star, Trophy } from "lucide-react";
 
 export const Route = createFileRoute("/profiles")({
   component: ProfilesDirectory,
@@ -48,6 +48,16 @@ function ProfilesDirectory() {
 
   const profiles = (data?.profiles ?? []) as unknown as PublicProfile[];
 
+  const verifiedCount = profiles.filter((p: any) => p.verified_status).length;
+  const topRunners = profiles.filter((p: any) => p.top_runner).length;
+  const ratings = profiles
+    .map((p: any) => (p.average_rating != null ? Number(p.average_rating) : null))
+    .filter((n): n is number => n != null && !Number.isNaN(n));
+  const avgRating = ratings.length ? (ratings.reduce((a, b) => a + b, 0) / ratings.length).toFixed(1) : "—";
+  const uniqueMarkets = new Set(
+    profiles.map((p: any) => [p.city, p.state].filter(Boolean).join(", ")).filter(Boolean)
+  ).size;
+
   const mapPoints: MapPoint[] = profiles.map((p: any) => ({
     id: p.user_id,
     kind: "runner",
@@ -64,14 +74,40 @@ function ProfilesDirectory() {
       <header className="sticky top-0 z-40 backdrop-blur bg-background/70 border-b border-border/60">
         <div className="mx-auto max-w-7xl px-5 h-16 flex items-center justify-between">
           <Link to="/" aria-label="REI Runner home"><BrandLogo /></Link>
-          <Link to="/dashboard" className="text-sm text-muted-foreground hover:text-foreground">Dashboard</Link>
+          <div className="flex items-center gap-4 text-sm">
+            <Link to="/tasks" className="text-muted-foreground hover:text-foreground">Open tasks</Link>
+            <Link to="/runners" className="text-muted-foreground hover:text-foreground">Become a runner</Link>
+            <Link to="/dashboard" className="text-muted-foreground hover:text-foreground">Dashboard</Link>
+          </div>
         </div>
       </header>
 
       <main className="mx-auto max-w-7xl px-5 py-10">
-        <div className="mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold tracking-tight">Browse the marketplace</h1>
-          <p className="mt-2 text-muted-foreground">Find runners and investors active in your market.</p>
+        <div className="mb-8 flex flex-wrap items-end justify-between gap-6">
+          <div>
+            <h1 className="text-3xl md:text-4xl font-bold tracking-tight">Browse the marketplace</h1>
+            <p className="mt-2 text-muted-foreground">Find runners and investors active in your market.</p>
+          </div>
+          {!isLoading && profiles.length > 0 && (
+            <dl className="grid grid-cols-4 gap-6 text-sm">
+              <div>
+                <dt className="text-muted-foreground text-xs uppercase tracking-wide">Profiles</dt>
+                <dd className="text-2xl font-bold tabular-nums">{profiles.length}</dd>
+              </div>
+              <div>
+                <dt className="text-muted-foreground text-xs uppercase tracking-wide inline-flex items-center gap-1"><BadgeCheck className="size-3" /> Verified</dt>
+                <dd className="text-2xl font-bold tabular-nums">{verifiedCount}</dd>
+              </div>
+              <div>
+                <dt className="text-muted-foreground text-xs uppercase tracking-wide inline-flex items-center gap-1"><Trophy className="size-3" /> Top</dt>
+                <dd className="text-2xl font-bold tabular-nums">{topRunners}</dd>
+              </div>
+              <div>
+                <dt className="text-muted-foreground text-xs uppercase tracking-wide inline-flex items-center gap-1"><Star className="size-3" /> Avg rating</dt>
+                <dd className="text-2xl font-bold tabular-nums">{avgRating}</dd>
+              </div>
+            </dl>
+          )}
         </div>
 
         <div className="mb-6">
