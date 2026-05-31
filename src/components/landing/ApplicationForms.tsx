@@ -382,6 +382,7 @@ export function FieldRunnerForm() {
 
   return (
     <form key={reset} onSubmit={handleSubmit} className="space-y-5">
+      <HoneypotField />
       {formError && (
         <Alert variant="destructive">
           <AlertCircle className="size-4" />
@@ -550,6 +551,7 @@ export function ProForm() {
 
   return (
     <form key={reset} onSubmit={handleSubmit} className="space-y-5">
+      <HoneypotField />
       {formError && (
         <Alert variant="destructive">
           <AlertCircle className="size-4" />
