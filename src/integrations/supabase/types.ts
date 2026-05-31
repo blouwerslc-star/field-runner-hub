@@ -2302,6 +2302,15 @@ export type Database = {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
       }
+      email_queue_metrics: {
+        Args: never
+        Returns: {
+          oldest_msg_age_sec: number
+          queue_length: number
+          queue_name: string
+          total_messages: number
+        }[]
+      }
       enqueue_email: {
         Args: { payload: Json; queue_name: string }
         Returns: number
