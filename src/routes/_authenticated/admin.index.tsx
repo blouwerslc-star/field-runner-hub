@@ -24,7 +24,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Loader2, Users, ClipboardList, UserCog, Plus, ShieldCheck, Send, BarChart3, Activity, BadgeCheck } from "lucide-react";
+import { Loader2, Users, ClipboardList, UserCog, Plus, ShieldCheck, Send, BarChart3, Activity, BadgeCheck, Mail } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { listPayouts, markPayoutPaid } from "@/lib/payments.functions";
@@ -143,6 +143,7 @@ function AdminDashboard() {
         <Button asChild variant="outline" size="sm" className="justify-start"><Link to="/admin/dispatch"><Send className="size-4 mr-2" /> Dispatch</Link></Button>
         <Button asChild variant="outline" size="sm" className="justify-start"><Link to="/admin/analytics"><BarChart3 className="size-4 mr-2" /> Analytics</Link></Button>
         <Button asChild variant="outline" size="sm" className="justify-start"><Link to="/admin/broadcasts"><Send className="size-4 mr-2" /> Broadcasts</Link></Button>
+        <Button asChild variant="outline" size="sm" className="justify-start"><Link to="/admin/email-monitor"><Mail className="size-4 mr-2" /> Email monitor</Link></Button>
       </div>
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
         <StatTile icon={Users} label="Runners" value={runners.length} />
