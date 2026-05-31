@@ -433,6 +433,45 @@ export type Database = {
         }
         Relationships: []
       }
+      broadcast_sends: {
+        Row: {
+          audience: string
+          created_at: string
+          error_message: string | null
+          id: string
+          provider_message_id: string | null
+          recipient_email: string
+          recipient_name: string | null
+          sent_by: string | null
+          status: string
+          subject: string
+        }
+        Insert: {
+          audience: string
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          provider_message_id?: string | null
+          recipient_email: string
+          recipient_name?: string | null
+          sent_by?: string | null
+          status?: string
+          subject: string
+        }
+        Update: {
+          audience?: string
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          provider_message_id?: string | null
+          recipient_email?: string
+          recipient_name?: string | null
+          sent_by?: string | null
+          status?: string
+          subject?: string
+        }
+        Relationships: []
+      }
       conversation_participants: {
         Row: {
           conversation_id: string
