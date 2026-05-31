@@ -48,7 +48,6 @@ function ProfilesDirectory() {
 
   const profiles = (data?.profiles ?? []) as unknown as PublicProfile[];
 
-  const runners = profiles.filter((p: any) => p.role === "runner" || p.runner_id || p.headline);
   const verifiedCount = profiles.filter((p: any) => p.verified_status).length;
   const topRunners = profiles.filter((p: any) => p.top_runner).length;
   const ratings = profiles
