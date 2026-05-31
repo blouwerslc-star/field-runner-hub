@@ -99,6 +99,25 @@ export const getEmailMonitorData = createServerFn({ method: "GET" })
       deduped.push(row);
     }
 
+    // Broadcast sends (separate table, not in email_send_log)
+    const { data: broadcasts } = await supabaseAdmin
+      .from("broadcast_sends")
+      .select("id, subject, recipient_email, status, error_message, created_at, audience")
+      .gte("created_at", since)
+      .order("created_at", { ascending: false })
+      .limit(500);
+    for (const b of broadcasts ?? []) {
+      deduped.push({
+        message_id: b.id,
+        template_name: `broadcast:${b.audience}`,
+        recipient_email: b.recipient_email,
+        status: b.status,
+        error_message: b.error_message,
+        created_at: b.created_at,
+      });
+    }
+    deduped.sort((a, b) => (a.created_at < b.created_at ? 1 : -1));
+
     // Stats by status
     const stats = {
       total: deduped.length,
