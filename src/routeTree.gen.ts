@@ -16,6 +16,7 @@ import { Route as TasksRouteImport } from './routes/tasks'
 import { Route as StoryRouteImport } from './routes/story'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SignupRouteImport } from './routes/signup'
+import { Route as RunnersRouteImport } from './routes/runners'
 import { Route as ProfilesRouteImport } from './routes/profiles'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as PricingRouteImport } from './routes/pricing'
@@ -124,6 +125,11 @@ const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
   path: '/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RunnersRoute = RunnersRouteImport.update({
+  id: '/runners',
+  path: '/runners',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProfilesRoute = ProfilesRouteImport.update({
@@ -552,6 +558,7 @@ export interface FileRoutesByFullPath {
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
   '/profiles': typeof ProfilesRoute
+  '/runners': typeof RunnersRoute
   '/signup': typeof SignupRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/story': typeof StoryRoute
@@ -634,6 +641,7 @@ export interface FileRoutesByTo {
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
   '/profiles': typeof ProfilesRoute
+  '/runners': typeof RunnersRoute
   '/signup': typeof SignupRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/story': typeof StoryRoute
@@ -713,6 +721,7 @@ export interface FileRoutesById {
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
   '/profiles': typeof ProfilesRoute
+  '/runners': typeof RunnersRoute
   '/signup': typeof SignupRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/story': typeof StoryRoute
@@ -797,6 +806,7 @@ export interface FileRouteTypes {
     | '/pricing'
     | '/privacy'
     | '/profiles'
+    | '/runners'
     | '/signup'
     | '/sitemap.xml'
     | '/story'
@@ -879,6 +889,7 @@ export interface FileRouteTypes {
     | '/pricing'
     | '/privacy'
     | '/profiles'
+    | '/runners'
     | '/signup'
     | '/sitemap.xml'
     | '/story'
@@ -957,6 +968,7 @@ export interface FileRouteTypes {
     | '/pricing'
     | '/privacy'
     | '/profiles'
+    | '/runners'
     | '/signup'
     | '/sitemap.xml'
     | '/story'
@@ -1041,6 +1053,7 @@ export interface RootRouteChildren {
   PricingRoute: typeof PricingRoute
   PrivacyRoute: typeof PrivacyRoute
   ProfilesRoute: typeof ProfilesRoute
+  RunnersRoute: typeof RunnersRoute
   SignupRoute: typeof SignupRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   StoryRoute: typeof StoryRoute
@@ -1109,6 +1122,13 @@ declare module '@tanstack/react-router' {
       path: '/signup'
       fullPath: '/signup'
       preLoaderRoute: typeof SignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/runners': {
+      id: '/runners'
+      path: '/runners'
+      fullPath: '/runners'
+      preLoaderRoute: typeof RunnersRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/profiles': {
@@ -1832,6 +1852,7 @@ const rootRouteChildren: RootRouteChildren = {
   PricingRoute: PricingRoute,
   PrivacyRoute: PrivacyRoute,
   ProfilesRoute: ProfilesRoute,
+  RunnersRoute: RunnersRoute,
   SignupRoute: SignupRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   StoryRoute: StoryRoute,
