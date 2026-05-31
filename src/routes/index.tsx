@@ -526,6 +526,9 @@ function Index() {
       {/* LIVE PLATFORM STATS */}
       <PlatformStatsStrip />
 
+      {/* MARKET COVERAGE MAP */}
+      <CoverageMapSection />
+
       {/* TRUST BADGES STRIP */}
       <section aria-label="Platform trust signals" className="mx-auto max-w-7xl px-5 pt-8 md:pt-10">
         <div className="rounded-2xl border border-border bg-card/40 backdrop-blur p-5 md:p-6">
