@@ -7,7 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { BrandLogo } from "@/components/brand/BrandLogo";
-import { Loader2, MapPin, DollarSign, Calendar, BadgeCheck, Bookmark, BookmarkCheck, Star } from "lucide-react";
+import { Loader2, MapPin, DollarSign, Calendar, BadgeCheck, Bookmark, BookmarkCheck, Star, ShieldCheck, Camera, Wallet, Clock } from "lucide-react";
 import { toast } from "sonner";
 import { Toaster } from "@/components/ui/sonner";
 
@@ -112,13 +112,39 @@ function TaskDetailPage() {
               <p className="text-sm text-muted-foreground whitespace-pre-wrap">{t.description}</p>
             </section>
           )}
-          <p className="mt-8 text-xs text-muted-foreground">
-            Exact property address is shared with the runner after assignment.
-          </p>
+
+          <section className="mt-10">
+            <h2 className="text-lg font-semibold mb-3">What to expect</h2>
+            <ol className="grid sm:grid-cols-2 gap-3">
+              {[
+                { icon: BadgeCheck, t: "Apply", b: "Send a short message. The investor reviews vetted runners and assigns the job." },
+                { icon: MapPin, t: "Get the address", b: "The exact property address is shared only after assignment." },
+                { icon: Camera, t: "Complete on site", b: "Submit geo-tagged photos, video, and notes from the property." },
+                { icon: Wallet, t: "Get paid", b: "Funds release after the investor approves your submission." },
+              ].map((s) => (
+                <li key={s.t} className="rounded-xl border border-border bg-card/40 p-4">
+                  <s.icon className="size-4 text-primary" />
+                  <div className="mt-2 font-medium text-sm">{s.t}</div>
+                  <p className="mt-0.5 text-xs text-muted-foreground leading-relaxed">{s.b}</p>
+                </li>
+              ))}
+            </ol>
+          </section>
+
+          <div className="mt-8 rounded-xl border border-border/60 bg-card/30 p-4 flex items-start gap-3 text-xs text-muted-foreground">
+            <ShieldCheck className="size-4 text-emerald-400 shrink-0 mt-0.5" />
+            <div>
+              <span className="text-foreground font-medium">Safety & privacy.</span> Exact addresses are gated until assignment. Every investor on REI Runner is identity-verified. Runners must follow lockbox and access protocols.{" "}
+              <Link to="/trust" className="underline underline-offset-4 hover:text-foreground">Read our trust standards</Link>.
+            </div>
+          </div>
         </div>
 
         <aside>
           <div className="rounded-2xl border border-border/60 bg-card/40 p-5 sticky top-24 space-y-4">
+            <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+              <Clock className="size-3" /> Typical response: under 24 hours
+            </div>
             {authed === false ? (
               <>
                 <p className="text-sm text-muted-foreground">Sign in as a runner to apply for this task.</p>
