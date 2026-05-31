@@ -10,12 +10,15 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WaitlistRouteImport } from './routes/waitlist'
+import { Route as TrustRouteImport } from './routes/trust'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as TasksRouteImport } from './routes/tasks'
+import { Route as StoryRouteImport } from './routes/story'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as ProfilesRouteImport } from './routes/profiles'
 import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as InvestorsRouteImport } from './routes/investors'
 import { Route as FaqRouteImport } from './routes/faq'
@@ -93,6 +96,11 @@ const WaitlistRoute = WaitlistRouteImport.update({
   path: '/waitlist',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TrustRoute = TrustRouteImport.update({
+  id: '/trust',
+  path: '/trust',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
   path: '/terms',
@@ -101,6 +109,11 @@ const TermsRoute = TermsRouteImport.update({
 const TasksRoute = TasksRouteImport.update({
   id: '/tasks',
   path: '/tasks',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StoryRoute = StoryRouteImport.update({
+  id: '/story',
+  path: '/story',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
@@ -121,6 +134,11 @@ const ProfilesRoute = ProfilesRouteImport.update({
 const PrivacyRoute = PrivacyRouteImport.update({
   id: '/privacy',
   path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PricingRoute = PricingRouteImport.update({
+  id: '/pricing',
+  path: '/pricing',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -531,12 +549,15 @@ export interface FileRoutesByFullPath {
   '/faq': typeof FaqRoute
   '/investors': typeof InvestorsRoute
   '/login': typeof LoginRoute
+  '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
   '/profiles': typeof ProfilesRoute
   '/signup': typeof SignupRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/story': typeof StoryRoute
   '/tasks': typeof TasksRouteWithChildren
   '/terms': typeof TermsRoute
+  '/trust': typeof TrustRoute
   '/waitlist': typeof WaitlistRoute
   '/academy': typeof AuthenticatedAcademyRouteWithChildren
   '/activity': typeof AuthenticatedActivityRoute
@@ -610,12 +631,15 @@ export interface FileRoutesByTo {
   '/faq': typeof FaqRoute
   '/investors': typeof InvestorsRoute
   '/login': typeof LoginRoute
+  '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
   '/profiles': typeof ProfilesRoute
   '/signup': typeof SignupRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/story': typeof StoryRoute
   '/tasks': typeof TasksRouteWithChildren
   '/terms': typeof TermsRoute
+  '/trust': typeof TrustRoute
   '/waitlist': typeof WaitlistRoute
   '/activity': typeof AuthenticatedActivityRoute
   '/admin-dashboard': typeof AuthenticatedAdminDashboardRoute
@@ -686,12 +710,15 @@ export interface FileRoutesById {
   '/faq': typeof FaqRoute
   '/investors': typeof InvestorsRoute
   '/login': typeof LoginRoute
+  '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
   '/profiles': typeof ProfilesRoute
   '/signup': typeof SignupRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/story': typeof StoryRoute
   '/tasks': typeof TasksRouteWithChildren
   '/terms': typeof TermsRoute
+  '/trust': typeof TrustRoute
   '/waitlist': typeof WaitlistRoute
   '/_authenticated/academy': typeof AuthenticatedAcademyRouteWithChildren
   '/_authenticated/activity': typeof AuthenticatedActivityRoute
@@ -767,12 +794,15 @@ export interface FileRouteTypes {
     | '/faq'
     | '/investors'
     | '/login'
+    | '/pricing'
     | '/privacy'
     | '/profiles'
     | '/signup'
     | '/sitemap.xml'
+    | '/story'
     | '/tasks'
     | '/terms'
+    | '/trust'
     | '/waitlist'
     | '/academy'
     | '/activity'
@@ -846,12 +876,15 @@ export interface FileRouteTypes {
     | '/faq'
     | '/investors'
     | '/login'
+    | '/pricing'
     | '/privacy'
     | '/profiles'
     | '/signup'
     | '/sitemap.xml'
+    | '/story'
     | '/tasks'
     | '/terms'
+    | '/trust'
     | '/waitlist'
     | '/activity'
     | '/admin-dashboard'
@@ -921,12 +954,15 @@ export interface FileRouteTypes {
     | '/faq'
     | '/investors'
     | '/login'
+    | '/pricing'
     | '/privacy'
     | '/profiles'
     | '/signup'
     | '/sitemap.xml'
+    | '/story'
     | '/tasks'
     | '/terms'
+    | '/trust'
     | '/waitlist'
     | '/_authenticated/academy'
     | '/_authenticated/activity'
@@ -1002,12 +1038,15 @@ export interface RootRouteChildren {
   FaqRoute: typeof FaqRoute
   InvestorsRoute: typeof InvestorsRoute
   LoginRoute: typeof LoginRoute
+  PricingRoute: typeof PricingRoute
   PrivacyRoute: typeof PrivacyRoute
   ProfilesRoute: typeof ProfilesRoute
   SignupRoute: typeof SignupRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  StoryRoute: typeof StoryRoute
   TasksRoute: typeof TasksRouteWithChildren
   TermsRoute: typeof TermsRoute
+  TrustRoute: typeof TrustRoute
   WaitlistRoute: typeof WaitlistRoute
   CheckoutReturnRoute: typeof CheckoutReturnRoute
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
@@ -1030,6 +1069,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof WaitlistRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/trust': {
+      id: '/trust'
+      path: '/trust'
+      fullPath: '/trust'
+      preLoaderRoute: typeof TrustRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/terms': {
       id: '/terms'
       path: '/terms'
@@ -1042,6 +1088,13 @@ declare module '@tanstack/react-router' {
       path: '/tasks'
       fullPath: '/tasks'
       preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/story': {
+      id: '/story'
+      path: '/story'
+      fullPath: '/story'
+      preLoaderRoute: typeof StoryRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/sitemap.xml': {
@@ -1070,6 +1123,13 @@ declare module '@tanstack/react-router' {
       path: '/privacy'
       fullPath: '/privacy'
       preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pricing': {
+      id: '/pricing'
+      path: '/pricing'
+      fullPath: '/pricing'
+      preLoaderRoute: typeof PricingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -1769,12 +1829,15 @@ const rootRouteChildren: RootRouteChildren = {
   FaqRoute: FaqRoute,
   InvestorsRoute: InvestorsRoute,
   LoginRoute: LoginRoute,
+  PricingRoute: PricingRoute,
   PrivacyRoute: PrivacyRoute,
   ProfilesRoute: ProfilesRoute,
   SignupRoute: SignupRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  StoryRoute: StoryRoute,
   TasksRoute: TasksRouteWithChildren,
   TermsRoute: TermsRoute,
+  TrustRoute: TrustRoute,
   WaitlistRoute: WaitlistRoute,
   CheckoutReturnRoute: CheckoutReturnRoute,
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
