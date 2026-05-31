@@ -53,6 +53,7 @@ import heroBg from "@/assets/hero-bg.jpg";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { listActivity } from "@/lib/activity.functions";
+import { getPublicStats } from "@/lib/public-stats.functions";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -282,6 +283,46 @@ function MarketplaceUpdatesTicker() {
 }
 
 function BetaStatusBoard() {
+  return _BetaStatusBoardImpl();
+}
+
+function PlatformStatsStrip() {
+  const fetchStats = useServerFn(getPublicStats);
+  const { data } = useQuery({
+    queryKey: ["home-public-stats"],
+    queryFn: () => fetchStats(),
+    staleTime: 5 * 60_000,
+    retry: false,
+  });
+  const stats = [
+    { label: "Registered investors", value: data?.investors ?? 0 },
+    { label: "Approved runners", value: data?.runners ?? 0 },
+    { label: "Tasks posted", value: data?.tasks_total ?? 0 },
+    { label: "Tasks completed", value: data?.tasks_completed ?? 0 },
+    { label: "Active cities", value: data?.cities_active ?? 0 },
+    { label: "Avg. rating", value: data?.reviews_count ? `${data.avg_rating} / 5` : "—" },
+  ];
+  return (
+    <section aria-label="Platform stats" className="mx-auto max-w-7xl px-5 pt-8 md:pt-10">
+      <div className="rounded-2xl border border-border bg-card/40 backdrop-blur p-5 md:p-6">
+        <div className="flex items-center justify-between mb-4">
+          <div className="text-xs font-mono uppercase tracking-widest text-primary">Live numbers</div>
+          <div className="text-[11px] text-muted-foreground">Updated in real time — no inflated metrics.</div>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
+          {stats.map((s) => (
+            <div key={s.label} className="rounded-xl border border-border/60 bg-background/40 p-3">
+              <div className="text-2xl font-bold tabular-nums">{s.value}</div>
+              <div className="mt-1 text-[11px] text-muted-foreground leading-snug">{s.label}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function _BetaStatusBoardImpl() {
   return (
     <section className="mx-auto max-w-7xl px-5 pt-10 md:pt-14">
       <div className="rounded-2xl border border-border bg-card/60 backdrop-blur p-5 md:p-7 shadow-card">
@@ -357,7 +398,8 @@ function Index() {
             <Link to="/pricing" className="hover:text-foreground transition">Pricing</Link>
             <Link to="/trust" className="hover:text-foreground transition">Trust & Safety</Link>
             <Link to="/story" className="hover:text-foreground transition">Our Story</Link>
-            <button onClick={() => scrollToId("services")} className="hover:text-foreground transition">Services</button>
+            <Link to="/runners" className="hover:text-foreground transition">For Runners</Link>
+            <Link to="/investors" className="hover:text-foreground transition">For Investors</Link>
             <Link to="/faq" className="hover:text-foreground transition">FAQ</Link>
           </nav>
           <div className="flex items-center gap-2">
@@ -478,6 +520,9 @@ function Index() {
 
       {/* BETA STATUS BOARD */}
       <BetaStatusBoard />
+
+      {/* LIVE PLATFORM STATS */}
+      <PlatformStatsStrip />
 
       {/* TRUST BADGES STRIP */}
       <section aria-label="Platform trust signals" className="mx-auto max-w-7xl px-5 pt-8 md:pt-10">
@@ -934,6 +979,7 @@ function Index() {
               <li><Link to="/trust" className="hover:text-foreground">Trust & Safety</Link></li>
               <li><Link to="/pricing" className="hover:text-foreground">Pricing</Link></li>
               <li><Link to="/investors" className="hover:text-foreground">For investors</Link></li>
+              <li><Link to="/runners" className="hover:text-foreground">For runners</Link></li>
               <li><Link to="/faq" className="hover:text-foreground">FAQ</Link></li>
               <li><a href="mailto:support@reirunner.com" className="hover:text-foreground inline-flex items-center gap-1.5"><HelpCircle className="size-3.5" /> Contact support</a></li>
               <li><Link to="/terms" className="hover:text-foreground">Terms</Link></li>
