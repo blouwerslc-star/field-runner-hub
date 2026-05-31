@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { listPublicProfiles } from "@/lib/profiles.functions";
 import { ProfileCard, type PublicProfile } from "@/components/profiles/ProfileCard";
 import { BrandLogo } from "@/components/brand/BrandLogo";
+import { MarketplaceMap, type MapPoint } from "@/components/maps/MarketplaceMap";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
@@ -47,6 +48,19 @@ function ProfilesDirectory() {
 
   const profiles = (data?.profiles ?? []) as PublicProfile[];
 
+  const mapPoints: MapPoint[] = profiles.map((p: any) => ({
+    id: p.user_id,
+    kind: "runner",
+    title: p.full_name ?? "Runner",
+    subtitle: [p.city, p.state].filter(Boolean).join(", ") || p.headline || null,
+    href: p.profile_slug ? `/profile/${p.profile_slug}` : null,
+    lat: p.home_lat,
+    lng: p.home_lng,
+    city: p.city,
+    state: p.state,
+    badge: p.top_runner ? "Top Runner" : p.availability_status === "available" ? "Available" : null,
+  }));
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <header className="sticky top-0 z-40 backdrop-blur bg-background/70 border-b border-border/60">
@@ -60,6 +74,14 @@ function ProfilesDirectory() {
         <div className="mb-8">
           <h1 className="text-3xl md:text-4xl font-bold tracking-tight">Browse the marketplace</h1>
           <p className="mt-2 text-muted-foreground">Find runners and investors active in your market.</p>
+        </div>
+
+        <div className="mb-6">
+          <MarketplaceMap
+            points={mapPoints}
+            title="Runners on the map"
+            emptyMessage="No runner locations available for these filters."
+          />
         </div>
 
         <form
