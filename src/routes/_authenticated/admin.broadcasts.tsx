@@ -24,7 +24,7 @@ export const Route = createFileRoute("/_authenticated/admin/broadcasts")({
   head: () => ({ meta: [{ title: "Broadcasts — Admin — REI Runner" }] }),
 });
 
-type Audience = "runner" | "investor";
+type Audience = "runner" | "investor" | "lead";
 
 const DEFAULTS: Record<Audience, { subject: string; html: string }> = {
   runner: {
@@ -43,6 +43,19 @@ const DEFAULTS: Record<Audience, { subject: string; html: string }> = {
 <p>Thanks for your interest in REI Runner. You're on the early access list for investors — the next step is to create your account so you can post tasks and start working with vetted runners in your market.</p>
 <p><a href="https://reirunner.com/signup?role=investor" style="display:inline-block;background:#16a34a;color:#fff;padding:12px 20px;border-radius:8px;text-decoration:none;font-weight:600">Finish setting up my Investor account</a></p>
 <p>If you have questions about pricing, markets, or how runners are vetted, just reply to this email.</p>
+<p>— The REI Runner Team</p>`,
+  },
+  lead: {
+    subject: "{{firstName}}, your REI Runner account is ready to claim",
+    html: `<p>Hi {{firstName}},</p>
+<p>Thanks for raising your hand for REI Runner — the marketplace that connects real estate investors with vetted, local field runners for lockbox checks, photos, drive-bys, sign installs, and more.</p>
+<p>Whichever side you're on, the next step is the same: create your free account so you're set up the moment your market goes live.</p>
+<p style="margin:24px 0;text-align:center">
+  <a href="https://reirunner.com/signup?role=runner" style="display:inline-block;background:#16a34a;color:#fff;padding:12px 22px;border-radius:8px;text-decoration:none;font-weight:600;margin:0 6px 8px 0">I'm a Runner — earn local jobs</a>
+  <a href="https://reirunner.com/signup?role=investor" style="display:inline-block;background:#0f172a;color:#fff;padding:12px 22px;border-radius:8px;text-decoration:none;font-weight:600;border:1px solid #16a34a;margin:0 6px 8px 0">I'm an Investor — get boots on the ground</a>
+</p>
+<p style="font-size:14px;color:#475569"><strong>Runners</strong> get paid per task in their area — no experience required, just a smartphone, transportation, and a willingness to show up. <strong>Investors</strong> get fast, reliable eyes on properties anywhere in the U.S. without hiring a full-time team.</p>
+<p>Not sure which fits? Just reply to this email and we'll help you decide.</p>
 <p>— The REI Runner Team</p>`,
   },
 };
@@ -158,6 +171,7 @@ function BroadcastsPage() {
         <TabsList className="mb-6">
           <TabsTrigger value="runner">Runner applicants</TabsTrigger>
           <TabsTrigger value="investor">Investor applicants</TabsTrigger>
+          <TabsTrigger value="lead">Facebook leads</TabsTrigger>
         </TabsList>
 
         <TabsContent value={audience} className="space-y-6">
