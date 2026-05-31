@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { BrandLogo } from "@/components/brand/BrandLogo";
 import { Loader2, MapPin, DollarSign, Calendar, Search, BadgeCheck } from "lucide-react";
+import { MarketplaceMap, type MapPoint } from "@/components/maps/MarketplaceMap";
 
 export const Route = createFileRoute("/tasks")({
   component: MarketplacePage,
@@ -48,6 +49,19 @@ function MarketplacePage() {
   });
   const tasks = data?.tasks ?? [];
 
+  const mapPoints: MapPoint[] = (tasks as any[]).map((t) => ({
+    id: t.id,
+    kind: "task",
+    title: t.title ?? "Open task",
+    subtitle: [t.city, t.state].filter(Boolean).join(", ") || null,
+    href: `/tasks/${t.id}`,
+    lat: t.lat ?? null,
+    lng: t.lng ?? null,
+    city: t.city,
+    state: t.state,
+    badge: t.payout_amount != null ? `$${Number(t.payout_amount).toFixed(0)}` : t.task_type ?? null,
+  }));
+
   function reset() {
     setQ(""); setCity(""); setState(""); setTaskType("all");
     setMinPayout(""); setMaxPayout(""); setBeforeDue(""); setSort("newest");
@@ -68,6 +82,14 @@ function MarketplacePage() {
         <div className="mb-8">
           <h1 className="text-3xl md:text-4xl font-bold tracking-tight">Open tasks</h1>
           <p className="mt-2 text-muted-foreground">Real-time marketplace of property visits, photos, occupancy checks, and more.</p>
+        </div>
+
+        <div className="mb-6">
+          <MarketplaceMap
+            points={mapPoints}
+            title="Open tasks on the map"
+            emptyMessage="No task locations available for these filters."
+          />
         </div>
 
         <form
