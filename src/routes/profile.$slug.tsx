@@ -270,10 +270,10 @@ function PublicProfilePage() {
 
               {isRunner ? (
                 <>
-                  <Button className="w-full" onClick={() => navigate({ to: "/messages/new" })}>
+                  <Button className="w-full" onClick={() => navigate({ to: "/messages/new", search: { to: userId } })}>
                     <Send className="size-4 mr-1.5" /> Request Service
                   </Button>
-                  <Button variant="outline" className="w-full" onClick={() => navigate({ to: "/messages/new" })}>
+                  <Button variant="outline" className="w-full" onClick={() => navigate({ to: "/messages/new", search: { to: userId } })}>
                     <MessageSquare className="size-4 mr-1.5" /> Message Runner
                   </Button>
                   <div className="grid grid-cols-2 gap-2">
@@ -294,7 +294,7 @@ function PublicProfilePage() {
                   </div>
                 </>
               ) : (
-                <Button className="w-full" onClick={() => navigate({ to: "/messages/new" })}>
+                <Button className="w-full" onClick={() => navigate({ to: "/messages/new", search: { to: userId } })}>
                   <MessageSquare className="size-4 mr-1.5" /> Message
                 </Button>
               )}
