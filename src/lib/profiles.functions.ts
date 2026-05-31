@@ -250,6 +250,7 @@ export const listPublicProfiles = createServerFn({ method: "POST" })
     // attach roles
     const userIds = filtered.map((r) => (r as { user_id: string }).user_id);
     const rolesByUser = new Map<string, string[]>();
+    const certByUser = new Map<string, { level: string | null; status: string | null }>();
     if (userIds.length) {
       const { data: roleRows } = await supabaseAdmin
         .from("user_roles")
@@ -260,11 +261,22 @@ export const listPublicProfiles = createServerFn({ method: "POST" })
         arr.push(r.role as string);
         rolesByUser.set(r.user_id, arr);
       }
+      const { data: runnerRows } = await supabaseAdmin
+        .from("runner_profiles")
+        .select("user_id, certification_level, certification_status")
+        .in("user_id", userIds);
+      for (const r of runnerRows ?? []) {
+        certByUser.set((r as any).user_id, {
+          level: (r as any).certification_level ?? null,
+          status: (r as any).certification_status ?? null,
+        });
+      }
     }
     return {
       profiles: filtered.map((p) => ({
         ...(p as Record<string, unknown>),
         roles: rolesByUser.get((p as { user_id: string }).user_id) ?? [],
+        academy_certification: certByUser.get((p as { user_id: string }).user_id) ?? null,
       })),
     };
   });
