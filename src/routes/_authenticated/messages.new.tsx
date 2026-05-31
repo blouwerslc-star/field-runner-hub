@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate, useSearch } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,7 +12,12 @@ import { toast } from "sonner";
 import { listMessageableUsers, startConversation } from "@/lib/messages.functions";
 import { X } from "lucide-react";
 
-const searchSchema = z.object({ taskId: z.string().uuid().optional() }).partial();
+const searchSchema = z
+  .object({
+    taskId: z.string().uuid().optional(),
+    to: z.string().uuid().optional(),
+  })
+  .partial();
 
 export const Route = createFileRoute("/_authenticated/messages/new")({
   validateSearch: (s) => searchSchema.parse(s),
@@ -21,7 +26,7 @@ export const Route = createFileRoute("/_authenticated/messages/new")({
 
 function NewMessage() {
   const navigate = useNavigate();
-  const { taskId } = useSearch({ from: "/_authenticated/messages/new" });
+  const { taskId, to } = useSearch({ from: "/_authenticated/messages/new" });
   const listFn = useServerFn(listMessageableUsers);
   const startFn = useServerFn(startConversation);
 
@@ -34,6 +39,28 @@ function NewMessage() {
     queryKey: ["messageable-users", search],
     queryFn: () => listFn({ data: { search } }),
   });
+
+  // Pre-fill recipient if `?to=<userId>` is provided
+  useEffect(() => {
+    if (!to) return;
+    if (recipients.some((r) => r.user_id === to)) return;
+    listFn({ data: { search: "" } }).then((res) => {
+      const match = (res?.users ?? []).find((u: any) => u.user_id === to);
+      if (match) {
+        setRecipients((prev) =>
+          prev.some((r) => r.user_id === to) ? prev : [...prev, match],
+        );
+      } else {
+        // Fallback: add a stub so the message can still send
+        setRecipients((prev) =>
+          prev.some((r) => r.user_id === to)
+            ? prev
+            : [...prev, { user_id: to, full_name: "Selected user", email: null }],
+        );
+      }
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [to]);
 
   const start = useMutation({
     mutationFn: () =>
