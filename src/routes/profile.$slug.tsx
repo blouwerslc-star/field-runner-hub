@@ -188,7 +188,7 @@ function PublicProfilePage() {
             {/* SERVICE AREA */}
             {isRunner && (
               <Section title="Service area">
-                <ServiceAreaMap lat={p.home_lat} lng={p.home_lng} city={p.city} state={p.state} radiusMiles={radiusMiles} />
+                <ServiceAreaMap city={p.city} state={p.state} radiusMiles={radiusMiles} />
               </Section>
             )}
 
