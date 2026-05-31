@@ -54,6 +54,8 @@ import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { listActivity } from "@/lib/activity.functions";
 import { getPublicStats } from "@/lib/public-stats.functions";
+import { getCoveragePoints } from "@/lib/public-stats.functions";
+import { MarketplaceMap, type MapPoint } from "@/components/maps/MarketplaceMap";
 
 export const Route = createFileRoute("/")({
   component: Index,
