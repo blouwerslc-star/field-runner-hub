@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { RoleBadge, StarRating, LocationLine, VerifiedBadge } from "./ProfileBadges";
 import { VerificationLevelBadge } from "./VerificationLevelBadge";
+import { GraduationCap } from "lucide-react";
 
 export type PublicProfile = {
   user_id: string;
@@ -20,6 +21,7 @@ export type PublicProfile = {
   featured: boolean;
   roles: string[];
   verification_level?: number;
+  academy_certification?: { level: string | null; status: string | null } | null;
 };
 
 function initials(name: string | null) {
@@ -62,6 +64,14 @@ export function ProfileCard({ p }: { p: PublicProfile }) {
         </div>
         {(p.verification_level ?? 0) > 0 && (
           <div><VerificationLevelBadge level={p.verification_level ?? 0} /></div>
+        )}
+        {p.academy_certification?.status === "certified" && (
+          <div>
+            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 text-[10px] font-medium">
+              <GraduationCap className="size-3" />
+              Academy Certified{p.academy_certification.level ? ` · ${p.academy_certification.level}` : ""}
+            </span>
+          </div>
         )}
         {p.headline && <p className="text-sm text-muted-foreground line-clamp-2">{p.headline}</p>}
         <div className="flex items-center justify-between gap-2">

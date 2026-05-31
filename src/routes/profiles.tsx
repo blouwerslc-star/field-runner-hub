@@ -46,7 +46,7 @@ function ProfilesDirectory() {
     queryFn: () => fetchFn({ data: filters }),
   });
 
-  const profiles = (data?.profiles ?? []) as PublicProfile[];
+  const profiles = (data?.profiles ?? []) as unknown as PublicProfile[];
 
   const mapPoints: MapPoint[] = profiles.map((p: any) => ({
     id: p.user_id,
