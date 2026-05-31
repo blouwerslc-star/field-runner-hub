@@ -53,6 +53,7 @@ import heroBg from "@/assets/hero-bg.jpg";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { listActivity } from "@/lib/activity.functions";
+import { getPublicStats } from "@/lib/public-stats.functions";
 
 export const Route = createFileRoute("/")({
   component: Index,
