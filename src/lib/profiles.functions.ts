@@ -4,7 +4,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
 const PUBLIC_COLUMNS =
-  "user_id, profile_slug, full_name, city, state, profile_photo_url, cover_photo_url, headline, bio, services_offered, markets_served, experience_level, years_experience, task_rate, hourly_rate, availability_status, average_rating, review_count, completed_tasks_count, response_time, verified_status, featured, turnaround_time, task_types, transportation_available, service_radius, company_name, company_description, monthly_deal_volume, created_at, verification_level, verification_status, email_verified, phone_verified, identity_verified, background_check_verified";
+  "user_id, profile_slug, full_name, city, state, profile_photo_url, cover_photo_url, headline, bio, services_offered, markets_served, experience_level, years_experience, task_rate, hourly_rate, availability_status, average_rating, review_count, completed_tasks_count, response_time, verified_status, featured, turnaround_time, task_types, transportation_available, service_radius, company_name, company_description, monthly_deal_volume, created_at, verification_level, verification_status, email_verified, phone_verified, identity_verified, background_check_verified, insurance_verified, top_runner, last_active_at, completion_rate, repeat_client_rate, response_time_minutes, specialties, real_estate_experience, real_estate_years, contractor_experience, contractor_years, property_management_experience, property_management_years, realtor_experience, realtor_years, rate_lockbox_install, rate_occupancy_check, rate_property_photos, rate_video_walkthrough, rate_sign_placement, avail_today, avail_this_week, avail_weekends, avail_emergency, home_lat, home_lng";
 
 export const getMyProfile = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
@@ -45,15 +45,39 @@ const updateSchema = z.object({
   company_description: z.string().trim().max(2000).optional().nullable(),
   monthly_deal_volume: z.string().trim().max(60).optional().nullable(),
 });
+const profileExtrasSchema = z.object({
+  specialties: z.array(z.string().min(1).max(60)).max(30).optional(),
+  insurance_verified: z.boolean().optional(),
+  real_estate_experience: z.boolean().optional(),
+  real_estate_years: z.number().int().min(0).max(80).optional().nullable(),
+  contractor_experience: z.boolean().optional(),
+  contractor_years: z.number().int().min(0).max(80).optional().nullable(),
+  property_management_experience: z.boolean().optional(),
+  property_management_years: z.number().int().min(0).max(80).optional().nullable(),
+  realtor_experience: z.boolean().optional(),
+  realtor_years: z.number().int().min(0).max(80).optional().nullable(),
+  rate_lockbox_install: z.number().min(0).max(100000).optional().nullable(),
+  rate_occupancy_check: z.number().min(0).max(100000).optional().nullable(),
+  rate_property_photos: z.number().min(0).max(100000).optional().nullable(),
+  rate_video_walkthrough: z.number().min(0).max(100000).optional().nullable(),
+  rate_sign_placement: z.number().min(0).max(100000).optional().nullable(),
+  avail_today: z.boolean().optional(),
+  avail_this_week: z.boolean().optional(),
+  avail_weekends: z.boolean().optional(),
+  avail_emergency: z.boolean().optional(),
+  home_lat: z.number().min(-90).max(90).optional().nullable(),
+  home_lng: z.number().min(-180).max(180).optional().nullable(),
+});
+const fullUpdateSchema = updateSchema.merge(profileExtrasSchema);
 
 export const updateMyProfile = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((i: unknown) => updateSchema.parse(i))
+  .inputValidator((i: unknown) => fullUpdateSchema.parse(i))
   .handler(async ({ context, data }) => {
     const { supabase, userId } = context;
     const { data: row, error } = await supabase
       .from("profiles")
-      .update({ ...data, updated_at: new Date().toISOString() })
+      .update({ ...data, updated_at: new Date().toISOString(), last_active_at: new Date().toISOString() })
       .eq("user_id", userId)
       .select("*")
       .single();
@@ -74,7 +98,7 @@ export const getPublicProfileBySlug = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     if (!profile) return { profile: null, roles: [] as string[] };
     const userId = (profile as { user_id: string }).user_id;
-    const [{ data: roles }, { data: runner }, { data: progress }] = await Promise.all([
+    const [{ data: roles }, { data: runner }, { data: progress }, { data: portfolio }, { data: reviewRows }, { data: blocks }, { data: tasks }, { count: favoriteCount }] = await Promise.all([
       supabaseAdmin.from("user_roles").select("role").eq("user_id", userId),
       supabaseAdmin
         .from("runner_profiles")
@@ -85,7 +109,78 @@ export const getPublicProfileBySlug = createServerFn({ method: "POST" })
         .from("academy_progress")
         .select("module_id, passed")
         .eq("user_id", userId),
+      supabaseAdmin
+        .from("profile_portfolio")
+        .select("id, kind, url, thumb_url, caption, sort_order, created_at")
+        .eq("user_id", userId)
+        .order("sort_order", { ascending: true })
+        .order("created_at", { ascending: false })
+        .limit(24),
+      supabaseAdmin
+        .from("reviews")
+        .select("id, task_id, reviewer_id, rating, comment, direction, created_at")
+        .eq("reviewee_id", userId)
+        .order("created_at", { ascending: false })
+        .limit(30),
+      supabaseAdmin
+        .from("runner_availability_blocks")
+        .select("blocked_date, reason")
+        .eq("runner_id", userId)
+        .gte("blocked_date", new Date().toISOString().slice(0, 10))
+        .order("blocked_date", { ascending: true })
+        .limit(60),
+      supabaseAdmin
+        .from("tasks")
+        .select("id, status, task_type, investor_id, runner_id, created_at, updated_at")
+        .or(`runner_id.eq.${userId},investor_id.eq.${userId}`)
+        .limit(500),
+      supabaseAdmin
+        .from("favorite_runners")
+        .select("id", { count: "exact", head: true })
+        .eq("runner_id", userId),
     ]);
+    // Enrich reviews with reviewer name/photo/slug
+    const reviewerIds = Array.from(new Set((reviewRows ?? []).map((r) => r.reviewer_id as string)));
+    const reviewerMap = new Map<string, { name: string | null; photo: string | null; slug: string | null }>();
+    if (reviewerIds.length) {
+      const { data: profs } = await supabaseAdmin
+        .from("profiles")
+        .select("user_id, full_name, profile_photo_url, profile_slug")
+        .in("user_id", reviewerIds);
+      for (const p of profs ?? []) {
+        reviewerMap.set((p as any).user_id, {
+          name: (p as any).full_name,
+          photo: (p as any).profile_photo_url,
+          slug: (p as any).profile_slug,
+        });
+      }
+    }
+    const reviews = (reviewRows ?? []).map((r) => ({ ...r, reviewer: reviewerMap.get(r.reviewer_id as string) ?? { name: null, photo: null, slug: null } }));
+    // Compute metrics from tasks where this user is the runner
+    const runnerTasks = (tasks ?? []).filter((t: any) => t.runner_id === userId);
+    const totalAssigned = runnerTasks.length;
+    const completedSet = new Set(["completed", "approved", "paid"]);
+    const completed = runnerTasks.filter((t: any) => completedSet.has(t.status)).length;
+    const cancelledOrDisputed = runnerTasks.filter((t: any) => ["cancelled", "disputed"].includes(t.status)).length;
+    const completionRate = totalAssigned ? Math.round((completed / Math.max(1, totalAssigned - 0)) * 100) : 0;
+    const investorIds = runnerTasks.map((t: any) => t.investor_id as string).filter(Boolean);
+    const uniqueInvestors = new Set(investorIds).size;
+    const repeatInvestors = investorIds.length - uniqueInvestors;
+    const repeatClientRate = uniqueInvestors ? Math.round((repeatInvestors / Math.max(1, uniqueInvestors)) * 100) : 0;
+    const lastActivity = runnerTasks.reduce<string | null>((acc, t: any) => {
+      const d = t.updated_at as string;
+      return !acc || (d && d > acc) ? d : acc;
+    }, (profile as any).last_active_at ?? null);
+    const metrics = {
+      total_assigned: totalAssigned,
+      completed,
+      cancelled_or_disputed: cancelledOrDisputed,
+      completion_rate: completionRate,
+      repeat_client_rate: repeatClientRate,
+      unique_clients: uniqueInvestors,
+      last_activity_at: lastActivity,
+      favorite_count: favoriteCount ?? 0,
+    };
     const { earnedSkillBadges } = await import("@/lib/academy/badges");
     const passedIds = (progress ?? []).filter((p: any) => p.passed).map((p: any) => p.module_id);
     const earned = earnedSkillBadges(passedIds).map((b) => ({ id: b.id, label: b.label, moduleId: b.moduleId }));
@@ -94,6 +189,10 @@ export const getPublicProfileBySlug = createServerFn({ method: "POST" })
       roles: (roles ?? []).map((r) => r.role as string),
       runner: runner ?? null,
       academy: { passed_module_ids: passedIds, earned_badges: earned },
+      portfolio: portfolio ?? [],
+      reviews,
+      availability_blocks: blocks ?? [],
+      metrics,
     };
   });
 
