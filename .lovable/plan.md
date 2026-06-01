@@ -1,70 +1,62 @@
-# REI Runner — Trust, Privacy & Conversion Sweep
+# REI Runner — Mobile App Readiness Plan
 
-This is a large multi-area change. Here's how I'd like to sequence it so each piece ships cleanly and you can review along the way. I'll group the 10 items into 4 batches.
+You picked "Do everything now" + Capacitor wrap + wipe test data. Honest framing: this is genuinely multiple days of work and risk. I'll execute in ordered batches below, pausing only for destructive actions (DB wipe) and store-account specifics that require your input (bundle IDs, signing, icons).
 
-## Batch 1 — CTAs, privacy & marketplace empty states (highest user-visible impact)
+## Batch 1 — Mobile responsiveness & UX states audit
+- Sweep every route under `src/routes/` for: viewport overflow, tap-target sizes (<44px), tables that don't collapse, modals/sheets that break <375px, and missing safe-area padding.
+- Add/standardize Empty, Loading (skeleton), and Error states for: tasks list, task detail, messages, profiles, applications, dashboards (investor/runner/admin), earnings, billing, notifications.
+- Ensure `MobileBottomNav` works on every authed route; verify content has `pb-20` to clear it.
+- Fix any horizontal scroll, fixed widths, oversized hero images on mobile.
 
-**1. Audience-specific CTAs (#1)**
-- Sweep `index.tsx`, `runners.tsx`, `investors.tsx`, `story.tsx`, `pricing.tsx`, `trust.tsx`, `faq.tsx`, landing components for "Apply Now"-style buttons.
-- Replace with paired CTAs: **Hire a Runner** → `/investors`, **Become a Runner** → `/runners` (or `/apply`).
+## Batch 2 — Marketplace flow completeness check
+For each flow, verify happy path + error path + empty state on mobile:
+- Runner signup → profile → verification → background check
+- Investor signup → post task → fund task → review submission → release payment
+- Runner: browse tasks → apply → accept assignment → upload deliverables (photo/video) → submit
+- Messaging: start convo, send message, attachment upload, unread badge
+- Notifications: realtime delivery, mark-as-read, deep links
+- Admin: moderation, approvals, dispute resolution
+- Static/legal: privacy, terms, support — confirm present, current date, contact info
 
-**2. Public `/profiles` privacy (#2)**
-- Server side (`src/lib/profiles.functions.ts`): for unauthenticated callers, return `first_name + last_initial` instead of `full_name`, drop `profile_slug`, drop precise identifiers used in URLs.
-- `ProfileCard`: when viewer is logged out, render the masked name, no link to detail page, and a "Sign in to view full profile" affordance.
-- `/profile/$slug`: if not authenticated, show a gated teaser + "Sign in to view full runner profiles" CTA (keep route public for SEO of authed sharing but block detail).
-- Add logged-out banner CTA on `/profiles`.
+I'll fix gaps inline, not rebuild what works.
 
-**3. `/tasks` empty state (#3)**
-- New empty-state component: headline, sub-copy, **Become a Runner** + **Post a Task** CTAs.
-- Render 2–3 dimmed sample cards with an "Example task" ribbon when the live list is empty.
+## Batch 3 — Capacitor wrap
+- Install `@capacitor/core`, `@capacitor/cli`, `@capacitor/ios`, `@capacitor/android`, `@capacitor/status-bar`, `@capacitor/splash-screen`, `@capacitor/app`, `@capacitor/preferences`, `@capacitor/camera`, `@capacitor/filesystem`, `@capacitor/push-notifications`.
+- Create `capacitor.config.ts` with `appId: com.reirunner.app`, `appName: REI Runner`, `webDir: dist`, `server.url` pointing to production for live updates (toggleable for offline bundle).
+- Add `npm` scripts: `cap:sync`, `cap:open:ios`, `cap:open:android`.
+- Add a `Capacitor.isNativePlatform()` guard layer in `src/lib/native.ts` that:
+  - swaps web file inputs for `Camera.getPhoto()` on native
+  - routes external links through `Browser.open()`
+  - handles deep links (`reirunner://`) → router navigate
+  - configures status bar style for dark theme
+  - shows splash, hides on app-ready
+- Document the build/submit flow in `docs/MOBILE_BUILD.md` (Xcode + Android Studio steps, signing, screenshots, App Store/Play Store metadata you still need to provide).
 
-**9. Logged-out marketplace nav (#9)**
-- On `/profiles` and `/tasks`, swap any action buttons that require auth (contact, claim, post) to the specified CTAs when logged out.
+## Batch 4 — App-store readiness
+- Add app icons + splash assets pipeline (`@capacitor/assets`) — needs a 1024×1024 source icon from you, or I'll generate a placeholder.
+- Privacy: confirm `/privacy` and `/terms` cover data collection, location, camera, photos, push, in-app purchases. Add an "Account deletion" screen (Apple requires it) wired to `account_status`.
+- Add NSCameraUsageDescription, NSPhotoLibraryUsageDescription, NSLocationWhenInUseUsageDescription strings to `ios/App/App/Info.plist` (Capacitor-generated, I'll patch).
+- Android permissions in `AndroidManifest.xml`.
 
-## Batch 2 — Trust, pricing & launch-status content
+## Batch 5 — Test data wipe (destructive, will pause for re-confirm)
+I'll query the DB first to show exactly what would be deleted, then issue a migration. Targets:
+- `tasks`, `task_submissions`, `task_files`, `applications`, `payments`, `invoices`, `payout_requests`
+- `conversations`, `conversation_participants`, `messages`, `message_attachments`
+- `reviews`, `reports`, `disputes`, `notifications`, `activity_events`, `favorite_runners`, `runner_availability_blocks`
+- Keep: `profiles`, `user_roles`, academy content, app_settings
+- Optionally clear test `field_runner_applications` / `real_estate_pro_applications` — your call.
 
-**4. Trust & Safety concreteness (#4)** — extend `/trust` with:
-- "Sample deliverables" section: photo checklist, walkthrough video specs, occupancy check report, lockbox install proof (cards with bullet specs + sample thumbnail blocks).
-- Plain-language process sections: ID verification, background checks, escrow/payment release, dispute handling, runner conduct rules.
+## What I need from you to fully ship
+1. **Bundle IDs**: confirm `com.reirunner.app` for both iOS and Android.
+2. **App icon**: upload a 1024×1024 PNG, or I generate one from the brand.
+3. **Apple Developer + Google Play accounts**: required to actually submit; I can't create those.
+4. **Push provider**: OneSignal vs Firebase Cloud Messaging vs Apple-only APNs — pick one for Batch 3.
+5. **Test-data wipe re-confirm**: I'll show row counts before running.
 
-**6. Pricing page upgrades (#6)** — for each service tier on `/pricing`:
-- "What's included" bullet list.
-- "Typical use case" example.
-- "Sample report" preview block (static mocked preview, labeled as sample).
-- Fees disclosure block (platform fee, processing, rush, travel).
+## Out of scope (call out)
+- React Native/Expo rebuild (you chose Capacitor — good call, ~10× faster).
+- Actual binary upload to App Store Connect / Google Play Console — requires your developer accounts and a Mac with Xcode for iOS.
+- App Store screenshots, marketing copy, ASO keywords — I can draft, you submit.
 
-**7. Launch-status language (#7)**
-- Replace "nationwide" copy across landing/story/investors/runners with "Launching market-by-market across the U.S." / "Building runner coverage in priority investor markets".
-- On market sections, introduce status chips: **Active**, **Waitlist**, **Coming soon**.
-
-**8. Founder/human trust (#8)**
-- Story page already has Brian Louwers — add a real photo asset (generated placeholder portrait + alt text), short operator background, and a founder note about why this matters & how both sides are protected.
-- Add a compact founder card on the homepage.
-
-## Batch 3 — Forms & friction
-
-**5. Application form friction (#5)**
-- `ApplicationForms.tsx` / `apply.tsx`: drop password from step 1. Collect application/early-access details, submit to existing applications table, then surface a "Verify your email to finish creating your account" step (magic-link or post-submit signup).
-- Keep `website_url` honeypot — verify it stays `aria-hidden`, `tabIndex={-1}`, off-screen, `autocomplete="off"`.
-
-## Batch 4 — Technical & a11y cleanup (#10)
-
-- Audit non-form buttons missing `type="button"` and fix (especially toolbar/nav buttons in dashboard, profile filters, map controls).
-- Add `aria-label` to every `Select`/`Input` filter on `/profiles` and `/tasks` (visible labels are absent today).
-- `MarketplaceMap`: ensure custom controls use `tabIndex={-1}` where they shouldn't dominate tab order, or are properly grouped after main content.
-- Add `loading="lazy"` + `decoding="async"` to non-critical `<img>` tags (avatars in lists, cover photos, gallery thumbnails).
-- Per-page `head()` audit: confirm every route (`/`, `/profiles`, `/tasks`, `/runners`, `/investors`, `/pricing`, `/trust`, `/story`, `/faq`, `/apply`, `/login`, `/signup`, `/privacy`, `/terms`, `/waitlist`) has a unique title + meta description. Fix any duplicates/missing.
-
----
-
-## Notes / decisions I'd like to confirm before starting
-
-1. **Privacy of `/profile/$slug`** — should I (a) fully gate the detail page behind auth, or (b) keep a public minimal teaser (masked name, role, city, rating, services) with a "Sign in to see full profile, portfolio, reviews, and contact" wall? Option (b) is better for SEO/social proof; (a) is stricter privacy.
-
-2. **Sample deliverables / sample report previews** — okay to generate lightweight placeholder images (property photo grid, report PDF screenshot, etc.) via the image tool, clearly labeled as examples? Or do you have real samples you want me to wire in?
-
-3. **Founder photo** — do you want me to generate a stylized portrait placeholder for Brian Louwers, or will you supply a real photo later? (I'll wire the slot either way.)
-
-4. **Application step 2** — after the friction-less first step, do you want the email verification + account creation to happen via Supabase magic link (no password ever), or password creation deferred to step 2 (still email-verified first)?
-
-If you want, I can just go ahead with sensible defaults (b / generated placeholders labeled as samples / generated portrait placeholder / magic link). Reply **"go with defaults"** to greenlight everything, or answer the questions and I'll adjust before starting Batch 1.
+## Execution order on next message
+Reply "go" and I start Batch 1. I'll commit per batch and surface anything that needs your input before continuing. If you want a different order (e.g., Capacitor first), say so.
