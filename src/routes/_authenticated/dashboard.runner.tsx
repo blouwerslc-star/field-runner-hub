@@ -21,6 +21,7 @@ import { toast } from "sonner";
 import { listMyTasks, getTaskDetail, startTask, submitTaskWork } from "@/lib/tasks.functions";
 import { createUploadUrl, recordTaskFile } from "@/lib/storage.functions";
 import { RunnerVerificationCard } from "@/components/dashboard/RunnerVerificationCard";
+import { ProfileCompletionBanner } from "@/components/dashboard/ProfileCompletionBanner";
 import { DashboardLoadingSkeleton, RouteErrorState } from "@/components/dashboard/UiStates";
 
 export const Route = createFileRoute("/_authenticated/dashboard/runner")({
@@ -59,6 +60,7 @@ function RunnerDashboard() {
 
   return (
     <DashboardShell title="Runner Dashboard" subtitle="Your assigned tasks. Complete the work, upload deliverables, and get paid.">
+      <ProfileCompletionBanner role="runner" />
       <RunnerVerificationCard />
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
         <StatTile label="Assigned" value={buckets.assigned.length} />

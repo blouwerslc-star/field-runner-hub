@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
+import { ProfileCompletionBanner } from "@/components/dashboard/ProfileCompletionBanner";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -74,6 +75,7 @@ function InvestorDashboard() {
   return (
     <DashboardShell title="Investor Dashboard" subtitle="Post tasks, review submissions, release payments.">
       <div className="-mx-6 mb-6"><PaymentTestModeBanner /></div>
+      <ProfileCompletionBanner role="investor" />
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
         <StatTile label="Open" value={buckets.open.length.toString()} />
         <StatTile label="In progress" value={buckets.in_progress.length.toString()} />
