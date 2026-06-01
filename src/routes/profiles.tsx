@@ -18,7 +18,12 @@ export const Route = createFileRoute("/profiles")({
     meta: [
       { title: "Browse runners and investors — REI Runner" },
       { name: "description", content: "Find verified field runners and active investors in your market." },
+      { property: "og:title", content: "Browse runners and investors — REI Runner" },
+      { property: "og:description", content: "Find verified field runners and active investors in your market." },
+      { property: "og:url", content: "https://reirunner.com/profiles" },
+      { property: "og:type", content: "website" },
     ],
+    links: [{ rel: "canonical", href: "https://reirunner.com/profiles" }],
   }),
 });
 
