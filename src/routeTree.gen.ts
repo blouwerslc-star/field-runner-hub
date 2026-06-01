@@ -25,6 +25,7 @@ import { Route as InvestorsRouteImport } from './routes/investors'
 import { Route as FaqRouteImport } from './routes/faq'
 import { Route as AuthTestRouteImport } from './routes/auth-test'
 import { Route as ApplyRouteImport } from './routes/apply'
+import { Route as AboutRouteImport } from './routes/about'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as SplatRouteImport } from './routes/$'
 import { Route as IndexRouteImport } from './routes/index'
@@ -175,6 +176,11 @@ const AuthTestRoute = AuthTestRouteImport.update({
 const ApplyRoute = ApplyRouteImport.update({
   id: '/apply',
   path: '/apply',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AboutRoute = AboutRouteImport.update({
+  id: '/about',
+  path: '/about',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedRoute = AuthenticatedRouteImport.update({
@@ -584,6 +590,7 @@ const AuthenticatedAcademyCourseSlugLessonSlugRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/$': typeof SplatRoute
+  '/about': typeof AboutRoute
   '/apply': typeof ApplyRoute
   '/auth-test': typeof AuthTestRoute
   '/faq': typeof FaqRoute
@@ -672,6 +679,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/$': typeof SplatRoute
+  '/about': typeof AboutRoute
   '/apply': typeof ApplyRoute
   '/auth-test': typeof AuthTestRoute
   '/faq': typeof FaqRoute
@@ -757,6 +765,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/$': typeof SplatRoute
   '/_authenticated': typeof AuthenticatedRouteWithChildren
+  '/about': typeof AboutRoute
   '/apply': typeof ApplyRoute
   '/auth-test': typeof AuthTestRoute
   '/faq': typeof FaqRoute
@@ -847,6 +856,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/$'
+    | '/about'
     | '/apply'
     | '/auth-test'
     | '/faq'
@@ -935,6 +945,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/$'
+    | '/about'
     | '/apply'
     | '/auth-test'
     | '/faq'
@@ -1019,6 +1030,7 @@ export interface FileRouteTypes {
     | '/'
     | '/$'
     | '/_authenticated'
+    | '/about'
     | '/apply'
     | '/auth-test'
     | '/faq'
@@ -1109,6 +1121,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   SplatRoute: typeof SplatRoute
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
+  AboutRoute: typeof AboutRoute
   ApplyRoute: typeof ApplyRoute
   AuthTestRoute: typeof AuthTestRoute
   FaqRoute: typeof FaqRoute
@@ -1249,6 +1262,13 @@ declare module '@tanstack/react-router' {
       path: '/apply'
       fullPath: '/apply'
       preLoaderRoute: typeof ApplyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/about': {
+      id: '/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof AboutRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated': {
@@ -1962,6 +1982,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   SplatRoute: SplatRoute,
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
+  AboutRoute: AboutRoute,
   ApplyRoute: ApplyRoute,
   AuthTestRoute: AuthTestRoute,
   FaqRoute: FaqRoute,
