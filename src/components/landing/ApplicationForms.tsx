@@ -388,21 +388,12 @@ export function FieldRunnerForm() {
         <TaskTypesGrid selected={taskTypes} onToggle={toggle} />
       </Field>
 
-      <Field label="Choose a password">
-        <Input
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-          minLength={8}
-          maxLength={100}
-          autoComplete="new-password"
-          placeholder="At least 8 characters — this creates your account"
-        />
-      </Field>
+      <p className="text-xs text-muted-foreground">
+        No password needed yet. We'll email you a secure verification link to finish setting up your account.
+      </p>
 
       <Button type="submit" size="lg" disabled={submitting} className="w-full bg-gradient-primary shadow-glow">
-        {submitting ? <><Loader2 className="size-4 mr-2 animate-spin" /> Creating account…</> : "Create Runner Account"}
+        {submitting ? <><Loader2 className="size-4 mr-2 animate-spin" /> Submitting…</> : "Apply as a Runner"}
       </Button>
     </form>
   );
@@ -532,21 +523,12 @@ export function ProForm() {
         </Field>
       </div>
 
-      <Field label="Choose a password">
-        <Input
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-          minLength={8}
-          maxLength={100}
-          autoComplete="new-password"
-          placeholder="At least 8 characters — this creates your account"
-        />
-      </Field>
+      <p className="text-xs text-muted-foreground">
+        No password needed yet. We'll email you a secure verification link to finish setting up your account.
+      </p>
 
       <Button type="submit" size="lg" disabled={submitting} className="w-full bg-gradient-primary shadow-glow">
-        {submitting ? <><Loader2 className="size-4 mr-2 animate-spin" /> Creating account…</> : "Create Investor Account"}
+        {submitting ? <><Loader2 className="size-4 mr-2 animate-spin" /> Submitting…</> : "Apply as an Investor"}
       </Button>
     </form>
   );
