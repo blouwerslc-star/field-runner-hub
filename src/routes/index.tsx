@@ -750,6 +750,9 @@ function Index() {
       {/* SOCIAL PROOF — honest beta-stage testimonials */}
       <TestimonialsSection />
 
+      {/* SAMPLE DELIVERABLES */}
+      <SampleDeliverablesSection variant="muted" />
+
       {/* TWO-PATH CTA */}
       <section className="mx-auto max-w-6xl px-5 py-16 md:py-24">
         <div className="text-center mb-10">
