@@ -453,7 +453,7 @@ function Index() {
             <BrandLogo />
           </a>
           <nav className="hidden md:flex items-center gap-7 text-sm text-muted-foreground">
-            <button onClick={() => scrollToId("how")} className="hover:text-foreground transition">How it works</button>
+            <button type="button" onClick={() => scrollToId("how")} className="hover:text-foreground transition">How it works</button>
             <Link to="/pricing" className="hover:text-foreground transition">Pricing</Link>
             <Link to="/trust" className="hover:text-foreground transition">Trust & Safety</Link>
             <Link to="/story" className="hover:text-foreground transition">Our Story</Link>
@@ -472,6 +472,7 @@ function Index() {
             <Sheet open={mobileNavOpen} onOpenChange={setMobileNavOpen}>
               <SheetTrigger asChild>
                 <button
+                  type="button"
                   aria-label="Open menu"
                   className="md:hidden inline-flex items-center justify-center size-10 -mr-2 rounded-md text-foreground/80 hover:text-foreground hover:bg-card/60 active:scale-95 transition"
                 >
@@ -487,6 +488,7 @@ function Index() {
                 <nav className="flex-1 overflow-y-auto px-3 py-4">
                   {mobileNavLinks.map((l) => (
                     <button
+                      type="button"
                       key={l.id}
                       onClick={closeNavThen(() => scrollToId(l.id))}
                       className="w-full text-left flex items-center justify-between px-3 py-4 rounded-lg text-base text-foreground/90 hover:bg-card/60 active:bg-card transition"
@@ -741,7 +743,7 @@ function Index() {
           <p className="mt-3 text-muted-foreground max-w-2xl mx-auto">Create a free account in under 60 seconds.</p>
         </div>
         <div className="grid md:grid-cols-2 gap-5">
-          <button onClick={goSignupRunner} className="group text-left rounded-2xl border border-border bg-card/60 backdrop-blur p-8 shadow-card hover:border-primary/60 hover:-translate-y-1 transition-all duration-300">
+          <button type="button" onClick={goSignupRunner} className="group text-left rounded-2xl border border-border bg-card/60 backdrop-blur p-8 shadow-card hover:border-primary/60 hover:-translate-y-1 transition-all duration-300">
             <div className="text-xs font-mono text-primary mb-2">FOR RUNNERS</div>
             <h3 className="text-2xl font-bold">I'm a Runner</h3>
             <p className="mt-2 text-sm text-muted-foreground">Get paid completing property tasks in your city — photos, videos, drive-bys, occupancy checks.</p>
@@ -749,7 +751,7 @@ function Index() {
               Become a Runner <ArrowRight className="size-4 group-hover:translate-x-1 transition-transform" />
             </div>
           </button>
-          <button onClick={goSignupInvestor} className="group text-left rounded-2xl border border-border bg-card/60 backdrop-blur p-8 shadow-card hover:border-primary/60 hover:-translate-y-1 transition-all duration-300">
+          <button type="button" onClick={goSignupInvestor} className="group text-left rounded-2xl border border-border bg-card/60 backdrop-blur p-8 shadow-card hover:border-primary/60 hover:-translate-y-1 transition-all duration-300">
             <div className="text-xs font-mono text-primary mb-2">FOR INVESTORS</div>
             <h3 className="text-2xl font-bold">I'm an Investor</h3>
             <p className="mt-2 text-sm text-muted-foreground">Post property tasks and get boots-on-the-ground in any major US market — usually same-day.</p>
@@ -834,7 +836,7 @@ function Index() {
         <div className="max-w-4xl mx-auto rounded-2xl border border-border bg-card/60 backdrop-blur overflow-hidden shadow-card aspect-video grid place-items-center relative group">
           <div aria-hidden className="absolute inset-0 bg-hero opacity-60" />
           <div aria-hidden className="absolute inset-0 grid-bg opacity-50" />
-          <button onClick={goApply} className="relative z-10 flex flex-col items-center gap-3 text-foreground">
+          <button type="button" onClick={goApply} className="relative z-10 flex flex-col items-center gap-3 text-foreground">
             <span className="size-20 rounded-full bg-gradient-primary grid place-items-center shadow-glow group-hover:scale-110 transition-transform">
               <PlayCircle className="size-10 text-primary-foreground" />
             </span>
@@ -1045,13 +1047,13 @@ function Index() {
           <div>
             <div className="text-xs font-semibold uppercase tracking-widest text-foreground mb-3">Platform</div>
             <ul className="space-y-2 text-sm text-muted-foreground">
-              <li><button onClick={() => scrollToId("how")} className="hover:text-foreground">How it works</button></li>
-              <li><button onClick={() => scrollToId("payments")} className="hover:text-foreground">How payments work</button></li>
-              <li><button onClick={() => scrollToId("trust")} className="hover:text-foreground">How we vet runners</button></li>
-              <li><button onClick={() => scrollToId("services")} className="hover:text-foreground">Services</button></li>
-              <li><button onClick={() => scrollToId("why")} className="hover:text-foreground">Why join</button></li>
-              <li><button onClick={() => scrollToId("markets")} className="hover:text-foreground">Markets</button></li>
-              <li><button onClick={goApply} className="hover:text-foreground">Apply</button></li>
+              <li><button type="button" onClick={() => scrollToId("how")} className="hover:text-foreground">How it works</button></li>
+              <li><button type="button" onClick={() => scrollToId("payments")} className="hover:text-foreground">How payments work</button></li>
+              <li><button type="button" onClick={() => scrollToId("trust")} className="hover:text-foreground">How we vet runners</button></li>
+              <li><button type="button" onClick={() => scrollToId("services")} className="hover:text-foreground">Services</button></li>
+              <li><button type="button" onClick={() => scrollToId("why")} className="hover:text-foreground">Why join</button></li>
+              <li><button type="button" onClick={() => scrollToId("markets")} className="hover:text-foreground">Markets</button></li>
+              <li><button type="button" onClick={goApply} className="hover:text-foreground">Apply</button></li>
             </ul>
           </div>
           <div>
