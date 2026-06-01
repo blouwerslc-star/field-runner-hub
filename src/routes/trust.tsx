@@ -39,6 +39,31 @@ export const Route = createFileRoute("/trust")({
       { property: "og:url", content: "https://reirunner.com/trust" },
     ],
     links: [{ rel: "canonical", href: "https://reirunner.com/trust" }],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          name: "Trust & Safety — REI Runner",
+          url: "https://reirunner.com/trust",
+          about: { "@id": "https://reirunner.com/#organization" },
+          description:
+            "How REI Runner screens runners, protects investor properties, handles disputes, and keeps every task safe and accountable.",
+        }),
+      },
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          itemListElement: [
+            { "@type": "ListItem", position: 1, name: "Home", item: "https://reirunner.com/" },
+            { "@type": "ListItem", position: 2, name: "Trust & Safety", item: "https://reirunner.com/trust" },
+          ],
+        }),
+      },
+    ],
   }),
 });
 
