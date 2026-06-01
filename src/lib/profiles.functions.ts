@@ -286,7 +286,7 @@ export const listPublicProfiles = createServerFn({ method: "POST" })
     return {
       profiles: filtered.map((p) => {
         const row = p as Record<string, unknown>;
-        const base = {
+        const base: Record<string, unknown> = {
           ...row,
           roles: rolesByUser.get((p as { user_id: string }).user_id) ?? [],
           academy_certification: certByUser.get((p as { user_id: string }).user_id) ?? null,
@@ -295,7 +295,7 @@ export const listPublicProfiles = createServerFn({ method: "POST" })
         // Public (logged-out) view: mask name, strip slug + free-text PII fields
         return {
           ...base,
-          full_name: maskName(base.full_name as string | null),
+          full_name: maskName(base.full_name as string | null | undefined),
           profile_slug: null,
           bio: null,
           company_description: null,
