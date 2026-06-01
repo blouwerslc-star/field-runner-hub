@@ -86,9 +86,14 @@ export const Route = createFileRoute("/")({
           "@context": "https://schema.org",
           "@type": "Organization",
           name: "REI Runner",
+          legalName: "B&K Investment Group LLC",
           description:
             "On-demand marketplace connecting real estate investors with local independent contractors for property field services like photos, videos, walkthroughs, and occupancy checks.",
           url: "https://reirunner.com/",
+          telephone: "+1-517-774-9896",
+          email: "support@reirunner.com",
+          areaServed: "US",
+          sameAs: [],
         }),
       },
       {
@@ -1051,8 +1056,8 @@ function Index() {
                 <Mail className="size-4 text-primary" />
                 <span>support@reirunner.com</span>
               </a>
-              <a href="tel:+18338734786" className="flex items-center gap-2 hover:text-foreground transition">
-                <Phone className="size-4 text-primary" /> (833) 873-RUNR
+              <a href="tel:+15177749896" className="flex items-center gap-2 hover:text-foreground transition">
+                <Phone className="size-4 text-primary" /> (517) 774-9896
               </a>
               <div className="flex items-center gap-2">
                 <Clock className="size-4 text-primary" /> Support hours: Mon–Fri, 8am–6pm CT
@@ -1077,7 +1082,8 @@ function Index() {
           <div>
             <div className="text-xs font-semibold uppercase tracking-widest text-foreground mb-3">Company</div>
             <ul className="space-y-2 text-sm text-muted-foreground">
-              <li><Link to="/story" className="hover:text-foreground">Our story</Link></li>
+               <li><Link to="/story" className="hover:text-foreground">Our story</Link></li>
+               <li><Link to="/about" className="hover:text-foreground">About</Link></li>
               <li><Link to="/trust" className="hover:text-foreground">Trust & Safety</Link></li>
               <li><Link to="/pricing" className="hover:text-foreground">Pricing</Link></li>
               <li><Link to="/investors" className="hover:text-foreground">For investors</Link></li>
@@ -1091,7 +1097,7 @@ function Index() {
         </div>
         <div className="border-t border-border/60">
           <div className="mx-auto max-w-7xl px-5 py-5 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-muted-foreground">
-            <div>© {new Date().getFullYear()} REI Runner, Inc. · Real estate field operations marketplace (beta).</div>
+            <div>© {new Date().getFullYear()} REI Runner — operated by B&K Investment Group LLC · (517) 774-9896</div>
             <div>Built in the USA 🇺🇸</div>
           </div>
         </div>
