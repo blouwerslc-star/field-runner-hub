@@ -183,6 +183,7 @@ function PricingPage() {
                 <Clock className="size-3.5" /> {s.eta}
               </div>
               <div className="my-4 h-px bg-border/70" />
+              <div className="text-xs font-mono uppercase tracking-widest text-primary mb-1.5">What's included</div>
               <ul className="space-y-1.5 text-sm text-muted-foreground">
                 {s.includes.map((d) => (
                   <li key={d} className="flex items-start gap-2">
@@ -191,6 +192,10 @@ function PricingPage() {
                   </li>
                 ))}
               </ul>
+              <div className="mt-4 rounded-lg border border-border/60 bg-muted/20 px-3 py-2.5">
+                <div className="text-[10px] font-mono uppercase tracking-widest text-primary mb-1">Typical use case</div>
+                <p className="text-xs text-muted-foreground leading-relaxed">{s.useCase}</p>
+              </div>
             </div>
           ))}
         </div>
