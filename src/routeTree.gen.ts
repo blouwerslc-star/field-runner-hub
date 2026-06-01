@@ -35,6 +35,7 @@ import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe
 import { Route as CheckoutReturnRouteImport } from './routes/checkout.return'
 import { Route as AuthenticatedTemplatesRouteImport } from './routes/_authenticated/templates'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
+import { Route as AuthenticatedRunnerRatesRouteImport } from './routes/_authenticated/runner-rates'
 import { Route as AuthenticatedRunnerDashboardRouteImport } from './routes/_authenticated/runner-dashboard'
 import { Route as AuthenticatedReviewsRouteImport } from './routes/_authenticated/reviews'
 import { Route as AuthenticatedPerformanceRouteImport } from './routes/_authenticated/performance'
@@ -224,6 +225,12 @@ const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedRunnerRatesRoute =
+  AuthenticatedRunnerRatesRouteImport.update({
+    id: '/runner-rates',
+    path: '/runner-rates',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedRunnerDashboardRoute =
   AuthenticatedRunnerDashboardRouteImport.update({
     id: '/runner-dashboard',
@@ -599,6 +606,7 @@ export interface FileRoutesByFullPath {
   '/performance': typeof AuthenticatedPerformanceRoute
   '/reviews': typeof AuthenticatedReviewsRoute
   '/runner-dashboard': typeof AuthenticatedRunnerDashboardRoute
+  '/runner-rates': typeof AuthenticatedRunnerRatesRoute
   '/settings': typeof AuthenticatedSettingsRouteWithChildren
   '/templates': typeof AuthenticatedTemplatesRoute
   '/checkout/return': typeof CheckoutReturnRoute
@@ -682,6 +690,7 @@ export interface FileRoutesByTo {
   '/performance': typeof AuthenticatedPerformanceRoute
   '/reviews': typeof AuthenticatedReviewsRoute
   '/runner-dashboard': typeof AuthenticatedRunnerDashboardRoute
+  '/runner-rates': typeof AuthenticatedRunnerRatesRoute
   '/templates': typeof AuthenticatedTemplatesRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
@@ -768,6 +777,7 @@ export interface FileRoutesById {
   '/_authenticated/performance': typeof AuthenticatedPerformanceRoute
   '/_authenticated/reviews': typeof AuthenticatedReviewsRoute
   '/_authenticated/runner-dashboard': typeof AuthenticatedRunnerDashboardRoute
+  '/_authenticated/runner-rates': typeof AuthenticatedRunnerRatesRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRouteWithChildren
   '/_authenticated/templates': typeof AuthenticatedTemplatesRoute
   '/checkout/return': typeof CheckoutReturnRoute
@@ -856,6 +866,7 @@ export interface FileRouteTypes {
     | '/performance'
     | '/reviews'
     | '/runner-dashboard'
+    | '/runner-rates'
     | '/settings'
     | '/templates'
     | '/checkout/return'
@@ -939,6 +950,7 @@ export interface FileRouteTypes {
     | '/performance'
     | '/reviews'
     | '/runner-dashboard'
+    | '/runner-rates'
     | '/templates'
     | '/checkout/return'
     | '/email/unsubscribe'
@@ -1024,6 +1036,7 @@ export interface FileRouteTypes {
     | '/_authenticated/performance'
     | '/_authenticated/reviews'
     | '/_authenticated/runner-dashboard'
+    | '/_authenticated/runner-rates'
     | '/_authenticated/settings'
     | '/_authenticated/templates'
     | '/checkout/return'
@@ -1293,6 +1306,13 @@ declare module '@tanstack/react-router' {
       path: '/settings'
       fullPath: '/settings'
       preLoaderRoute: typeof AuthenticatedSettingsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/runner-rates': {
+      id: '/_authenticated/runner-rates'
+      path: '/runner-rates'
+      fullPath: '/runner-rates'
+      preLoaderRoute: typeof AuthenticatedRunnerRatesRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/runner-dashboard': {
@@ -1849,6 +1869,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedPerformanceRoute: typeof AuthenticatedPerformanceRoute
   AuthenticatedReviewsRoute: typeof AuthenticatedReviewsRoute
   AuthenticatedRunnerDashboardRoute: typeof AuthenticatedRunnerDashboardRoute
+  AuthenticatedRunnerRatesRoute: typeof AuthenticatedRunnerRatesRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRouteWithChildren
   AuthenticatedTemplatesRoute: typeof AuthenticatedTemplatesRoute
   AuthenticatedDashboardFavoritesRoute: typeof AuthenticatedDashboardFavoritesRoute
@@ -1875,6 +1896,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedPerformanceRoute: AuthenticatedPerformanceRoute,
   AuthenticatedReviewsRoute: AuthenticatedReviewsRoute,
   AuthenticatedRunnerDashboardRoute: AuthenticatedRunnerDashboardRoute,
+  AuthenticatedRunnerRatesRoute: AuthenticatedRunnerRatesRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRouteWithChildren,
   AuthenticatedTemplatesRoute: AuthenticatedTemplatesRoute,
   AuthenticatedDashboardFavoritesRoute: AuthenticatedDashboardFavoritesRoute,
