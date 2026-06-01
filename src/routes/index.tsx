@@ -84,7 +84,8 @@ export const Route = createFileRoute("/")({
         type: "application/ld+json",
         children: JSON.stringify({
           "@context": "https://schema.org",
-          "@type": "Organization",
+          "@type": ["Organization", "LocalBusiness"],
+          "@id": "https://reirunner.com/#organization",
           name: "REI Runner",
           legalName: "B&K Investment Group LLC",
           description:
@@ -93,6 +94,17 @@ export const Route = createFileRoute("/")({
           telephone: "+1-517-774-9896",
           email: "support@reirunner.com",
           areaServed: "US",
+          logo: "https://reirunner.com/rei-runner-logo.png",
+          image: "https://reirunner.com/rei-runner-logo.png",
+          priceRange: "$$",
+          contactPoint: [{
+            "@type": "ContactPoint",
+            telephone: "+1-517-774-9896",
+            email: "support@reirunner.com",
+            contactType: "customer support",
+            areaServed: "US",
+            availableLanguage: ["en"],
+          }],
           sameAs: [],
         }),
       },
