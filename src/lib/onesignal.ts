@@ -5,6 +5,7 @@
 // plugin is bridge-compatible). On web it is a no-op so the same imports
 // are safe from any client code.
 import { isNative, nativePlatform } from "./native";
+import { getOneSignalIdentity } from "./onesignal-identity.functions";
 
 export const ONESIGNAL_APP_ID = "d352999f-6c2f-4715-b911-8d7edf216025";
 
@@ -177,9 +178,6 @@ export async function setOneSignalLogLevel(level: number) {
 export async function syncOneSignalIdentity() {
   if (!isNative()) return;
   try {
-    const { getOneSignalIdentity } = await import(
-      "./onesignal-identity.functions"
-    );
     const identity = await getOneSignalIdentity();
     if (!identity?.externalId) return;
     await loginOneSignalUser(identity.externalId);
