@@ -1148,6 +1148,129 @@ export type Database = {
         }
         Relationships: []
       }
+      pricing_addons: {
+        Row: {
+          active: boolean
+          created_at: string
+          description: string | null
+          investor_price: number | null
+          investor_price_max: number | null
+          investor_price_min: number | null
+          key: string
+          name: string
+          platform_fee: number | null
+          platform_pct: number | null
+          price_type: string
+          runner_payout: number | null
+          runner_pct: number | null
+          sort_order: number
+          unit_label: string | null
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          description?: string | null
+          investor_price?: number | null
+          investor_price_max?: number | null
+          investor_price_min?: number | null
+          key: string
+          name: string
+          platform_fee?: number | null
+          platform_pct?: number | null
+          price_type?: string
+          runner_payout?: number | null
+          runner_pct?: number | null
+          sort_order?: number
+          unit_label?: string | null
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          description?: string | null
+          investor_price?: number | null
+          investor_price_max?: number | null
+          investor_price_min?: number | null
+          key?: string
+          name?: string
+          platform_fee?: number | null
+          platform_pct?: number | null
+          price_type?: string
+          runner_payout?: number | null
+          runner_pct?: number | null
+          sort_order?: number
+          unit_label?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      pricing_market_overrides: {
+        Row: {
+          active: boolean
+          addon_key: string | null
+          created_at: string
+          experience_level: string | null
+          id: string
+          investor_price: number | null
+          market_city: string | null
+          market_state: string | null
+          notes: string | null
+          platform_fee: number | null
+          runner_payout: number | null
+          template_id: string | null
+          updated_at: string
+          urgency: string | null
+        }
+        Insert: {
+          active?: boolean
+          addon_key?: string | null
+          created_at?: string
+          experience_level?: string | null
+          id?: string
+          investor_price?: number | null
+          market_city?: string | null
+          market_state?: string | null
+          notes?: string | null
+          platform_fee?: number | null
+          runner_payout?: number | null
+          template_id?: string | null
+          updated_at?: string
+          urgency?: string | null
+        }
+        Update: {
+          active?: boolean
+          addon_key?: string | null
+          created_at?: string
+          experience_level?: string | null
+          id?: string
+          investor_price?: number | null
+          market_city?: string | null
+          market_state?: string | null
+          notes?: string | null
+          platform_fee?: number | null
+          runner_payout?: number | null
+          template_id?: string | null
+          updated_at?: string
+          urgency?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pricing_market_overrides_addon_key_fkey"
+            columns: ["addon_key"]
+            isOneToOne: false
+            referencedRelation: "pricing_addons"
+            referencedColumns: ["key"]
+          },
+          {
+            foreignKeyName: "pricing_market_overrides_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "task_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profile_portfolio: {
         Row: {
           caption: string | null
@@ -1987,37 +2110,70 @@ export type Database = {
       }
       task_templates: {
         Row: {
+          active: boolean
+          available_addons: string[]
+          category: string | null
           created_at: string
           default_payout: number | null
+          deliverables: string[]
           description: string | null
+          est_minutes: number | null
+          excludes_notes: string | null
           id: string
+          includes_notes: string | null
+          investor_price: number | null
           is_system: boolean
           name: string
           owner_id: string | null
+          platform_fee: number | null
+          runner_payout: number | null
+          sort_order: number
           task_type: string
           title: string
           updated_at: string
         }
         Insert: {
+          active?: boolean
+          available_addons?: string[]
+          category?: string | null
           created_at?: string
           default_payout?: number | null
+          deliverables?: string[]
           description?: string | null
+          est_minutes?: number | null
+          excludes_notes?: string | null
           id?: string
+          includes_notes?: string | null
+          investor_price?: number | null
           is_system?: boolean
           name: string
           owner_id?: string | null
+          platform_fee?: number | null
+          runner_payout?: number | null
+          sort_order?: number
           task_type: string
           title: string
           updated_at?: string
         }
         Update: {
+          active?: boolean
+          available_addons?: string[]
+          category?: string | null
           created_at?: string
           default_payout?: number | null
+          deliverables?: string[]
           description?: string | null
+          est_minutes?: number | null
+          excludes_notes?: string | null
           id?: string
+          includes_notes?: string | null
+          investor_price?: number | null
           is_system?: boolean
           name?: string
           owner_id?: string | null
+          platform_fee?: number | null
+          runner_payout?: number | null
+          sort_order?: number
           task_type?: string
           title?: string
           updated_at?: string

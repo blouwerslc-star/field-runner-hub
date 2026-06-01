@@ -30,10 +30,12 @@ import { Route as SplatRouteImport } from './routes/$'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as TasksTaskIdRouteImport } from './routes/tasks.$taskId'
 import { Route as ProfileSlugRouteImport } from './routes/profile.$slug'
+import { Route as PricingCatalogRouteImport } from './routes/pricing.catalog'
 import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
 import { Route as CheckoutReturnRouteImport } from './routes/checkout.return'
 import { Route as AuthenticatedTemplatesRouteImport } from './routes/_authenticated/templates'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
+import { Route as AuthenticatedRunnerRatesRouteImport } from './routes/_authenticated/runner-rates'
 import { Route as AuthenticatedRunnerDashboardRouteImport } from './routes/_authenticated/runner-dashboard'
 import { Route as AuthenticatedReviewsRouteImport } from './routes/_authenticated/reviews'
 import { Route as AuthenticatedPerformanceRouteImport } from './routes/_authenticated/performance'
@@ -75,6 +77,7 @@ import { Route as AuthenticatedAdminVerificationsRouteImport } from './routes/_a
 import { Route as AuthenticatedAdminRunnerApprovalsRouteImport } from './routes/_authenticated/admin.runner-approvals'
 import { Route as AuthenticatedAdminPushTestRouteImport } from './routes/_authenticated/admin.push-test'
 import { Route as AuthenticatedAdminProfilesRouteImport } from './routes/_authenticated/admin.profiles'
+import { Route as AuthenticatedAdminPricingRouteImport } from './routes/_authenticated/admin.pricing'
 import { Route as AuthenticatedAdminModerationRouteImport } from './routes/_authenticated/admin.moderation'
 import { Route as AuthenticatedAdminMarketplaceHealthRouteImport } from './routes/_authenticated/admin.marketplace-health'
 import { Route as AuthenticatedAdminEmailMonitorRouteImport } from './routes/_authenticated/admin.email-monitor'
@@ -198,6 +201,11 @@ const ProfileSlugRoute = ProfileSlugRouteImport.update({
   path: '/profile/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PricingCatalogRoute = PricingCatalogRouteImport.update({
+  id: '/catalog',
+  path: '/catalog',
+  getParentRoute: () => PricingRoute,
+} as any)
 const EmailUnsubscribeRoute = EmailUnsubscribeRouteImport.update({
   id: '/email/unsubscribe',
   path: '/email/unsubscribe',
@@ -218,6 +226,12 @@ const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedRunnerRatesRoute =
+  AuthenticatedRunnerRatesRouteImport.update({
+    id: '/runner-rates',
+    path: '/runner-rates',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedRunnerDashboardRoute =
   AuthenticatedRunnerDashboardRouteImport.update({
     id: '/runner-dashboard',
@@ -454,6 +468,12 @@ const AuthenticatedAdminProfilesRoute =
     path: '/profiles',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminPricingRoute =
+  AuthenticatedAdminPricingRouteImport.update({
+    id: '/pricing',
+    path: '/pricing',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminModerationRoute =
   AuthenticatedAdminModerationRouteImport.update({
     id: '/moderation',
@@ -569,7 +589,7 @@ export interface FileRoutesByFullPath {
   '/faq': typeof FaqRoute
   '/investors': typeof InvestorsRoute
   '/login': typeof LoginRoute
-  '/pricing': typeof PricingRoute
+  '/pricing': typeof PricingRouteWithChildren
   '/privacy': typeof PrivacyRoute
   '/profiles': typeof ProfilesRoute
   '/runners': typeof RunnersRoute
@@ -593,10 +613,12 @@ export interface FileRoutesByFullPath {
   '/performance': typeof AuthenticatedPerformanceRoute
   '/reviews': typeof AuthenticatedReviewsRoute
   '/runner-dashboard': typeof AuthenticatedRunnerDashboardRoute
+  '/runner-rates': typeof AuthenticatedRunnerRatesRoute
   '/settings': typeof AuthenticatedSettingsRouteWithChildren
   '/templates': typeof AuthenticatedTemplatesRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
+  '/pricing/catalog': typeof PricingCatalogRoute
   '/profile/$slug': typeof ProfileSlugRoute
   '/tasks/$taskId': typeof TasksTaskIdRoute
   '/academy/$courseSlug': typeof AuthenticatedAcademyCourseSlugRouteWithChildren
@@ -607,6 +629,7 @@ export interface FileRoutesByFullPath {
   '/admin/email-monitor': typeof AuthenticatedAdminEmailMonitorRoute
   '/admin/marketplace-health': typeof AuthenticatedAdminMarketplaceHealthRoute
   '/admin/moderation': typeof AuthenticatedAdminModerationRoute
+  '/admin/pricing': typeof AuthenticatedAdminPricingRoute
   '/admin/profiles': typeof AuthenticatedAdminProfilesRoute
   '/admin/push-test': typeof AuthenticatedAdminPushTestRoute
   '/admin/runner-approvals': typeof AuthenticatedAdminRunnerApprovalsRoute
@@ -654,7 +677,7 @@ export interface FileRoutesByTo {
   '/faq': typeof FaqRoute
   '/investors': typeof InvestorsRoute
   '/login': typeof LoginRoute
-  '/pricing': typeof PricingRoute
+  '/pricing': typeof PricingRouteWithChildren
   '/privacy': typeof PrivacyRoute
   '/profiles': typeof ProfilesRoute
   '/runners': typeof RunnersRoute
@@ -675,9 +698,11 @@ export interface FileRoutesByTo {
   '/performance': typeof AuthenticatedPerformanceRoute
   '/reviews': typeof AuthenticatedReviewsRoute
   '/runner-dashboard': typeof AuthenticatedRunnerDashboardRoute
+  '/runner-rates': typeof AuthenticatedRunnerRatesRoute
   '/templates': typeof AuthenticatedTemplatesRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
+  '/pricing/catalog': typeof PricingCatalogRoute
   '/profile/$slug': typeof ProfileSlugRoute
   '/tasks/$taskId': typeof TasksTaskIdRoute
   '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
@@ -687,6 +712,7 @@ export interface FileRoutesByTo {
   '/admin/email-monitor': typeof AuthenticatedAdminEmailMonitorRoute
   '/admin/marketplace-health': typeof AuthenticatedAdminMarketplaceHealthRoute
   '/admin/moderation': typeof AuthenticatedAdminModerationRoute
+  '/admin/pricing': typeof AuthenticatedAdminPricingRoute
   '/admin/profiles': typeof AuthenticatedAdminProfilesRoute
   '/admin/push-test': typeof AuthenticatedAdminPushTestRoute
   '/admin/runner-approvals': typeof AuthenticatedAdminRunnerApprovalsRoute
@@ -736,7 +762,7 @@ export interface FileRoutesById {
   '/faq': typeof FaqRoute
   '/investors': typeof InvestorsRoute
   '/login': typeof LoginRoute
-  '/pricing': typeof PricingRoute
+  '/pricing': typeof PricingRouteWithChildren
   '/privacy': typeof PrivacyRoute
   '/profiles': typeof ProfilesRoute
   '/runners': typeof RunnersRoute
@@ -760,10 +786,12 @@ export interface FileRoutesById {
   '/_authenticated/performance': typeof AuthenticatedPerformanceRoute
   '/_authenticated/reviews': typeof AuthenticatedReviewsRoute
   '/_authenticated/runner-dashboard': typeof AuthenticatedRunnerDashboardRoute
+  '/_authenticated/runner-rates': typeof AuthenticatedRunnerRatesRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRouteWithChildren
   '/_authenticated/templates': typeof AuthenticatedTemplatesRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
+  '/pricing/catalog': typeof PricingCatalogRoute
   '/profile/$slug': typeof ProfileSlugRoute
   '/tasks/$taskId': typeof TasksTaskIdRoute
   '/_authenticated/academy/$courseSlug': typeof AuthenticatedAcademyCourseSlugRouteWithChildren
@@ -774,6 +802,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/email-monitor': typeof AuthenticatedAdminEmailMonitorRoute
   '/_authenticated/admin/marketplace-health': typeof AuthenticatedAdminMarketplaceHealthRoute
   '/_authenticated/admin/moderation': typeof AuthenticatedAdminModerationRoute
+  '/_authenticated/admin/pricing': typeof AuthenticatedAdminPricingRoute
   '/_authenticated/admin/profiles': typeof AuthenticatedAdminProfilesRoute
   '/_authenticated/admin/push-test': typeof AuthenticatedAdminPushTestRoute
   '/_authenticated/admin/runner-approvals': typeof AuthenticatedAdminRunnerApprovalsRoute
@@ -847,10 +876,12 @@ export interface FileRouteTypes {
     | '/performance'
     | '/reviews'
     | '/runner-dashboard'
+    | '/runner-rates'
     | '/settings'
     | '/templates'
     | '/checkout/return'
     | '/email/unsubscribe'
+    | '/pricing/catalog'
     | '/profile/$slug'
     | '/tasks/$taskId'
     | '/academy/$courseSlug'
@@ -861,6 +892,7 @@ export interface FileRouteTypes {
     | '/admin/email-monitor'
     | '/admin/marketplace-health'
     | '/admin/moderation'
+    | '/admin/pricing'
     | '/admin/profiles'
     | '/admin/push-test'
     | '/admin/runner-approvals'
@@ -929,9 +961,11 @@ export interface FileRouteTypes {
     | '/performance'
     | '/reviews'
     | '/runner-dashboard'
+    | '/runner-rates'
     | '/templates'
     | '/checkout/return'
     | '/email/unsubscribe'
+    | '/pricing/catalog'
     | '/profile/$slug'
     | '/tasks/$taskId'
     | '/admin/analytics'
@@ -941,6 +975,7 @@ export interface FileRouteTypes {
     | '/admin/email-monitor'
     | '/admin/marketplace-health'
     | '/admin/moderation'
+    | '/admin/pricing'
     | '/admin/profiles'
     | '/admin/push-test'
     | '/admin/runner-approvals'
@@ -1013,10 +1048,12 @@ export interface FileRouteTypes {
     | '/_authenticated/performance'
     | '/_authenticated/reviews'
     | '/_authenticated/runner-dashboard'
+    | '/_authenticated/runner-rates'
     | '/_authenticated/settings'
     | '/_authenticated/templates'
     | '/checkout/return'
     | '/email/unsubscribe'
+    | '/pricing/catalog'
     | '/profile/$slug'
     | '/tasks/$taskId'
     | '/_authenticated/academy/$courseSlug'
@@ -1027,6 +1064,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/email-monitor'
     | '/_authenticated/admin/marketplace-health'
     | '/_authenticated/admin/moderation'
+    | '/_authenticated/admin/pricing'
     | '/_authenticated/admin/profiles'
     | '/_authenticated/admin/push-test'
     | '/_authenticated/admin/runner-approvals'
@@ -1076,7 +1114,7 @@ export interface RootRouteChildren {
   FaqRoute: typeof FaqRoute
   InvestorsRoute: typeof InvestorsRoute
   LoginRoute: typeof LoginRoute
-  PricingRoute: typeof PricingRoute
+  PricingRoute: typeof PricingRouteWithChildren
   PrivacyRoute: typeof PrivacyRoute
   ProfilesRoute: typeof ProfilesRoute
   RunnersRoute: typeof RunnersRoute
@@ -1248,6 +1286,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProfileSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/pricing/catalog': {
+      id: '/pricing/catalog'
+      path: '/catalog'
+      fullPath: '/pricing/catalog'
+      preLoaderRoute: typeof PricingCatalogRouteImport
+      parentRoute: typeof PricingRoute
+    }
     '/email/unsubscribe': {
       id: '/email/unsubscribe'
       path: '/email/unsubscribe'
@@ -1274,6 +1319,13 @@ declare module '@tanstack/react-router' {
       path: '/settings'
       fullPath: '/settings'
       preLoaderRoute: typeof AuthenticatedSettingsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/runner-rates': {
+      id: '/_authenticated/runner-rates'
+      path: '/runner-rates'
+      fullPath: '/runner-rates'
+      preLoaderRoute: typeof AuthenticatedRunnerRatesRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/runner-dashboard': {
@@ -1563,6 +1615,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminProfilesRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/pricing': {
+      id: '/_authenticated/admin/pricing'
+      path: '/pricing'
+      fullPath: '/admin/pricing'
+      preLoaderRoute: typeof AuthenticatedAdminPricingRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/moderation': {
       id: '/_authenticated/admin/moderation'
       path: '/moderation'
@@ -1738,6 +1797,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminEmailMonitorRoute: typeof AuthenticatedAdminEmailMonitorRoute
   AuthenticatedAdminMarketplaceHealthRoute: typeof AuthenticatedAdminMarketplaceHealthRoute
   AuthenticatedAdminModerationRoute: typeof AuthenticatedAdminModerationRoute
+  AuthenticatedAdminPricingRoute: typeof AuthenticatedAdminPricingRoute
   AuthenticatedAdminProfilesRoute: typeof AuthenticatedAdminProfilesRoute
   AuthenticatedAdminPushTestRoute: typeof AuthenticatedAdminPushTestRoute
   AuthenticatedAdminRunnerApprovalsRoute: typeof AuthenticatedAdminRunnerApprovalsRoute
@@ -1755,6 +1815,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminMarketplaceHealthRoute:
     AuthenticatedAdminMarketplaceHealthRoute,
   AuthenticatedAdminModerationRoute: AuthenticatedAdminModerationRoute,
+  AuthenticatedAdminPricingRoute: AuthenticatedAdminPricingRoute,
   AuthenticatedAdminProfilesRoute: AuthenticatedAdminProfilesRoute,
   AuthenticatedAdminPushTestRoute: AuthenticatedAdminPushTestRoute,
   AuthenticatedAdminRunnerApprovalsRoute:
@@ -1830,6 +1891,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedPerformanceRoute: typeof AuthenticatedPerformanceRoute
   AuthenticatedReviewsRoute: typeof AuthenticatedReviewsRoute
   AuthenticatedRunnerDashboardRoute: typeof AuthenticatedRunnerDashboardRoute
+  AuthenticatedRunnerRatesRoute: typeof AuthenticatedRunnerRatesRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRouteWithChildren
   AuthenticatedTemplatesRoute: typeof AuthenticatedTemplatesRoute
   AuthenticatedDashboardFavoritesRoute: typeof AuthenticatedDashboardFavoritesRoute
@@ -1856,6 +1918,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedPerformanceRoute: AuthenticatedPerformanceRoute,
   AuthenticatedReviewsRoute: AuthenticatedReviewsRoute,
   AuthenticatedRunnerDashboardRoute: AuthenticatedRunnerDashboardRoute,
+  AuthenticatedRunnerRatesRoute: AuthenticatedRunnerRatesRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRouteWithChildren,
   AuthenticatedTemplatesRoute: AuthenticatedTemplatesRoute,
   AuthenticatedDashboardFavoritesRoute: AuthenticatedDashboardFavoritesRoute,
@@ -1873,6 +1936,17 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
 const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
   AuthenticatedRouteChildren,
 )
+
+interface PricingRouteChildren {
+  PricingCatalogRoute: typeof PricingCatalogRoute
+}
+
+const PricingRouteChildren: PricingRouteChildren = {
+  PricingCatalogRoute: PricingCatalogRoute,
+}
+
+const PricingRouteWithChildren =
+  PricingRoute._addFileChildren(PricingRouteChildren)
 
 interface TasksRouteChildren {
   TasksTaskIdRoute: typeof TasksTaskIdRoute
@@ -1893,7 +1967,7 @@ const rootRouteChildren: RootRouteChildren = {
   FaqRoute: FaqRoute,
   InvestorsRoute: InvestorsRoute,
   LoginRoute: LoginRoute,
-  PricingRoute: PricingRoute,
+  PricingRoute: PricingRouteWithChildren,
   PrivacyRoute: PrivacyRoute,
   ProfilesRoute: ProfilesRoute,
   RunnersRoute: RunnersRoute,
@@ -1918,13 +1992,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
