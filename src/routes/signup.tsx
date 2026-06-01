@@ -25,7 +25,11 @@ export const Route = createFileRoute("/signup")({
     meta: [
       { title: "Create your REI Runner account" },
       { name: "description", content: "Sign up as a runner or investor to join the REI Runner marketplace." },
+      { property: "og:title", content: "Create your REI Runner account" },
+      { property: "og:description", content: "Join REI Runner as a runner to earn on property tasks, or as an investor to hire local boots-on-the-ground in your market." },
+      { property: "og:url", content: "https://reirunner.com/signup" },
     ],
+    links: [{ rel: "canonical", href: "https://reirunner.com/signup" }],
   }),
 });
 

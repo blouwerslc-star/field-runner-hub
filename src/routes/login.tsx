@@ -18,8 +18,12 @@ export const Route = createFileRoute("/login")({
   head: () => ({
     meta: [
       { title: "Sign in — REI Runner" },
-      { name: "description", content: "Sign in to your REI Runner account." },
+      { name: "description", content: "Sign in to your REI Runner account to post property tasks, manage runners, accept jobs, and track payouts in your local market." },
+      { property: "og:title", content: "Sign in — REI Runner" },
+      { property: "og:description", content: "Sign in to REI Runner to manage tasks, runners, and payouts in your local real estate market." },
+      { property: "og:url", content: "https://reirunner.com/login" },
     ],
+    links: [{ rel: "canonical", href: "https://reirunner.com/login" }],
   }),
 });
 
