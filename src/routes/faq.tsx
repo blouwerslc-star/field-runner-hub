@@ -15,6 +15,14 @@ const FAQS = [
   { q: "How often are payouts made?", a: "Payouts are issued as deals close. Approved runners receive onboarding details with payout schedules and methods." },
   { q: "Is there a mobile app coming?", a: "Yes. The REI Runner mobile app is in active development for iOS and Android. Founding Runners get early access." },
   { q: "How do investors use the platform?", a: "Verified investors get a live feed of qualified leads in their target markets, complete with photos, notes, and location data." },
+  { q: "How much do field-service tasks pay?", a: "Pay depends on task type and complexity. Basic exterior photo inspections typically pay $18–$30, occupancy and vacancy checks $30–$45+, video walkthroughs $75–$120, and professional real estate photography $110–$300+. See the full catalog at /pricing/catalog." },
+  { q: "Who sets the pricing?", a: "REI Runner sets base investor pricing and runner payouts per assignment type, with adjustments for market, urgency, mileage, difficulty, and runner experience. Final pricing may vary by location, urgency, property access, assignment complexity, mileage, and runner availability." },
+  { q: "Are runners employees or contractors?", a: "Runners are independent contractors. They choose which assignments to accept and operate on their own schedule." },
+  { q: "How are runners vetted?", a: "Runners complete an application, agree to our code of conduct, and are reviewed before activation. Higher-tier tasks may require additional verification or experience level." },
+  { q: "What if I'm not satisfied with a delivery?", a: "Each assignment has clear deliverables defined up front. If a deliverable is missing or unusable, contact support and we'll work with the runner to redo or refund." },
+  { q: "Do you offer rush or same-day service?", a: "Yes — rush is available as an add-on on most assignments, subject to runner availability in the market." },
+  { q: "How is my data and property information protected?", a: "Property and account data is encrypted in transit and at rest. Runners only see the assignment details required to complete the task." },
+  { q: "How do I get support?", a: "Email support@reirunner.com or call (517) 774-9896. REI Runner is operated by B&K Investment Group LLC." },
 ];
 
 export const Route = createFileRoute("/faq")({

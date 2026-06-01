@@ -19,6 +19,42 @@ export const Route = createFileRoute("/pricing/catalog")({
           "Detailed pricing, deliverables, estimated turnaround, and add-ons for every REI Runner field service assignment.",
       },
       { property: "og:title", content: "Service pricing & deliverables — REI Runner" },
+      { property: "og:description", content: "Transparent pricing for property photos, walkthrough videos, occupancy checks, drive-bys, and sign placement." },
+      { property: "og:url", content: "https://reirunner.com/pricing/catalog" },
+    ],
+    links: [{ rel: "canonical", href: "https://reirunner.com/pricing/catalog" }],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Service",
+          serviceType: "Real Estate Field Services",
+          provider: { "@id": "https://reirunner.com/#organization", "@type": "Organization", name: "REI Runner" },
+          areaServed: { "@type": "Country", name: "United States" },
+          description: "On-demand field services for real estate investors: property photos, video walkthroughs, occupancy checks, drive-bys, and sign placement.",
+          url: "https://reirunner.com/pricing/catalog",
+          offers: {
+            "@type": "AggregateOffer",
+            priceCurrency: "USD",
+            lowPrice: "25",
+            highPrice: "300",
+            offerCount: "8",
+          },
+        }),
+      },
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          itemListElement: [
+            { "@type": "ListItem", position: 1, name: "Home", item: "https://reirunner.com/" },
+            { "@type": "ListItem", position: 2, name: "Pricing", item: "https://reirunner.com/pricing" },
+            { "@type": "ListItem", position: 3, name: "Catalog", item: "https://reirunner.com/pricing/catalog" },
+          ],
+        }),
+      },
     ],
   }),
 });
