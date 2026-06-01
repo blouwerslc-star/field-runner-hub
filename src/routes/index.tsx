@@ -545,6 +545,8 @@ function Index() {
           aria-hidden
           width={1920}
           height={1280}
+          fetchPriority="high"
+          decoding="async"
           className="absolute inset-0 -z-10 w-full h-full object-cover opacity-25"
         />
         <div aria-hidden className="absolute inset-0 -z-10 grid-bg" />
