@@ -58,6 +58,7 @@ import { getPublicStats } from "@/lib/public-stats.functions";
 import { getCoveragePoints } from "@/lib/public-stats.functions";
 import { MarketplaceMap, type MapPoint } from "@/components/maps/MarketplaceMap";
 import { TestimonialsSection } from "@/components/landing/TestimonialsSection";
+import { SampleDeliverablesSection } from "@/components/landing/SampleDeliverablesSection";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -748,6 +749,9 @@ function Index() {
 
       {/* SOCIAL PROOF — honest beta-stage testimonials */}
       <TestimonialsSection />
+
+      {/* SAMPLE DELIVERABLES */}
+      <SampleDeliverablesSection variant="muted" />
 
       {/* TWO-PATH CTA */}
       <section className="mx-auto max-w-6xl px-5 py-16 md:py-24">

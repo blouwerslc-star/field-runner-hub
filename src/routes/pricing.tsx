@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { BrandLogo } from "@/components/brand/BrandLogo";
+import { SampleDeliverablesSection } from "@/components/landing/SampleDeliverablesSection";
 import {
   Accordion,
   AccordionContent,
@@ -251,6 +252,9 @@ function PricingPage() {
           <p className="mt-4 text-center text-xs text-muted-foreground">Sample preview — actual reports use your task's specific checklist.</p>
         </div>
       </section>
+
+      {/* SAMPLE DELIVERABLES */}
+      <SampleDeliverablesSection />
 
       {/* FEES DISCLOSURE */}
       <section className="mx-auto max-w-4xl px-5 py-14 md:py-20">
