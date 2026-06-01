@@ -7,11 +7,11 @@ import {
 } from "@/components/ui/accordion";
 
 const FAQS = [
-  { q: "What is REI Runner?", a: "REI Runner is a nationwide field acquisition network connecting local people who spot distressed and off-market properties with real estate investors actively looking to buy them." },
+  { q: "What is REI Runner?", a: "REI Runner is a field acquisition and operations network connecting local people who spot distressed and off-market properties — and complete on-site investor tasks — with real estate investors actively looking to buy them. We're launching market-by-market across the U.S." },
   { q: "How do runners make money?", a: "Runners earn when the leads they submit are reviewed and turned into closed deals by investors in the network." },
   { q: "Do I need real estate experience?", a: "No experience required. If you can drive your city and spot vacant or distressed properties, you can be a runner." },
   { q: "What kinds of properties qualify?", a: "Vacant, distressed, fire-damaged, code violations, abandoned, hoarder homes, FSBO signs, and other off-market properties investors can't easily find on the MLS." },
-  { q: "Is this available nationwide?", a: "We're launching in Detroit, Atlanta, Dallas, Phoenix, Tampa, Indianapolis, Cleveland, and Chicago — then expanding nationwide." },
+  { q: "Where is REI Runner available?", a: "We're launching market-by-market across the U.S. Active priority markets include Detroit, Atlanta, Dallas, Phoenix, Tampa, Indianapolis, Cleveland, and Chicago. Other cities are on a waitlist while we build runner coverage there." },
   { q: "How often are payouts made?", a: "Payouts are issued as deals close. Approved runners receive onboarding details with payout schedules and methods." },
   { q: "Is there a mobile app coming?", a: "Yes. The REI Runner mobile app is in active development for iOS and Android. Founding Runners get early access." },
   { q: "How do investors use the platform?", a: "Verified investors get a live feed of qualified leads in their target markets, complete with photos, notes, and location data." },

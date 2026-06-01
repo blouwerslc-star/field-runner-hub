@@ -27,7 +27,7 @@ function Terms() {
           </p>
           <h2 className="text-xl font-semibold text-foreground">1. What REI Runner Is</h2>
           <p>
-            REI Runner is a nationwide network that connects local field runners with real estate investors looking for distressed and off-market properties. We are not a real estate brokerage, inspection company, appraisal company, property management company, or legal service.
+            REI Runner is a U.S. marketplace that connects local field runners with real estate investors looking for distressed and off-market properties. We are launching market-by-market and are not a real estate brokerage, inspection company, appraisal company, property management company, or legal service.
           </p>
           <h2 className="text-xl font-semibold text-foreground">2. Eligibility</h2>
           <p>

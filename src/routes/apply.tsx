@@ -83,7 +83,7 @@ function ApplyPage() {
               </div>
               <h2 className="text-xl font-semibold">Join as an Investor</h2>
               <p className="mt-2 text-sm text-muted-foreground">
-                Post property tasks and hire vetted local runners nationwide.
+                Post property tasks and hire vetted local runners in our active U.S. markets.
               </p>
               <span className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-primary">
                 Apply as an Investor <ArrowRight className="size-4 group-hover:translate-x-1 transition-transform" />
@@ -129,8 +129,8 @@ function ApplyPage() {
           </h1>
           <p className="mt-4 text-muted-foreground text-base md:text-lg">
             {isRunner
-              ? "Join the nationwide field operations network for real estate investors."
-              : "Post property tasks and hire vetted local runners nationwide."}
+              ? "Join the field operations network for real estate investors — launching market-by-market across the U.S."
+              : "Post property tasks and hire vetted local runners in our active U.S. markets."}
           </p>
 
           <div className="mt-6 inline-flex items-center gap-2 rounded-full bg-amber-500/10 border border-amber-500/30 px-4 py-1.5 text-sm text-amber-300">

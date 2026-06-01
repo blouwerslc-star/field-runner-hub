@@ -142,7 +142,7 @@ function SignupPage() {
                 {
                   role: "investor" as const,
                   title: "Join as an Investor",
-                  desc: "Post property tasks and hire local runners nationwide.",
+                  desc: "Post property tasks and hire local runners in our active U.S. markets.",
                 },
               ]).map((c) => (
                 <button
