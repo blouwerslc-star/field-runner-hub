@@ -1,4 +1,4 @@
-import { QueryClient, QueryClientProvider, useQueryClient } from "@tanstack/react-query";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   Outlet,
   Link,
@@ -157,7 +157,6 @@ function RootShell({ children }: { children: React.ReactNode }) {
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const router = useRouter();
-  const qc = useQueryClient();
 
   useEffect(() => {
     initNativeShell((path) => {
@@ -199,7 +198,7 @@ function RootComponent() {
 
     const { data } = supabase.auth.onAuthStateChange((event, session) => {
       router.invalidate();
-      qc.invalidateQueries();
+      queryClient.invalidateQueries();
       if (event === "SIGNED_OUT" || !session?.user) {
         // Fire and forget — OneSignal must never break auth flows.
         logoutOneSignalUser().catch(() => {});
@@ -225,7 +224,7 @@ function RootComponent() {
       data.subscription.unsubscribe();
       unsubscribeProfile();
     };
-  }, [router, qc]);
+  }, [router, queryClient]);
 
   return (
     <QueryClientProvider client={queryClient}>
