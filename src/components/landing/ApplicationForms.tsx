@@ -66,23 +66,22 @@ function mapAuthError(code: string | undefined, message: string): string {
   }
 }
 
-async function createAccount(opts: {
+async function requestMagicLinkSignup(opts: {
   email: string;
-  password: string;
   full_name: string;
   phone: string;
   role: "runner" | "investor";
   extra: RunnerMeta | InvestorMeta;
-  finalizeProfile: (payload: { data: any }) => Promise<{ profileStatus: string }>;
-}): Promise<{ hasSession: boolean; debug: SignupDebug }> {
-  const { data, error } = await supabase.auth.signUp({
+}): Promise<{ debug: SignupDebug }> {
+  const redirectTo =
+    typeof window !== "undefined"
+      ? `${window.location.origin}/dashboard`
+      : undefined;
+  const { error } = await supabase.auth.signInWithOtp({
     email: opts.email,
-    password: opts.password,
     options: {
-      emailRedirectTo:
-        typeof window !== "undefined"
-          ? `${window.location.origin}/dashboard`
-          : undefined,
+      emailRedirectTo: redirectTo,
+      shouldCreateUser: true,
       data: {
         role: opts.role,
         full_name: opts.full_name,
@@ -94,31 +93,13 @@ async function createAccount(opts: {
   if (error) {
     throw new Error(mapAuthError((error as { code?: string }).code, error.message));
   }
-  if (!data.user) {
-    throw new Error("Sign-up didn't return a user. Please try again.");
-  }
-  let profileStatus = "Created by database trigger; sign in after email verification to confirm profile access.";
-  if (data.session) {
-    await supabase.auth.getSession();
-    const result = await opts.finalizeProfile({
-      data: {
-        userId: data.user.id,
-        email: data.user.email ?? opts.email,
-        full_name: opts.full_name,
-        phone: opts.phone,
-        role: opts.role,
-        ...opts.extra,
-      },
-    });
-    profileStatus = result.profileStatus;
-  }
   return {
-    hasSession: !!data.session,
     debug: {
-      authUserId: data.user.id,
-      email: data.user.email ?? opts.email,
+      authUserId: "pending-email-verification",
+      email: opts.email,
       role: opts.role,
-      profileStatus,
+      profileStatus:
+        "Application captured. Profile will be created automatically when you click the verification link in your email.",
     },
   };
 }
