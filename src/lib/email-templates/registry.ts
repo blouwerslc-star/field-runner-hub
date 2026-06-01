@@ -1,6 +1,7 @@
 import type { ComponentType } from 'react'
 import { template as applicantWelcome } from './applicant-welcome'
 import { template as notification } from './notification'
+import { template as profileCompletionReminder } from './profile-completion-reminder'
 
 export interface TemplateEntry {
   component: ComponentType<any>
@@ -22,4 +23,5 @@ export interface TemplateEntry {
 export const TEMPLATES: Record<string, TemplateEntry> = {
   applicant_welcome: applicantWelcome,
   notification: notification,
+  profile_completion_reminder: profileCompletionReminder,
 }
