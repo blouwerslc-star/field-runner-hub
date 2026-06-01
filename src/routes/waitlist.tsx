@@ -12,7 +12,9 @@ export const Route = createFileRoute("/waitlist")({
       { name: "robots", content: "noindex" },
       { property: "og:title", content: "You're on the Waitlist — REI Runner" },
       { property: "og:description", content: "Your application has been received. Watch your inbox for updates from REI Runner." },
+      { property: "og:url", content: "https://reirunner.com/waitlist" },
     ],
+    links: [{ rel: "canonical", href: "https://reirunner.com/waitlist" }],
   }),
   component: WaitlistPage,
 });
