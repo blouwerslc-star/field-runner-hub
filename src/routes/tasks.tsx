@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { BrandLogo } from "@/components/brand/BrandLogo";
-import { Loader2, MapPin, DollarSign, Calendar, Search, BadgeCheck } from "lucide-react";
+import { Loader2, MapPin, DollarSign, Calendar, Search, BadgeCheck, Camera, Video, ShieldCheck } from "lucide-react";
 import { MarketplaceMap, type MapPoint } from "@/components/maps/MarketplaceMap";
 
 export const Route = createFileRoute("/tasks")({
@@ -15,12 +15,18 @@ export const Route = createFileRoute("/tasks")({
   head: () => ({
     meta: [
       { title: "Open tasks — REI Runner Marketplace" },
-      { name: "description", content: "Browse open real estate field service tasks. Filter by market, payout, and type." },
+      { name: "description", content: "Browse open real estate field service tasks across REI Runner's launching markets. Filter by city, payout, and task type." },
       { property: "og:title", content: "Open tasks — REI Runner Marketplace" },
-      { property: "og:description", content: "Browse open real estate field service tasks across the country." },
+      { property: "og:description", content: "Browse open property field tasks. REI Runner is launching market-by-market across the U.S." },
     ],
   }),
 });
+
+const SAMPLE_TASKS = [
+  { id: "sample-1", task_type: "property_photos", title: "Exterior + interior photo set", city: "Detroit", state: "MI", payout: 65, icon: Camera, desc: "20+ geotagged photos uploaded same-day. Example only — apply to be notified when real tasks open." },
+  { id: "sample-2", task_type: "occupancy_check", title: "Drive-by occupancy check", city: "Atlanta", state: "GA", payout: 35, icon: ShieldCheck, desc: "Verify vacant / occupied with 4 exterior photos and written observations." },
+  { id: "sample-3", task_type: "walkthrough_video", title: "Interior walkthrough video", city: "Dallas", state: "TX", payout: 110, icon: Video, desc: "Full narrated interior walkthrough video, vertical HD." },
+];
 
 function MarketplacePage() {
   const [q, setQ] = useState("");
@@ -86,7 +92,8 @@ function MarketplacePage() {
           <Link to="/" aria-label="REI Runner home"><BrandLogo /></Link>
           <div className="flex items-center gap-3 text-sm">
             <Link to="/profiles" className="text-muted-foreground hover:text-foreground">Browse runners</Link>
-            <Link to="/investors" className="text-muted-foreground hover:text-foreground">Post a task</Link>
+            <Link to="/investors" className="text-muted-foreground hover:text-foreground">Hire a Runner</Link>
+            <Link to="/runners" className="text-muted-foreground hover:text-foreground">Become a Runner</Link>
             <Link to="/login" className="text-muted-foreground hover:text-foreground">Sign in</Link>
           </div>
         </div>
@@ -134,12 +141,12 @@ function MarketplacePage() {
           <div className="grid md:grid-cols-[1fr_160px_120px_180px_auto] gap-2">
             <div className="relative">
               <Search className="size-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-              <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search title or description" className="pl-9" />
+              <Input aria-label="Search tasks by title or description" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search title or description" className="pl-9" />
             </div>
-            <Input value={city} onChange={(e) => setCity(e.target.value)} placeholder="City" />
-            <Input value={state} onChange={(e) => setState(e.target.value)} placeholder="State" />
+            <Input aria-label="Filter tasks by city" value={city} onChange={(e) => setCity(e.target.value)} placeholder="City" />
+            <Input aria-label="Filter tasks by state" value={state} onChange={(e) => setState(e.target.value)} placeholder="State" />
             <Select value={sort} onValueChange={(v) => setSort(v as any)}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectTrigger aria-label="Sort tasks"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="newest">Newest</SelectItem>
                 <SelectItem value="payout">Highest payout</SelectItem>
@@ -152,7 +159,7 @@ function MarketplacePage() {
           </div>
           <div className="grid md:grid-cols-[200px_140px_140px_180px_auto] gap-2">
             <Select value={taskType} onValueChange={setTaskType}>
-              <SelectTrigger><SelectValue placeholder="Task type" /></SelectTrigger>
+              <SelectTrigger aria-label="Filter by task type"><SelectValue placeholder="Task type" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All task types</SelectItem>
                 <SelectItem value="property_photos">Property photos</SelectItem>
@@ -166,9 +173,9 @@ function MarketplacePage() {
                 <SelectItem value="other">Other</SelectItem>
               </SelectContent>
             </Select>
-            <Input type="number" min={0} value={minPayout} onChange={(e) => setMinPayout(e.target.value)} placeholder="Min $" />
-            <Input type="number" min={0} value={maxPayout} onChange={(e) => setMaxPayout(e.target.value)} placeholder="Max $" />
-            <Input type="date" value={beforeDue} onChange={(e) => setBeforeDue(e.target.value)} placeholder="Due before" />
+            <Input aria-label="Minimum payout in dollars" type="number" min={0} value={minPayout} onChange={(e) => setMinPayout(e.target.value)} placeholder="Min $" />
+            <Input aria-label="Maximum payout in dollars" type="number" min={0} value={maxPayout} onChange={(e) => setMaxPayout(e.target.value)} placeholder="Max $" />
+            <Input aria-label="Due before date" type="date" value={beforeDue} onChange={(e) => setBeforeDue(e.target.value)} placeholder="Due before" />
             <Button type="button" variant="ghost" onClick={reset}>Reset</Button>
           </div>
         </form>
@@ -176,8 +183,45 @@ function MarketplacePage() {
         {isLoading ? (
           <div className="grid place-items-center py-20"><Loader2 className="size-6 animate-spin text-primary" /></div>
         ) : tasks.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-border p-12 text-center text-muted-foreground">
-            No open tasks match your filters.
+          <div className="space-y-6">
+            <div className="rounded-2xl border border-dashed border-border p-8 md:p-12 text-center">
+              <MapPin className="size-8 text-primary mx-auto mb-3" />
+              <h2 className="text-xl md:text-2xl font-semibold">No open tasks in this market yet.</h2>
+              <p className="mt-2 text-muted-foreground max-w-xl mx-auto">
+                REI Runner is opening markets city-by-city. Join early access to get notified when tasks go live near you.
+              </p>
+              <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
+                <Button asChild><Link to="/runners">Become a Runner</Link></Button>
+                <Button asChild variant="outline"><Link to="/investors">Post a Task</Link></Button>
+              </div>
+            </div>
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <div className="text-xs font-mono uppercase tracking-widest text-primary">Example tasks</div>
+                <div className="text-[11px] text-muted-foreground">For illustration only — not live work.</div>
+              </div>
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {SAMPLE_TASKS.map((s) => (
+                  <div key={s.id} className="relative rounded-2xl border border-dashed border-border/70 bg-card/30 p-5 opacity-90">
+                    <span className="absolute top-3 right-3 inline-flex items-center rounded-full bg-muted text-muted-foreground border border-border/60 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide">
+                      Example task
+                    </span>
+                    <div className="flex items-start gap-2">
+                      <span className="inline-flex items-center rounded-full bg-primary/10 text-primary border border-primary/30 px-2 py-0.5 text-xs font-medium">
+                        {s.task_type}
+                      </span>
+                    </div>
+                    <h3 className="mt-3 font-semibold">{s.title}</h3>
+                    <p className="mt-1 text-xs text-muted-foreground flex items-center gap-1"><MapPin className="size-3" /> {s.city}, {s.state}</p>
+                    <p className="mt-2 text-sm text-muted-foreground line-clamp-3">{s.desc}</p>
+                    <div className="mt-4 flex items-center justify-between">
+                      <span className="text-xs text-muted-foreground inline-flex items-center gap-1"><s.icon className="size-3.5" /> Sample deliverable</span>
+                      <span className="inline-flex items-center gap-1 font-bold text-primary"><DollarSign className="size-4" />{s.payout}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         ) : (
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
