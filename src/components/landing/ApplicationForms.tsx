@@ -1,9 +1,7 @@
 import { useState, useId, useRef, useEffect, cloneElement, isValidElement } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { finalizeSignupProfile } from "@/lib/signup.functions";
 import { precheckSignupAttempt } from "@/lib/spam-protection.functions";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
@@ -66,23 +64,22 @@ function mapAuthError(code: string | undefined, message: string): string {
   }
 }
 
-async function createAccount(opts: {
+async function requestMagicLinkSignup(opts: {
   email: string;
-  password: string;
   full_name: string;
   phone: string;
   role: "runner" | "investor";
   extra: RunnerMeta | InvestorMeta;
-  finalizeProfile: (payload: { data: any }) => Promise<{ profileStatus: string }>;
-}): Promise<{ hasSession: boolean; debug: SignupDebug }> {
-  const { data, error } = await supabase.auth.signUp({
+}): Promise<{ debug: SignupDebug }> {
+  const redirectTo =
+    typeof window !== "undefined"
+      ? `${window.location.origin}/dashboard`
+      : undefined;
+  const { error } = await supabase.auth.signInWithOtp({
     email: opts.email,
-    password: opts.password,
     options: {
-      emailRedirectTo:
-        typeof window !== "undefined"
-          ? `${window.location.origin}/dashboard`
-          : undefined,
+      emailRedirectTo: redirectTo,
+      shouldCreateUser: true,
       data: {
         role: opts.role,
         full_name: opts.full_name,
@@ -94,31 +91,13 @@ async function createAccount(opts: {
   if (error) {
     throw new Error(mapAuthError((error as { code?: string }).code, error.message));
   }
-  if (!data.user) {
-    throw new Error("Sign-up didn't return a user. Please try again.");
-  }
-  let profileStatus = "Created by database trigger; sign in after email verification to confirm profile access.";
-  if (data.session) {
-    await supabase.auth.getSession();
-    const result = await opts.finalizeProfile({
-      data: {
-        userId: data.user.id,
-        email: data.user.email ?? opts.email,
-        full_name: opts.full_name,
-        phone: opts.phone,
-        role: opts.role,
-        ...opts.extra,
-      },
-    });
-    profileStatus = result.profileStatus;
-  }
   return {
-    hasSession: !!data.session,
     debug: {
-      authUserId: data.user.id,
-      email: data.user.email ?? opts.email,
+      authUserId: "pending-email-verification",
+      email: opts.email,
       role: opts.role,
-      profileStatus,
+      profileStatus:
+        "Application captured. Profile will be created automatically when you click the verification link in your email.",
     },
   };
 }
@@ -258,8 +237,6 @@ function SuccessCard({
 }
 
 export function FieldRunnerForm() {
-  const navigate = useNavigate();
-  const finalizeProfile = useServerFn(finalizeSignupProfile);
   const precheck = useServerFn(precheckSignupAttempt);
   const formMountedAt = useRef<number>(Date.now());
   useEffect(() => {
@@ -274,7 +251,6 @@ export function FieldRunnerForm() {
   const [serviceRadius, setServiceRadius] = useState("");
   const [transportation, setTransportation] = useState("");
   const [taskTypes, setTaskTypes] = useState<string[]>([]);
-  const [password, setPassword] = useState("");
   const [reset, setReset] = useState(0);
 
   const toggle = (s: string) =>
@@ -291,7 +267,6 @@ export function FieldRunnerForm() {
     setServiceRadius("");
     setTransportation("");
     setTaskTypes([]);
-    setPassword("");
     setReset((n) => n + 1);
   };
 
@@ -318,10 +293,6 @@ export function FieldRunnerForm() {
       toast.error("Pick at least one task type you can perform.");
       return;
     }
-    if (password.length < 8) {
-      toast.error("Please choose a password of at least 8 characters.");
-      return;
-    }
 
     setSubmitting(true);
     try {
@@ -335,13 +306,11 @@ export function FieldRunnerForm() {
         setSubmitting(false);
         return;
       }
-      const { hasSession, debug } = await createAccount({
+      const { debug } = await requestMagicLinkSignup({
         email,
-        password,
         full_name,
         phone,
         role: "runner",
-        finalizeProfile,
         extra: {
           city,
           state,
@@ -352,14 +321,9 @@ export function FieldRunnerForm() {
       });
       setSubmittedEmail(email);
       setSignupDebug(debug);
-      setNeedsEmailVerification(!hasSession);
+      setNeedsEmailVerification(true);
       setDone(true);
-      if (hasSession) {
-        toast.success("Welcome aboard!");
-        navigate({ to: "/dashboard/runner" });
-      } else {
-        toast.success("Account created — check your email to verify.");
-      }
+      toast.success("Application received — check your email to finish.");
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Submission failed.";
       console.error("[signup:runner]", err);
@@ -421,29 +385,18 @@ export function FieldRunnerForm() {
         <TaskTypesGrid selected={taskTypes} onToggle={toggle} />
       </Field>
 
-      <Field label="Choose a password">
-        <Input
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-          minLength={8}
-          maxLength={100}
-          autoComplete="new-password"
-          placeholder="At least 8 characters — this creates your account"
-        />
-      </Field>
+      <p className="text-xs text-muted-foreground">
+        No password needed yet. We'll email you a secure verification link to finish setting up your account.
+      </p>
 
       <Button type="submit" size="lg" disabled={submitting} className="w-full bg-gradient-primary shadow-glow">
-        {submitting ? <><Loader2 className="size-4 mr-2 animate-spin" /> Creating account…</> : "Create Runner Account"}
+        {submitting ? <><Loader2 className="size-4 mr-2 animate-spin" /> Submitting…</> : "Apply as a Runner"}
       </Button>
     </form>
   );
 }
 
 export function ProForm() {
-  const navigate = useNavigate();
-  const finalizeProfile = useServerFn(finalizeSignupProfile);
   const precheck = useServerFn(precheckSignupAttempt);
   const formMountedAt = useRef<number>(Date.now());
   useEffect(() => {
@@ -456,7 +409,6 @@ export function ProForm() {
   const [signupDebug, setSignupDebug] = useState<SignupDebug | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
   const [dealVolume, setDealVolume] = useState("");
-  const [password, setPassword] = useState("");
   const [reset, setReset] = useState(0);
 
   const onReset = () => {
@@ -466,7 +418,6 @@ export function ProForm() {
     setSignupDebug(null);
     setFormError(null);
     setDealVolume("");
-    setPassword("");
     setReset((n) => n + 1);
   };
 
@@ -489,10 +440,6 @@ export function ProForm() {
       toast.error("Please select your monthly deal volume.");
       return;
     }
-    if (password.length < 8) {
-      toast.error("Please choose a password of at least 8 characters.");
-      return;
-    }
 
     setSubmitting(true);
     try {
@@ -506,13 +453,11 @@ export function ProForm() {
         setSubmitting(false);
         return;
       }
-      const { hasSession, debug } = await createAccount({
+      const { debug } = await requestMagicLinkSignup({
         email,
-        password,
         full_name,
         phone,
         role: "investor",
-        finalizeProfile,
         extra: {
           company_name,
           markets_served,
@@ -521,14 +466,9 @@ export function ProForm() {
       });
       setSubmittedEmail(email);
       setSignupDebug(debug);
-      setNeedsEmailVerification(!hasSession);
+      setNeedsEmailVerification(true);
       setDone(true);
-      if (hasSession) {
-        toast.success("Welcome aboard!");
-        navigate({ to: "/dashboard/investor" });
-      } else {
-        toast.success("Account created — check your email to verify.");
-      }
+      toast.success("Application received — check your email to finish.");
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Submission failed.";
       console.error("[signup:investor]", err);
@@ -579,21 +519,12 @@ export function ProForm() {
         </Field>
       </div>
 
-      <Field label="Choose a password">
-        <Input
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-          minLength={8}
-          maxLength={100}
-          autoComplete="new-password"
-          placeholder="At least 8 characters — this creates your account"
-        />
-      </Field>
+      <p className="text-xs text-muted-foreground">
+        No password needed yet. We'll email you a secure verification link to finish setting up your account.
+      </p>
 
       <Button type="submit" size="lg" disabled={submitting} className="w-full bg-gradient-primary shadow-glow">
-        {submitting ? <><Loader2 className="size-4 mr-2 animate-spin" /> Creating account…</> : "Create Investor Account"}
+        {submitting ? <><Loader2 className="size-4 mr-2 animate-spin" /> Submitting…</> : "Apply as an Investor"}
       </Button>
     </form>
   );
