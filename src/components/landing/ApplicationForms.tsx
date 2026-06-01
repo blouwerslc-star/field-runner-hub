@@ -1,9 +1,7 @@
 import { useState, useId, useRef, useEffect, cloneElement, isValidElement } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { finalizeSignupProfile } from "@/lib/signup.functions";
 import { precheckSignupAttempt } from "@/lib/spam-protection.functions";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
@@ -239,7 +237,6 @@ function SuccessCard({
 }
 
 export function FieldRunnerForm() {
-  const navigate = useNavigate();
   const precheck = useServerFn(precheckSignupAttempt);
   const formMountedAt = useRef<number>(Date.now());
   useEffect(() => {
@@ -400,7 +397,6 @@ export function FieldRunnerForm() {
 }
 
 export function ProForm() {
-  const navigate = useNavigate();
   const precheck = useServerFn(precheckSignupAttempt);
   const formMountedAt = useRef<number>(Date.now());
   useEffect(() => {
