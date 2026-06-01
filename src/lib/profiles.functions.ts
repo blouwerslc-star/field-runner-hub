@@ -205,7 +205,18 @@ const listSchema = z.object({
   availability: z.enum(["available", "busy", "unavailable"]).optional(),
   sort: z.enum(["rating", "completed", "newest", "featured"]).default("featured"),
   limit: z.number().int().min(1).max(60).default(24),
+  viewerLoggedIn: z.boolean().optional().default(false),
 });
+
+function maskName(full: string | null | undefined): string | null {
+  if (!full) return null;
+  const parts = full.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return null;
+  if (parts.length === 1) return parts[0];
+  const first = parts[0];
+  const lastInitial = parts[parts.length - 1][0]?.toUpperCase() ?? "";
+  return lastInitial ? `${first} ${lastInitial}.` : first;
+}
 
 export const listPublicProfiles = createServerFn({ method: "POST" })
   .inputValidator((i: unknown) => listSchema.parse(i ?? {}))
@@ -273,11 +284,25 @@ export const listPublicProfiles = createServerFn({ method: "POST" })
       }
     }
     return {
-      profiles: filtered.map((p) => ({
-        ...(p as Record<string, unknown>),
-        roles: rolesByUser.get((p as { user_id: string }).user_id) ?? [],
-        academy_certification: certByUser.get((p as { user_id: string }).user_id) ?? null,
-      })),
+      profiles: filtered.map((p) => {
+        const row = p as Record<string, unknown>;
+        const base = {
+          ...row,
+          roles: rolesByUser.get((p as { user_id: string }).user_id) ?? [],
+          academy_certification: certByUser.get((p as { user_id: string }).user_id) ?? null,
+        };
+        if (data.viewerLoggedIn) return base;
+        // Public (logged-out) view: mask name, strip slug + free-text PII fields
+        return {
+          ...base,
+          full_name: maskName(base.full_name as string | null),
+          profile_slug: null,
+          bio: null,
+          company_description: null,
+          company_name: null,
+        };
+      }),
+      viewerLoggedIn: data.viewerLoggedIn,
     };
   });
 
