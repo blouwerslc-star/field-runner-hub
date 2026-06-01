@@ -175,13 +175,13 @@ function HoneypotField() {
         overflow: "hidden",
       }}
     >
-      <label>
-        Website
+      <label aria-hidden="true">
         <input
           type="text"
           name="website_url"
           tabIndex={-1}
           autoComplete="off"
+          aria-hidden="true"
         />
       </label>
     </div>
