@@ -168,3 +168,27 @@ export async function setOneSignalLogLevel(level: number) {
     OneSignal?.Debug?.setLogLevel?.(level);
   } catch {}
 }
+
+/**
+ * Pulls the current user's role/profile/status from the server and pushes
+ * them to OneSignal as external ID + tags. Safe to call from anywhere —
+ * on web (no native shell) it is a no-op. Never throws.
+ */
+export async function syncOneSignalIdentity() {
+  if (!isNative()) return;
+  try {
+    const { getOneSignalIdentity } = await import(
+      "./onesignal-identity.functions"
+    );
+    const identity = await getOneSignalIdentity();
+    if (!identity?.externalId) return;
+    await loginOneSignalUser(identity.externalId);
+    const tagStrings: Record<string, string> = {};
+    for (const [k, v] of Object.entries(identity.tags)) {
+      tagStrings[k] = typeof v === "string" ? v : String(v);
+    }
+    await addOneSignalTags(tagStrings);
+  } catch (err) {
+    console.warn("[OneSignal] identity sync failed:", err);
+  }
+}

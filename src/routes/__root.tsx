@@ -1,4 +1,4 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClient, QueryClientProvider, useQueryClient } from "@tanstack/react-query";
 import {
   Outlet,
   Link,
@@ -13,7 +13,12 @@ import { META_PIXEL_ID, GA4_MEASUREMENT_ID } from "@/lib/tracking";
 import { BackButton } from "@/components/navigation/BackButton";
 import { useEffect } from "react";
 import { initNativeShell } from "@/lib/native";
-import { initOneSignal } from "@/lib/onesignal";
+import {
+  initOneSignal,
+  syncOneSignalIdentity,
+  logoutOneSignalUser,
+} from "@/lib/onesignal";
+import { supabase } from "@/integrations/supabase/client";
 
 function NotFoundComponent() {
   return (
@@ -152,6 +157,7 @@ function RootShell({ children }: { children: React.ReactNode }) {
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const router = useRouter();
+  const qc = useQueryClient();
 
   useEffect(() => {
     initNativeShell((path) => {
@@ -159,6 +165,67 @@ function RootComponent() {
     });
     initOneSignal();
   }, [router]);
+
+  useEffect(() => {
+    // Single source of truth for auth state. Wire OneSignal identity
+    // here so login/logout/refresh in any flow stays in sync, and
+    // invalidate query caches so user-scoped data doesn't bleed across
+    // sessions.
+    let profileChannel: ReturnType<typeof supabase.channel> | null = null;
+
+    const subscribeProfile = (userId: string) => {
+      if (profileChannel) return;
+      try {
+        profileChannel = supabase
+          .channel(`onesignal-profile-${userId}`)
+          .on(
+            "postgres_changes",
+            { event: "*", schema: "public", table: "profiles", filter: `user_id=eq.${userId}` },
+            () => {
+              syncOneSignalIdentity().catch(() => {});
+            },
+          )
+          .subscribe();
+      } catch {
+        // realtime may not be enabled for this table — safe to ignore
+      }
+    };
+
+    const unsubscribeProfile = () => {
+      if (!profileChannel) return;
+      try { supabase.removeChannel(profileChannel); } catch {}
+      profileChannel = null;
+    };
+
+    const { data } = supabase.auth.onAuthStateChange((event, session) => {
+      router.invalidate();
+      qc.invalidateQueries();
+      if (event === "SIGNED_OUT" || !session?.user) {
+        // Fire and forget — OneSignal must never break auth flows.
+        logoutOneSignalUser().catch(() => {});
+        unsubscribeProfile();
+        return;
+      }
+      if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED" || event === "USER_UPDATED") {
+        syncOneSignalIdentity().catch(() => {});
+        subscribeProfile(session.user.id);
+      }
+    });
+
+    // Initial hydration — session may already be restored before the
+    // listener attaches.
+    supabase.auth.getSession().then(({ data: s }) => {
+      if (s.session?.user) {
+        syncOneSignalIdentity().catch(() => {});
+        subscribeProfile(s.session.user.id);
+      }
+    });
+
+    return () => {
+      data.subscription.unsubscribe();
+      unsubscribeProfile();
+    };
+  }, [router, qc]);
 
   return (
     <QueryClientProvider client={queryClient}>
