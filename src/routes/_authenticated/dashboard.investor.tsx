@@ -24,7 +24,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Loader2, Plus, MapPin, Calendar, DollarSign, CheckCircle2, XCircle, FileImage, ClipboardList } from "lucide-react";
+import { Loader2, Plus, MapPin, Calendar, DollarSign, CheckCircle2, XCircle, FileImage } from "lucide-react";
 import { toast } from "sonner";
 import { listMyTasks, getTaskDetail, createInvestorTask, reviewSubmission } from "@/lib/tasks.functions";
 import { getSignedDownloadUrl } from "@/lib/storage.functions";
