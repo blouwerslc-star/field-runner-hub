@@ -173,10 +173,10 @@ function StoryPage() {
         </p>
         <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
           <Button asChild size="lg" className="bg-gradient-primary shadow-glow">
-            <Link to="/apply">Apply as a Runner <ArrowRight className="size-4 ml-1" /></Link>
+            <Link to="/investors">Hire a Runner <ArrowRight className="size-4 ml-1" /></Link>
           </Button>
           <Button asChild size="lg" variant="outline">
-            <Link to="/investors">Join as an Investor</Link>
+            <Link to="/runners">Become a Runner</Link>
           </Button>
         </div>
       </section>

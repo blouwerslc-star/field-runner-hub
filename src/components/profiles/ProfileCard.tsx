@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { RoleBadge, StarRating, LocationLine, VerifiedBadge } from "./ProfileBadges";
 import { VerificationLevelBadge } from "./VerificationLevelBadge";
-import { GraduationCap } from "lucide-react";
+import { GraduationCap, Lock } from "lucide-react";
 
 export type PublicProfile = {
   user_id: string;
@@ -35,14 +35,12 @@ function initials(name: string | null) {
     .toUpperCase();
 }
 
-export function ProfileCard({ p }: { p: PublicProfile }) {
+export function ProfileCard({ p, viewerAuthenticated = true }: { p: PublicProfile; viewerAuthenticated?: boolean }) {
   const slug = p.profile_slug ?? p.user_id;
-  return (
-    <Link
-      to="/profile/$slug"
-      params={{ slug }}
-      className="group flex flex-col rounded-xl border border-border/60 bg-card/40 overflow-hidden hover:border-primary/50 transition-colors"
-    >
+  const canLink = viewerAuthenticated && !!p.profile_slug;
+
+  const inner = (
+    <>
       <div
         className="h-24 w-full bg-gradient-to-br from-primary/20 to-purple-500/20"
         style={p.cover_photo_url ? { backgroundImage: `url(${p.cover_photo_url})`, backgroundSize: "cover", backgroundPosition: "center" } : undefined}
@@ -50,7 +48,7 @@ export function ProfileCard({ p }: { p: PublicProfile }) {
       <div className="-mt-8 px-4 pb-4 flex flex-col gap-2">
         <div className="size-16 rounded-full border-4 border-card bg-muted overflow-hidden flex items-center justify-center text-lg font-semibold text-muted-foreground">
           {p.profile_photo_url ? (
-            <img src={p.profile_photo_url} alt={p.full_name ?? ""} className="size-full object-cover" />
+            <img src={p.profile_photo_url} alt={p.full_name ?? ""} loading="lazy" decoding="async" className="size-full object-cover" />
           ) : (
             initials(p.full_name)
           )}
@@ -89,7 +87,11 @@ export function ProfileCard({ p }: { p: PublicProfile }) {
         )}
         <div className="flex items-center justify-between pt-2 border-t border-border/60">
           <span className="text-xs text-muted-foreground">{p.completed_tasks_count} jobs</span>
-          {p.task_rate ? (
+          {!viewerAuthenticated ? (
+            <span className="text-xs text-primary font-medium inline-flex items-center gap-1">
+              <Lock className="size-3" /> Sign in to view
+            </span>
+          ) : p.task_rate ? (
             <span className="text-sm">
               <span className="text-muted-foreground">from </span>
               <span className="font-semibold">${p.task_rate}</span>
@@ -99,6 +101,16 @@ export function ProfileCard({ p }: { p: PublicProfile }) {
           )}
         </div>
       </div>
-    </Link>
+    </>
   );
+
+  const className = "group flex flex-col rounded-xl border border-border/60 bg-card/40 overflow-hidden hover:border-primary/50 transition-colors";
+  if (canLink) {
+    return (
+      <Link to="/profile/$slug" params={{ slug }} className={className}>
+        {inner}
+      </Link>
+    );
+  }
+  return <div className={className} aria-label={viewerAuthenticated ? undefined : "Sign in to view this profile"}>{inner}</div>;
 }

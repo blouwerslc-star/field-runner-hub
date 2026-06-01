@@ -1,4 +1,4 @@
-import { createFileRoute, Link, notFound, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, notFound, useNavigate, redirect } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
@@ -22,10 +22,18 @@ import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/profile/$slug")({
   component: PublicProfilePage,
+  beforeLoad: async ({ location }) => {
+    if (typeof window === "undefined") return;
+    const { data } = await supabase.auth.getSession();
+    if (!data.session) {
+      throw redirect({ to: "/login", search: { redirect: location.href } });
+    }
+  },
   head: ({ params }) => ({
     meta: [
-      { title: `${params.slug} — REI Runner` },
-      { name: "description", content: `Public profile on REI Runner.` },
+      { title: "Runner profile — REI Runner" },
+      { name: "description", content: "Detailed runner profile, available to signed-in REI Runner members." },
+      { name: "robots", content: "noindex" },
     ],
   }),
   errorComponent: ({ error }) => (

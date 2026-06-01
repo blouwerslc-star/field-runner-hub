@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { listPublicProfiles } from "@/lib/profiles.functions";
@@ -9,7 +9,8 @@ import { MarketplaceMap, type MapPoint } from "@/components/maps/MarketplaceMap"
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { Loader2, Search, BadgeCheck, Star, Trophy } from "lucide-react";
+import { Loader2, Search, BadgeCheck, Star, Trophy, Lock } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/profiles")({
   component: ProfilesDirectory,
@@ -23,6 +24,12 @@ export const Route = createFileRoute("/profiles")({
 
 function ProfilesDirectory() {
   const fetchFn = useServerFn(listPublicProfiles);
+  const [authed, setAuthed] = useState(false);
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: s }) => setAuthed(!!s.session));
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => setAuthed(!!s));
+    return () => sub.subscription.unsubscribe();
+  }, []);
   const [q, setQ] = useState("");
   const [role, setRole] = useState<"all" | "runner" | "investor">("all");
   const [city, setCity] = useState("");
@@ -39,6 +46,7 @@ function ProfilesDirectory() {
     service: service || undefined,
     availability: availability === "all" ? undefined : availability,
     sort,
+    viewerLoggedIn: authed,
   };
 
   const { data, isLoading, refetch, isFetching } = useQuery({
@@ -83,6 +91,18 @@ function ProfilesDirectory() {
       </header>
 
       <main className="mx-auto max-w-7xl px-5 py-10">
+        {!authed && (
+          <div className="mb-6 rounded-xl border border-primary/30 bg-primary/5 px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center gap-2 text-sm">
+              <Lock className="size-4 text-primary" />
+              <span>Public listings show first name + last initial only. <span className="text-muted-foreground">Sign in to view full runner profiles and contact runners.</span></span>
+            </div>
+            <div className="flex gap-2">
+              <Button asChild size="sm" variant="outline"><Link to="/login">Sign in</Link></Button>
+              <Button asChild size="sm"><Link to="/investors">Create investor account</Link></Button>
+            </div>
+          </div>
+        )}
         <div className="mb-8 flex flex-wrap items-end justify-between gap-6">
           <div>
             <h1 className="text-3xl md:text-4xl font-bold tracking-tight">Browse the marketplace</h1>
@@ -124,21 +144,21 @@ function ProfilesDirectory() {
         >
           <div className="md:col-span-2 relative">
             <Search className="size-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-            <Input placeholder="Search name or headline" value={q} onChange={(e) => setQ(e.target.value)} className="pl-9" />
+            <Input aria-label="Search profiles by name or headline" placeholder="Search name or headline" value={q} onChange={(e) => setQ(e.target.value)} className="pl-9" />
           </div>
           <Select value={role} onValueChange={(v) => setRole(v as typeof role)}>
-            <SelectTrigger><SelectValue placeholder="Role" /></SelectTrigger>
+            <SelectTrigger aria-label="Filter by role"><SelectValue placeholder="Role" /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All roles</SelectItem>
               <SelectItem value="runner">Runners</SelectItem>
               <SelectItem value="investor">Investors</SelectItem>
             </SelectContent>
           </Select>
-          <Input placeholder="City" value={city} onChange={(e) => setCity(e.target.value)} />
-          <Input placeholder="State" value={state} onChange={(e) => setState(e.target.value)} />
-          <Input placeholder="Service" value={service} onChange={(e) => setService(e.target.value)} />
+          <Input aria-label="Filter by city" placeholder="City" value={city} onChange={(e) => setCity(e.target.value)} />
+          <Input aria-label="Filter by state" placeholder="State" value={state} onChange={(e) => setState(e.target.value)} />
+          <Input aria-label="Filter by service offered" placeholder="Service" value={service} onChange={(e) => setService(e.target.value)} />
           <Select value={availability} onValueChange={(v) => setAvailability(v as typeof availability)}>
-            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectTrigger aria-label="Filter by availability"><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Any availability</SelectItem>
               <SelectItem value="available">Available</SelectItem>
@@ -147,7 +167,7 @@ function ProfilesDirectory() {
             </SelectContent>
           </Select>
           <Select value={sort} onValueChange={(v) => setSort(v as typeof sort)}>
-            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectTrigger aria-label="Sort profiles"><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="featured">Featured first</SelectItem>
               <SelectItem value="rating">Top rated</SelectItem>
@@ -169,7 +189,7 @@ function ProfilesDirectory() {
           </div>
         ) : (
           <div className="grid gap-5 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-            {profiles.map((p) => <ProfileCard key={p.user_id} p={p} />)}
+            {profiles.map((p) => <ProfileCard key={p.user_id} p={p} viewerAuthenticated={authed} />)}
           </div>
         )}
       </main>
