@@ -73,6 +73,7 @@ import { Route as AuthenticatedDashboardInvestorRouteImport } from './routes/_au
 import { Route as AuthenticatedDashboardFavoritesRouteImport } from './routes/_authenticated/dashboard.favorites'
 import { Route as AuthenticatedAdminVerificationsRouteImport } from './routes/_authenticated/admin.verifications'
 import { Route as AuthenticatedAdminRunnerApprovalsRouteImport } from './routes/_authenticated/admin.runner-approvals'
+import { Route as AuthenticatedAdminPushTestRouteImport } from './routes/_authenticated/admin.push-test'
 import { Route as AuthenticatedAdminProfilesRouteImport } from './routes/_authenticated/admin.profiles'
 import { Route as AuthenticatedAdminModerationRouteImport } from './routes/_authenticated/admin.moderation'
 import { Route as AuthenticatedAdminMarketplaceHealthRouteImport } from './routes/_authenticated/admin.marketplace-health'
@@ -441,6 +442,12 @@ const AuthenticatedAdminRunnerApprovalsRoute =
     path: '/runner-approvals',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminPushTestRoute =
+  AuthenticatedAdminPushTestRouteImport.update({
+    id: '/push-test',
+    path: '/push-test',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminProfilesRoute =
   AuthenticatedAdminProfilesRouteImport.update({
     id: '/profiles',
@@ -601,6 +608,7 @@ export interface FileRoutesByFullPath {
   '/admin/marketplace-health': typeof AuthenticatedAdminMarketplaceHealthRoute
   '/admin/moderation': typeof AuthenticatedAdminModerationRoute
   '/admin/profiles': typeof AuthenticatedAdminProfilesRoute
+  '/admin/push-test': typeof AuthenticatedAdminPushTestRoute
   '/admin/runner-approvals': typeof AuthenticatedAdminRunnerApprovalsRoute
   '/admin/verifications': typeof AuthenticatedAdminVerificationsRoute
   '/dashboard/favorites': typeof AuthenticatedDashboardFavoritesRoute
@@ -680,6 +688,7 @@ export interface FileRoutesByTo {
   '/admin/marketplace-health': typeof AuthenticatedAdminMarketplaceHealthRoute
   '/admin/moderation': typeof AuthenticatedAdminModerationRoute
   '/admin/profiles': typeof AuthenticatedAdminProfilesRoute
+  '/admin/push-test': typeof AuthenticatedAdminPushTestRoute
   '/admin/runner-approvals': typeof AuthenticatedAdminRunnerApprovalsRoute
   '/admin/verifications': typeof AuthenticatedAdminVerificationsRoute
   '/dashboard/favorites': typeof AuthenticatedDashboardFavoritesRoute
@@ -766,6 +775,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/marketplace-health': typeof AuthenticatedAdminMarketplaceHealthRoute
   '/_authenticated/admin/moderation': typeof AuthenticatedAdminModerationRoute
   '/_authenticated/admin/profiles': typeof AuthenticatedAdminProfilesRoute
+  '/_authenticated/admin/push-test': typeof AuthenticatedAdminPushTestRoute
   '/_authenticated/admin/runner-approvals': typeof AuthenticatedAdminRunnerApprovalsRoute
   '/_authenticated/admin/verifications': typeof AuthenticatedAdminVerificationsRoute
   '/_authenticated/dashboard/favorites': typeof AuthenticatedDashboardFavoritesRoute
@@ -852,6 +862,7 @@ export interface FileRouteTypes {
     | '/admin/marketplace-health'
     | '/admin/moderation'
     | '/admin/profiles'
+    | '/admin/push-test'
     | '/admin/runner-approvals'
     | '/admin/verifications'
     | '/dashboard/favorites'
@@ -931,6 +942,7 @@ export interface FileRouteTypes {
     | '/admin/marketplace-health'
     | '/admin/moderation'
     | '/admin/profiles'
+    | '/admin/push-test'
     | '/admin/runner-approvals'
     | '/admin/verifications'
     | '/dashboard/favorites'
@@ -1016,6 +1028,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/marketplace-health'
     | '/_authenticated/admin/moderation'
     | '/_authenticated/admin/profiles'
+    | '/_authenticated/admin/push-test'
     | '/_authenticated/admin/runner-approvals'
     | '/_authenticated/admin/verifications'
     | '/_authenticated/dashboard/favorites'
@@ -1536,6 +1549,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminRunnerApprovalsRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/push-test': {
+      id: '/_authenticated/admin/push-test'
+      path: '/push-test'
+      fullPath: '/admin/push-test'
+      preLoaderRoute: typeof AuthenticatedAdminPushTestRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/profiles': {
       id: '/_authenticated/admin/profiles'
       path: '/profiles'
@@ -1719,6 +1739,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminMarketplaceHealthRoute: typeof AuthenticatedAdminMarketplaceHealthRoute
   AuthenticatedAdminModerationRoute: typeof AuthenticatedAdminModerationRoute
   AuthenticatedAdminProfilesRoute: typeof AuthenticatedAdminProfilesRoute
+  AuthenticatedAdminPushTestRoute: typeof AuthenticatedAdminPushTestRoute
   AuthenticatedAdminRunnerApprovalsRoute: typeof AuthenticatedAdminRunnerApprovalsRoute
   AuthenticatedAdminVerificationsRoute: typeof AuthenticatedAdminVerificationsRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
@@ -1735,6 +1756,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
     AuthenticatedAdminMarketplaceHealthRoute,
   AuthenticatedAdminModerationRoute: AuthenticatedAdminModerationRoute,
   AuthenticatedAdminProfilesRoute: AuthenticatedAdminProfilesRoute,
+  AuthenticatedAdminPushTestRoute: AuthenticatedAdminPushTestRoute,
   AuthenticatedAdminRunnerApprovalsRoute:
     AuthenticatedAdminRunnerApprovalsRoute,
   AuthenticatedAdminVerificationsRoute: AuthenticatedAdminVerificationsRoute,
