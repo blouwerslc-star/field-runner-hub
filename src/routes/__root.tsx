@@ -13,6 +13,7 @@ import { META_PIXEL_ID, GA4_MEASUREMENT_ID } from "@/lib/tracking";
 import { BackButton } from "@/components/navigation/BackButton";
 import { useEffect } from "react";
 import { initNativeShell } from "@/lib/native";
+import { initOneSignal } from "@/lib/onesignal";
 
 function NotFoundComponent() {
   return (
@@ -156,6 +157,7 @@ function RootComponent() {
     initNativeShell((path) => {
       router.navigate({ to: path });
     });
+    initOneSignal();
   }, [router]);
 
   return (
