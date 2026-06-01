@@ -1,4 +1,4 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClient, QueryClientProvider, useQueryClient } from "@tanstack/react-query";
 import {
   Outlet,
   Link,
@@ -13,7 +13,12 @@ import { META_PIXEL_ID, GA4_MEASUREMENT_ID } from "@/lib/tracking";
 import { BackButton } from "@/components/navigation/BackButton";
 import { useEffect } from "react";
 import { initNativeShell } from "@/lib/native";
-import { initOneSignal } from "@/lib/onesignal";
+import {
+  initOneSignal,
+  syncOneSignalIdentity,
+  logoutOneSignalUser,
+} from "@/lib/onesignal";
+import { supabase } from "@/integrations/supabase/client";
 
 function NotFoundComponent() {
   return (
@@ -152,6 +157,7 @@ function RootShell({ children }: { children: React.ReactNode }) {
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const router = useRouter();
+  const qc = useQueryClient();
 
   useEffect(() => {
     initNativeShell((path) => {
@@ -159,6 +165,26 @@ function RootComponent() {
     });
     initOneSignal();
   }, [router]);
+
+  useEffect(() => {
+    // Single source of truth for auth state. Wire OneSignal identity
+    // here so login/logout/refresh in any flow stays in sync, and
+    // invalidate query caches so user-scoped data doesn't bleed across
+    // sessions.
+    const { data } = supabase.auth.onAuthStateChange((event, session) => {
+      router.invalidate();
+      qc.invalidateQueries();
+      if (event === "SIGNED_OUT" || !session?.user) {
+        // Fire and forget — OneSignal must never break auth flows.
+        logoutOneSignalUser().catch(() => {});
+        return;
+      }
+      if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED" || event === "USER_UPDATED") {
+        syncOneSignalIdentity().catch(() => {});
+      }
+    });
+    return () => data.subscription.unsubscribe();
+  }, [router, qc]);
 
   return (
     <QueryClientProvider client={queryClient}>
