@@ -284,9 +284,9 @@ export const listPublicProfiles = createServerFn({ method: "POST" })
       }
     }
     return {
-      profiles: filtered.map((p) => {
+       profiles: filtered.map((p): any => {
         const row = p as Record<string, unknown>;
-        const base: Record<string, unknown> = {
+        const base: any = {
           ...row,
           roles: rolesByUser.get((p as { user_id: string }).user_id) ?? [],
           academy_certification: certByUser.get((p as { user_id: string }).user_id) ?? null,
