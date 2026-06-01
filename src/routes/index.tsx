@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
+import founderPhoto from "@/assets/founder-brian.jpg";
 import { Toaster } from "@/components/ui/sonner";
 import { Button } from "@/components/ui/button";
 import {
@@ -66,7 +67,7 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "Hire local runners for property photos, walkthrough videos, occupancy checks, drive-bys, and sign placement — on demand, nationwide.",
+          "Hire local runners for property photos, walkthrough videos, occupancy checks, drive-bys, and sign placement — on demand, market-by-market across the U.S.",
       },
       { property: "og:title", content: "REI Runner | On-Demand Real Estate Field Services" },
       {
@@ -877,7 +878,7 @@ function Index() {
               Built by an operator who lived the problem.
             </h2>
             <p className="mt-5 text-muted-foreground">
-              REI Runner was started by Brian Louwers, a real estate operator who got tired of cold-calling friends-of-friends every time he needed a property checked in another city. The vision is simple: a single, vetted, on-demand network for real estate field work — so investors can operate confidently in any market, and locals can earn real income without a license or a long-term commitment.
+              REI Runner was started by Brian Louwers, a real estate operator who got tired of cold-calling friends-of-friends every time he needed a property checked in another city. The vision is simple: a vetted, on-demand network for real estate field work — so investors can operate confidently in their priority markets, and locals can earn real income without a license or a long-term commitment.
             </p>
             <p className="mt-3 text-xs text-muted-foreground">
               REI Runner is in active beta. We are building this market-by-market, with the people we serve.
@@ -890,12 +891,18 @@ function Index() {
                 "I built REI Runner because I lived the problem. Buying a property in another city used to mean calling a friend of a friend to drive by. That doesn't scale — and it shouldn't be how a trillion-dollar industry operates. My job is to make local field work reliable, transparent, and fair to everyone involved."
               </p>
               <div className="mt-6 flex items-center gap-4">
-                <div className="size-14 rounded-full bg-gradient-primary grid place-items-center shadow-glow">
-                  <span className="text-primary-foreground font-bold">BL</span>
-                </div>
+                <img
+                  src={founderPhoto}
+                  alt="Brian Louwers, founder of REI Runner"
+                  width={56}
+                  height={56}
+                  loading="lazy"
+                  decoding="async"
+                  className="size-14 rounded-full object-cover shadow-glow ring-2 ring-primary/30"
+                />
                 <div>
                   <div className="font-semibold">Brian Louwers</div>
-                  <div className="text-xs text-muted-foreground">Founder · REI Runner · United States</div>
+                  <div className="text-xs text-muted-foreground">Founder · REI Runner · Operator-investor</div>
                 </div>
               </div>
             </div>
