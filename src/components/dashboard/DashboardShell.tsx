@@ -61,7 +61,7 @@ export function DashboardShell({
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-background text-foreground pt-safe">
       <Toaster richColors closeButton position="top-center" theme="dark" />
       <header className="sticky top-0 z-40 backdrop-blur bg-background/70 border-b border-border/60">
         <div className="mx-auto max-w-7xl px-5 h-16 flex items-center justify-between">
