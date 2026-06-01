@@ -186,6 +186,7 @@ function TrustPage() {
 
       {/* PILLARS */}
       <Section>
+        <h2 className="text-2xl md:text-3xl font-bold mb-6 text-center">Our Trust Pillars</h2>
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
           {PILLARS.map((p) => (
             <div key={p.title} className="rounded-2xl border border-border bg-card/60 backdrop-blur p-6">

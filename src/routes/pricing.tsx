@@ -159,6 +159,7 @@ function PricingPage() {
 
       {/* GRID */}
       <section className="mx-auto max-w-7xl px-5 py-14 md:py-20">
+        <h2 className="text-2xl md:text-3xl font-bold mb-6 text-center">Available Field Services</h2>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {SERVICES.map((s) => (
             <div key={s.title} className="rounded-2xl border border-border bg-card/60 backdrop-blur p-6 shadow-card flex flex-col">
