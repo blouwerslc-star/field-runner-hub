@@ -1,88 +1,70 @@
-## Academy LMS — Full Build Plan
+# REI Runner — Trust, Privacy & Conversion Sweep
 
-Transform the academy from a single-route mockup into a full LMS with per-course routes, per-lesson pages, real DB-backed content, quizzes, and certificates.
+This is a large multi-area change. Here's how I'd like to sequence it so each piece ships cleanly and you can review along the way. I'll group the 10 items into 4 batches.
 
-### 1. Database (new migration)
+## Batch 1 — CTAs, privacy & marketplace empty states (highest user-visible impact)
 
-Create real content tables (separate from runtime `academy_progress`):
+**1. Audience-specific CTAs (#1)**
+- Sweep `index.tsx`, `runners.tsx`, `investors.tsx`, `story.tsx`, `pricing.tsx`, `trust.tsx`, `faq.tsx`, landing components for "Apply Now"-style buttons.
+- Replace with paired CTAs: **Hire a Runner** → `/investors`, **Become a Runner** → `/runners` (or `/apply`).
 
-- `academy_courses` — slug, title, summary, description, cert_level, order, icon, required_for_paid
-- `academy_lessons` — course_id, slug, order, title, headline, body (markdown), key_takeaways[], checklist[], video_url, video_provider, est_minutes
-- `academy_lesson_progress` — user_id, lesson_id, completed_at (unique on user_id+lesson_id)
-- `academy_quizzes` — course_id, passing_score, time_limit
-- `academy_quiz_questions` — quiz_id, order, prompt, choices (jsonb), correct_index, explanation
-- `academy_quiz_attempts` — user_id, quiz_id, score, passed, answers (jsonb), created_at
-- `academy_certificates` — user_id, course_id, certificate_no, issued_at, score
-- `academy_downloads` — course_id, title, file_url, kind
+**2. Public `/profiles` privacy (#2)**
+- Server side (`src/lib/profiles.functions.ts`): for unauthenticated callers, return `first_name + last_initial` instead of `full_name`, drop `profile_slug`, drop precise identifiers used in URLs.
+- `ProfileCard`: when viewer is logged out, render the masked name, no link to detail page, and a "Sign in to view full profile" affordance.
+- `/profile/$slug`: if not authenticated, show a gated teaser + "Sign in to view full runner profiles" CTA (keep route public for SEO of authed sharing but block detail).
+- Add logged-out banner CTA on `/profiles`.
 
-All public-read for courses/lessons/quizzes/questions (questions exclude correct_index via view or server-side filtering); per-user RLS for progress/attempts/certificates.
+**3. `/tasks` empty state (#3)**
+- New empty-state component: headline, sub-copy, **Become a Runner** + **Post a Task** CTAs.
+- Render 2–3 dimmed sample cards with an "Example task" ribbon when the live list is empty.
 
-Keep existing `academy_progress` + `runner_profiles.certification_*` for top-level cert tracking; sync via trigger when all course certificates issued.
+**9. Logged-out marketplace nav (#9)**
+- On `/profiles` and `/tasks`, swap any action buttons that require auth (contact, claim, post) to the specified CTAs when logged out.
 
-### 2. Seed content
+## Batch 2 — Trust, pricing & launch-status content
 
-Migration seeds 8 courses:
-1. Orientation (Welcome to REI Runner)
-2. Photography Standards
-3. Walkthrough Video Standards
-4. Occupancy Check Procedures
-5. Lockbox Installation (full 8-lesson buildout per spec)
-6. Property Condition Reporting
-7. Client Communication
-8. Professional Conduct & Safety
+**4. Trust & Safety concreteness (#4)** — extend `/trust` with:
+- "Sample deliverables" section: photo checklist, walkthrough video specs, occupancy check report, lockbox install proof (cards with bullet specs + sample thumbnail blocks).
+- Plain-language process sections: ID verification, background checks, escrow/payment release, dispute handling, runner conduct rules.
 
-Each course gets 4–8 real lessons with headline, body, key takeaways, checklist; each gets a 5–10 question quiz. Lockbox gets the exact 8 lessons specified.
+**6. Pricing page upgrades (#6)** — for each service tier on `/pricing`:
+- "What's included" bullet list.
+- "Typical use case" example.
+- "Sample report" preview block (static mocked preview, labeled as sample).
+- Fees disclosure block (platform fee, processing, rush, travel).
 
-### 3. Routes
+**7. Launch-status language (#7)**
+- Replace "nationwide" copy across landing/story/investors/runners with "Launching market-by-market across the U.S." / "Building runner coverage in priority investor markets".
+- On market sections, introduce status chips: **Active**, **Waitlist**, **Coming soon**.
 
-```
-/academy                           — course catalog (rebuild)
-/academy/$courseSlug               — course overview + lesson list + progress + downloads
-/academy/$courseSlug/$lessonSlug   — lesson page (content, video, checklist, prev/next, mark complete)
-/academy/$courseSlug/quiz          — quiz runner (locked until all lessons done)
-/academy/$courseSlug/certificate   — certificate viewer + PDF download (locked until quiz passed)
-```
+**8. Founder/human trust (#8)**
+- Story page already has Brian Louwers — add a real photo asset (generated placeholder portrait + alt text), short operator background, and a founder note about why this matters & how both sides are protected.
+- Add a compact founder card on the homepage.
 
-All under `_authenticated`. Delete legacy `/academy/$moduleId` route.
+## Batch 3 — Forms & friction
 
-### 4. Server functions (`src/lib/academy.functions.ts` rewrite)
+**5. Application form friction (#5)**
+- `ApplicationForms.tsx` / `apply.tsx`: drop password from step 1. Collect application/early-access details, submit to existing applications table, then surface a "Verify your email to finish creating your account" step (magic-link or post-submit signup).
+- Keep `website_url` honeypot — verify it stays `aria-hidden`, `tabIndex={-1}`, off-screen, `autocomplete="off"`.
 
-- `listCourses()` — courses + per-user progress %
-- `getCourse(slug)` — course + lessons + lesson completion + downloads + quiz status + cert
-- `getLesson(courseSlug, lessonSlug)` — lesson + prev/next + completion
-- `completeLesson(lessonId)` — upsert progress, return next-unlock
-- `getQuiz(courseSlug)` — quiz + questions (no correct answers) + gate check
-- `submitQuiz(courseSlug, answers)` — score, persist attempt, issue cert on pass
-- `getCertificate(courseSlug)` — cert + PDF (reuse `pdf-lib` from existing certificate.functions.ts)
+## Batch 4 — Technical & a11y cleanup (#10)
 
-### 5. UI components
+- Audit non-form buttons missing `type="button"` and fix (especially toolbar/nav buttons in dashboard, profile filters, map controls).
+- Add `aria-label` to every `Select`/`Input` filter on `/profiles` and `/tasks` (visible labels are absent today).
+- `MarketplaceMap`: ensure custom controls use `tabIndex={-1}` where they shouldn't dominate tab order, or are properly grouped after main content.
+- Add `loading="lazy"` + `decoding="async"` to non-critical `<img>` tags (avatars in lists, cover photos, gallery thumbnails).
+- Per-page `head()` audit: confirm every route (`/`, `/profiles`, `/tasks`, `/runners`, `/investors`, `/pricing`, `/trust`, `/story`, `/faq`, `/apply`, `/login`, `/signup`, `/privacy`, `/terms`, `/waitlist`) has a unique title + meta description. Fix any duplicates/missing.
 
-- `CourseCard` — progress bar, cert badge, locked state
-- `LessonListItem` — completion check, lock icon, duration
-- `LessonViewer` — markdown body, video embed, checklist, prev/next, complete button
-- `QuizRunner` — one-question-at-a-time, submit, results
-- `CertificateView` — preview + download
+---
 
-YouTube/Vimeo embed helper detects provider from URL.
+## Notes / decisions I'd like to confirm before starting
 
-### 6. Out of scope (deferred — call out to user)
+1. **Privacy of `/profile/$slug`** — should I (a) fully gate the detail page behind auth, or (b) keep a public minimal teaser (masked name, role, city, rating, services) with a "Sign in to see full profile, portfolio, reviews, and contact" wall? Option (b) is better for SEO/social proof; (a) is stricter privacy.
 
-- Admin course builder UI (DB schema supports it; CRUD UI would 2x the work). Will note admins can edit via DB for now.
-- File upload UI for downloads/videos (storage bucket + admin form).
-- Investor training track.
+2. **Sample deliverables / sample report previews** — okay to generate lightweight placeholder images (property photo grid, report PDF screenshot, etc.) via the image tool, clearly labeled as examples? Or do you have real samples you want me to wire in?
 
-### Risks
+3. **Founder photo** — do you want me to generate a stylized portrait placeholder for Brian Louwers, or will you supply a real photo later? (I'll wire the slot either way.)
 
-- Large migration with seed content (~1500 lines SQL). One shot.
-- Existing `/academy` and `academy_progress` rows become legacy; will keep table but stop writing to it from new flow (or sync on course completion).
-- Course slugs must match route params exactly.
+4. **Application step 2** — after the friction-less first step, do you want the email verification + account creation to happen via Supabase magic link (no password ever), or password creation deferred to step 2 (still email-verified first)?
 
-### Order of operations
-
-1. Migration (tables + seed) → user approves
-2. Server functions
-3. Route files (catalog → course → lesson → quiz → certificate)
-4. Components
-5. Verify build, smoke-test navigation
-
-Admin builder UI deferred — confirm OK or expand scope.
+If you want, I can just go ahead with sensible defaults (b / generated placeholders labeled as samples / generated portrait placeholder / magic link). Reply **"go with defaults"** to greenlight everything, or answer the questions and I'll adjust before starting Batch 1.
