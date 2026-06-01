@@ -30,6 +30,7 @@ import { Route as SplatRouteImport } from './routes/$'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as TasksTaskIdRouteImport } from './routes/tasks.$taskId'
 import { Route as ProfileSlugRouteImport } from './routes/profile.$slug'
+import { Route as PricingCatalogRouteImport } from './routes/pricing.catalog'
 import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
 import { Route as CheckoutReturnRouteImport } from './routes/checkout.return'
 import { Route as AuthenticatedTemplatesRouteImport } from './routes/_authenticated/templates'
@@ -197,6 +198,11 @@ const ProfileSlugRoute = ProfileSlugRouteImport.update({
   id: '/profile/$slug',
   path: '/profile/$slug',
   getParentRoute: () => rootRouteImport,
+} as any)
+const PricingCatalogRoute = PricingCatalogRouteImport.update({
+  id: '/catalog',
+  path: '/catalog',
+  getParentRoute: () => PricingRoute,
 } as any)
 const EmailUnsubscribeRoute = EmailUnsubscribeRouteImport.update({
   id: '/email/unsubscribe',
@@ -569,7 +575,7 @@ export interface FileRoutesByFullPath {
   '/faq': typeof FaqRoute
   '/investors': typeof InvestorsRoute
   '/login': typeof LoginRoute
-  '/pricing': typeof PricingRoute
+  '/pricing': typeof PricingRouteWithChildren
   '/privacy': typeof PrivacyRoute
   '/profiles': typeof ProfilesRoute
   '/runners': typeof RunnersRoute
@@ -597,6 +603,7 @@ export interface FileRoutesByFullPath {
   '/templates': typeof AuthenticatedTemplatesRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
+  '/pricing/catalog': typeof PricingCatalogRoute
   '/profile/$slug': typeof ProfileSlugRoute
   '/tasks/$taskId': typeof TasksTaskIdRoute
   '/academy/$courseSlug': typeof AuthenticatedAcademyCourseSlugRouteWithChildren
@@ -654,7 +661,7 @@ export interface FileRoutesByTo {
   '/faq': typeof FaqRoute
   '/investors': typeof InvestorsRoute
   '/login': typeof LoginRoute
-  '/pricing': typeof PricingRoute
+  '/pricing': typeof PricingRouteWithChildren
   '/privacy': typeof PrivacyRoute
   '/profiles': typeof ProfilesRoute
   '/runners': typeof RunnersRoute
@@ -678,6 +685,7 @@ export interface FileRoutesByTo {
   '/templates': typeof AuthenticatedTemplatesRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
+  '/pricing/catalog': typeof PricingCatalogRoute
   '/profile/$slug': typeof ProfileSlugRoute
   '/tasks/$taskId': typeof TasksTaskIdRoute
   '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
@@ -736,7 +744,7 @@ export interface FileRoutesById {
   '/faq': typeof FaqRoute
   '/investors': typeof InvestorsRoute
   '/login': typeof LoginRoute
-  '/pricing': typeof PricingRoute
+  '/pricing': typeof PricingRouteWithChildren
   '/privacy': typeof PrivacyRoute
   '/profiles': typeof ProfilesRoute
   '/runners': typeof RunnersRoute
@@ -764,6 +772,7 @@ export interface FileRoutesById {
   '/_authenticated/templates': typeof AuthenticatedTemplatesRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
+  '/pricing/catalog': typeof PricingCatalogRoute
   '/profile/$slug': typeof ProfileSlugRoute
   '/tasks/$taskId': typeof TasksTaskIdRoute
   '/_authenticated/academy/$courseSlug': typeof AuthenticatedAcademyCourseSlugRouteWithChildren
@@ -851,6 +860,7 @@ export interface FileRouteTypes {
     | '/templates'
     | '/checkout/return'
     | '/email/unsubscribe'
+    | '/pricing/catalog'
     | '/profile/$slug'
     | '/tasks/$taskId'
     | '/academy/$courseSlug'
@@ -932,6 +942,7 @@ export interface FileRouteTypes {
     | '/templates'
     | '/checkout/return'
     | '/email/unsubscribe'
+    | '/pricing/catalog'
     | '/profile/$slug'
     | '/tasks/$taskId'
     | '/admin/analytics'
@@ -1017,6 +1028,7 @@ export interface FileRouteTypes {
     | '/_authenticated/templates'
     | '/checkout/return'
     | '/email/unsubscribe'
+    | '/pricing/catalog'
     | '/profile/$slug'
     | '/tasks/$taskId'
     | '/_authenticated/academy/$courseSlug'
@@ -1076,7 +1088,7 @@ export interface RootRouteChildren {
   FaqRoute: typeof FaqRoute
   InvestorsRoute: typeof InvestorsRoute
   LoginRoute: typeof LoginRoute
-  PricingRoute: typeof PricingRoute
+  PricingRoute: typeof PricingRouteWithChildren
   PrivacyRoute: typeof PrivacyRoute
   ProfilesRoute: typeof ProfilesRoute
   RunnersRoute: typeof RunnersRoute
@@ -1247,6 +1259,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/profile/$slug'
       preLoaderRoute: typeof ProfileSlugRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/pricing/catalog': {
+      id: '/pricing/catalog'
+      path: '/catalog'
+      fullPath: '/pricing/catalog'
+      preLoaderRoute: typeof PricingCatalogRouteImport
+      parentRoute: typeof PricingRoute
     }
     '/email/unsubscribe': {
       id: '/email/unsubscribe'
@@ -1874,6 +1893,17 @@ const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
   AuthenticatedRouteChildren,
 )
 
+interface PricingRouteChildren {
+  PricingCatalogRoute: typeof PricingCatalogRoute
+}
+
+const PricingRouteChildren: PricingRouteChildren = {
+  PricingCatalogRoute: PricingCatalogRoute,
+}
+
+const PricingRouteWithChildren =
+  PricingRoute._addFileChildren(PricingRouteChildren)
+
 interface TasksRouteChildren {
   TasksTaskIdRoute: typeof TasksTaskIdRoute
 }
@@ -1893,7 +1923,7 @@ const rootRouteChildren: RootRouteChildren = {
   FaqRoute: FaqRoute,
   InvestorsRoute: InvestorsRoute,
   LoginRoute: LoginRoute,
-  PricingRoute: PricingRoute,
+  PricingRoute: PricingRouteWithChildren,
   PrivacyRoute: PrivacyRoute,
   ProfilesRoute: ProfilesRoute,
   RunnersRoute: RunnersRoute,
