@@ -18,6 +18,7 @@ import {
   ClipboardCheck,
   MapPinned,
 } from "lucide-react";
+import { SampleDeliverablesSection } from "@/components/landing/SampleDeliverablesSection";
 
 export const Route = createFileRoute("/trust")({
   component: TrustPage,
@@ -242,6 +243,8 @@ function TrustPage() {
           Sample specs — investors can customize the checklist per task. Runners must meet the posted requirements before payment is released.
         </p>
       </Section>
+
+      <SampleDeliverablesSection variant="muted" />
 
       <SectionHeading icon={KeyRound} eyebrow="Property Access" title="Property access & lockbox standards" />
       <Section>
