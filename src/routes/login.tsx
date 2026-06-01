@@ -61,6 +61,22 @@ function LoginPage() {
     }
   }
 
+  async function handleApple() {
+    setLoading(true);
+    try {
+      const result = await lovable.auth.signInWithOAuth("apple", {
+        redirect_uri: `${window.location.origin}${redirect}`,
+      });
+      if (result.redirected) return;
+      if (result.error) throw result.error;
+      navigate({ to: redirect });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Apple sign-in failed";
+      toast.error(msg);
+      setLoading(false);
+    }
+  }
+
   return (
     <div className="min-h-screen bg-background text-foreground grid place-items-center px-5 py-12">
       <Toaster richColors closeButton position="top-center" theme="dark" />
@@ -92,6 +108,10 @@ function LoginPage() {
 
           <Button type="button" variant="outline" className="w-full" onClick={handleGoogle} disabled={loading}>
             Continue with Google
+          </Button>
+
+          <Button type="button" variant="outline" className="w-full mt-2" onClick={handleApple} disabled={loading}>
+            Continue with Apple
           </Button>
 
           <p className="mt-6 text-sm text-muted-foreground text-center">
