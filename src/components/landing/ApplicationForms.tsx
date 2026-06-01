@@ -362,7 +362,7 @@ export function FieldRunnerForm() {
         <Field label="State"><Input name="state" required maxLength={50} /></Field>
         <Field label="Service Radius">
           <Select value={serviceRadius} onValueChange={setServiceRadius}>
-            <SelectTrigger><SelectValue placeholder="Select radius" /></SelectTrigger>
+            <SelectTrigger aria-label="Service radius"><SelectValue placeholder="Select radius" /></SelectTrigger>
             <SelectContent>
               {SERVICE_RADIUS_OPTIONS.map((o) => (
                 <SelectItem key={o} value={o}>{o}</SelectItem>
@@ -372,7 +372,7 @@ export function FieldRunnerForm() {
         </Field>
         <Field label="Transportation Available">
           <Select value={transportation} onValueChange={setTransportation}>
-            <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
+            <SelectTrigger aria-label="Transportation available"><SelectValue placeholder="Select" /></SelectTrigger>
             <SelectContent>
               <SelectItem value="yes">Yes</SelectItem>
               <SelectItem value="no">No</SelectItem>
@@ -509,7 +509,7 @@ export function ProForm() {
         </Field>
         <Field label="Monthly Deal Volume">
           <Select value={dealVolume} onValueChange={setDealVolume}>
-            <SelectTrigger><SelectValue placeholder="Select volume" /></SelectTrigger>
+            <SelectTrigger aria-label="Monthly deal volume"><SelectValue placeholder="Select volume" /></SelectTrigger>
             <SelectContent>
               {DEAL_VOLUME_OPTIONS.map((o) => (
                 <SelectItem key={o} value={o}>{o}</SelectItem>

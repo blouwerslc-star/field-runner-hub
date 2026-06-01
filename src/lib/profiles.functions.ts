@@ -218,6 +218,63 @@ function maskName(full: string | null | undefined): string | null {
   return lastInitial ? `${first} ${lastInitial}.` : first;
 }
 
+// Major metros — map known small towns / suburbs to their parent market.
+// For unknown cities we fall back to "{City} area" so we don't reveal
+// the exact small town/zip-level location to logged-out viewers.
+const METRO_MAP: Record<string, string> = {
+  detroit: "Detroit market",
+  dearborn: "Detroit market",
+  warren: "Detroit market",
+  southfield: "Detroit market",
+  atlanta: "Atlanta metro",
+  marietta: "Atlanta metro",
+  decatur: "Atlanta metro",
+  sandy: "Atlanta metro",
+  dallas: "Dallas–Fort Worth metro",
+  "fort worth": "Dallas–Fort Worth metro",
+  arlington: "Dallas–Fort Worth metro",
+  plano: "Dallas–Fort Worth metro",
+  irving: "Dallas–Fort Worth metro",
+  "los angeles": "Los Angeles market",
+  pasadena: "Los Angeles market",
+  burbank: "Los Angeles market",
+  glendale: "Los Angeles market",
+  "long beach": "Los Angeles market",
+  chicago: "Chicago market",
+  evanston: "Chicago market",
+  oak: "Chicago market",
+  houston: "Houston market",
+  phoenix: "Phoenix market",
+  mesa: "Phoenix market",
+  scottsdale: "Phoenix market",
+  philadelphia: "Philadelphia market",
+  miami: "Miami metro",
+  "fort lauderdale": "Miami metro",
+  hialeah: "Miami metro",
+  charlotte: "Charlotte market",
+  tampa: "Tampa Bay market",
+  "st petersburg": "Tampa Bay market",
+  orlando: "Orlando market",
+  nashville: "Nashville market",
+  indianapolis: "Indianapolis market",
+  cleveland: "Cleveland market",
+  columbus: "Columbus market",
+  cincinnati: "Cincinnati market",
+  pittsburgh: "Pittsburgh market",
+  baltimore: "Baltimore market",
+  "kansas city": "Kansas City market",
+  "st louis": "St. Louis market",
+  "saint louis": "St. Louis market",
+  memphis: "Memphis market",
+};
+
+function maskCity(city: string | null | undefined): string | null {
+  if (!city) return null;
+  const key = city.trim().toLowerCase();
+  if (METRO_MAP[key]) return METRO_MAP[key];
+  return `${city.trim()} area`;
+}
+
 export const listPublicProfiles = createServerFn({ method: "POST" })
   .inputValidator((i: unknown) => listSchema.parse(i ?? {}))
   .handler(async ({ data }) => {
@@ -296,6 +353,7 @@ export const listPublicProfiles = createServerFn({ method: "POST" })
         return {
           ...base,
           full_name: maskName(base.full_name as string | null | undefined),
+          city: maskCity(base.city as string | null | undefined),
           profile_slug: null,
           bio: null,
           company_description: null,
