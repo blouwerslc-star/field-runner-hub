@@ -1271,6 +1271,27 @@ export type Database = {
           },
         ]
       }
+      profile_completion_emails: {
+        Row: {
+          id: string
+          sent_at: string
+          stage: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          sent_at?: string
+          stage: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          sent_at?: string
+          stage?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profile_portfolio: {
         Row: {
           caption: string | null
