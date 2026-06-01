@@ -85,7 +85,11 @@ function ProfilesDirectory() {
           <div className="flex items-center gap-4 text-sm">
             <Link to="/tasks" className="text-muted-foreground hover:text-foreground">Open tasks</Link>
             <Link to="/runners" className="text-muted-foreground hover:text-foreground">Become a runner</Link>
-            <Link to="/dashboard" className="text-muted-foreground hover:text-foreground">Dashboard</Link>
+            {authed ? (
+              <Link to="/dashboard" className="text-muted-foreground hover:text-foreground">Dashboard</Link>
+            ) : (
+              <Link to="/login" className="text-muted-foreground hover:text-foreground">Sign in</Link>
+            )}
           </div>
         </div>
       </header>
