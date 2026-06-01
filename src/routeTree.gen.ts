@@ -77,6 +77,7 @@ import { Route as AuthenticatedAdminVerificationsRouteImport } from './routes/_a
 import { Route as AuthenticatedAdminRunnerApprovalsRouteImport } from './routes/_authenticated/admin.runner-approvals'
 import { Route as AuthenticatedAdminPushTestRouteImport } from './routes/_authenticated/admin.push-test'
 import { Route as AuthenticatedAdminProfilesRouteImport } from './routes/_authenticated/admin.profiles'
+import { Route as AuthenticatedAdminPricingRouteImport } from './routes/_authenticated/admin.pricing'
 import { Route as AuthenticatedAdminModerationRouteImport } from './routes/_authenticated/admin.moderation'
 import { Route as AuthenticatedAdminMarketplaceHealthRouteImport } from './routes/_authenticated/admin.marketplace-health'
 import { Route as AuthenticatedAdminEmailMonitorRouteImport } from './routes/_authenticated/admin.email-monitor'
@@ -467,6 +468,12 @@ const AuthenticatedAdminProfilesRoute =
     path: '/profiles',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminPricingRoute =
+  AuthenticatedAdminPricingRouteImport.update({
+    id: '/pricing',
+    path: '/pricing',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminModerationRoute =
   AuthenticatedAdminModerationRouteImport.update({
     id: '/moderation',
@@ -622,6 +629,7 @@ export interface FileRoutesByFullPath {
   '/admin/email-monitor': typeof AuthenticatedAdminEmailMonitorRoute
   '/admin/marketplace-health': typeof AuthenticatedAdminMarketplaceHealthRoute
   '/admin/moderation': typeof AuthenticatedAdminModerationRoute
+  '/admin/pricing': typeof AuthenticatedAdminPricingRoute
   '/admin/profiles': typeof AuthenticatedAdminProfilesRoute
   '/admin/push-test': typeof AuthenticatedAdminPushTestRoute
   '/admin/runner-approvals': typeof AuthenticatedAdminRunnerApprovalsRoute
@@ -704,6 +712,7 @@ export interface FileRoutesByTo {
   '/admin/email-monitor': typeof AuthenticatedAdminEmailMonitorRoute
   '/admin/marketplace-health': typeof AuthenticatedAdminMarketplaceHealthRoute
   '/admin/moderation': typeof AuthenticatedAdminModerationRoute
+  '/admin/pricing': typeof AuthenticatedAdminPricingRoute
   '/admin/profiles': typeof AuthenticatedAdminProfilesRoute
   '/admin/push-test': typeof AuthenticatedAdminPushTestRoute
   '/admin/runner-approvals': typeof AuthenticatedAdminRunnerApprovalsRoute
@@ -793,6 +802,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/email-monitor': typeof AuthenticatedAdminEmailMonitorRoute
   '/_authenticated/admin/marketplace-health': typeof AuthenticatedAdminMarketplaceHealthRoute
   '/_authenticated/admin/moderation': typeof AuthenticatedAdminModerationRoute
+  '/_authenticated/admin/pricing': typeof AuthenticatedAdminPricingRoute
   '/_authenticated/admin/profiles': typeof AuthenticatedAdminProfilesRoute
   '/_authenticated/admin/push-test': typeof AuthenticatedAdminPushTestRoute
   '/_authenticated/admin/runner-approvals': typeof AuthenticatedAdminRunnerApprovalsRoute
@@ -882,6 +892,7 @@ export interface FileRouteTypes {
     | '/admin/email-monitor'
     | '/admin/marketplace-health'
     | '/admin/moderation'
+    | '/admin/pricing'
     | '/admin/profiles'
     | '/admin/push-test'
     | '/admin/runner-approvals'
@@ -964,6 +975,7 @@ export interface FileRouteTypes {
     | '/admin/email-monitor'
     | '/admin/marketplace-health'
     | '/admin/moderation'
+    | '/admin/pricing'
     | '/admin/profiles'
     | '/admin/push-test'
     | '/admin/runner-approvals'
@@ -1052,6 +1064,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/email-monitor'
     | '/_authenticated/admin/marketplace-health'
     | '/_authenticated/admin/moderation'
+    | '/_authenticated/admin/pricing'
     | '/_authenticated/admin/profiles'
     | '/_authenticated/admin/push-test'
     | '/_authenticated/admin/runner-approvals'
@@ -1602,6 +1615,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminProfilesRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/pricing': {
+      id: '/_authenticated/admin/pricing'
+      path: '/pricing'
+      fullPath: '/admin/pricing'
+      preLoaderRoute: typeof AuthenticatedAdminPricingRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/moderation': {
       id: '/_authenticated/admin/moderation'
       path: '/moderation'
@@ -1777,6 +1797,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminEmailMonitorRoute: typeof AuthenticatedAdminEmailMonitorRoute
   AuthenticatedAdminMarketplaceHealthRoute: typeof AuthenticatedAdminMarketplaceHealthRoute
   AuthenticatedAdminModerationRoute: typeof AuthenticatedAdminModerationRoute
+  AuthenticatedAdminPricingRoute: typeof AuthenticatedAdminPricingRoute
   AuthenticatedAdminProfilesRoute: typeof AuthenticatedAdminProfilesRoute
   AuthenticatedAdminPushTestRoute: typeof AuthenticatedAdminPushTestRoute
   AuthenticatedAdminRunnerApprovalsRoute: typeof AuthenticatedAdminRunnerApprovalsRoute
@@ -1794,6 +1815,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminMarketplaceHealthRoute:
     AuthenticatedAdminMarketplaceHealthRoute,
   AuthenticatedAdminModerationRoute: AuthenticatedAdminModerationRoute,
+  AuthenticatedAdminPricingRoute: AuthenticatedAdminPricingRoute,
   AuthenticatedAdminProfilesRoute: AuthenticatedAdminProfilesRoute,
   AuthenticatedAdminPushTestRoute: AuthenticatedAdminPushTestRoute,
   AuthenticatedAdminRunnerApprovalsRoute:
