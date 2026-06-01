@@ -39,6 +39,31 @@ export const Route = createFileRoute("/trust")({
       { property: "og:url", content: "https://reirunner.com/trust" },
     ],
     links: [{ rel: "canonical", href: "https://reirunner.com/trust" }],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          name: "Trust & Safety — REI Runner",
+          url: "https://reirunner.com/trust",
+          about: { "@id": "https://reirunner.com/#organization" },
+          description:
+            "How REI Runner screens runners, protects investor properties, handles disputes, and keeps every task safe and accountable.",
+        }),
+      },
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          itemListElement: [
+            { "@type": "ListItem", position: 1, name: "Home", item: "https://reirunner.com/" },
+            { "@type": "ListItem", position: 2, name: "Trust & Safety", item: "https://reirunner.com/trust" },
+          ],
+        }),
+      },
+    ],
   }),
 });
 
@@ -339,8 +364,8 @@ function TrustPage() {
             <a href="mailto:safety@reirunner.com" className="inline-flex items-center justify-center gap-2 h-12 px-6 rounded-md bg-gradient-primary shadow-glow text-sm font-medium text-primary-foreground">
               <Mail className="size-4" /> safety@reirunner.com
             </a>
-            <a href="tel:+18338734786" className="inline-flex items-center justify-center gap-2 h-12 px-6 rounded-md border border-border bg-card/60 text-sm font-medium hover:bg-card transition">
-              <Phone className="size-4 text-primary" /> (833) 873-RUNR
+            <a href="tel:+15177749896" className="inline-flex items-center justify-center gap-2 h-12 px-6 rounded-md border border-border bg-card/60 text-sm font-medium hover:bg-card transition">
+              <Phone className="size-4 text-primary" /> (517) 774-9896
             </a>
           </div>
           <div className="mt-8 text-xs text-muted-foreground">

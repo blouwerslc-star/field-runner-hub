@@ -21,3 +21,33 @@ export function trackLead(value?: number, currency = "USD") {
     // no-op
   }
 }
+
+export function trackSignup(method: "investor" | "runner" | "email" | "google" = "email") {
+  if (typeof window === "undefined") return;
+  try {
+    window.fbq?.("track", "CompleteRegistration", { content_name: method });
+    window.gtag?.("event", "sign_up", { method });
+  } catch {
+    // no-op
+  }
+}
+
+export function trackContact(channel: "email" | "phone" | "form" = "form") {
+  if (typeof window === "undefined") return;
+  try {
+    window.fbq?.("track", "Contact", { content_name: channel });
+    window.gtag?.("event", "contact", { method: channel });
+  } catch {
+    // no-op
+  }
+}
+
+export function trackEvent(name: string, params: Record<string, unknown> = {}) {
+  if (typeof window === "undefined") return;
+  try {
+    window.gtag?.("event", name, params);
+    window.fbq?.("trackCustom", name, params);
+  } catch {
+    // no-op
+  }
+}
