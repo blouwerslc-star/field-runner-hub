@@ -14,6 +14,9 @@ import {
   Phone,
   Mail,
   ArrowRight,
+  Video,
+  ClipboardCheck,
+  MapPinned,
 } from "lucide-react";
 
 export const Route = createFileRoute("/trust")({
@@ -58,6 +61,53 @@ const PILLARS = [
     icon: HeartHandshake,
     title: "Real Human Support",
     body: "A US-based team monitors disputes, safety reports, and incident escalations. We respond — we don't auto-resolve through a bot.",
+  },
+];
+
+const SAMPLE_DELIVERABLES = [
+  {
+    icon: Camera,
+    title: "Property Photo Set",
+    desc: "Standardized photo checklist so every set looks the same — no matter who shot it.",
+    bullets: [
+      "20+ geotagged exterior and interior photos",
+      "Required angles: street view, all 4 elevations, roof line",
+      "Interior: each room, mechanical, panel, water heater, kitchen, baths",
+      "Timestamped and uploaded through the app — no email attachments",
+    ],
+  },
+  {
+    icon: Video,
+    title: "Walkthrough Video",
+    desc: "Narrated video so you can scope the property without flying out.",
+    bullets: [
+      "Continuous walkthrough, no jump cuts",
+      "Runner narrates condition: floors, walls, plumbing, smells, damage",
+      "Required exterior loop before entering",
+      "HD vertical or horizontal, captioned summary at end",
+    ],
+  },
+  {
+    icon: ClipboardCheck,
+    title: "Occupancy Check Report",
+    desc: "A written status you can act on, not a vague drive-by note.",
+    bullets: [
+      "Status: Vacant · Occupied · Abandoned · Unable to verify",
+      "Signals observed (mail, utilities, vehicles, blinds, debris)",
+      "Photos of entrances, windows, posted notices",
+      "Notes on neighbor conversations, if any (with consent)",
+    ],
+  },
+  {
+    icon: KeyRound,
+    title: "Lockbox Install Proof",
+    desc: "Documented install so you and your team can access the property cleanly.",
+    bullets: [
+      "Photo of installed lockbox in agreed location",
+      "Photo of access point (door, gate, post)",
+      "Code delivered through the app, not text or email",
+      "Confirmation that the code opens the box on the way out",
+    ],
   },
 ];
 
@@ -160,6 +210,36 @@ function TrustPage() {
             </div>
           ))}
         </div>
+      </Section>
+
+      <SectionHeading icon={ClipboardCheck} eyebrow="Sample Deliverables" title="What every task actually produces" />
+      <Section>
+        <div className="grid sm:grid-cols-2 gap-4 max-w-6xl mx-auto">
+          {SAMPLE_DELIVERABLES.map((d) => (
+            <div key={d.title} className="rounded-2xl border border-border bg-card/60 p-6">
+              <div className="flex items-start gap-4">
+                <div className="size-11 rounded-xl bg-primary/10 grid place-items-center shrink-0">
+                  <d.icon className="size-5 text-primary" />
+                </div>
+                <div>
+                  <h3 className="font-semibold">{d.title}</h3>
+                  <p className="text-sm text-muted-foreground mt-1">{d.desc}</p>
+                </div>
+              </div>
+              <ul className="mt-4 space-y-2 pl-1">
+                {d.bullets.map((b) => (
+                  <li key={b} className="flex gap-2.5 text-sm text-muted-foreground">
+                    <span className="mt-1.5 size-1.5 rounded-full bg-primary shrink-0" />
+                    <span>{b}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+        <p className="mt-6 text-center text-xs text-muted-foreground max-w-2xl mx-auto">
+          Sample specs — investors can customize the checklist per task. Runners must meet the posted requirements before payment is released.
+        </p>
       </Section>
 
       <SectionHeading icon={KeyRound} eyebrow="Property Access" title="Property access & lockbox standards" />
