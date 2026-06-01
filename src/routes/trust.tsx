@@ -339,8 +339,8 @@ function TrustPage() {
             <a href="mailto:safety@reirunner.com" className="inline-flex items-center justify-center gap-2 h-12 px-6 rounded-md bg-gradient-primary shadow-glow text-sm font-medium text-primary-foreground">
               <Mail className="size-4" /> safety@reirunner.com
             </a>
-            <a href="tel:+18338734786" className="inline-flex items-center justify-center gap-2 h-12 px-6 rounded-md border border-border bg-card/60 text-sm font-medium hover:bg-card transition">
-              <Phone className="size-4 text-primary" /> (833) 873-RUNR
+            <a href="tel:+15177749896" className="inline-flex items-center justify-center gap-2 h-12 px-6 rounded-md border border-border bg-card/60 text-sm font-medium hover:bg-card transition">
+              <Phone className="size-4 text-primary" /> (517) 774-9896
             </a>
           </div>
           <div className="mt-8 text-xs text-muted-foreground">
