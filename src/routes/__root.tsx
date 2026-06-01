@@ -11,6 +11,8 @@ import {
 import appCss from "../styles.css?url";
 import { META_PIXEL_ID, GA4_MEASUREMENT_ID } from "@/lib/tracking";
 import { BackButton } from "@/components/navigation/BackButton";
+import { useEffect } from "react";
+import { initNativeShell } from "@/lib/native";
 
 function NotFoundComponent() {
   return (
@@ -148,6 +150,13 @@ function RootShell({ children }: { children: React.ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const router = useRouter();
+
+  useEffect(() => {
+    initNativeShell((path) => {
+      router.navigate({ to: path });
+    });
+  }, [router]);
 
   return (
     <QueryClientProvider client={queryClient}>
