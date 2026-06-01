@@ -198,7 +198,7 @@ function RootComponent() {
 
     const { data } = supabase.auth.onAuthStateChange((event, session) => {
       router.invalidate();
-      qc.invalidateQueries();
+      queryClient.invalidateQueries();
       if (event === "SIGNED_OUT" || !session?.user) {
         // Fire and forget — OneSignal must never break auth flows.
         logoutOneSignalUser().catch(() => {});
