@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { BrandLogo } from "@/components/brand/BrandLogo";
 import { Button } from "@/components/ui/button";
+import founderPhoto from "@/assets/founder-brian.jpg";
 import {
   ArrowRight,
   Building2,
@@ -149,18 +150,27 @@ function StoryPage() {
         <div className="mx-auto max-w-4xl px-5 py-16 md:py-24">
           <div className="rounded-3xl border border-border bg-card/80 backdrop-blur p-7 md:p-10">
             <div className="flex items-center gap-5">
-              <div className="size-16 md:size-20 rounded-full bg-gradient-primary grid place-items-center shadow-glow shrink-0">
-                <span className="text-primary-foreground font-bold text-xl">BL</span>
-              </div>
+              <img
+                src={founderPhoto}
+                alt="Brian Louwers, founder of REI Runner"
+                width={80}
+                height={80}
+                loading="lazy"
+                decoding="async"
+                className="size-16 md:size-20 rounded-full object-cover shadow-glow shrink-0 ring-2 ring-primary/30"
+              />
               <div>
                 <div className="text-xs font-mono uppercase tracking-widest text-primary">Founder</div>
                 <div className="text-xl font-bold mt-1">Brian Louwers</div>
-                <div className="text-sm text-muted-foreground">Founder · REI Runner · United States</div>
+                <div className="text-sm text-muted-foreground">Founder · REI Runner · Operator-investor since 2014</div>
               </div>
             </div>
             <blockquote className="mt-7 text-base md:text-lg text-foreground/90 leading-relaxed border-l-2 border-primary pl-5">
               "I've been on both sides of this. The investor who needed photos by noon and the local who would have happily driven across town for $40 — if there had been a way to connect us. REI Runner is that connection, built with the trust and accountability the industry actually needs."
             </blockquote>
+            <p className="mt-5 text-sm text-muted-foreground leading-relaxed">
+              Brian has spent a decade buying and managing real estate across multiple US markets — wholesales, rehabs, and rental portfolios. The runner network he wished existed every time a deal moved to a new city is the network he's building now.
+            </p>
           </div>
         </div>
       </section>
@@ -169,7 +179,7 @@ function StoryPage() {
       <section className="mx-auto max-w-4xl px-5 py-16 md:py-24 text-center">
         <h2 className="text-2xl md:text-4xl font-bold">Where we're going</h2>
         <p className="mt-5 text-muted-foreground md:text-lg leading-relaxed">
-          Our long-term goal is a national, on-demand field operations layer for real estate — every major US market covered by vetted local runners, every common investor task standardized, every job documented end-to-end. We're building it city by city, runner by runner, task by task.
+          Our long-term goal is an on-demand field operations layer for real estate — vetted local runners in every priority US market, every common investor task standardized, every job documented end-to-end. We're launching market-by-market across the U.S., building runner coverage where investors need it first.
         </p>
         <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
           <Button asChild size="lg" className="bg-gradient-primary shadow-glow">
