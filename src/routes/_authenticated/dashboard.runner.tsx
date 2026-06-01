@@ -21,10 +21,16 @@ import { toast } from "sonner";
 import { listMyTasks, getTaskDetail, startTask, submitTaskWork } from "@/lib/tasks.functions";
 import { createUploadUrl, recordTaskFile } from "@/lib/storage.functions";
 import { RunnerVerificationCard } from "@/components/dashboard/RunnerVerificationCard";
+import { DashboardLoadingSkeleton, RouteErrorState } from "@/components/dashboard/UiStates";
 
 export const Route = createFileRoute("/_authenticated/dashboard/runner")({
   component: RunnerDashboard,
   head: () => ({ meta: [{ title: "Runner Dashboard — REI Runner" }] }),
+  errorComponent: ({ error, reset }) => (
+    <DashboardShell title="Runner Dashboard">
+      <RouteErrorState error={error} reset={reset} title="Couldn't load your tasks" />
+    </DashboardShell>
+  ),
 });
 
 function statusColor(status: string) {
@@ -62,12 +68,12 @@ function RunnerDashboard() {
       </div>
 
       {isLoading ? (
-        <Loader2 className="size-5 animate-spin text-primary" />
+        <DashboardLoadingSkeleton tiles={0} rows={4} />
       ) : tasks.length === 0 ? (
         <EmptyState message="No tasks assigned yet. An admin will assign tasks from your market here." />
       ) : (
         <Tabs defaultValue="active">
-          <TabsList className="mb-6">
+          <TabsList className="mb-6 w-full overflow-x-auto justify-start">
             <TabsTrigger value="active">Active ({buckets.assigned.length + buckets.in_progress.length})</TabsTrigger>
             <TabsTrigger value="submitted">Submitted ({buckets.submitted.length})</TabsTrigger>
             <TabsTrigger value="completed">Completed ({buckets.completed.length})</TabsTrigger>

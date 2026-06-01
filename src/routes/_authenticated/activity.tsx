@@ -3,11 +3,17 @@ import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { listActivity } from "@/lib/activity.functions";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
-import { Loader2, Activity, ClipboardList, UserPlus, Star, CheckCircle2 } from "lucide-react";
+import { Activity, ClipboardList, UserPlus, Star, CheckCircle2 } from "lucide-react";
+import { DashboardLoadingSkeleton, EmptyState, RouteErrorState } from "@/components/dashboard/UiStates";
 
 export const Route = createFileRoute("/_authenticated/activity")({
   component: ActivityPage,
   head: () => ({ meta: [{ title: "Activity — REI Runner" }] }),
+  errorComponent: ({ error, reset }) => (
+    <DashboardShell title="Activity">
+      <RouteErrorState error={error} reset={reset} title="Couldn't load activity feed" />
+    </DashboardShell>
+  ),
 });
 
 const ICONS: Record<string, any> = {
@@ -38,11 +44,13 @@ function ActivityPage() {
   return (
     <DashboardShell title="Activity" subtitle="What's happening across the REI Runner marketplace.">
       {isLoading ? (
-        <div className="grid place-items-center py-20"><Loader2 className="size-6 animate-spin text-primary" /></div>
+        <DashboardLoadingSkeleton tiles={0} rows={6} />
       ) : events.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-border p-12 text-center text-muted-foreground">
-          No activity yet. Check back soon.
-        </div>
+        <EmptyState
+          icon={Activity}
+          title="Quiet around here"
+          message="No marketplace activity yet. New tasks, applications, and reviews will appear here as they happen."
+        />
       ) : (
         <ul className="space-y-2">
           {events.map((e: any) => {

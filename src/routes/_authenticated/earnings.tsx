@@ -3,12 +3,18 @@ import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { getRunnerEarnings } from "@/lib/ops.functions";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
-import { Loader2, DollarSign, Clock, Trophy, CheckCircle2 } from "lucide-react";
+import { DollarSign, Clock, Trophy, CheckCircle2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { DashboardLoadingSkeleton, EmptyState, RouteErrorState } from "@/components/dashboard/UiStates";
 
 export const Route = createFileRoute("/_authenticated/earnings")({
   component: EarningsPage,
   head: () => ({ meta: [{ title: "Earnings — REI Runner" }] }),
+  errorComponent: ({ error, reset }) => (
+    <DashboardShell title="Earnings">
+      <RouteErrorState error={error} reset={reset} title="Couldn't load earnings" />
+    </DashboardShell>
+  ),
 });
 
 const fmt = (c: number) => `$${(c / 100).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -17,8 +23,21 @@ function EarningsPage() {
   const fn = useServerFn(getRunnerEarnings);
   const q = useQuery({ queryKey: ["runner-earnings"], queryFn: () => fn() });
 
-  if (q.isLoading) return <DashboardShell title="Earnings"><Loader2 className="size-5 animate-spin text-primary" /></DashboardShell>;
-  const d = q.data!;
+  if (q.isLoading) {
+    return (
+      <DashboardShell title="Earnings">
+        <DashboardLoadingSkeleton tiles={4} rows={3} />
+      </DashboardShell>
+    );
+  }
+  const d = q.data;
+  if (!d) {
+    return (
+      <DashboardShell title="Earnings">
+        <EmptyState message="No earnings data yet." />
+      </DashboardShell>
+    );
+  }
   const maxMonth = Math.max(1, ...d.months.map((m) => m.paid));
 
   return (
@@ -32,12 +51,12 @@ function EarningsPage() {
 
       <section className="rounded-2xl border border-border bg-card/50 p-6 mb-6">
         <h2 className="font-semibold mb-4">Last 6 months</h2>
-        <div className="grid grid-cols-6 gap-3 items-end h-40">
+        <div className="grid grid-cols-6 gap-1 sm:gap-3 items-end h-40">
           {d.months.map((m) => (
-            <div key={m.month} className="flex flex-col items-center gap-2">
-              <div className="text-xs font-semibold text-primary">{fmt(m.paid)}</div>
+            <div key={m.month} className="flex flex-col items-center gap-2 min-w-0">
+              <div className="text-[10px] sm:text-xs font-semibold text-primary truncate max-w-full">{fmt(m.paid)}</div>
               <div className="w-full bg-primary/80 rounded-t-md transition-all" style={{ height: `${(m.paid / maxMonth) * 100}%`, minHeight: m.paid > 0 ? 6 : 2 }} />
-              <div className="text-xs text-muted-foreground">{m.month.slice(5)}</div>
+              <div className="text-[10px] sm:text-xs text-muted-foreground">{m.month.slice(5)}</div>
               <div className="text-[10px] text-muted-foreground">{m.tasks} task{m.tasks === 1 ? "" : "s"}</div>
             </div>
           ))}
@@ -47,12 +66,14 @@ function EarningsPage() {
       <section>
         <h2 className="font-semibold mb-3">Recent completed tasks</h2>
         {d.recent_completed.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-border bg-card/30 p-10 text-center text-sm text-muted-foreground">
-            No completed tasks yet. Apply to one from the Marketplace.
-          </div>
+          <EmptyState
+            message="No completed tasks yet. Apply to one from the Marketplace to start earning."
+            ctaLabel="Browse marketplace"
+            ctaTo="/tasks"
+          />
         ) : (
-          <div className="rounded-2xl border border-border bg-card/40 overflow-hidden">
-            <table className="w-full text-sm">
+          <div className="rounded-2xl border border-border bg-card/40 overflow-x-auto">
+            <table className="w-full text-sm min-w-[520px]">
               <thead className="bg-muted/30 text-xs uppercase text-muted-foreground">
                 <tr><th className="text-left p-3">Task</th><th className="text-left p-3">Location</th><th className="text-left p-3">Payout</th><th className="text-left p-3">Status</th></tr>
               </thead>

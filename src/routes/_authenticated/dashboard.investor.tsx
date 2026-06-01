@@ -30,10 +30,16 @@ import { listMyTasks, getTaskDetail, createInvestorTask, reviewSubmission } from
 import { getSignedDownloadUrl } from "@/lib/storage.functions";
 import { TaskFundingCheckout } from "@/components/payments/TaskFundingCheckout";
 import { PaymentTestModeBanner } from "@/components/payments/PaymentTestModeBanner";
+import { DashboardLoadingSkeleton, RouteErrorState } from "@/components/dashboard/UiStates";
 
 export const Route = createFileRoute("/_authenticated/dashboard/investor")({
   component: InvestorDashboard,
   head: () => ({ meta: [{ title: "Investor Dashboard — REI Runner" }] }),
+  errorComponent: ({ error, reset }) => (
+    <DashboardShell title="Investor Dashboard">
+      <RouteErrorState error={error} reset={reset} title="Couldn't load your tasks" />
+    </DashboardShell>
+  ),
 });
 
 function statusColor(status: string) {
@@ -80,12 +86,12 @@ function InvestorDashboard() {
       </div>
 
       {isLoading ? (
-        <Loader2 className="size-5 animate-spin text-primary" />
+        <DashboardLoadingSkeleton tiles={0} rows={4} />
       ) : tasks.length === 0 ? (
-        <EmptyState message="No tasks yet. Post one to get started." />
+        <EmptyState message="No tasks yet. Post your first task above to start getting bids from local runners." />
       ) : (
         <Tabs defaultValue="review">
-          <TabsList className="mb-6">
+          <TabsList className="mb-6 w-full overflow-x-auto justify-start">
             <TabsTrigger value="review">To review ({buckets.submitted.length})</TabsTrigger>
             <TabsTrigger value="active">Active ({buckets.open.length + buckets.in_progress.length})</TabsTrigger>
             <TabsTrigger value="done">Completed ({buckets.completed.length})</TabsTrigger>

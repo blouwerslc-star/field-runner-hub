@@ -17,10 +17,16 @@ import { Badge } from "@/components/ui/badge";
 import { Loader2, Plus, Trash2, DollarSign, ArrowDownToLine, CheckCircle2, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
 import { startConnectOnboarding, getConnectStatus, openConnectDashboard } from "@/lib/stripe-connect.functions";
+import { DashboardLoadingSkeleton, RouteErrorState } from "@/components/dashboard/UiStates";
 
 export const Route = createFileRoute("/_authenticated/billing")({
   component: BillingPage,
   head: () => ({ meta: [{ title: "Billing & payouts — REI Runner" }] }),
+  errorComponent: ({ error, reset }) => (
+    <DashboardShell title="Billing & payouts">
+      <RouteErrorState error={error} reset={reset} title="Couldn't load billing" />
+    </DashboardShell>
+  ),
 });
 
 function fmt(c?: number | null) {
@@ -61,7 +67,7 @@ function BillingPage() {
       </div>
 
       <Tabs defaultValue="earnings">
-        <TabsList className="mb-6">
+        <TabsList className="mb-6 w-full overflow-x-auto justify-start">
           <TabsTrigger value="earnings">Payout requests</TabsTrigger>
           <TabsTrigger value="methods">Payout methods</TabsTrigger>
           <TabsTrigger value="invoices">Invoices</TabsTrigger>
@@ -78,12 +84,12 @@ function BillingPage() {
               }}
             />
           </div>
-          {requests.isLoading ? <Loader2 className="size-5 animate-spin text-primary" /> :
+          {requests.isLoading ? <DashboardLoadingSkeleton tiles={0} rows={3} /> :
             (requests.data?.requests.length ?? 0) === 0 ? (
               <Empty>No payout requests yet.</Empty>
             ) : (
-              <div className="rounded-2xl border border-border bg-card/50 overflow-hidden">
-                <table className="w-full text-sm">
+              <div className="rounded-2xl border border-border bg-card/50 overflow-x-auto">
+                <table className="w-full text-sm min-w-[520px]">
                   <thead className="text-xs uppercase text-muted-foreground bg-muted/30">
                     <tr><th className="text-left p-3">Date</th><th className="text-left p-3">Amount</th><th className="text-left p-3">Status</th><th className="text-left p-3">Notes</th></tr>
                   </thead>
@@ -131,7 +137,7 @@ function BillingPage() {
               qc.invalidateQueries({ queryKey: ["payout-methods"] });
             }} />
           </div>
-          {methods.isLoading ? <Loader2 className="size-5 animate-spin text-primary" /> :
+          {methods.isLoading ? <DashboardLoadingSkeleton tiles={0} rows={2} /> :
             (methods.data?.methods.length ?? 0) === 0 ? (
               <Empty>No payout methods yet. Add one to receive payments.</Empty>
             ) : (
@@ -157,12 +163,12 @@ function BillingPage() {
         </TabsContent>
 
         <TabsContent value="invoices" className="space-y-3">
-          {invoices.isLoading ? <Loader2 className="size-5 animate-spin text-primary" /> :
+          {invoices.isLoading ? <DashboardLoadingSkeleton tiles={0} rows={3} /> :
             (invoices.data?.invoices.length ?? 0) === 0 ? (
               <Empty>No invoices yet.</Empty>
             ) : (
-              <div className="rounded-2xl border border-border bg-card/50 overflow-hidden">
-                <table className="w-full text-sm">
+              <div className="rounded-2xl border border-border bg-card/50 overflow-x-auto">
+                <table className="w-full text-sm min-w-[560px]">
                   <thead className="text-xs uppercase text-muted-foreground bg-muted/30">
                     <tr><th className="text-left p-3">Date</th><th className="text-left p-3">Description</th><th className="text-left p-3">Amount</th><th className="text-left p-3">Status</th></tr>
                   </thead>
