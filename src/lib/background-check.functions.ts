@@ -4,7 +4,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { createStripeClient, getStripeErrorMessage, type StripeEnv } from "@/lib/stripe.server";
 
 const ENV_SCHEMA = z.enum(["sandbox", "live"]);
-export const BG_CHECK_PRICE_CENTS = 2499; // $24.99
+export const BG_CHECK_PRICE_CENTS = 1399; // $13.99
 
 type CheckoutResult = { clientSecret: string } | { error: string };
 
