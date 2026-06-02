@@ -29,7 +29,7 @@ function BackgroundCheckPage() {
   return (
     <DashboardShell
       title="Background Check Verification"
-      subtitle="One-time $24.99 — unlocks your Verified badge once approved."
+      subtitle="One-time $13.99 — unlocks your Verified badge once approved."
     >
       {isLoading ? (
         <Loader2 className="size-5 animate-spin text-primary" />
@@ -74,6 +74,21 @@ function BackgroundCheckPage() {
       ) : (
         <div className="grid lg:grid-cols-[1fr_1fr] gap-6">
           <div className="rounded-2xl border border-border bg-card/40 p-6 space-y-4">
+            <div className="rounded-xl border border-primary/30 bg-primary/5 p-4 space-y-2">
+              <h2 className="text-base font-semibold text-foreground">Why we require this</h2>
+              <p className="text-sm text-muted-foreground">
+                Investors are handing over access to properties worth hundreds of thousands of dollars — sometimes
+                lockbox codes, sometimes keys, sometimes sensitive tenant info. Before they trust a runner they've never
+                met, they need to know that person has been vetted. A verified background check is the single biggest
+                signal of trust on this platform.
+              </p>
+              <p className="text-sm text-muted-foreground">
+                <strong className="text-foreground">Think of the $13.99 as an investment in yourself.</strong> Verified
+                runners get prioritized in search, show a Verified badge on every bid, and consistently win more tasks
+                than unverified ones. More trust → more tasks → more money in your pocket. Most runners earn this back
+                on their first or second job.
+              </p>
+            </div>
             <h2 className="text-lg font-semibold">What's included</h2>
             <ul className="text-sm text-muted-foreground space-y-2">
               <li>• SSN trace & address history</li>
