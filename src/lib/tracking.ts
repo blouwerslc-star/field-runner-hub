@@ -1,6 +1,6 @@
 // Paste your IDs here once created. Both are publishable (safe in client code).
 // Meta Pixel ID — a long number, e.g. "1234567890123456"
-export const META_PIXEL_ID = "1916193709038747";
+export const META_PIXEL_ID = "1749801672820097";
 // GA4 Measurement ID — starts with "G-", e.g. "G-XXXXXXXXXX"
 export const GA4_MEASUREMENT_ID = "G-G8HR1RLMKV";
 
