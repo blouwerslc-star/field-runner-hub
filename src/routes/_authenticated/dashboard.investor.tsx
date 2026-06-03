@@ -25,9 +25,10 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Loader2, Plus, MapPin, Calendar, DollarSign, CheckCircle2, XCircle, FileImage } from "lucide-react";
+import { Loader2, Plus, MapPin, Calendar, DollarSign, CheckCircle2, XCircle, FileImage, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
-import { listMyTasks, getTaskDetail, createInvestorTask, reviewSubmission } from "@/lib/tasks.functions";
+import { listMyTasks, getTaskDetail, createInvestorTask, reviewSubmission, defaultRequiresInteriorAccess } from "@/lib/tasks.functions";
+import { Checkbox } from "@/components/ui/checkbox";
 import { getSignedDownloadUrl } from "@/lib/storage.functions";
 import { TaskFundingCheckout } from "@/components/payments/TaskFundingCheckout";
 import { PaymentTestModeBanner } from "@/components/payments/PaymentTestModeBanner";
@@ -145,6 +146,7 @@ type Task = {
   due_date: string | null;
   description: string | null;
   funded?: boolean;
+  requires_interior_access?: boolean;
 };
 
 function InvestorTaskCard({ task }: { task: Task }) {
@@ -161,6 +163,11 @@ function InvestorTaskCard({ task }: { task: Task }) {
               {task.status.replace("_", " ")}
             </Badge>
             <Badge variant="outline" className="text-xs">{task.task_type}</Badge>
+            {task.requires_interior_access && (
+              <Badge variant="outline" className="text-xs border-primary/40 text-primary flex items-center gap-1">
+                <ShieldCheck className="size-3" /> Background check req.
+              </Badge>
+            )}
             {task.funded ? (
               <Badge variant="outline" className="text-xs border-emerald-500/30 text-emerald-300">Funded</Badge>
             ) : needsFunding ? (
@@ -334,6 +341,12 @@ function CreateTaskDialog() {
     city: "", state: "", zip_code: "", payout_amount: "",
     due_date: "", description: "",
   });
+  const [interiorTouched, setInteriorTouched] = useState(false);
+  const [requiresInterior, setRequiresInterior] = useState(false);
+  // Auto-default the interior-access checkbox from the selected task type,
+  // unless the investor has explicitly toggled it.
+  const autoInterior = defaultRequiresInteriorAccess(form.task_type);
+  const effectiveRequiresInterior = interiorTouched ? requiresInterior : autoInterior;
 
   const create = useMutation({
     mutationFn: () => createFn({
@@ -347,6 +360,7 @@ function CreateTaskDialog() {
         payout_amount: form.payout_amount ? Number(form.payout_amount) : null,
         due_date: form.due_date || null,
         description: form.description || null,
+        requires_interior_access: effectiveRequiresInterior,
       },
     }),
     onSuccess: () => {
@@ -354,6 +368,8 @@ function CreateTaskDialog() {
       qc.invalidateQueries({ queryKey: ["my-tasks"] });
       setOpen(false);
       setForm({ title: "", task_type: "photos", property_address: "", city: "", state: "", zip_code: "", payout_amount: "", due_date: "", description: "" });
+      setInteriorTouched(false);
+      setRequiresInterior(false);
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -402,6 +418,28 @@ function CreateTaskDialog() {
           <div>
             <Label>Description</Label>
             <Textarea rows={3} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="Any specifics the runner should know…" />
+          </div>
+          <div className="rounded-xl border border-border bg-muted/20 p-3 flex items-start gap-3">
+            <Checkbox
+              id="requires-interior"
+              checked={effectiveRequiresInterior}
+              onCheckedChange={(v) => {
+                setInteriorTouched(true);
+                setRequiresInterior(v === true);
+              }}
+              className="mt-0.5"
+            />
+            <div className="flex-1">
+              <Label htmlFor="requires-interior" className="flex items-center gap-1.5 cursor-pointer">
+                <ShieldCheck className="size-3.5 text-primary" />
+                Runner will enter inside the property
+              </Label>
+              <p className="text-xs text-muted-foreground mt-1">
+                {autoInterior && !interiorTouched
+                  ? "Auto-enabled for this task type. Only runners with a verified background check will be able to apply."
+                  : "Check if this involves lockbox entry, interior walkthrough, or any access inside. Only background-check-verified runners can apply."}
+              </p>
+            </div>
           </div>
         </div>
         <DialogFooter>

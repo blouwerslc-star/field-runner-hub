@@ -2,6 +2,24 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
+/**
+ * Task types that, by default, involve the runner entering inside the property.
+ * Used to auto-default the `requires_interior_access` flag at task creation.
+ * Investors can still override the checkbox manually.
+ */
+export const INTERIOR_ACCESS_TASK_TYPES = new Set<string>([
+  "video",
+  "walkthrough_video",
+  "lockbox",
+  "interior_photos",
+  "interior",
+]);
+
+export function defaultRequiresInteriorAccess(taskType: string | null | undefined): boolean {
+  if (!taskType) return false;
+  return INTERIOR_ACCESS_TASK_TYPES.has(taskType);
+}
+
 export const listMyTasks = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
@@ -69,6 +87,7 @@ const createTaskSchema = z.object({
   zip_code: z.string().max(20).optional().nullable(),
   payout_amount: z.number().nonnegative().max(100000).optional().nullable(),
   due_date: z.string().max(20).optional().nullable(),
+  requires_interior_access: z.boolean().optional(),
 });
 
 export const createInvestorTask = createServerFn({ method: "POST" })
@@ -76,6 +95,10 @@ export const createInvestorTask = createServerFn({ method: "POST" })
   .inputValidator((i: unknown) => createTaskSchema.parse(i))
   .handler(async ({ context, data }) => {
     const { supabase, userId } = context;
+    const requiresInterior =
+      typeof data.requires_interior_access === "boolean"
+        ? data.requires_interior_access
+        : defaultRequiresInteriorAccess(data.task_type);
     const { data: row, error } = await supabase
       .from("tasks")
       .insert({
@@ -89,6 +112,7 @@ export const createInvestorTask = createServerFn({ method: "POST" })
         zip_code: data.zip_code ?? null,
         payout_amount: data.payout_amount ?? null,
         due_date: data.due_date ?? null,
+        requires_interior_access: requiresInterior,
         status: "open",
       })
       .select("*")
