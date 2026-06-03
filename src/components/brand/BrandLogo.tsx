@@ -63,4 +63,7 @@ export function BrandLogo({
   );
 }
 
-export { logoUrl, iconUrl };
+export {
+  logoUrl,
+  iconUrl,
+};
