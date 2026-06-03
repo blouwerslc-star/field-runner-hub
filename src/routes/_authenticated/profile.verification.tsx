@@ -30,7 +30,7 @@ function VerificationPage() {
   const profile = data?.profile as any;
   const currentLevel = profile?.verification_level ?? 0;
   const status = (profile?.verification_status as string) ?? "not_started";
-  const nextLevel = Math.min(4, currentLevel + 1);
+  const nextLevel = Math.min(2, currentLevel + 1);
   const isPending = status === "pending_review" || status === "pending_payment";
 
   const submit = useMutation({
@@ -57,14 +57,14 @@ function VerificationPage() {
                 <VerificationStatusPill status={status} />
               </div>
               <h2 className="text-2xl font-bold tracking-tight">
-                {currentLevel === 4
+                {currentLevel === 2
                   ? "You're fully verified."
                   : currentLevel === 0
                     ? "Start your verification"
                     : `You're Level ${currentLevel}. Keep going.`}
               </h2>
               <p className="text-sm text-muted-foreground mt-1">
-                Each level unlocks more visibility, trust, and access to higher-paying tasks.
+                Step 1 verifies your identity. Step 2 (background check) unlocks tasks where you'll enter inside a property.
               </p>
             </div>
 
@@ -106,7 +106,7 @@ function VerificationPage() {
             </div>
 
             {/* Request form */}
-            {currentLevel < 4 && (
+            {currentLevel < 2 && (
               <div className="rounded-2xl border border-primary/40 bg-primary/5 p-6">
                 <h3 className="font-semibold text-lg">
                   {isPending ? "Verification in review" : `Request Level ${nextLevel} verification`}
@@ -114,13 +114,11 @@ function VerificationPage() {
                 <p className="text-sm text-muted-foreground mt-1">
                   {isPending
                     ? "An admin is reviewing your request. You'll be notified once it's decided."
-                    : nextLevel === 3
-                      ? "Make sure you've uploaded your ID first."
-                      : nextLevel === 4
-                        ? "Background check requires consent and may take 2–5 business days."
-                        : "Optional context for our team."}
+                    : nextLevel === 1
+                      ? "Upload a clear photo of your government-issued ID. We review most submissions within 1 business day."
+                      : "Background check is required to accept tasks where you'll enter inside a property. One-time $13.99, results in 24–72 hours."}
                 </p>
-                {nextLevel === 3 && !isPending && (
+                {nextLevel === 1 && !isPending && (
                   <Link
                     to="/profile/id-verification"
                     className="inline-flex text-sm text-primary hover:underline mt-2"
@@ -128,12 +126,15 @@ function VerificationPage() {
                     Upload ID documents →
                   </Link>
                 )}
-                {nextLevel === 4 && !isPending && (
+                {nextLevel === 2 && !isPending && (
                   <div className="mt-4 rounded-xl border border-primary/40 bg-background/40 p-4 space-y-2">
                     <div className="text-sm">
                       <strong>$13.99 one-time</strong> — covers a full background check
                       (SSN trace, national + county criminal, sex offender, global watchlist).
                       Our team initiates the check after payment; results typically come back in 24–72 hours.
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      Required to accept tasks flagged "interior access" (lockbox entry, interior walkthroughs, occupied-unit visits). Drive-by and exterior-only tasks do not require it.
                     </div>
                     <Link to="/profile/background-check">
                       <Button size="lg" className="bg-gradient-to-r from-primary to-primary/80 gap-2">
@@ -142,7 +143,7 @@ function VerificationPage() {
                     </Link>
                   </div>
                 )}
-                {nextLevel !== 4 && !isPending && (
+                {nextLevel === 1 && !isPending && (
                   <div className="mt-4 space-y-3">
                     <Textarea
                       placeholder="Notes for the admin (optional)"
@@ -160,7 +161,7 @@ function VerificationPage() {
                       {submit.isPending ? (
                         <><Loader2 className="size-4 mr-2 animate-spin" /> Submitting…</>
                       ) : (
-                        <><ShieldCheck className="size-4 mr-2" /> Get Verified — Level {nextLevel}</>
+                        <><ShieldCheck className="size-4 mr-2" /> Submit for ID review</>
                       )}
                     </Button>
                   </div>
