@@ -4,10 +4,19 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
 export const VERIFICATION_LEVELS = [
-  { level: 1, key: "email_verified", title: "Email Verified", description: "Confirm your email address." },
-  { level: 2, key: "phone_verified", title: "Phone Verified", description: "Confirm your phone number." },
-  { level: 3, key: "identity_verified", title: "Identity Verified", description: "Government-issued ID confirmed by our team." },
-  { level: 4, key: "background_check_verified", title: "Background Check Verified", description: "Pass a third-party background check." },
+  {
+    level: 1,
+    key: "identity_verified",
+    title: "ID Verified",
+    description: "Upload a government-issued photo ID. Our team reviews it and unlocks your Verified badge.",
+  },
+  {
+    level: 2,
+    key: "background_check_verified",
+    title: "Background Check Verified",
+    description:
+      "Required to accept tasks that involve entering inside a property (lockbox access, interior walkthroughs, occupied-unit visits). One-time $13.99.",
+  },
 ] as const;
 
 const PROFILE_COLUMNS =
@@ -35,7 +44,7 @@ export const getMyVerification = createServerFn({ method: "GET" })
   });
 
 const requestSchema = z.object({
-  requested_level: z.number().int().min(1).max(4),
+  requested_level: z.number().int().min(1).max(2),
   notes: z.string().trim().max(1000).optional().nullable(),
 });
 
@@ -172,12 +181,11 @@ export const adminDecideVerification = createServerFn({ method: "POST" })
     };
 
     if (data.decision === "verified") {
-      // Flip booleans up to requested level and bump verification_level
+      // Flip booleans up to requested level and bump verification_level.
+      // Two-step system: level 1 = identity verified, level 2 = background check verified.
       const lvl = req.requested_level as number;
-      if (lvl >= 1) patch.email_verified = true;
-      if (lvl >= 2) patch.phone_verified = true;
-      if (lvl >= 3) patch.identity_verified = true;
-      if (lvl >= 4) patch.background_check_verified = true;
+      if (lvl >= 1) patch.identity_verified = true;
+      if (lvl >= 2) patch.background_check_verified = true;
       patch.verification_level = lvl;
       patch.verified_status = true;
     }
@@ -260,7 +268,7 @@ export const adminSetBackgroundCheckStatus = createServerFn({ method: "POST" })
 
     if (data.status === "passed") {
       patch.background_check_verified = true;
-      patch.verification_level = 4;
+      patch.verification_level = 2;
       patch.verified_status = true;
       patch.verification_status = "verified";
     } else if (data.status === "failed") {
