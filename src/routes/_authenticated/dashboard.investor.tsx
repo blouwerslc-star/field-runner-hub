@@ -415,6 +415,28 @@ function CreateTaskDialog() {
             <Label>Description</Label>
             <Textarea rows={3} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="Any specifics the runner should know…" />
           </div>
+          <div className="rounded-xl border border-border bg-muted/20 p-3 flex items-start gap-3">
+            <Checkbox
+              id="requires-interior"
+              checked={effectiveRequiresInterior}
+              onCheckedChange={(v) => {
+                setInteriorTouched(true);
+                setRequiresInterior(v === true);
+              }}
+              className="mt-0.5"
+            />
+            <div className="flex-1">
+              <Label htmlFor="requires-interior" className="flex items-center gap-1.5 cursor-pointer">
+                <ShieldCheck className="size-3.5 text-primary" />
+                Runner will enter inside the property
+              </Label>
+              <p className="text-xs text-muted-foreground mt-1">
+                {autoInterior && !interiorTouched
+                  ? "Auto-enabled for this task type. Only runners with a verified background check will be able to apply."
+                  : "Check if this involves lockbox entry, interior walkthrough, or any access inside. Only background-check-verified runners can apply."}
+              </p>
+            </div>
+          </div>
         </div>
         <DialogFooter>
           <Button onClick={() => create.mutate()} disabled={create.isPending || !form.title || !form.property_address || !form.city || !form.state} className="bg-gradient-primary shadow-glow">
