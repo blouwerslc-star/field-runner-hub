@@ -244,6 +244,11 @@ function MarketplacePage() {
                     </span>
                   )}
                 </div>
+                {t.requires_interior_access && (
+                  <span className="mt-2 inline-flex items-center gap-1 rounded-full border border-primary/40 bg-primary/5 px-2 py-0.5 text-[10px] font-medium text-primary">
+                    Background check required
+                  </span>
+                )}
                 <h3 className="mt-3 font-semibold group-hover:text-primary line-clamp-2">{t.title}</h3>
                 <p className="mt-1 text-xs text-muted-foreground flex items-center gap-1">
                   <MapPin className="size-3" /> {[t.city, t.state].filter(Boolean).join(", ")}
