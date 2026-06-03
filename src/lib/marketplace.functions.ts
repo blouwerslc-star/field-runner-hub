@@ -99,6 +99,24 @@ export const applyToTask = createServerFn({ method: "POST" })
     if (!rp || ((rp as any).certification_level ?? 0) < 1) {
       throw new Error("Complete REI Runner Academy certification before applying to tasks.");
     }
+    // Gate: tasks that require interior property access need a verified background check.
+    const { data: taskRow } = await supabase
+      .from("tasks")
+      .select("requires_interior_access")
+      .eq("id", data.taskId)
+      .maybeSingle();
+    if ((taskRow as any)?.requires_interior_access) {
+      const { data: prof } = await supabase
+        .from("profiles")
+        .select("background_check_verified")
+        .eq("user_id", userId)
+        .maybeSingle();
+      if (!(prof as any)?.background_check_verified) {
+        throw new Error(
+          "This task requires interior property access. Complete your background check verification ($13.99) before applying.",
+        );
+      }
+    }
     const { error } = await supabase
       .from("task_applications")
       .insert({ task_id: data.taskId, runner_id: userId, message: data.message ?? null });
