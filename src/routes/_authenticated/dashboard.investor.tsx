@@ -148,6 +148,7 @@ type Task = {
   due_date: string | null;
   description: string | null;
   funded?: boolean;
+  requires_interior_access?: boolean;
 };
 
 function InvestorTaskCard({ task }: { task: Task }) {
@@ -164,6 +165,11 @@ function InvestorTaskCard({ task }: { task: Task }) {
               {task.status.replace("_", " ")}
             </Badge>
             <Badge variant="outline" className="text-xs">{task.task_type}</Badge>
+            {task.requires_interior_access && (
+              <Badge variant="outline" className="text-xs border-primary/40 text-primary flex items-center gap-1">
+                <ShieldCheck className="size-3" /> Background check req.
+              </Badge>
+            )}
             {task.funded ? (
               <Badge variant="outline" className="text-xs border-emerald-500/30 text-emerald-300">Funded</Badge>
             ) : needsFunding ? (
