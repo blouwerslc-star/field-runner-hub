@@ -18,8 +18,7 @@ export function BrandLogo({
   size?: "sm" | "md" | "lg";
 }) {
   const navigate = useNavigate();
-  const dims =
-    size === "lg" ? "h-12 w-12" : size === "md" ? "h-10 w-10" : "h-8 w-8";
+  const dims = size === "lg" ? "h-12 w-12" : size === "md" ? "h-10 w-10" : "h-8 w-8";
 
   function routeSignedInUsersHome(event: React.MouseEvent<HTMLSpanElement>) {
     if (typeof window === "undefined") return;
@@ -54,11 +53,7 @@ export function BrandLogo({
       className={cn("inline-flex items-center gap-2 font-semibold tracking-tight", className)}
       onClick={routeSignedInUsersHome}
     >
-      <img
-        src={iconUrl}
-        alt="REI Runner"
-        className={cn(dims, "object-contain shrink-0")}
-      />
+      <img src={iconUrl} alt="REI Runner" className={cn(dims, "object-contain shrink-0")} />
       {showWordmark && (
         <span>
           REI <span className="text-primary">Runner</span>
