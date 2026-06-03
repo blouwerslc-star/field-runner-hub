@@ -28,6 +28,9 @@ import {
 import { Loader2, Plus, MapPin, Calendar, DollarSign, CheckCircle2, XCircle, FileImage } from "lucide-react";
 import { toast } from "sonner";
 import { listMyTasks, getTaskDetail, createInvestorTask, reviewSubmission } from "@/lib/tasks.functions";
+import { defaultRequiresInteriorAccess } from "@/lib/tasks.functions";
+import { Checkbox } from "@/components/ui/checkbox";
+import { ShieldCheck } from "lucide-react";
 import { getSignedDownloadUrl } from "@/lib/storage.functions";
 import { TaskFundingCheckout } from "@/components/payments/TaskFundingCheckout";
 import { PaymentTestModeBanner } from "@/components/payments/PaymentTestModeBanner";
@@ -334,6 +337,12 @@ function CreateTaskDialog() {
     city: "", state: "", zip_code: "", payout_amount: "",
     due_date: "", description: "",
   });
+  const [interiorTouched, setInteriorTouched] = useState(false);
+  const [requiresInterior, setRequiresInterior] = useState(false);
+  // Auto-default the interior-access checkbox from the selected task type,
+  // unless the investor has explicitly toggled it.
+  const autoInterior = defaultRequiresInteriorAccess(form.task_type);
+  const effectiveRequiresInterior = interiorTouched ? requiresInterior : autoInterior;
 
   const create = useMutation({
     mutationFn: () => createFn({
@@ -347,6 +356,7 @@ function CreateTaskDialog() {
         payout_amount: form.payout_amount ? Number(form.payout_amount) : null,
         due_date: form.due_date || null,
         description: form.description || null,
+        requires_interior_access: effectiveRequiresInterior,
       },
     }),
     onSuccess: () => {
@@ -354,6 +364,8 @@ function CreateTaskDialog() {
       qc.invalidateQueries({ queryKey: ["my-tasks"] });
       setOpen(false);
       setForm({ title: "", task_type: "photos", property_address: "", city: "", state: "", zip_code: "", payout_amount: "", due_date: "", description: "" });
+      setInteriorTouched(false);
+      setRequiresInterior(false);
     },
     onError: (e: Error) => toast.error(e.message),
   });
