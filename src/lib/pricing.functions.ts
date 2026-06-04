@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import { supabase as anonClient } from "@/integrations/supabase/client";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
 export type PricingTemplate = {
   id: string;
@@ -42,13 +42,13 @@ export type PricingAddon = {
 export const getPricingCatalog = createServerFn({ method: "GET" }).handler(
   async () => {
     const [tplRes, addonRes] = await Promise.all([
-      anonClient
+      supabaseAdmin
         .from("task_templates")
         .select("*")
         .eq("is_system", true)
         .eq("active", true)
         .order("sort_order", { ascending: true }),
-      anonClient
+      supabaseAdmin
         .from("pricing_addons")
         .select("*")
         .eq("active", true)
