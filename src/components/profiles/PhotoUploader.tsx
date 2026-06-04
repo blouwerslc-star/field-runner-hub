@@ -27,9 +27,20 @@ export function PhotoUploader({
     }
     setBusy(true);
     try {
+      // Always resolve the current auth user id — storage RLS checks the
+      // first folder segment against auth.uid(). If the prop userId is
+      // stale/empty (e.g. profile query still loading), fall back to the
+      // session user to avoid an RLS violation.
+      const { data: authData } = await supabase.auth.getUser();
+      const uid = authData.user?.id ?? userId;
+      if (!uid) {
+        toast.error("You must be signed in to upload");
+        return;
+      }
       const ext = file.name.split(".").pop()?.toLowerCase() ?? "jpg";
       const safe = ext.replace(/[^a-z0-9]/g, "");
-      const path = `${userId}/${Date.now()}-${label.toLowerCase()}.${safe}`;
+      const safeLabel = label.toLowerCase().replace(/[^a-z0-9]/g, "-");
+      const path = `${uid}/${Date.now()}-${safeLabel}.${safe}`;
       const { error } = await supabase.storage.from("profile-media").upload(path, file, {
         cacheControl: "3600",
         upsert: true,
