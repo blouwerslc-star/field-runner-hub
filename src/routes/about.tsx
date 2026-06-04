@@ -9,7 +9,7 @@ export const Route = createFileRoute("/about")({
       {
         name: "description",
         content:
-          "REI Runner is the nationwide marketplace connecting real estate investors with vetted local runners for property photos, vacancy verification, lockbox installs, and contractor meetups. Operated by B&K Investment Group LLC.",
+          "Nationwide marketplace connecting real estate investors with vetted local runners for property photos, vacancy checks, lockbox installs, and contractor meetups.",
       },
       { property: "og:title", content: "About REI Runner — The Uber for Real Estate Field Services" },
       {
