@@ -17,6 +17,7 @@ import { Route as StoryRouteImport } from './routes/story'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as RunnersRouteImport } from './routes/runners'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as ProfilesRouteImport } from './routes/profiles'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as PricingRouteImport } from './routes/pricing'
@@ -138,6 +139,11 @@ const SignupRoute = SignupRouteImport.update({
 const RunnersRoute = RunnersRouteImport.update({
   id: '/runners',
   path: '/runners',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProfilesRoute = ProfilesRouteImport.update({
@@ -613,6 +619,7 @@ export interface FileRoutesByFullPath {
   '/pricing': typeof PricingRouteWithChildren
   '/privacy': typeof PrivacyRoute
   '/profiles': typeof ProfilesRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/runners': typeof RunnersRoute
   '/signup': typeof SignupRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -704,6 +711,7 @@ export interface FileRoutesByTo {
   '/pricing': typeof PricingRouteWithChildren
   '/privacy': typeof PrivacyRoute
   '/profiles': typeof ProfilesRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/runners': typeof RunnersRoute
   '/signup': typeof SignupRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -792,6 +800,7 @@ export interface FileRoutesById {
   '/pricing': typeof PricingRouteWithChildren
   '/privacy': typeof PrivacyRoute
   '/profiles': typeof ProfilesRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/runners': typeof RunnersRoute
   '/signup': typeof SignupRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -885,6 +894,7 @@ export interface FileRouteTypes {
     | '/pricing'
     | '/privacy'
     | '/profiles'
+    | '/reset-password'
     | '/runners'
     | '/signup'
     | '/sitemap.xml'
@@ -976,6 +986,7 @@ export interface FileRouteTypes {
     | '/pricing'
     | '/privacy'
     | '/profiles'
+    | '/reset-password'
     | '/runners'
     | '/signup'
     | '/sitemap.xml'
@@ -1063,6 +1074,7 @@ export interface FileRouteTypes {
     | '/pricing'
     | '/privacy'
     | '/profiles'
+    | '/reset-password'
     | '/runners'
     | '/signup'
     | '/sitemap.xml'
@@ -1156,6 +1168,7 @@ export interface RootRouteChildren {
   PricingRoute: typeof PricingRouteWithChildren
   PrivacyRoute: typeof PrivacyRoute
   ProfilesRoute: typeof ProfilesRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
   RunnersRoute: typeof RunnersRoute
   SignupRoute: typeof SignupRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
@@ -1233,6 +1246,13 @@ declare module '@tanstack/react-router' {
       path: '/runners'
       fullPath: '/runners'
       preLoaderRoute: typeof RunnersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/profiles': {
@@ -2033,6 +2053,7 @@ const rootRouteChildren: RootRouteChildren = {
   PricingRoute: PricingRouteWithChildren,
   PrivacyRoute: PrivacyRoute,
   ProfilesRoute: ProfilesRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
   RunnersRoute: RunnersRoute,
   SignupRoute: SignupRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
