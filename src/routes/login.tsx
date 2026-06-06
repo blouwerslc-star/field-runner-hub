@@ -122,6 +122,10 @@ function LoginPage() {
             New here?{" "}
             <Link to="/signup" search={{ role: "runner", redirect }} className="text-primary hover:underline">Create an account</Link>
           </p>
+          <p className="mt-2 text-sm text-muted-foreground text-center">
+            Forgot your password?{" "}
+            <Link to="/forgot-password" className="text-primary hover:underline">Reset it</Link>
+          </p>
         </div>
       </div>
     </div>

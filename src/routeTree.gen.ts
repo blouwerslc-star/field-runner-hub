@@ -17,11 +17,13 @@ import { Route as StoryRouteImport } from './routes/story'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as RunnersRouteImport } from './routes/runners'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as ProfilesRouteImport } from './routes/profiles'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as InvestorsRouteImport } from './routes/investors'
+import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as FaqRouteImport } from './routes/faq'
 import { Route as AuthTestRouteImport } from './routes/auth-test'
 import { Route as ApplyRouteImport } from './routes/apply'
@@ -139,6 +141,11 @@ const RunnersRoute = RunnersRouteImport.update({
   path: '/runners',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ProfilesRoute = ProfilesRouteImport.update({
   id: '/profiles',
   path: '/profiles',
@@ -162,6 +169,11 @@ const LoginRoute = LoginRouteImport.update({
 const InvestorsRoute = InvestorsRouteImport.update({
   id: '/investors',
   path: '/investors',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
+  id: '/forgot-password',
+  path: '/forgot-password',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FaqRoute = FaqRouteImport.update({
@@ -601,11 +613,13 @@ export interface FileRoutesByFullPath {
   '/apply': typeof ApplyRoute
   '/auth-test': typeof AuthTestRoute
   '/faq': typeof FaqRoute
+  '/forgot-password': typeof ForgotPasswordRoute
   '/investors': typeof InvestorsRoute
   '/login': typeof LoginRoute
   '/pricing': typeof PricingRouteWithChildren
   '/privacy': typeof PrivacyRoute
   '/profiles': typeof ProfilesRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/runners': typeof RunnersRoute
   '/signup': typeof SignupRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -691,11 +705,13 @@ export interface FileRoutesByTo {
   '/apply': typeof ApplyRoute
   '/auth-test': typeof AuthTestRoute
   '/faq': typeof FaqRoute
+  '/forgot-password': typeof ForgotPasswordRoute
   '/investors': typeof InvestorsRoute
   '/login': typeof LoginRoute
   '/pricing': typeof PricingRouteWithChildren
   '/privacy': typeof PrivacyRoute
   '/profiles': typeof ProfilesRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/runners': typeof RunnersRoute
   '/signup': typeof SignupRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -778,11 +794,13 @@ export interface FileRoutesById {
   '/apply': typeof ApplyRoute
   '/auth-test': typeof AuthTestRoute
   '/faq': typeof FaqRoute
+  '/forgot-password': typeof ForgotPasswordRoute
   '/investors': typeof InvestorsRoute
   '/login': typeof LoginRoute
   '/pricing': typeof PricingRouteWithChildren
   '/privacy': typeof PrivacyRoute
   '/profiles': typeof ProfilesRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/runners': typeof RunnersRoute
   '/signup': typeof SignupRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -870,11 +888,13 @@ export interface FileRouteTypes {
     | '/apply'
     | '/auth-test'
     | '/faq'
+    | '/forgot-password'
     | '/investors'
     | '/login'
     | '/pricing'
     | '/privacy'
     | '/profiles'
+    | '/reset-password'
     | '/runners'
     | '/signup'
     | '/sitemap.xml'
@@ -960,11 +980,13 @@ export interface FileRouteTypes {
     | '/apply'
     | '/auth-test'
     | '/faq'
+    | '/forgot-password'
     | '/investors'
     | '/login'
     | '/pricing'
     | '/privacy'
     | '/profiles'
+    | '/reset-password'
     | '/runners'
     | '/signup'
     | '/sitemap.xml'
@@ -1046,11 +1068,13 @@ export interface FileRouteTypes {
     | '/apply'
     | '/auth-test'
     | '/faq'
+    | '/forgot-password'
     | '/investors'
     | '/login'
     | '/pricing'
     | '/privacy'
     | '/profiles'
+    | '/reset-password'
     | '/runners'
     | '/signup'
     | '/sitemap.xml'
@@ -1138,11 +1162,13 @@ export interface RootRouteChildren {
   ApplyRoute: typeof ApplyRoute
   AuthTestRoute: typeof AuthTestRoute
   FaqRoute: typeof FaqRoute
+  ForgotPasswordRoute: typeof ForgotPasswordRoute
   InvestorsRoute: typeof InvestorsRoute
   LoginRoute: typeof LoginRoute
   PricingRoute: typeof PricingRouteWithChildren
   PrivacyRoute: typeof PrivacyRoute
   ProfilesRoute: typeof ProfilesRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
   RunnersRoute: typeof RunnersRoute
   SignupRoute: typeof SignupRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
@@ -1222,6 +1248,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RunnersRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/profiles': {
       id: '/profiles'
       path: '/profiles'
@@ -1255,6 +1288,13 @@ declare module '@tanstack/react-router' {
       path: '/investors'
       fullPath: '/investors'
       preLoaderRoute: typeof InvestorsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/forgot-password': {
+      id: '/forgot-password'
+      path: '/forgot-password'
+      fullPath: '/forgot-password'
+      preLoaderRoute: typeof ForgotPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/faq': {
@@ -2007,11 +2047,13 @@ const rootRouteChildren: RootRouteChildren = {
   ApplyRoute: ApplyRoute,
   AuthTestRoute: AuthTestRoute,
   FaqRoute: FaqRoute,
+  ForgotPasswordRoute: ForgotPasswordRoute,
   InvestorsRoute: InvestorsRoute,
   LoginRoute: LoginRoute,
   PricingRoute: PricingRouteWithChildren,
   PrivacyRoute: PrivacyRoute,
   ProfilesRoute: ProfilesRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
   RunnersRoute: RunnersRoute,
   SignupRoute: SignupRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
@@ -2036,13 +2078,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
