@@ -22,6 +22,7 @@ import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as InvestorsRouteImport } from './routes/investors'
+import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as FaqRouteImport } from './routes/faq'
 import { Route as AuthTestRouteImport } from './routes/auth-test'
 import { Route as ApplyRouteImport } from './routes/apply'
@@ -162,6 +163,11 @@ const LoginRoute = LoginRouteImport.update({
 const InvestorsRoute = InvestorsRouteImport.update({
   id: '/investors',
   path: '/investors',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
+  id: '/forgot-password',
+  path: '/forgot-password',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FaqRoute = FaqRouteImport.update({
@@ -601,6 +607,7 @@ export interface FileRoutesByFullPath {
   '/apply': typeof ApplyRoute
   '/auth-test': typeof AuthTestRoute
   '/faq': typeof FaqRoute
+  '/forgot-password': typeof ForgotPasswordRoute
   '/investors': typeof InvestorsRoute
   '/login': typeof LoginRoute
   '/pricing': typeof PricingRouteWithChildren
@@ -691,6 +698,7 @@ export interface FileRoutesByTo {
   '/apply': typeof ApplyRoute
   '/auth-test': typeof AuthTestRoute
   '/faq': typeof FaqRoute
+  '/forgot-password': typeof ForgotPasswordRoute
   '/investors': typeof InvestorsRoute
   '/login': typeof LoginRoute
   '/pricing': typeof PricingRouteWithChildren
@@ -778,6 +786,7 @@ export interface FileRoutesById {
   '/apply': typeof ApplyRoute
   '/auth-test': typeof AuthTestRoute
   '/faq': typeof FaqRoute
+  '/forgot-password': typeof ForgotPasswordRoute
   '/investors': typeof InvestorsRoute
   '/login': typeof LoginRoute
   '/pricing': typeof PricingRouteWithChildren
@@ -870,6 +879,7 @@ export interface FileRouteTypes {
     | '/apply'
     | '/auth-test'
     | '/faq'
+    | '/forgot-password'
     | '/investors'
     | '/login'
     | '/pricing'
@@ -960,6 +970,7 @@ export interface FileRouteTypes {
     | '/apply'
     | '/auth-test'
     | '/faq'
+    | '/forgot-password'
     | '/investors'
     | '/login'
     | '/pricing'
@@ -1046,6 +1057,7 @@ export interface FileRouteTypes {
     | '/apply'
     | '/auth-test'
     | '/faq'
+    | '/forgot-password'
     | '/investors'
     | '/login'
     | '/pricing'
@@ -1138,6 +1150,7 @@ export interface RootRouteChildren {
   ApplyRoute: typeof ApplyRoute
   AuthTestRoute: typeof AuthTestRoute
   FaqRoute: typeof FaqRoute
+  ForgotPasswordRoute: typeof ForgotPasswordRoute
   InvestorsRoute: typeof InvestorsRoute
   LoginRoute: typeof LoginRoute
   PricingRoute: typeof PricingRouteWithChildren
@@ -1255,6 +1268,13 @@ declare module '@tanstack/react-router' {
       path: '/investors'
       fullPath: '/investors'
       preLoaderRoute: typeof InvestorsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/forgot-password': {
+      id: '/forgot-password'
+      path: '/forgot-password'
+      fullPath: '/forgot-password'
+      preLoaderRoute: typeof ForgotPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/faq': {
@@ -2007,6 +2027,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApplyRoute: ApplyRoute,
   AuthTestRoute: AuthTestRoute,
   FaqRoute: FaqRoute,
+  ForgotPasswordRoute: ForgotPasswordRoute,
   InvestorsRoute: InvestorsRoute,
   LoginRoute: LoginRoute,
   PricingRoute: PricingRouteWithChildren,
