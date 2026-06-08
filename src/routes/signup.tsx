@@ -88,6 +88,7 @@ function SignupPage() {
         profileStatus = result.profileStatus;
       }
       setDebug({ authUserId: data.user.id, email: data.user.email ?? email, role: activeRole, profileStatus });
+      trackSignup(activeRole);
       if (!data.session) {
         toast.success("Account created. Check your email to confirm, then sign in.");
         return;
