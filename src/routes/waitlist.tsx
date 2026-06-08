@@ -22,6 +22,7 @@ export const Route = createFileRoute("/waitlist")({
 function WaitlistPage() {
   useEffect(() => {
     trackLead();
+    trackSignup("email");
   }, []);
   return (
     <main className="min-h-screen flex items-center justify-center px-4 py-16 bg-background">
