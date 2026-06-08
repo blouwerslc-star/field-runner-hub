@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { CheckCircle2, Mail } from "lucide-react";
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { trackLead } from "@/lib/tracking";
+import { trackLead, trackSignup } from "@/lib/tracking";
 
 export const Route = createFileRoute("/waitlist")({
   head: () => ({
