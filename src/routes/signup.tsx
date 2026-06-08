@@ -4,6 +4,7 @@ import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
 import { finalizeSignupProfile } from "@/lib/signup.functions";
+import { trackSignup } from "@/lib/tracking";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -87,6 +88,7 @@ function SignupPage() {
         profileStatus = result.profileStatus;
       }
       setDebug({ authUserId: data.user.id, email: data.user.email ?? email, role: activeRole, profileStatus });
+      trackSignup(activeRole);
       if (!data.session) {
         toast.success("Account created. Check your email to confirm, then sign in.");
         return;
