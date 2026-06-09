@@ -145,6 +145,43 @@ function Flag({ label, on }: { label: string; on: boolean }) {
   );
 }
 
+function EmptyVerifications({ tab }: { tab: StatusTab }) {
+  const now = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  const copy =
+    tab === "pending_review"
+      ? "No pending verifications."
+      : tab === "verified"
+        ? "No verified runners in this view."
+        : tab === "rejected"
+          ? "No rejected requests."
+          : "No verification requests yet.";
+  return (
+    <div className="rounded-2xl border border-dashed border-border bg-card/30 p-8 text-sm">
+      <div className="flex items-center gap-2 mb-2">
+        <BadgeCheck className="size-4 text-primary" />
+        <span className="font-medium">{copy}</span>
+        <Badge variant="outline" className="ml-auto text-[10px]">Last checked {now}</Badge>
+      </div>
+      <p className="text-muted-foreground text-xs mb-4">
+        {tab === "pending_review"
+          ? "Nothing is waiting for review right now. You're all caught up."
+          : "Try a different tab to see other request states."}
+      </p>
+      <div className="flex flex-wrap gap-2">
+        <Button asChild size="sm" variant="outline" className="h-8 text-xs">
+          <Link to="/admin/runner-approvals"><ShieldCheck className="size-3.5 mr-1.5" /> Runner approvals <ArrowRight className="size-3 ml-1" /></Link>
+        </Button>
+        <Button asChild size="sm" variant="outline" className="h-8 text-xs">
+          <Link to="/admin/background-checks"><Users className="size-3.5 mr-1.5" /> Background checks <ArrowRight className="size-3 ml-1" /></Link>
+        </Button>
+        <Button asChild size="sm" variant="outline" className="h-8 text-xs">
+          <Link to="/admin/broadcasts"><Mail className="size-3.5 mr-1.5" /> Send broadcast <ArrowRight className="size-3 ml-1" /></Link>
+        </Button>
+      </div>
+    </div>
+  );
+}
+
 function RejectDialog({ onSubmit, pending }: { onSubmit: (notes: string) => void; pending: boolean }) {
   const [open, setOpen] = useState(false);
   const [notes, setNotes] = useState("");
