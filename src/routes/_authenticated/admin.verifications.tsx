@@ -14,7 +14,8 @@ import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger,
 } from "@/components/ui/dialog";
-import { Loader2, CheckCircle2, XCircle, Mail, Phone, BadgeCheck, ShieldCheck } from "lucide-react";
+import { Loader2, CheckCircle2, XCircle, Mail, Phone, BadgeCheck, ShieldCheck, Users, ArrowRight } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { VerificationLevelBadge } from "@/components/profiles/VerificationLevelBadge";
 
@@ -59,9 +60,7 @@ function AdminVerificationsPage() {
           {query.isLoading ? (
             <Loader2 className="size-5 animate-spin text-primary" />
           ) : (query.data?.requests.length ?? 0) === 0 ? (
-            <div className="rounded-2xl border border-dashed border-border bg-card/30 p-12 text-center text-sm text-muted-foreground">
-              No requests in this view.
-            </div>
+            <EmptyVerifications tab={tab} />
           ) : (
             <div className="grid lg:grid-cols-2 gap-4">
               {query.data!.requests.map((r: any) => (
