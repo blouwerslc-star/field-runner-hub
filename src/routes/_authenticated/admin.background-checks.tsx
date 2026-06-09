@@ -11,7 +11,8 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
-import { Loader2, CheckCircle2, XCircle, Clock, Mail, Phone, ExternalLink } from "lucide-react";
+import { Loader2, CheckCircle2, XCircle, Clock, Mail, Phone, ExternalLink, BadgeCheck, ShieldCheck, ArrowRight } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/admin/background-checks")({
@@ -78,9 +79,7 @@ function AdminBackgroundChecksPage() {
           {query.isLoading ? (
             <Loader2 className="size-5 animate-spin text-primary" />
           ) : (query.data?.profiles.length ?? 0) === 0 ? (
-            <div className="rounded-2xl border border-dashed border-border bg-card/30 p-12 text-center text-sm text-muted-foreground">
-              No runners in this view.
-            </div>
+            <EmptyBgChecks tab={tab} />
           ) : (
             <div className="grid lg:grid-cols-2 gap-4">
               {query.data!.profiles.map((p: any) => (
