@@ -339,6 +339,280 @@ function StatTile({
   );
 }
 
+function formatMoney(cents: number) {
+  return "$" + (cents / 100).toLocaleString(undefined, { maximumFractionDigits: 0 });
+}
+
+function KPI({
+  icon: Icon,
+  label,
+  value,
+  tone = "default",
+  to,
+}: {
+  icon: React.ComponentType<{ className?: string }>;
+  label: string;
+  value: string | number;
+  tone?: "default" | "warning" | "danger" | "success";
+  to?: string;
+}) {
+  const toneClass =
+    tone === "warning"
+      ? "border-yellow-500/30 bg-yellow-500/5"
+      : tone === "danger"
+        ? "border-red-500/30 bg-red-500/5"
+        : tone === "success"
+          ? "border-emerald-500/30 bg-emerald-500/5"
+          : "border-border bg-card/60";
+  const iconTone =
+    tone === "warning"
+      ? "text-yellow-400"
+      : tone === "danger"
+        ? "text-red-400"
+        : tone === "success"
+          ? "text-emerald-400"
+          : "text-muted-foreground";
+  const Inner = (
+    <div className={`rounded-xl border ${toneClass} backdrop-blur p-3 h-full transition-colors hover:bg-muted/40`}>
+      <div className={`flex items-center gap-1.5 text-[10px] uppercase tracking-wider mb-1.5 ${iconTone}`}>
+        <Icon className="size-3.5" /> {label}
+      </div>
+      <div className="text-xl font-bold tabular-nums">{value}</div>
+    </div>
+  );
+  return to ? <Link to={to}>{Inner}</Link> : Inner;
+}
+
+function QueuePanel({
+  title,
+  icon: Icon,
+  to,
+  emptyLabel,
+  children,
+  count,
+}: {
+  title: string;
+  icon: React.ComponentType<{ className?: string }>;
+  to: string;
+  emptyLabel: string;
+  count: number;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="rounded-2xl border border-border bg-card/40 p-4 flex flex-col">
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-2 text-sm font-semibold">
+          <Icon className="size-4 text-primary" />
+          {title}
+          <Badge variant="outline" className="ml-1 text-[10px]">{count}</Badge>
+        </div>
+        <Button asChild variant="ghost" size="sm" className="h-7 text-xs">
+          <Link to={to}>Open →</Link>
+        </Button>
+      </div>
+      {count === 0 ? (
+        <div className="text-xs text-muted-foreground italic py-4 text-center border border-dashed border-border/60 rounded-lg">
+          {emptyLabel}
+        </div>
+      ) : (
+        <div className="space-y-1.5">{children}</div>
+      )}
+    </div>
+  );
+}
+
+function AdminOverviewSection({
+  data,
+  isLoading,
+  isFetching,
+  onRefresh,
+}: {
+  data: Awaited<ReturnType<typeof getAdminOverview>> | undefined;
+  isLoading: boolean;
+  isFetching: boolean;
+  onRefresh: () => void;
+}) {
+  if (isLoading || !data) {
+    return (
+      <div className="mb-6 rounded-2xl border border-border bg-card/40 p-6 grid place-items-center">
+        <Loader2 className="size-5 animate-spin text-primary" />
+      </div>
+    );
+  }
+  const k = data.kpis;
+  const q = data.queues;
+  const generated = new Date(data.generated_at);
+  return (
+    <section className="mb-8 space-y-4">
+      <div className="flex items-center justify-between flex-wrap gap-2">
+        <div className="text-xs text-muted-foreground">
+          Last refreshed {generated.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+        </div>
+        <Button variant="outline" size="sm" onClick={onRefresh} disabled={isFetching} className="h-8">
+          <RefreshCw className={`size-3.5 mr-1.5 ${isFetching ? "animate-spin" : ""}`} />
+          Refresh
+        </Button>
+      </div>
+
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
+        <KPI icon={Users} label="Users" value={k.total_users} />
+        <KPI icon={ShieldCheck} label="Approved runners" value={k.approved_runners} to="/admin/runner-approvals" />
+        <KPI icon={UserCog} label="Investors" value={k.registered_investors} />
+        <KPI icon={ClipboardList} label="Open tasks" value={k.open_tasks} />
+        <KPI icon={ClipboardList} label="Completed" value={k.completed_tasks} tone="success" />
+        <KPI icon={DollarSign} label="GMV" value={formatMoney(k.gmv_cents)} tone="success" />
+        <KPI
+          icon={ShieldCheck}
+          label="Pending approvals"
+          value={k.pending_runner_approvals}
+          tone={k.pending_runner_approvals > 0 ? "warning" : "default"}
+          to="/admin/runner-approvals"
+        />
+        <KPI
+          icon={BadgeCheck}
+          label="Pending verifications"
+          value={k.pending_verifications}
+          tone={k.pending_verifications > 0 ? "warning" : "default"}
+          to="/admin/verifications"
+        />
+        <KPI
+          icon={FileSearch}
+          label="Background checks"
+          value={k.pending_background_checks}
+          tone={k.pending_background_checks > 0 ? "warning" : "default"}
+          to="/admin/background-checks"
+        />
+        <KPI icon={ClipboardList} label="Total tasks" value={k.total_tasks} />
+        <KPI
+          icon={AlertTriangle}
+          label="Email fails 24h"
+          value={k.failed_emails_24h}
+          tone={k.failed_emails_24h > 0 ? "danger" : "default"}
+          to="/admin/email-monitor"
+        />
+        <KPI icon={Activity} label="Marketplace" value="Health" to="/admin/marketplace-health" />
+      </div>
+
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
+        <QueuePanel
+          title="Pending approvals"
+          icon={ShieldCheck}
+          to="/admin/runner-approvals"
+          count={q.pending_approvals.length}
+          emptyLabel="No pending runner applications."
+        >
+          {q.pending_approvals.map((a: any) => (
+            <div key={a.id} className="text-xs flex items-center justify-between gap-2 px-2 py-1.5 rounded hover:bg-muted/40">
+              <div className="truncate">
+                <div className="font-medium truncate">{a.full_name}</div>
+                <div className="text-muted-foreground truncate">{a.city ?? "—"}, {a.state ?? "—"}</div>
+              </div>
+              <div className="text-[10px] text-muted-foreground whitespace-nowrap">
+                {new Date(a.created_at).toLocaleDateString()}
+              </div>
+            </div>
+          ))}
+        </QueuePanel>
+
+        <QueuePanel
+          title="Pending verifications"
+          icon={BadgeCheck}
+          to="/admin/verifications"
+          count={q.pending_verifications.length}
+          emptyLabel="No pending verifications."
+        >
+          {q.pending_verifications.map((v: any) => (
+            <div key={v.id} className="text-xs flex items-center justify-between gap-2 px-2 py-1.5 rounded hover:bg-muted/40">
+              <div className="truncate">
+                <div className="font-medium truncate">Level {v.requested_level}</div>
+                <div className="text-muted-foreground truncate font-mono text-[10px]">{v.user_id?.slice(0, 8)}…</div>
+              </div>
+              <div className="text-[10px] text-muted-foreground whitespace-nowrap">
+                {new Date(v.created_at).toLocaleDateString()}
+              </div>
+            </div>
+          ))}
+        </QueuePanel>
+
+        <QueuePanel
+          title="Open disputes"
+          icon={AlertTriangle}
+          to="/disputes"
+          count={q.open_disputes.length}
+          emptyLabel="No open disputes."
+        >
+          {q.open_disputes.map((d: any) => (
+            <div key={d.id} className="text-xs flex items-center justify-between gap-2 px-2 py-1.5 rounded hover:bg-muted/40">
+              <div className="truncate">
+                <div className="font-medium truncate capitalize">{d.status.replace("_", " ")}</div>
+                <div className="text-muted-foreground truncate">{d.reason ?? "—"}</div>
+              </div>
+              <div className="text-[10px] text-muted-foreground whitespace-nowrap">
+                {new Date(d.created_at).toLocaleDateString()}
+              </div>
+            </div>
+          ))}
+        </QueuePanel>
+
+        <QueuePanel
+          title="Open tasks (unassigned)"
+          icon={ClipboardList}
+          to="/admin/dispatch"
+          count={q.unassigned_open_tasks.length}
+          emptyLabel="No unassigned open tasks."
+        >
+          {q.unassigned_open_tasks.map((t: any) => (
+            <div key={t.id} className="text-xs flex items-center justify-between gap-2 px-2 py-1.5 rounded hover:bg-muted/40">
+              <div className="truncate">
+                <div className="font-medium truncate">{t.title}</div>
+                <div className="text-muted-foreground truncate">{t.city}, {t.state}</div>
+              </div>
+              {t.payout_amount != null && (
+                <div className="text-[10px] text-primary whitespace-nowrap font-semibold">
+                  ${Number(t.payout_amount).toFixed(0)}
+                </div>
+              )}
+            </div>
+          ))}
+        </QueuePanel>
+
+        <QueuePanel
+          title="Email failures (24h)"
+          icon={Mail}
+          to="/admin/email-monitor"
+          count={q.failed_emails.length}
+          emptyLabel="No email failures in the last 24h."
+        >
+          {q.failed_emails.map((e: any) => (
+            <div key={e.id} className="text-xs px-2 py-1.5 rounded hover:bg-muted/40">
+              <div className="flex items-center justify-between gap-2">
+                <div className="font-medium truncate">{e.template_name}</div>
+                <Badge variant="outline" className="text-[9px] border-red-500/30 text-red-300">{e.status}</Badge>
+              </div>
+              <div className="text-muted-foreground truncate text-[10px]">{e.recipient_email}</div>
+            </div>
+          ))}
+        </QueuePanel>
+
+        <div className="rounded-2xl border border-border bg-card/40 p-4">
+          <div className="text-sm font-semibold mb-3 flex items-center gap-2">
+            <Plus className="size-4 text-primary" /> Quick actions
+          </div>
+          <div className="grid grid-cols-2 gap-1.5">
+            <Button asChild size="sm" variant="outline" className="justify-start h-8 text-xs"><Link to="/admin/dispatch"><Send className="size-3.5 mr-1.5" />Dispatch</Link></Button>
+            <Button asChild size="sm" variant="outline" className="justify-start h-8 text-xs"><Link to="/admin/broadcasts"><Mail className="size-3.5 mr-1.5" />Broadcast</Link></Button>
+            <Button asChild size="sm" variant="outline" className="justify-start h-8 text-xs"><Link to="/admin/runner-approvals"><ShieldCheck className="size-3.5 mr-1.5" />Approvals</Link></Button>
+            <Button asChild size="sm" variant="outline" className="justify-start h-8 text-xs"><Link to="/admin/verifications"><BadgeCheck className="size-3.5 mr-1.5" />Verify</Link></Button>
+            <Button asChild size="sm" variant="outline" className="justify-start h-8 text-xs"><Link to="/admin/background-checks"><FileSearch className="size-3.5 mr-1.5" />BG checks</Link></Button>
+            <Button asChild size="sm" variant="outline" className="justify-start h-8 text-xs"><Link to="/admin/email-monitor"><Mail className="size-3.5 mr-1.5" />Emails</Link></Button>
+            <Button asChild size="sm" variant="outline" className="justify-start h-8 text-xs col-span-2"><Link to="/messages"><MessageSquare className="size-3.5 mr-1.5" />Open messages</Link></Button>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function EmptyState({ message }: { message: string }) {
   return (
     <div className="rounded-2xl border border-dashed border-border bg-card/30 p-10 text-center text-sm text-muted-foreground">
