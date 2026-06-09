@@ -430,3 +430,117 @@ export const getMarketplaceHealth = createServerFn({ method: "GET" })
       series,
     };
   });
+
+/* ───────────────────────── 7. ADMIN OPS OVERVIEW ──────────────────────────── */
+
+export const getAdminOverview = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await requireAdmin(context.supabase, context.userId);
+    const now = Date.now();
+    const since24h = new Date(now - 86400_000).toISOString();
+
+    const [
+      profilesTotal,
+      runnerRoles,
+      investorRoles,
+      pendingApps,
+      pendingVerifications,
+      pendingBgRows,
+      tasksTotal,
+      tasksOpenCount,
+      tasksCompletedCount,
+      openTasksUnassigned,
+      openDisputes,
+      paymentsPaid,
+      emailsFailed24h,
+      recentPendingApps,
+      recentPendingVerifications,
+      recentOpenTasks,
+    ] = await Promise.all([
+      supabaseAdmin.from("profiles").select("id", { head: true, count: "exact" }),
+      supabaseAdmin.from("user_roles").select("user_id", { head: true, count: "exact" }).eq("role", "runner"),
+      supabaseAdmin.from("user_roles").select("user_id", { head: true, count: "exact" }).eq("role", "investor"),
+      supabaseAdmin.from("field_runner_applications").select("id", { head: true, count: "exact" }).eq("status", "pending"),
+      supabaseAdmin.from("verification_requests").select("id", { head: true, count: "exact" }).eq("status", "pending_review"),
+      supabaseAdmin.from("runner_profiles").select("user_id", { head: true, count: "exact" }).eq("background_check_status", "pending"),
+      supabaseAdmin.from("tasks").select("id", { head: true, count: "exact" }),
+      supabaseAdmin.from("tasks").select("id", { head: true, count: "exact" }).eq("status", "open"),
+      supabaseAdmin.from("tasks").select("id", { head: true, count: "exact" }).in("status", ["completed", "approved", "paid"]),
+      supabaseAdmin
+        .from("tasks")
+        .select("id, title, city, state, created_at, payout_amount")
+        .eq("status", "open")
+        .is("runner_id", null)
+        .order("created_at", { ascending: false })
+        .limit(5),
+      supabaseAdmin
+        .from("disputes")
+        .select("id, task_id, reason, status, created_at")
+        .in("status", ["open", "under_review"])
+        .order("created_at", { ascending: false })
+        .limit(5),
+      supabaseAdmin.from("payments").select("amount_cents, status").eq("status", "paid"),
+      supabaseAdmin
+        .from("email_send_log")
+        .select("id, recipient_email, template_name, status, error_message, created_at")
+        .in("status", ["dlq", "failed", "bounced"])
+        .gte("created_at", since24h)
+        .order("created_at", { ascending: false })
+        .limit(5),
+      supabaseAdmin
+        .from("field_runner_applications")
+        .select("id, full_name, email, city, state, created_at")
+        .eq("status", "pending")
+        .order("created_at", { ascending: false })
+        .limit(5),
+      supabaseAdmin
+        .from("verification_requests")
+        .select("id, user_id, requested_level, created_at")
+        .eq("status", "pending_review")
+        .order("created_at", { ascending: false })
+        .limit(5),
+      supabaseAdmin
+        .from("tasks")
+        .select("id, title, city, state, created_at")
+        .eq("status", "open")
+        .order("created_at", { ascending: false })
+        .limit(5),
+    ]);
+
+    const gmvCents = (paymentsPaid.data ?? []).reduce(
+      (s: number, p: any) => s + Number(p.amount_cents ?? 0),
+      0,
+    );
+
+    const { count: failedEmailCount } = await supabaseAdmin
+      .from("email_send_log")
+      .select("id", { head: true, count: "exact" })
+      .in("status", ["dlq", "failed", "bounced"])
+      .gte("created_at", since24h);
+
+    return {
+      generated_at: new Date().toISOString(),
+      kpis: {
+        total_users: profilesTotal.count ?? 0,
+        approved_runners: runnerRoles.count ?? 0,
+        registered_investors: investorRoles.count ?? 0,
+        pending_runner_approvals: pendingApps.count ?? 0,
+        pending_verifications: pendingVerifications.count ?? 0,
+        pending_background_checks: pendingBgRows.count ?? 0,
+        total_tasks: tasksTotal.count ?? 0,
+        open_tasks: tasksOpenCount.count ?? 0,
+        completed_tasks: tasksCompletedCount.count ?? 0,
+        gmv_cents: gmvCents,
+        failed_emails_24h: failedEmailCount ?? 0,
+      },
+      queues: {
+        pending_approvals: recentPendingApps.data ?? [],
+        pending_verifications: recentPendingVerifications.data ?? [],
+        unassigned_open_tasks: openTasksUnassigned.data ?? [],
+        open_disputes: openDisputes.data ?? [],
+        recent_open_tasks: recentOpenTasks.data ?? [],
+        failed_emails: emailsFailed24h.data ?? [],
+      },
+    };
+  });
