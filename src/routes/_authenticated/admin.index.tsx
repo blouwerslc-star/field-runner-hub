@@ -24,7 +24,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Loader2, Users, ClipboardList, UserCog, Plus, ShieldCheck, Send, BarChart3, Activity, BadgeCheck, Mail } from "lucide-react";
+import { Loader2, Users, ClipboardList, UserCog, Plus, ShieldCheck, Send, BarChart3, Activity, BadgeCheck, Mail, AlertTriangle, DollarSign, RefreshCw, FileSearch, MessageSquare } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { listPayouts, markPayoutPaid } from "@/lib/payments.functions";
@@ -32,6 +32,7 @@ import { getTaskDetail } from "@/lib/tasks.functions";
 import { getSignedDownloadUrl } from "@/lib/storage.functions";
 import { listAdminRunners, type AdminRunner } from "@/lib/admin.functions";
 import { useQuery } from "@tanstack/react-query";
+import { getAdminOverview } from "@/lib/ops.functions";
 
 export const Route = createFileRoute("/_authenticated/admin/")({
   component: AdminDashboard,
@@ -96,6 +97,12 @@ function AdminDashboard() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const fetchRunners = useServerFn(listAdminRunners);
   const signFn = useServerFn(getSignedDownloadUrl);
+  const overviewFn = useServerFn(getAdminOverview);
+  const overview = useQuery({
+    queryKey: ["admin-overview"],
+    queryFn: () => overviewFn(),
+    refetchInterval: 120_000,
+  });
 
   async function loadAll() {
     setLoading(true);
@@ -135,6 +142,12 @@ function AdminDashboard() {
       title="Admin Dashboard"
       subtitle="Manage signups, post tasks on behalf of investors, and assign runners."
     >
+      <AdminOverviewSection
+        data={overview.data}
+        isLoading={overview.isLoading}
+        isFetching={overview.isFetching}
+        onRefresh={() => overview.refetch()}
+      />
       <div className="grid grid-cols-2 sm:grid-cols-6 gap-2 mb-6">
         <Button asChild variant="outline" size="sm" className="justify-start"><Link to="/admin/marketplace-health"><Activity className="size-4 mr-2" /> Health</Link></Button>
         <Button asChild variant="outline" size="sm" className="justify-start"><Link to="/admin/runner-approvals"><ShieldCheck className="size-4 mr-2" /> Approvals</Link></Button>
