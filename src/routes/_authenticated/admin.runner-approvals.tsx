@@ -154,3 +154,46 @@ function RejectDialog({ onSubmit, pending }: { onSubmit: (notes: string) => void
 function Empty({ children }: { children: React.ReactNode }) {
   return <div className="rounded-2xl border border-dashed border-border bg-card/30 p-12 text-center text-sm text-muted-foreground">{children}</div>;
 }
+
+function EmptyApprovals({ tab }: { tab: "pending" | "approved" | "rejected" }) {
+  const now = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  const copy =
+    tab === "pending"
+      ? "No pending applications."
+      : tab === "approved"
+        ? "No approved runners yet."
+        : "No rejected applications.";
+  const detail =
+    tab === "pending"
+      ? "You're caught up — every application has a decision. Try inviting more applicants or send a follow-up broadcast."
+      : tab === "approved"
+        ? "Once you approve runners they'll show up here. Open the pending tab to review applicants."
+        : "Rejected applicants appear here. Switch tabs to see other states.";
+  return (
+    <div className="rounded-2xl border border-dashed border-border bg-card/30 p-8 text-sm">
+      <div className="flex items-center gap-2 mb-2">
+        <ShieldCheck className="size-4 text-primary" />
+        <span className="font-medium">{copy}</span>
+        <Badge variant="outline" className="ml-auto text-[10px]">Last checked {now}</Badge>
+      </div>
+      <p className="text-muted-foreground text-xs mb-4">{detail}</p>
+      <div className="flex flex-wrap gap-2">
+        <a href="/admin/verifications">
+          <Button size="sm" variant="outline" className="h-8 text-xs">
+            <BadgeCheck className="size-3.5 mr-1.5" /> Verifications <ArrowRight className="size-3 ml-1" />
+          </Button>
+        </a>
+        <a href="/admin/background-checks">
+          <Button size="sm" variant="outline" className="h-8 text-xs">
+            <ShieldCheck className="size-3.5 mr-1.5" /> Background checks <ArrowRight className="size-3 ml-1" />
+          </Button>
+        </a>
+        <a href="/admin/broadcasts">
+          <Button size="sm" variant="outline" className="h-8 text-xs">
+            <Mail className="size-3.5 mr-1.5" /> Send broadcast <ArrowRight className="size-3 ml-1" />
+          </Button>
+        </a>
+      </div>
+    </div>
+  );
+}
