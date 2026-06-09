@@ -108,6 +108,45 @@ function StatusBadge({ status }: { status: string | null }) {
   return <Badge variant="outline"><Clock className="size-3 mr-1" /> Pending</Badge>;
 }
 
+function EmptyBgChecks({ tab }: { tab: Tab }) {
+  const now = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  const copy =
+    tab === "pending"
+      ? "No runners pending background checks."
+      : tab === "passed"
+        ? "No passed background checks yet."
+        : tab === "failed"
+          ? "No failed background checks."
+          : "No background checks on record.";
+  return (
+    <div className="rounded-2xl border border-dashed border-border bg-card/30 p-8 text-sm">
+      <div className="flex items-center gap-2 mb-2">
+        <ShieldCheck className="size-4 text-primary" />
+        <span className="font-medium">{copy}</span>
+        <Badge variant="outline" className="ml-auto text-[10px]">Last checked {now}</Badge>
+      </div>
+      <p className="text-muted-foreground text-xs mb-4">
+        {tab === "pending"
+          ? "Runners only land here after paying for a background check. Approve more runners or invite applicants to grow this queue."
+          : "Switch tabs to see other states, or open Checkr to run a new report."}
+      </p>
+      <div className="flex flex-wrap gap-2">
+        <Button asChild size="sm" variant="outline" className="h-8 text-xs">
+          <Link to="/admin/verifications"><BadgeCheck className="size-3.5 mr-1.5" /> Verifications <ArrowRight className="size-3 ml-1" /></Link>
+        </Button>
+        <Button asChild size="sm" variant="outline" className="h-8 text-xs">
+          <Link to="/admin/runner-approvals"><ShieldCheck className="size-3.5 mr-1.5" /> Runner approvals <ArrowRight className="size-3 ml-1" /></Link>
+        </Button>
+        <a href="https://dashboard.checkr.com" target="_blank" rel="noopener noreferrer">
+          <Button size="sm" variant="outline" className="h-8 text-xs gap-1.5">
+            Open Checkr <ExternalLink className="size-3" />
+          </Button>
+        </a>
+      </div>
+    </div>
+  );
+}
+
 function BgCheckCard({
   profile,
   pending,
