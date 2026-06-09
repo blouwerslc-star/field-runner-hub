@@ -463,7 +463,11 @@ export const getAdminOverview = createServerFn({ method: "GET" })
       supabaseAdmin.from("user_roles").select("user_id", { head: true, count: "exact" }).eq("role", "investor"),
       supabaseAdmin.from("field_runner_applications").select("id", { head: true, count: "exact" }).eq("status", "pending"),
       supabaseAdmin.from("verification_requests").select("id", { head: true, count: "exact" }).eq("status", "pending_review"),
-      supabaseAdmin.from("runner_profiles").select("user_id", { head: true, count: "exact" }).eq("background_check_status", "pending"),
+      supabaseAdmin
+        .from("profiles")
+        .select("id", { head: true, count: "exact" })
+        .not("background_check_paid_at", "is", null)
+        .eq("background_check_verified", false),
       supabaseAdmin.from("tasks").select("id", { head: true, count: "exact" }),
       supabaseAdmin.from("tasks").select("id", { head: true, count: "exact" }).eq("status", "open"),
       supabaseAdmin.from("tasks").select("id", { head: true, count: "exact" }).in("status", ["completed", "approved", "paid"]),
