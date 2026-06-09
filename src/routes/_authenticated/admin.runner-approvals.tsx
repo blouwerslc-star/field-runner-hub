@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger } from "@/components/ui/dialog";
-import { Loader2, CheckCircle2, XCircle, MapPin, Mail, Phone, Car, Smartphone } from "lucide-react";
+import { Loader2, CheckCircle2, XCircle, MapPin, Mail, Phone, Car, Smartphone, BadgeCheck, ShieldCheck, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/admin/runner-approvals")({
@@ -50,7 +50,7 @@ function RunnerApprovalsPage() {
           {apps.isLoading ? (
             <Loader2 className="size-5 animate-spin text-primary" />
           ) : (apps.data?.applications.length ?? 0) === 0 ? (
-            <Empty>No {tab} applications.</Empty>
+            <EmptyApprovals tab={tab as "pending" | "approved" | "rejected"} />
           ) : (
             <div className="grid lg:grid-cols-2 gap-4">
               {apps.data!.applications.map((a: any) => (
