@@ -1,62 +1,50 @@
-# REI Runner — Mobile App Readiness Plan
+# Admin Ops Cockpit — Phased Plan
 
-You picked "Do everything now" + Capacitor wrap + wipe test data. Honest framing: this is genuinely multiple days of work and risk. I'll execute in ordered batches below, pausing only for destructive actions (DB wipe) and store-account specifics that require your input (bundle IDs, signing, icons).
+This is a very large request (12 priorities, dozens of pages). Shipping it all in one batch would be unsafe — too many simultaneous changes to admin queues, broadcasts, RLS-sensitive surfaces, and routing. I'll split into phases and confirm scope before starting.
 
-## Batch 1 — Mobile responsiveness & UX states audit
-- Sweep every route under `src/routes/` for: viewport overflow, tap-target sizes (<44px), tables that don't collapse, modals/sheets that break <375px, and missing safe-area padding.
-- Add/standardize Empty, Loading (skeleton), and Error states for: tasks list, task detail, messages, profiles, applications, dashboards (investor/runner/admin), earnings, billing, notifications.
-- Ensure `MobileBottomNav` works on every authed route; verify content has `pb-20` to clear it.
-- Fix any horizontal scroll, fixed widths, oversized hero images on mobile.
+## Phase 1 — Foundation (recommended first ship)
+The pieces that unblock everything else and fix the "blank dashboard" complaint.
 
-## Batch 2 — Marketplace flow completeness check
-For each flow, verify happy path + error path + empty state on mobile:
-- Runner signup → profile → verification → background check
-- Investor signup → post task → fund task → review submission → release payment
-- Runner: browse tasks → apply → accept assignment → upload deliverables (photo/video) → submit
-- Messaging: start convo, send message, attachment upload, unread badge
-- Notifications: realtime delivery, mark-as-read, deep links
-- Admin: moderation, approvals, dispute resolution
-- Static/legal: privacy, terms, support — confirm present, current date, contact info
+1. **Role-based dashboard routing (P1)**
+   - `/dashboard` already routes by role, but admins fall through to runner — fix to send admins to `/admin`.
+   - `BrandLogo` link + mobile Home nav → role-aware destination (new `useRoleHome()` hook).
+2. **Admin nav entry (P2)**
+   - Add an "Admin" dropdown/section in `DashboardShell` (desktop + mobile sheet + bottom nav) visible only when `has_role(admin)`. Quick links to all 8 admin pages.
+3. **Upgraded `/admin` dashboard (P3)**
+   - New server fn `getAdminOverview` returning KPI counts + queue previews (pending approvals, verifications, BG checks, disputes, unassigned tasks, failed emails 24h).
+   - KPI grid, queue panels with "Review" deep-links, quick-action buttons, last-refreshed timestamp + manual refresh.
+4. **Useful empty states (P4)** on `/admin/verifications`, `/admin/runner-approvals`, `/admin/background-checks` — counts by status, last-checked time, next-action links.
+5. **Hide desktop Back button noise (P11)** on list/dashboard pages.
 
-I'll fix gaps inline, not rebuild what works.
+## Phase 2 — Marketplace Health + Analytics depth (P5, P6)
+Expand `/admin/marketplace-health` with funnel / supply / demand / risk sections, and `/admin/analytics` with the requested funnels and trend charts + date range filters.
 
-## Batch 3 — Capacitor wrap
-- Install `@capacitor/core`, `@capacitor/cli`, `@capacitor/ios`, `@capacitor/android`, `@capacitor/status-bar`, `@capacitor/splash-screen`, `@capacitor/app`, `@capacitor/preferences`, `@capacitor/camera`, `@capacitor/filesystem`, `@capacitor/push-notifications`.
-- Create `capacitor.config.ts` with `appId: com.reirunner.app`, `appName: REI Runner`, `webDir: dist`, `server.url` pointing to production for live updates (toggleable for offline bundle).
-- Add `npm` scripts: `cap:sync`, `cap:open:ios`, `cap:open:android`.
-- Add a `Capacitor.isNativePlatform()` guard layer in `src/lib/native.ts` that:
-  - swaps web file inputs for `Camera.getPhoto()` on native
-  - routes external links through `Browser.open()`
-  - handles deep links (`reirunner://`) → router navigate
-  - configures status bar style for dark theme
-  - shows splash, hides on app-ready
-- Document the build/submit flow in `docs/MOBILE_BUILD.md` (Xcode + Android Studio steps, signing, screenshots, App Store/Play Store metadata you still need to provide).
+## Phase 3 — Queue page upgrades (P7)
+Search, status tabs w/ counts, sort, richer applicant context, confirmation modals on approve/reject/pass/fail.
 
-## Batch 4 — App-store readiness
-- Add app icons + splash assets pipeline (`@capacitor/assets`) — needs a 1024×1024 source icon from you, or I'll generate a placeholder.
-- Privacy: confirm `/privacy` and `/terms` cover data collection, location, camera, photos, push, in-app purchases. Add an "Account deletion" screen (Apple requires it) wired to `account_status`.
-- Add NSCameraUsageDescription, NSPhotoLibraryUsageDescription, NSLocationWhenInUseUsageDescription strings to `ios/App/App/Info.plist` (Capacitor-generated, I'll patch).
-- Android permissions in `AndroidManifest.xml`.
+## Phase 4 — Broadcasts safety (P8)
+Email masking + reveal, dedupe, bounced/suppressed/unsubscribed filtering, test-send, recipient preview, bulk-send confirmation, audit log.
 
-## Batch 5 — Test data wipe (destructive, will pause for re-confirm)
-I'll query the DB first to show exactly what would be deleted, then issue a migration. Targets:
-- `tasks`, `task_submissions`, `task_files`, `applications`, `payments`, `invoices`, `payout_requests`
-- `conversations`, `conversation_participants`, `messages`, `message_attachments`
-- `reviews`, `reports`, `disputes`, `notifications`, `activity_events`, `favorite_runners`, `runner_availability_blocks`
-- Keep: `profiles`, `user_roles`, academy content, app_settings
-- Optionally clear test `field_runner_applications` / `real_estate_pro_applications` — your call.
+## Phase 5 — Email Monitor + Messages polish (P9, P10)
 
-## What I need from you to fully ship
-1. **Bundle IDs**: confirm `com.reirunner.app` for both iOS and Android.
-2. **App icon**: upload a 1024×1024 PNG, or I generate one from the brand.
-3. **Apple Developer + Google Play accounts**: required to actually submit; I can't create those.
-4. **Push provider**: OneSignal vs Firebase Cloud Messaging vs Apple-only APNs — pick one for Batch 3.
-5. **Test-data wipe re-confirm**: I'll show row counts before running.
+## Phase 6 — Admin permissions + audit logs (P12)
+New `admin_audit_log` table, granular permission helpers (`has_admin_permission`), audit writes on PII reveal, broadcast send, decisions, payouts, role changes.
 
-## Out of scope (call out)
-- React Native/Expo rebuild (you chose Capacitor — good call, ~10× faster).
-- Actual binary upload to App Store Connect / Google Play Console — requires your developer accounts and a Mac with Xcode for iOS.
-- App Store screenshots, marketing copy, ASO keywords — I can draft, you submit.
+---
 
-## Execution order on next message
-Reply "go" and I start Batch 1. I'll commit per batch and surface anything that needs your input before continuing. If you want a different order (e.g., Capacitor first), say so.
+## Technical notes
+
+- All new server fns go in `src/lib/admin.functions.ts` (or new `ops.functions.ts` additions) using `requireSupabaseAuth` + `has_role('admin')` check, never `supabaseAdmin` from client-reachable code.
+- Audit log table (Phase 6) needs a migration with GRANTs + RLS (admin-read only, service_role write).
+- No existing routes removed; no data migrations destructive.
+- Honest zero-states everywhere — no fabricated metrics.
+
+---
+
+## Question
+
+This is roughly 2–4 days of work end-to-end. **Which phase should I ship first?**
+
+My recommendation: **Phase 1 only this turn** — it fixes the most visible problems (blank admin dashboard, missing admin nav, weak `/admin` page, noisy empty states) without touching broadcasts/RLS/audit surfaces where mistakes are costly. Then we iterate.
+
+Reply with: "Phase 1", "Phases 1+2", "all of it", or specify which priorities matter most.

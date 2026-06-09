@@ -14,7 +14,8 @@ import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger,
 } from "@/components/ui/dialog";
-import { Loader2, CheckCircle2, XCircle, Mail, Phone, BadgeCheck, ShieldCheck } from "lucide-react";
+import { Loader2, CheckCircle2, XCircle, Mail, Phone, BadgeCheck, ShieldCheck, Users, ArrowRight } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { VerificationLevelBadge } from "@/components/profiles/VerificationLevelBadge";
 
@@ -59,9 +60,7 @@ function AdminVerificationsPage() {
           {query.isLoading ? (
             <Loader2 className="size-5 animate-spin text-primary" />
           ) : (query.data?.requests.length ?? 0) === 0 ? (
-            <div className="rounded-2xl border border-dashed border-border bg-card/30 p-12 text-center text-sm text-muted-foreground">
-              No requests in this view.
-            </div>
+            <EmptyVerifications tab={tab} />
           ) : (
             <div className="grid lg:grid-cols-2 gap-4">
               {query.data!.requests.map((r: any) => (
@@ -142,6 +141,43 @@ function Flag({ label, on }: { label: string; on: boolean }) {
     <div className={`rounded border px-2 py-1 text-center ${on ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-300" : "border-border text-muted-foreground"}`}>
       <div className="font-semibold">{label}</div>
       <div>{on ? "✓" : "—"}</div>
+    </div>
+  );
+}
+
+function EmptyVerifications({ tab }: { tab: StatusTab }) {
+  const now = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  const copy =
+    tab === "pending_review"
+      ? "No pending verifications."
+      : tab === "verified"
+        ? "No verified runners in this view."
+        : tab === "rejected"
+          ? "No rejected requests."
+          : "No verification requests yet.";
+  return (
+    <div className="rounded-2xl border border-dashed border-border bg-card/30 p-8 text-sm">
+      <div className="flex items-center gap-2 mb-2">
+        <BadgeCheck className="size-4 text-primary" />
+        <span className="font-medium">{copy}</span>
+        <Badge variant="outline" className="ml-auto text-[10px]">Last checked {now}</Badge>
+      </div>
+      <p className="text-muted-foreground text-xs mb-4">
+        {tab === "pending_review"
+          ? "Nothing is waiting for review right now. You're all caught up."
+          : "Try a different tab to see other request states."}
+      </p>
+      <div className="flex flex-wrap gap-2">
+        <Button asChild size="sm" variant="outline" className="h-8 text-xs">
+          <Link to="/admin/runner-approvals"><ShieldCheck className="size-3.5 mr-1.5" /> Runner approvals <ArrowRight className="size-3 ml-1" /></Link>
+        </Button>
+        <Button asChild size="sm" variant="outline" className="h-8 text-xs">
+          <Link to="/admin/background-checks"><Users className="size-3.5 mr-1.5" /> Background checks <ArrowRight className="size-3 ml-1" /></Link>
+        </Button>
+        <Button asChild size="sm" variant="outline" className="h-8 text-xs">
+          <Link to="/admin/broadcasts"><Mail className="size-3.5 mr-1.5" /> Send broadcast <ArrowRight className="size-3 ml-1" /></Link>
+        </Button>
+      </div>
     </div>
   );
 }
