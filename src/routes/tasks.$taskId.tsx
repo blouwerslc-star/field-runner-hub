@@ -148,7 +148,7 @@ function TaskDetailPage() {
             ) : authed === false ? (
               <>
                 <p className="text-sm text-muted-foreground">Sign in as a runner to apply for this task.</p>
-                <Button className="w-full" onClick={() => navigate({ to: "/login", search: { redirect: `/tasks/${taskId}` } })}>Sign in</Button>
+                <Button className="w-full" onClick={() => navigate({ to: "/login", search: { redirect: `/tasks/${taskId}`, role: "runner" } })}>Sign in</Button>
                 <Button variant="outline" className="w-full" onClick={() => navigate({ to: "/signup", search: { role: "runner", redirect: `/tasks/${taskId}` } })}>Create runner account</Button>
               </>
             ) : myApp?.application ? (

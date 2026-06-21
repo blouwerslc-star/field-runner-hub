@@ -88,7 +88,7 @@ export function MobileBottomNav({
             className="flex flex-col items-center justify-center gap-0.5 min-h-14 py-2 text-[10px] font-medium text-muted-foreground hover:text-foreground transition-colors"
           >
             <Menu className="size-5" aria-hidden />
-            <span className="leading-none">More Options</span>
+            <span className="leading-none">More</span>
           </button>
         </li>
       </ul>

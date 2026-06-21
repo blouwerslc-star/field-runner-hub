@@ -13,6 +13,7 @@ import { BrandLogo } from "@/components/brand/BrandLogo";
 export const Route = createFileRoute("/login")({
   validateSearch: (s: Record<string, unknown>) => ({
     redirect: typeof s.redirect === "string" ? s.redirect : "/dashboard",
+    role: s.role === "investor" || s.role === "runner" ? (s.role as "investor" | "runner") : undefined,
   }),
   component: LoginPage,
   head: () => ({
@@ -28,7 +29,7 @@ export const Route = createFileRoute("/login")({
 });
 
 function LoginPage() {
-  const { redirect } = Route.useSearch();
+  const { redirect, role } = Route.useSearch();
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -81,6 +82,15 @@ function LoginPage() {
     }
   }
 
+  const signupRole =
+    role ??
+    (redirect.includes("/dashboard/investor") || redirect.includes("/investors")
+      ? "investor"
+      : redirect.includes("/dashboard/runner") || redirect.includes("/runners") || redirect.includes("/tasks/")
+        ? "runner"
+        : undefined);
+  const signupSearch = signupRole ? { role: signupRole, redirect } : { redirect };
+
   return (
     <div className="min-h-screen bg-background text-foreground grid place-items-center px-5 py-12">
       <Toaster richColors closeButton position="top-center" theme="dark" />
@@ -120,7 +130,7 @@ function LoginPage() {
 
           <p className="mt-6 text-sm text-muted-foreground text-center">
             New here?{" "}
-            <Link to="/signup" search={{ role: "runner", redirect }} className="text-primary hover:underline">Create an account</Link>
+            <Link to="/signup" search={signupSearch} className="text-primary hover:underline">Create an account</Link>
           </p>
           <p className="mt-2 text-sm text-muted-foreground text-center">
             Forgot your password?{" "}

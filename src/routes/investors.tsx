@@ -90,7 +90,7 @@ function InvestorsPage() {
 
           <p className="mt-6 text-center text-xs text-muted-foreground inline-flex items-center justify-center w-full gap-2">
             <Users className="size-3.5" />
-            Already have an account? <Link to="/login" className="text-foreground hover:text-primary underline-offset-4 hover:underline">Sign in</Link>
+            Already have an account? <Link to="/login" search={{ redirect: "/dashboard/investor", role: "investor" }} className="text-foreground hover:text-primary underline-offset-4 hover:underline">Sign in</Link>
             <span>·</span>
             <Link to="/tasks" className="inline-flex items-center gap-1 text-foreground hover:text-primary underline-offset-4 hover:underline"><MapPinned className="size-3.5" /> See the live marketplace</Link>
           </p>
