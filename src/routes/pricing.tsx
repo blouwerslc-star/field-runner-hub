@@ -291,7 +291,7 @@ function PricingPage() {
             <a href="mailto:support@reirunner.com" className="inline-flex items-center gap-2 h-12 px-6 rounded-md bg-gradient-primary shadow-glow text-sm font-medium text-primary-foreground">
               Contact Sales <ArrowRight className="size-4" />
             </a>
-            <Link to="/signup" search={{ role: "investor", redirect: "/dashboard" }} className="inline-flex items-center h-12 px-6 rounded-md border border-border bg-card text-sm font-medium hover:bg-card/80 transition">
+            <Link to="/signup" search={{ role: "investor", redirect: "/dashboard/investor" }} className="inline-flex items-center h-12 px-6 rounded-md border border-border bg-card text-sm font-medium hover:bg-card/80 transition">
               Post a Task
             </Link>
           </div>
@@ -311,7 +311,7 @@ function PricingPage() {
         </Accordion>
         <div className="mt-10 text-center">
           <Button asChild size="lg" className="bg-gradient-primary shadow-glow">
-            <Link to="/signup" search={{ role: "investor", redirect: "/dashboard" }}>
+            <Link to="/signup" search={{ role: "investor", redirect: "/dashboard/investor" }}>
               Get Started <ArrowRight className="size-4 ml-1" />
             </Link>
           </Button>

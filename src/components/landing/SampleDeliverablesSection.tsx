@@ -233,7 +233,7 @@ export function SampleDeliverablesSection({
         {/* CTAs */}
         <div className="mt-10 flex flex-col sm:flex-row gap-3 justify-center">
           <Button asChild size="lg" className="bg-gradient-primary shadow-glow">
-            <Link to="/signup" search={{ role: "investor", redirect: "/dashboard" }}>
+            <Link to="/signup" search={{ role: "investor", redirect: "/dashboard/investor" }}>
               Post a Task <ArrowRight className="size-4 ml-1" />
             </Link>
           </Button>

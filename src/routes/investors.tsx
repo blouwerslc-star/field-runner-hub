@@ -7,13 +7,13 @@ import { ProForm } from "@/components/landing/ApplicationForms";
 export const Route = createFileRoute("/investors")({
   head: () => ({
     meta: [
-      { title: "Investor Application — REI Runner" },
+      { title: "Investor Account — REI Runner" },
       {
         name: "description",
         content:
-          "Apply for early access to REI Runner as an investor. Hire vetted local runners for photos, videos, drive-bys, and occupancy checks on demand.",
+          "Create a REI Runner investor account to hire local runners for photos, videos, drive-bys, and occupancy checks on demand.",
       },
-      { property: "og:title", content: "Investor Application — REI Runner" },
+      { property: "og:title", content: "Investor Account — REI Runner" },
       {
         property: "og:description",
         content:

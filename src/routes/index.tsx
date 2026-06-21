@@ -132,7 +132,7 @@ const MARKETS = [
 // Beta status items — no fabricated metrics. Replace with real DB-backed numbers when available.
 const BETA_STATUS = [
   { icon: Users, label: "Founding Runner Applications", value: "Open" },
-  { icon: Building2, label: "Investor Applications", value: "Open" },
+  { icon: Building2, label: "Investor Accounts", value: "Open" },
   { icon: MapPin, label: "Market Coverage", value: "Expanding" },
   { icon: Zap, label: "Marketplace", value: "Early Access" },
 ];
@@ -444,7 +444,7 @@ function Index() {
   const goHire = () => navigate({ to: "/investors" });
   const goBecome = () => navigate({ to: "/runners" });
   const goSignupRunner = () => navigate({ to: "/signup", search: { role: "runner", redirect: "/dashboard" } });
-  const goSignupInvestor = () => navigate({ to: "/signup", search: { role: "investor", redirect: "/dashboard" } });
+  const goSignupInvestor = () => navigate({ to: "/signup", search: { role: "investor", redirect: "/dashboard/investor" } });
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [showStickyCta, setShowStickyCta] = useState(false);
 
@@ -791,7 +791,7 @@ function Index() {
             <h3 className="text-2xl font-bold">I'm an Investor</h3>
             <p className="mt-2 text-sm text-muted-foreground">Post property tasks and get boots-on-the-ground in any major US market — usually same-day.</p>
             <div className="mt-6 inline-flex items-center gap-2 text-primary font-medium">
-              Join Investor Early Access <ArrowRight className="size-4 group-hover:translate-x-1 transition-transform" />
+              Create Investor Account <ArrowRight className="size-4 group-hover:translate-x-1 transition-transform" />
             </div>
           </button>
         </div>
@@ -1006,7 +1006,7 @@ function Index() {
             to="/investors"
             className="inline-flex items-center gap-2 h-12 px-6 rounded-md bg-gradient-primary shadow-glow text-sm font-medium text-primary-foreground hover:opacity-90 transition"
           >
-            Apply as an Investor <ArrowRight className="size-4" />
+            Create Investor Account <ArrowRight className="size-4" />
           </Link>
         </div>
       </section>
@@ -1016,7 +1016,7 @@ function Index() {
         <SectionHeader
           eyebrow="Join the marketplace"
           title="Hire a Runner — or become one"
-          subtitle="Limited spots during beta launch. Applications reviewed weekly."
+          subtitle="Investor accounts are open now. Runner applications are reviewed weekly during beta launch."
         />
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
           <Button type="button" size="lg" onClick={goHire} className="bg-gradient-primary shadow-glow text-base h-14 px-8">

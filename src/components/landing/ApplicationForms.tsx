@@ -3,6 +3,10 @@ import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { precheckSignupAttempt } from "@/lib/spam-protection.functions";
+import {
+  createPasswordAccount,
+  getPasswordValidationError,
+} from "@/lib/signup-client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -221,7 +225,7 @@ function SuccessCard({
           <>Your account is set up. Redirecting you to your dashboard…</>
         )}
       </p>
-      {debug && (
+      {import.meta.env.DEV && debug && (
         <div className="mt-5 rounded-lg border border-border bg-muted/40 p-3 text-left text-xs text-muted-foreground">
           <div><strong className="text-foreground">Auth user id:</strong> {debug.authUserId}</div>
           <div><strong className="text-foreground">Email:</strong> {debug.email}</div>
@@ -397,11 +401,6 @@ export function FieldRunnerForm() {
 }
 
 export function ProForm() {
-  const precheck = useServerFn(precheckSignupAttempt);
-  const formMountedAt = useRef<number>(Date.now());
-  useEffect(() => {
-    formMountedAt.current = Date.now();
-  }, []);
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
   const [needsEmailVerification, setNeedsEmailVerification] = useState(false);
@@ -430,9 +429,10 @@ export function ProForm() {
     const phone = String(f.get("phone") || "").trim();
     const company_name = String(f.get("company_name") || "").trim();
     const markets_served = String(f.get("markets_served") || "").trim();
-    const honeypot = String(f.get("website_url") || "");
+    const password = String(f.get("password") || "");
+    const confirm_password = String(f.get("confirm_password") || "");
 
-    if (!full_name || !email || !phone || !markets_served) {
+    if (!full_name || !email || !markets_served) {
       toast.error("Please complete all required fields.");
       return;
     }
@@ -440,24 +440,25 @@ export function ProForm() {
       toast.error("Please select your monthly deal volume.");
       return;
     }
+    const passwordError = getPasswordValidationError(password, confirm_password);
+    if (passwordError) {
+      toast.error(passwordError);
+      return;
+    }
 
     setSubmitting(true);
     try {
-      const elapsed_ms = Date.now() - formMountedAt.current;
-      const check = await precheck({
-        data: { email, role: "investor", honeypot, elapsed_ms },
-      });
-      if (!check.ok) {
-        setFormError(check.reason);
-        toast.error(check.reason);
-        setSubmitting(false);
-        return;
-      }
-      const { debug } = await requestMagicLinkSignup({
+      const redirectTo =
+        typeof window !== "undefined"
+          ? `${window.location.origin}/dashboard/investor`
+          : undefined;
+      const result = await createPasswordAccount({
         email,
-        full_name,
+        password,
+        fullName: full_name,
         phone,
         role: "investor",
+        redirectTo,
         extra: {
           company_name,
           markets_served,
@@ -465,12 +466,22 @@ export function ProForm() {
         },
       });
       setSubmittedEmail(email);
-      setSignupDebug(debug);
-      setNeedsEmailVerification(true);
+      setSignupDebug({
+        authUserId: result.userId,
+        email: result.email,
+        role: "investor",
+        profileStatus: "Profile and investor role are created by the Supabase signup trigger.",
+      });
+      setNeedsEmailVerification(result.needsEmailVerification);
       setDone(true);
-      toast.success("Application received — check your email to finish.");
+      if (result.needsEmailVerification) {
+        toast.success("Account created. Check your email to confirm.");
+      } else {
+        toast.success("Investor account created.");
+        window.setTimeout(() => window.location.assign("/dashboard/investor"), 500);
+      }
     } catch (err) {
-      const msg = err instanceof Error ? err.message : "Submission failed.";
+      const msg = err instanceof Error ? err.message : "Sign-up failed.";
       console.error("[signup:investor]", err);
       setFormError(msg);
       toast.error(msg);
@@ -500,9 +511,11 @@ export function ProForm() {
         </Alert>
       )}
       <div className="grid sm:grid-cols-2 gap-4">
-        <Field label="Full Name"><Input name="full_name" required maxLength={100} /></Field>
-        <Field label="Email"><Input name="email" type="email" required maxLength={200} /></Field>
-        <Field label="Phone"><Input name="phone" required maxLength={30} /></Field>
+        <Field label="Full Name"><Input name="full_name" required maxLength={100} autoComplete="name" /></Field>
+        <Field label="Email"><Input name="email" type="email" required maxLength={200} autoComplete="email" /></Field>
+        <Field label="Password"><Input name="password" type="password" required minLength={8} maxLength={100} autoComplete="new-password" /></Field>
+        <Field label="Confirm Password"><Input name="confirm_password" type="password" required minLength={8} maxLength={100} autoComplete="new-password" /></Field>
+        <Field label="Phone (optional)"><Input name="phone" maxLength={30} autoComplete="tel" /></Field>
         <Field label="Company Name"><Input name="company_name" maxLength={150} /></Field>
         <Field label="Markets Served">
           <Input name="markets_served" required maxLength={300} placeholder="e.g. Atlanta GA, Charlotte NC" />
@@ -520,11 +533,11 @@ export function ProForm() {
       </div>
 
       <p className="text-xs text-muted-foreground">
-        No password needed yet. We'll email you a secure verification link to finish setting up your account.
+        Create your password now. If email verification is enabled, we will send one confirmation link before dashboard access.
       </p>
 
       <Button type="submit" size="lg" disabled={submitting} className="w-full bg-gradient-primary shadow-glow">
-        {submitting ? <><Loader2 className="size-4 mr-2 animate-spin" /> Submitting…</> : "Apply as an Investor"}
+        {submitting ? <><Loader2 className="size-4 mr-2 animate-spin" /> Creating...</> : "Create Investor Account"}
       </Button>
     </form>
   );
