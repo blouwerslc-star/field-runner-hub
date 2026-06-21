@@ -19,6 +19,7 @@ import {
   logoutOneSignalUser,
 } from "@/lib/onesignal";
 import { supabase } from "@/integrations/supabase/client";
+import { setAuthHint } from "@/lib/auth-hint";
 
 function NotFoundComponent() {
   return (
@@ -200,12 +201,14 @@ function RootComponent() {
       router.invalidate();
       queryClient.invalidateQueries();
       if (event === "SIGNED_OUT" || !session?.user) {
+        setAuthHint(false);
         // Fire and forget — OneSignal must never break auth flows.
         logoutOneSignalUser().catch(() => {});
         unsubscribeProfile();
         return;
       }
       if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED" || event === "USER_UPDATED") {
+        setAuthHint(true);
         syncOneSignalIdentity().catch(() => {});
         subscribeProfile(session.user.id);
       }
@@ -215,8 +218,11 @@ function RootComponent() {
     // listener attaches.
     supabase.auth.getSession().then(({ data: s }) => {
       if (s.session?.user) {
+        setAuthHint(true);
         syncOneSignalIdentity().catch(() => {});
         subscribeProfile(s.session.user.id);
+      } else {
+        setAuthHint(false);
       }
     });
 

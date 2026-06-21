@@ -6,7 +6,7 @@ import { getPublicTaskDetail, applyToTask, toggleSaveTask, getMyApplicationForTa
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { BrandLogo } from "@/components/brand/BrandLogo";
+import { SiteHeader } from "@/components/navigation/SiteHeader";
 import { Loader2, MapPin, DollarSign, Calendar, BadgeCheck, Bookmark, BookmarkCheck, Star, ShieldCheck, Camera, Wallet, Clock } from "lucide-react";
 import { toast } from "sonner";
 import { Toaster } from "@/components/ui/sonner";
@@ -70,12 +70,7 @@ function TaskDetailPage() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Toaster richColors closeButton position="top-center" theme="dark" />
-      <header className="sticky top-0 z-40 backdrop-blur bg-background/70 border-b border-border/60">
-        <div className="mx-auto max-w-5xl px-5 h-16 flex items-center justify-between">
-          <Link to="/" aria-label="REI Runner home"><BrandLogo /></Link>
-          <Link to="/tasks" className="text-sm text-muted-foreground hover:text-foreground">Back to marketplace</Link>
-        </div>
-      </header>
+      <SiteHeader currentPath="/tasks" />
       <main className="mx-auto max-w-5xl px-5 py-10 grid md:grid-cols-[2fr,1fr] gap-8">
         <div>
           <div className="flex items-center gap-2 flex-wrap mb-3">
@@ -145,11 +140,16 @@ function TaskDetailPage() {
             <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
               <Clock className="size-3" /> Typical response: under 24 hours
             </div>
-            {authed === false ? (
+            {authed === null ? (
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Loader2 className="size-4 animate-spin text-primary" />
+                Checking account status...
+              </div>
+            ) : authed === false ? (
               <>
                 <p className="text-sm text-muted-foreground">Sign in as a runner to apply for this task.</p>
-                <Button className="w-full" onClick={() => navigate({ to: "/login" })}>Sign in</Button>
-                <Button variant="outline" className="w-full" onClick={() => navigate({ to: "/signup" })}>Create runner account</Button>
+                <Button className="w-full" onClick={() => navigate({ to: "/login", search: { redirect: `/tasks/${taskId}` } })}>Sign in</Button>
+                <Button variant="outline" className="w-full" onClick={() => navigate({ to: "/signup", search: { role: "runner", redirect: `/tasks/${taskId}` } })}>Create runner account</Button>
               </>
             ) : myApp?.application ? (
               <div className="space-y-2 text-sm">

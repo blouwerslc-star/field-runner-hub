@@ -11,24 +11,57 @@ import { getUnreadCount } from "@/lib/messages.functions";
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { useEffect, useState } from "react";
 import { MobileBottomNav } from "@/components/dashboard/MobileBottomNav";
+import { setAuthHint } from "@/lib/auth-hint";
 
-const NAV_ITEMS = [
+const COMMON_NAV_ITEMS = [
   { to: "/profiles", label: "Browse", icon: Compass },
   { to: "/tasks", label: "Marketplace", icon: Store },
-  { to: "/academy", label: "Academy", icon: GraduationCap },
   { to: "/applications", label: "Applications", icon: Briefcase },
-  { to: "/earnings", label: "Earnings", icon: DollarSign },
-  { to: "/performance", label: "Performance", icon: BarChart3 },
   { to: "/billing", label: "Billing", icon: Wallet },
   { to: "/activity", label: "Activity", icon: Activity },
   { to: "/disputes", label: "Disputes", icon: ShieldAlert },
   { to: "/messages", label: "Messages", icon: MessageSquare },
-  { to: "/profile/verification", label: "Get Verified", icon: ShieldCheck },
   { to: "/profile/edit", label: "My profile", icon: UserCog },
   { to: "/settings", label: "Settings", icon: Settings },
 ] as const;
 
+const INVESTOR_NAV_ITEMS = [
+  { to: "/performance", label: "Performance", icon: BarChart3 },
+] as const;
+
+const RUNNER_NAV_ITEMS = [
+  { to: "/academy", label: "Academy", icon: GraduationCap },
+  { to: "/earnings", label: "Earnings", icon: DollarSign },
+  { to: "/profile/verification", label: "Get Verified", icon: ShieldCheck },
+] as const;
+
 const ADMIN_NAV_ITEM = { to: "/admin", label: "Admin", icon: ShieldEllipsis } as const;
+
+type DashboardNavItem =
+  | (typeof ADMIN_NAV_ITEM)
+  | (typeof COMMON_NAV_ITEMS)[number]
+  | (typeof INVESTOR_NAV_ITEMS)[number]
+  | (typeof RUNNER_NAV_ITEMS)[number];
+
+function dedupeNavItems(items: DashboardNavItem[]) {
+  const seen = new Set<string>();
+  return items.filter((item) => {
+    if (seen.has(item.to)) return false;
+    seen.add(item.to);
+    return true;
+  });
+}
+
+function buildNavItems(roles: string[]) {
+  const roleSet = new Set(roles);
+
+  const items: DashboardNavItem[] = [...COMMON_NAV_ITEMS];
+  if (roleSet.has("investor") || roleSet.has("admin")) items.push(...INVESTOR_NAV_ITEMS);
+  if (roleSet.has("runner") || roleSet.has("admin")) items.push(...RUNNER_NAV_ITEMS);
+  if (roleSet.has("admin")) items.unshift(ADMIN_NAV_ITEM);
+
+  return dedupeNavItems(items);
+}
 
 export function DashboardShell({
   title,
@@ -57,26 +90,30 @@ export function DashboardShell({
   });
   const unreadTotal = unread?.total ?? 0;
 
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [roles, setRoles] = useState<string[]>([]);
   useEffect(() => {
     let cancelled = false;
     (async () => {
       const { data: u } = await supabase.auth.getUser();
-      if (!u.user || cancelled) return;
-      const { data: roles } = await supabase
+      if (cancelled) return;
+      if (!u.user) {
+        setAuthHint(false);
+        return;
+      }
+      setAuthHint(true);
+      const { data } = await supabase
         .from("user_roles")
         .select("role")
-        .eq("user_id", u.user.id)
-        .eq("role", "admin")
-        .maybeSingle();
-      if (!cancelled) setIsAdmin(!!roles);
+        .eq("user_id", u.user.id);
+      if (!cancelled) setRoles((data ?? []).map((row) => row.role));
     })();
     return () => { cancelled = true; };
   }, []);
 
-  const navItems = isAdmin ? [ADMIN_NAV_ITEM, ...NAV_ITEMS] : NAV_ITEMS;
+  const navItems = buildNavItems(roles);
 
   async function signOut() {
+    setAuthHint(false);
     await supabase.auth.signOut();
     navigate({ to: "/" });
   }
@@ -93,7 +130,7 @@ export function DashboardShell({
           <div className="hidden xl:flex items-center gap-1">
             {navItems.map((item) => (
               <Button key={item.to} asChild variant="ghost" size="sm" className="relative">
-                <Link to={item.to}>
+                <Link to={item.to as any}>
                   <item.icon className={`size-4 mr-1.5 ${item.to === "/admin" ? "text-primary" : ""}`} /> {item.label}
                   {item.to === "/messages" && unreadTotal > 0 && (
                     <span className="ml-1.5 size-5 rounded-full bg-primary text-[10px] font-bold text-primary-foreground grid place-items-center">
@@ -135,7 +172,7 @@ export function DashboardShell({
                   {navItems.map((item) => (
                     <Link
                       key={item.to}
-                      to={item.to}
+                      to={item.to as any}
                       onClick={() => setOpen(false)}
                       className="flex items-center gap-3 rounded-md px-3 py-2.5 text-sm hover:bg-muted/60 transition-colors"
                     >

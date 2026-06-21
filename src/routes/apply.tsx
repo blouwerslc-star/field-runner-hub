@@ -1,8 +1,8 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { Flag, ArrowLeft, Sparkles, Clock, ShieldCheck, Zap, Briefcase, Footprints, ArrowRight } from "lucide-react";
-import { BrandLogo } from "@/components/brand/BrandLogo";
 import { Toaster } from "@/components/ui/sonner";
 import { FieldRunnerForm, ProForm } from "@/components/landing/ApplicationForms";
+import { SiteHeader } from "@/components/navigation/SiteHeader";
 
 export const Route = createFileRoute("/apply")({
   validateSearch: (s: Record<string, unknown>) => ({
@@ -40,14 +40,7 @@ function ApplyPage() {
     return (
       <div className="min-h-screen bg-background text-foreground">
         <Toaster richColors closeButton position="top-center" theme="dark" />
-        <header className="sticky top-0 z-40 backdrop-blur bg-background/70 border-b border-border/60">
-          <div className="mx-auto max-w-7xl px-5 h-16 flex items-center justify-between">
-            <Link to="/" aria-label="REI Runner home"><BrandLogo /></Link>
-            <Link to="/" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition">
-              <ArrowLeft className="size-4" /> Back
-            </Link>
-          </div>
-        </header>
+        <SiteHeader currentPath="/apply" />
         <section className="mx-auto max-w-3xl px-5 py-14 md:py-20">
           <div className="text-center mb-10">
             <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-semibold tracking-widest text-primary uppercase">
@@ -103,23 +96,16 @@ function ApplyPage() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Toaster richColors closeButton position="top-center" theme="dark" />
-
-      <header className="sticky top-0 z-40 backdrop-blur bg-background/70 border-b border-border/60">
-        <div className="mx-auto max-w-7xl px-5 h-16 flex items-center justify-between">
-          <Link to="/" aria-label="REI Runner home">
-            <BrandLogo />
-          </Link>
-          <button
-            type="button"
-            onClick={() => navigate({ to: "/apply", search: {} })}
-            className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition"
-          >
-            <ArrowLeft className="size-4" /> Change path
-          </button>
-        </div>
-      </header>
+      <SiteHeader currentPath="/apply" />
 
       <section className="mx-auto max-w-3xl px-5 py-14 md:py-20">
+        <button
+          type="button"
+          onClick={() => navigate({ to: "/apply", search: {} })}
+          className="mb-8 inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition"
+        >
+          <ArrowLeft className="size-4" /> Change path
+        </button>
         <div className="text-center mb-10">
           <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-semibold tracking-widest text-primary uppercase">
             <Sparkles className="size-3.5" /> {isRunner ? "Founding Runner Program" : "Investor Account Setup"}

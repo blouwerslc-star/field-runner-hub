@@ -4,7 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { listPublicProfiles } from "@/lib/profiles.functions";
 import { ProfileCard, type PublicProfile } from "@/components/profiles/ProfileCard";
-import { BrandLogo } from "@/components/brand/BrandLogo";
+import { SiteHeader } from "@/components/navigation/SiteHeader";
 import { MarketplaceMap, type MapPoint } from "@/components/maps/MarketplaceMap";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -84,20 +84,7 @@ function ProfilesDirectory() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <header className="sticky top-0 z-40 backdrop-blur bg-background/70 border-b border-border/60">
-        <div className="mx-auto max-w-7xl px-5 h-16 flex items-center justify-between">
-          <Link to="/" aria-label="REI Runner home"><BrandLogo /></Link>
-          <div className="flex items-center gap-4 text-sm">
-            <Link to="/tasks" className="text-muted-foreground hover:text-foreground">Open tasks</Link>
-            <Link to="/runners" className="text-muted-foreground hover:text-foreground">Become a runner</Link>
-            {authed ? (
-              <Link to="/dashboard" className="text-muted-foreground hover:text-foreground">Dashboard</Link>
-            ) : (
-              <Link to="/login" className="text-muted-foreground hover:text-foreground">Sign in</Link>
-            )}
-          </div>
-        </div>
-      </header>
+      <SiteHeader currentPath="/profiles" />
 
       <main className="mx-auto max-w-7xl px-5 py-10">
         {!authed && (

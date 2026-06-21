@@ -1,4 +1,4 @@
-import { createFileRoute, Link, notFound, useNavigate, redirect } from "@tanstack/react-router";
+import { createFileRoute, notFound, useNavigate, redirect } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
@@ -6,7 +6,7 @@ import { getPublicProfileBySlug } from "@/lib/profiles.functions";
 import { toggleFavorite, isFavorite } from "@/lib/profile-extras.functions";
 import { Button } from "@/components/ui/button";
 import { RoleBadge, AvailabilityBadge, StarRating, LocationLine } from "@/components/profiles/ProfileBadges";
-import { BrandLogo } from "@/components/brand/BrandLogo";
+import { SiteHeader } from "@/components/navigation/SiteHeader";
 import { CertificationBadge } from "@/components/academy/CertificationBadge";
 import { TrustBadgeRow } from "@/components/profiles/TrustBadgeRow";
 import { PerformanceMetrics } from "@/components/profiles/PerformanceMetrics";
@@ -106,12 +106,7 @@ function PublicProfilePage() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Toaster richColors closeButton position="top-center" theme="dark" />
-      <header className="sticky top-0 z-40 backdrop-blur bg-background/70 border-b border-border/60">
-        <div className="mx-auto max-w-6xl px-5 h-16 flex items-center justify-between">
-          <Link to="/" aria-label="REI Runner home"><BrandLogo /></Link>
-          <Link to="/profiles" className="text-sm text-muted-foreground hover:text-foreground">Browse profiles</Link>
-        </div>
-      </header>
+      <SiteHeader currentPath="/profiles" />
 
       <div
         className="h-48 md:h-64 w-full bg-gradient-to-br from-primary/20 to-purple-500/20"

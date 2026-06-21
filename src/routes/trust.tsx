@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { BrandLogo } from "@/components/brand/BrandLogo";
+import { SiteHeader } from "@/components/navigation/SiteHeader";
 import {
   ShieldCheck,
   BadgeCheck,
@@ -180,19 +180,7 @@ const INCIDENT_STEPS = [
 function TrustPage() {
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <header className="sticky top-0 z-40 backdrop-blur bg-background/70 border-b border-border/60">
-        <div className="mx-auto max-w-7xl px-5 h-16 flex items-center justify-between">
-          <Link to="/" aria-label="REI Runner home"><BrandLogo /></Link>
-          <nav className="hidden md:flex items-center gap-6 text-sm text-muted-foreground">
-            <Link to="/" className="hover:text-foreground">Home</Link>
-            <Link to="/pricing" className="hover:text-foreground">Pricing</Link>
-            <Link to="/trust" className="text-foreground">Trust & Safety</Link>
-            <Link to="/story" className="hover:text-foreground">Our Story</Link>
-            <Link to="/faq" className="hover:text-foreground">FAQ</Link>
-          </nav>
-          <Link to="/login" className="text-sm text-muted-foreground hover:text-foreground">Sign in</Link>
-        </div>
-      </header>
+      <SiteHeader currentPath="/trust" />
 
       {/* HERO */}
       <section className="relative border-b border-border/60">

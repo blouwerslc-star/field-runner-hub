@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { BrandLogo } from "@/components/brand/BrandLogo";
-import { ArrowLeft, Target, Compass, ShieldCheck, MapPin, HeartHandshake, Zap, Building2, Users, Phone, Mail } from "lucide-react";
+import { SiteHeader } from "@/components/navigation/SiteHeader";
+import { Target, Compass, ShieldCheck, MapPin, HeartHandshake, Zap, Building2, Users, Phone, Mail } from "lucide-react";
 
 export const Route = createFileRoute("/about")({
   head: () => ({
@@ -82,14 +82,7 @@ const RUNNER_BENEFITS = [
 function AboutPage() {
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <header className="sticky top-0 z-40 backdrop-blur bg-background/70 border-b border-border/60">
-        <div className="mx-auto max-w-6xl px-5 h-16 flex items-center justify-between">
-          <Link to="/" aria-label="REI Runner home"><BrandLogo /></Link>
-          <Link to="/" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition">
-            <ArrowLeft className="size-4" /> Back
-          </Link>
-        </div>
-      </header>
+      <SiteHeader currentPath="/about" />
 
       <section className="mx-auto max-w-4xl px-5 py-16 md:py-24">
         <div className="text-xs font-semibold tracking-widest text-primary uppercase">About REI Runner</div>

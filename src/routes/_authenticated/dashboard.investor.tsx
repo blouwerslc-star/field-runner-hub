@@ -84,14 +84,21 @@ function InvestorDashboard() {
         <StatTile label="Spent" value={`$${totalSpent.toFixed(0)}`} />
       </div>
 
-      <div className="flex justify-end mb-4">
-        <CreateTaskDialog />
-      </div>
+      {tasks.length > 0 && (
+        <div className="flex justify-end mb-4">
+          <CreateTaskDialog />
+        </div>
+      )}
 
       {isLoading ? (
         <DashboardLoadingSkeleton tiles={0} rows={4} />
       ) : tasks.length === 0 ? (
-        <EmptyState message="No tasks yet. Post your first task above to start getting bids from local runners." />
+        <EmptyState
+          title="Post your first field task"
+          message="Start with photos, a drive-by, an occupancy check, or a walkthrough. The form includes presets so you do not have to build the request from scratch."
+        >
+          <CreateTaskDialog triggerLabel="Post first task" />
+        </EmptyState>
       ) : (
         <Tabs defaultValue="review">
           <TabsList className="mb-6 w-full overflow-x-auto justify-start">
@@ -126,10 +133,20 @@ function StatTile({ label, value }: { label: string; value: string }) {
   );
 }
 
-function EmptyState({ message }: { message: string }) {
+function EmptyState({
+  title,
+  message,
+  children,
+}: {
+  title?: string;
+  message: string;
+  children?: React.ReactNode;
+}) {
   return (
     <div className="rounded-2xl border border-dashed border-border bg-card/30 p-10 text-center text-sm text-muted-foreground">
-      {message}
+      {title && <h3 className="mb-2 text-base font-semibold text-foreground">{title}</h3>}
+      <p className="mx-auto max-w-md">{message}</p>
+      {children && <div className="mt-5 flex justify-center">{children}</div>}
     </div>
   );
 }
@@ -149,10 +166,50 @@ type Task = {
   requires_interior_access?: boolean;
 };
 
+const TASK_PRESETS = [
+  {
+    label: "Exterior photos",
+    task_type: "photos",
+    title: "Exterior photo set",
+    payout_amount: "35",
+    description: "Capture front, sides, rear, street view, roofline, driveway, yard, visible repairs, and any posted notices.",
+    requires_interior_access: false,
+  },
+  {
+    label: "Occupancy check",
+    task_type: "occupancy",
+    title: "Occupancy and vacancy check",
+    payout_amount: "45",
+    description: "Verify whether the property appears vacant, occupied, abandoned, or inaccessible. Include photos of doors, windows, mail, utilities, vehicles, and posted notices.",
+    requires_interior_access: false,
+  },
+  {
+    label: "Walkthrough",
+    task_type: "video",
+    title: "Interior walkthrough video",
+    payout_amount: "95",
+    description: "Record a continuous interior/exterior walkthrough. Narrate visible condition, repairs, utilities, odors, water damage, mechanicals, kitchen, baths, and safety issues.",
+    requires_interior_access: true,
+  },
+  {
+    label: "Lockbox or sign",
+    task_type: "lockbox",
+    title: "Lockbox or yard sign install",
+    payout_amount: "50",
+    description: "Install the lockbox or sign in the agreed location, test access, and upload clear proof photos before leaving the property.",
+    requires_interior_access: true,
+  },
+] as const;
+
 function InvestorTaskCard({ task }: { task: Task }) {
   const [open, setOpen] = useState(false);
   const [fundOpen, setFundOpen] = useState(false);
   const needsFunding = !task.funded && task.payout_amount != null && Number(task.payout_amount) > 0;
+  const checkoutReturnUrl =
+    typeof window === "undefined"
+      ? "https://reirunner.com/checkout/return?session_id={CHECKOUT_SESSION_ID}"
+      : `${window.location.origin}/checkout/return?session_id={CHECKOUT_SESSION_ID}`;
+
   return (
     <div className="rounded-2xl border border-border bg-card/50 p-5">
       <div className="flex flex-wrap items-start justify-between gap-3">
@@ -208,7 +265,7 @@ function InvestorTaskCard({ task }: { task: Task }) {
                 </p>
                 <TaskFundingCheckout
                   taskId={task.id}
-                  returnUrl={`${window.location.origin}/checkout/return?session_id={CHECKOUT_SESSION_ID}`}
+                  returnUrl={checkoutReturnUrl}
                 />
               </DialogContent>
             </Dialog>
@@ -332,7 +389,7 @@ function InvestorTaskPanel({ task, onDone }: { task: Task; onDone: () => void })
   );
 }
 
-function CreateTaskDialog() {
+function CreateTaskDialog({ triggerLabel = "New task" }: { triggerLabel?: string }) {
   const qc = useQueryClient();
   const createFn = useServerFn(createInvestorTask);
   const [open, setOpen] = useState(false);
@@ -347,6 +404,22 @@ function CreateTaskDialog() {
   // unless the investor has explicitly toggled it.
   const autoInterior = defaultRequiresInteriorAccess(form.task_type);
   const effectiveRequiresInterior = interiorTouched ? requiresInterior : autoInterior;
+  const payoutValue = form.payout_amount ? Number(form.payout_amount) : null;
+  const invalidPayout = payoutValue != null && (!Number.isFinite(payoutValue) || payoutValue < 0);
+  const readyToPost = !!form.title && !!form.property_address && !!form.city && !!form.state && !invalidPayout;
+  const today = new Date().toISOString().slice(0, 10);
+
+  function applyPreset(preset: (typeof TASK_PRESETS)[number]) {
+    setForm((current) => ({
+      ...current,
+      title: preset.title,
+      task_type: preset.task_type,
+      payout_amount: preset.payout_amount,
+      description: preset.description,
+    }));
+    setInteriorTouched(true);
+    setRequiresInterior(preset.requires_interior_access);
+  }
 
   const create = useMutation({
     mutationFn: () => createFn({
@@ -378,18 +451,35 @@ function CreateTaskDialog() {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button className="bg-gradient-primary shadow-glow">
-          <Plus className="size-4 mr-1.5" /> New task
+          <Plus className="size-4 mr-1.5" /> {triggerLabel}
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-lg">
+      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader><DialogTitle>Post a new task</DialogTitle></DialogHeader>
         <div className="grid gap-3">
           <div>
-            <Label>Title</Label>
+            <Label>Start with a preset</Label>
+            <div className="mt-2 grid grid-cols-2 gap-2">
+              {TASK_PRESETS.map((preset) => (
+                <Button
+                  key={preset.label}
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="h-auto justify-start whitespace-normal py-2 text-left"
+                  onClick={() => applyPreset(preset)}
+                >
+                  {preset.label}
+                </Button>
+              ))}
+            </div>
+          </div>
+          <div>
+            <Label>Title *</Label>
             <Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="Drive-by photos at 123 Main St" />
           </div>
           <div>
-            <Label>Type</Label>
+            <Label>Type *</Label>
             <Select value={form.task_type} onValueChange={(v) => setForm({ ...form, task_type: v })}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
@@ -403,17 +493,21 @@ function CreateTaskDialog() {
             </Select>
           </div>
           <div>
-            <Label>Address</Label>
+            <Label>Address *</Label>
             <Input value={form.property_address} onChange={(e) => setForm({ ...form, property_address: e.target.value })} />
           </div>
           <div className="grid grid-cols-3 gap-2">
-            <div><Label>City</Label><Input value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} /></div>
-            <div><Label>State</Label><Input value={form.state} onChange={(e) => setForm({ ...form, state: e.target.value })} /></div>
+            <div><Label>City *</Label><Input value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} /></div>
+            <div><Label>State *</Label><Input value={form.state} onChange={(e) => setForm({ ...form, state: e.target.value.toUpperCase().slice(0, 2) })} placeholder="MI" maxLength={2} /></div>
             <div><Label>ZIP</Label><Input value={form.zip_code} onChange={(e) => setForm({ ...form, zip_code: e.target.value })} /></div>
           </div>
           <div className="grid grid-cols-2 gap-2">
-            <div><Label>Payout ($)</Label><Input type="number" value={form.payout_amount} onChange={(e) => setForm({ ...form, payout_amount: e.target.value })} /></div>
-            <div><Label>Due date</Label><Input type="date" value={form.due_date} onChange={(e) => setForm({ ...form, due_date: e.target.value })} /></div>
+            <div>
+              <Label>Payout ($)</Label>
+              <Input type="number" min="0" step="1" value={form.payout_amount} onChange={(e) => setForm({ ...form, payout_amount: e.target.value })} />
+              {invalidPayout && <p className="mt-1 text-xs text-destructive">Enter a valid payout amount.</p>}
+            </div>
+            <div><Label>Due date</Label><Input type="date" min={today} value={form.due_date} onChange={(e) => setForm({ ...form, due_date: e.target.value })} /></div>
           </div>
           <div>
             <Label>Description</Label>
@@ -443,7 +537,10 @@ function CreateTaskDialog() {
           </div>
         </div>
         <DialogFooter>
-          <Button onClick={() => create.mutate()} disabled={create.isPending || !form.title || !form.property_address || !form.city || !form.state} className="bg-gradient-primary shadow-glow">
+          <Button variant="outline" onClick={() => setOpen(false)} disabled={create.isPending}>
+            Cancel
+          </Button>
+          <Button onClick={() => create.mutate()} disabled={create.isPending || !readyToPost} className="bg-gradient-primary shadow-glow">
             {create.isPending ? <Loader2 className="size-4 mr-2 animate-spin" /> : null}
             Post task
           </Button>
