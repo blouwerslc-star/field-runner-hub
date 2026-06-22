@@ -62,7 +62,7 @@ import { SampleDeliverablesSection } from "@/components/landing/SampleDeliverabl
 import { supabase } from "@/integrations/supabase/client";
 import { readAuthHint, setAuthHint } from "@/lib/auth-hint";
 
-export const Route = createFileRoute("/")({
+export const Route = createFileRoute("/full-site")({
   component: Index,
   head: () => ({
     meta: [
