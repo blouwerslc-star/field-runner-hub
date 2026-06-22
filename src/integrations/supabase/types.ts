@@ -1003,6 +1003,7 @@ export type Database = {
           currency: string
           id: string
           investor_id: string | null
+          kind: string
           paid_at: string | null
           paid_by: string | null
           payout_method: string | null
@@ -1023,6 +1024,7 @@ export type Database = {
           currency?: string
           id?: string
           investor_id?: string | null
+          kind?: string
           paid_at?: string | null
           paid_by?: string | null
           payout_method?: string | null
@@ -1043,6 +1045,7 @@ export type Database = {
           currency?: string
           id?: string
           investor_id?: string | null
+          kind?: string
           paid_at?: string | null
           paid_by?: string | null
           payout_method?: string | null
