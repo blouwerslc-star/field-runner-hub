@@ -23,6 +23,7 @@ import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as InvestorsRouteImport } from './routes/investors'
+import { Route as FullSiteRouteImport } from './routes/full-site'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as FaqRouteImport } from './routes/faq'
 import { Route as AuthTestRouteImport } from './routes/auth-test'
@@ -30,7 +31,6 @@ import { Route as ApplyRouteImport } from './routes/apply'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as SplatRouteImport } from './routes/$'
-import { Route as IndexRouteImport } from './routes/index'
 import { Route as TasksTaskIdRouteImport } from './routes/tasks.$taskId'
 import { Route as ProfileSlugRouteImport } from './routes/profile.$slug'
 import { Route as PricingCatalogRouteImport } from './routes/pricing.catalog'
@@ -171,6 +171,11 @@ const InvestorsRoute = InvestorsRouteImport.update({
   path: '/investors',
   getParentRoute: () => rootRouteImport,
 } as any)
+const FullSiteRoute = FullSiteRouteImport.update({
+  id: '/full-site',
+  path: '/full-site',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
   id: '/forgot-password',
   path: '/forgot-password',
@@ -203,11 +208,6 @@ const AuthenticatedRoute = AuthenticatedRouteImport.update({
 const SplatRoute = SplatRouteImport.update({
   id: '/$',
   path: '/$',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TasksTaskIdRoute = TasksTaskIdRouteImport.update({
@@ -607,13 +607,14 @@ const AuthenticatedAcademyCourseSlugLessonSlugRoute =
   } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
   '/$': typeof SplatRoute
+  '/': typeof AuthenticatedRouteWithChildren
   '/about': typeof AboutRoute
   '/apply': typeof ApplyRoute
   '/auth-test': typeof AuthTestRoute
   '/faq': typeof FaqRoute
   '/forgot-password': typeof ForgotPasswordRoute
+  '/full-site': typeof FullSiteRoute
   '/investors': typeof InvestorsRoute
   '/login': typeof LoginRoute
   '/pricing': typeof PricingRouteWithChildren
@@ -699,13 +700,14 @@ export interface FileRoutesByFullPath {
   '/academy/$courseSlug/': typeof AuthenticatedAcademyCourseSlugIndexRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
   '/$': typeof SplatRoute
+  '/': typeof AuthenticatedRouteWithChildren
   '/about': typeof AboutRoute
   '/apply': typeof ApplyRoute
   '/auth-test': typeof AuthTestRoute
   '/faq': typeof FaqRoute
   '/forgot-password': typeof ForgotPasswordRoute
+  '/full-site': typeof FullSiteRoute
   '/investors': typeof InvestorsRoute
   '/login': typeof LoginRoute
   '/pricing': typeof PricingRouteWithChildren
@@ -787,7 +789,6 @@ export interface FileRoutesByTo {
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
   '/$': typeof SplatRoute
   '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/about': typeof AboutRoute
@@ -795,6 +796,7 @@ export interface FileRoutesById {
   '/auth-test': typeof AuthTestRoute
   '/faq': typeof FaqRoute
   '/forgot-password': typeof ForgotPasswordRoute
+  '/full-site': typeof FullSiteRoute
   '/investors': typeof InvestorsRoute
   '/login': typeof LoginRoute
   '/pricing': typeof PricingRouteWithChildren
@@ -882,13 +884,14 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    | '/'
     | '/$'
+    | '/'
     | '/about'
     | '/apply'
     | '/auth-test'
     | '/faq'
     | '/forgot-password'
+    | '/full-site'
     | '/investors'
     | '/login'
     | '/pricing'
@@ -974,13 +977,14 @@ export interface FileRouteTypes {
     | '/academy/$courseSlug/'
   fileRoutesByTo: FileRoutesByTo
   to:
-    | '/'
     | '/$'
+    | '/'
     | '/about'
     | '/apply'
     | '/auth-test'
     | '/faq'
     | '/forgot-password'
+    | '/full-site'
     | '/investors'
     | '/login'
     | '/pricing'
@@ -1061,7 +1065,6 @@ export interface FileRouteTypes {
     | '/academy/$courseSlug'
   id:
     | '__root__'
-    | '/'
     | '/$'
     | '/_authenticated'
     | '/about'
@@ -1069,6 +1072,7 @@ export interface FileRouteTypes {
     | '/auth-test'
     | '/faq'
     | '/forgot-password'
+    | '/full-site'
     | '/investors'
     | '/login'
     | '/pricing'
@@ -1155,7 +1159,6 @@ export interface FileRouteTypes {
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
   SplatRoute: typeof SplatRoute
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
   AboutRoute: typeof AboutRoute
@@ -1163,6 +1166,7 @@ export interface RootRouteChildren {
   AuthTestRoute: typeof AuthTestRoute
   FaqRoute: typeof FaqRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
+  FullSiteRoute: typeof FullSiteRoute
   InvestorsRoute: typeof InvestorsRoute
   LoginRoute: typeof LoginRoute
   PricingRoute: typeof PricingRouteWithChildren
@@ -1290,6 +1294,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof InvestorsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/full-site': {
+      id: '/full-site'
+      path: '/full-site'
+      fullPath: '/full-site'
+      preLoaderRoute: typeof FullSiteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/forgot-password': {
       id: '/forgot-password'
       path: '/forgot-password'
@@ -1337,13 +1348,6 @@ declare module '@tanstack/react-router' {
       path: '/$'
       fullPath: '/$'
       preLoaderRoute: typeof SplatRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/tasks/$taskId': {
@@ -2040,7 +2044,6 @@ const TasksRouteChildren: TasksRouteChildren = {
 const TasksRouteWithChildren = TasksRoute._addFileChildren(TasksRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
   SplatRoute: SplatRoute,
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
   AboutRoute: AboutRoute,
@@ -2048,6 +2051,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthTestRoute: AuthTestRoute,
   FaqRoute: FaqRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,
+  FullSiteRoute: FullSiteRoute,
   InvestorsRoute: InvestorsRoute,
   LoginRoute: LoginRoute,
   PricingRoute: PricingRouteWithChildren,
