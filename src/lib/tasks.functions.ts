@@ -111,6 +111,13 @@ export const createInvestorTask = createServerFn({ method: "POST" })
       typeof data.requires_interior_access === "boolean"
         ? data.requires_interior_access
         : defaultRequiresInteriorAccess(data.task_type);
+    const { geocodeAddress } = await import("./geocoding.server");
+    const geo = await geocodeAddress({
+      address: data.property_address,
+      city: data.city,
+      state: data.state,
+      zip: data.zip_code,
+    });
     const { data: row, error } = await supabase
       .from("tasks")
       .insert({
@@ -130,6 +137,8 @@ export const createInvestorTask = createServerFn({ method: "POST" })
         recurrence_next_at: computeNextRunAt(data.recurrence_rule ?? null),
         recurrence_active: data.recurrence_rule ? true : false,
         status: "open",
+        property_lat: geo?.lat ?? null,
+        property_lng: geo?.lng ?? null,
       })
       .select("*")
       .single();
