@@ -1151,6 +1151,39 @@ export type Database = {
         }
         Relationships: []
       }
+      phone_verification_codes: {
+        Row: {
+          attempts: number
+          code_hash: string
+          consumed_at: string | null
+          created_at: string
+          expires_at: string
+          id: string
+          phone: string
+          user_id: string
+        }
+        Insert: {
+          attempts?: number
+          code_hash: string
+          consumed_at?: string | null
+          created_at?: string
+          expires_at: string
+          id?: string
+          phone: string
+          user_id: string
+        }
+        Update: {
+          attempts?: number
+          code_hash?: string
+          consumed_at?: string | null
+          created_at?: string
+          expires_at?: string
+          id?: string
+          phone?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       pricing_addons: {
         Row: {
           active: boolean
@@ -1988,6 +2021,53 @@ export type Database = {
           user_agent?: string | null
         }
         Relationships: []
+      }
+      sms_send_log: {
+        Row: {
+          body: string
+          created_at: string
+          error: string | null
+          id: string
+          notification_id: string | null
+          phone: string
+          provider: string | null
+          provider_message_id: string | null
+          status: string
+          user_id: string | null
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          error?: string | null
+          id?: string
+          notification_id?: string | null
+          phone: string
+          provider?: string | null
+          provider_message_id?: string | null
+          status?: string
+          user_id?: string | null
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          error?: string | null
+          id?: string
+          notification_id?: string | null
+          phone?: string
+          provider?: string | null
+          provider_message_id?: string | null
+          status?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sms_send_log_notification_id_fkey"
+            columns: ["notification_id"]
+            isOneToOne: false
+            referencedRelation: "notifications"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       support_requests: {
         Row: {
