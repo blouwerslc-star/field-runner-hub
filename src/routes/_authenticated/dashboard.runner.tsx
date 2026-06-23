@@ -16,7 +16,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Loader2, Upload, FileImage, MapPin, Calendar, DollarSign } from "lucide-react";
+import { Loader2, Upload, FileImage, MapPin, Calendar, DollarSign, Repeat } from "lucide-react";
 import { toast } from "sonner";
 import { listMyTasks, getTaskDetail, startTask, submitTaskWork } from "@/lib/tasks.functions";
 import { createUploadUrl, recordTaskFile } from "@/lib/storage.functions";
@@ -130,6 +130,8 @@ type Task = {
   payout_amount: number | null;
   due_date: string | null;
   description: string | null;
+  recurrence_rule?: string | null;
+  recurrence_active?: boolean | null;
 };
 
 function RunnerTaskCard({ task }: { task: Task }) {
@@ -144,6 +146,24 @@ function RunnerTaskCard({ task }: { task: Task }) {
               {task.status.replace("_", " ")}
             </Badge>
             <Badge variant="outline" className="text-xs">{task.task_type}</Badge>
+            {task.recurrence_rule && (
+              <Badge
+                variant="outline"
+                className={`text-xs flex items-center gap-1 ${
+                  task.recurrence_active
+                    ? "border-primary/40 text-primary"
+                    : "border-muted-foreground/40 text-muted-foreground"
+                }`}
+                title={
+                  task.recurrence_active
+                    ? `Repeats ${task.recurrence_rule} — investor may auto-post the next one to you`
+                    : `Recurring ${task.recurrence_rule} schedule is paused`
+                }
+              >
+                <Repeat className="size-3" />
+                {task.recurrence_rule}{!task.recurrence_active ? " · paused" : ""}
+              </Badge>
+            )}
           </div>
           <p className="text-sm text-muted-foreground mt-1 flex items-center gap-1.5">
             <MapPin className="size-3.5" />
