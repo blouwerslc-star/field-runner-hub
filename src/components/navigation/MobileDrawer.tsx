@@ -99,9 +99,13 @@ export function MobileDrawer({
           transform: open ? "translate3d(0, 0, 0)" : "translate3d(100%, 0, 0)",
           transition: "transform 220ms cubic-bezier(0.16, 1, 0.3, 1)",
           willChange: "transform",
-          backfaceVisibility: "hidden",
-          WebkitBackfaceVisibility: "hidden",
-          contain: "layout paint",
+          // NOTE: do NOT add `contain: paint/layout` or `backface-visibility`
+          // here. Several Android Chrome / WebView builds skip painting the
+          // drawer's children (leaving an empty dark panel) when those props
+          // combine with `position: fixed` + `transform`. Plain transform is
+          // safe everywhere.
+          isolation: "isolate",
+          opacity: 1,
         }}
       >
         {children}
