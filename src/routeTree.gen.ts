@@ -80,6 +80,7 @@ import { Route as AuthenticatedDashboardInvestorRouteImport } from './routes/_au
 import { Route as AuthenticatedDashboardFavoritesRouteImport } from './routes/_authenticated/dashboard.favorites'
 import { Route as AuthenticatedDashboardAnalyticsRouteImport } from './routes/_authenticated/dashboard.analytics'
 import { Route as AuthenticatedAdminVerificationsRouteImport } from './routes/_authenticated/admin.verifications'
+import { Route as AuthenticatedAdminTrackingRouteImport } from './routes/_authenticated/admin.tracking'
 import { Route as AuthenticatedAdminRunnerApprovalsRouteImport } from './routes/_authenticated/admin.runner-approvals'
 import { Route as AuthenticatedAdminPushTestRouteImport } from './routes/_authenticated/admin.push-test'
 import { Route as AuthenticatedAdminProfilesRouteImport } from './routes/_authenticated/admin.profiles'
@@ -99,10 +100,12 @@ import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/e
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
+import { Route as ApiPublicHooksSweepTrackingRouteImport } from './routes/api/public/hooks/sweep-tracking'
 import { Route as ApiPublicHooksRecurringTasksRouteImport } from './routes/api/public/hooks/recurring-tasks'
 import { Route as ApiPublicHooksProfileCompletionRemindersRouteImport } from './routes/api/public/hooks/profile-completion-reminders'
 import { Route as ApiPublicHooksEmailNurtureRouteImport } from './routes/api/public/hooks/email-nurture'
 import { Route as ApiPublicHooksDispatchSmsRouteImport } from './routes/api/public/hooks/dispatch-sms'
+import { Route as AuthenticatedTasksTaskIdTrackingRouteImport } from './routes/_authenticated/tasks.$taskId.tracking'
 import { Route as AuthenticatedAcademyCourseSlugQuizRouteImport } from './routes/_authenticated/academy.$courseSlug.quiz'
 import { Route as AuthenticatedAcademyCourseSlugCertificateRouteImport } from './routes/_authenticated/academy.$courseSlug.certificate'
 import { Route as AuthenticatedAcademyCourseSlugLessonSlugRouteImport } from './routes/_authenticated/academy.$courseSlug.$lessonSlug'
@@ -492,6 +495,12 @@ const AuthenticatedAdminVerificationsRoute =
     path: '/verifications',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminTrackingRoute =
+  AuthenticatedAdminTrackingRouteImport.update({
+    id: '/tracking',
+    path: '/tracking',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminRunnerApprovalsRoute =
   AuthenticatedAdminRunnerApprovalsRouteImport.update({
     id: '/runner-approvals',
@@ -604,6 +613,12 @@ const ApiPublicPaymentsWebhookRoute =
     path: '/api/public/payments/webhook',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksSweepTrackingRoute =
+  ApiPublicHooksSweepTrackingRouteImport.update({
+    id: '/api/public/hooks/sweep-tracking',
+    path: '/api/public/hooks/sweep-tracking',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicHooksRecurringTasksRoute =
   ApiPublicHooksRecurringTasksRouteImport.update({
     id: '/api/public/hooks/recurring-tasks',
@@ -627,6 +642,12 @@ const ApiPublicHooksDispatchSmsRoute =
     id: '/api/public/hooks/dispatch-sms',
     path: '/api/public/hooks/dispatch-sms',
     getParentRoute: () => rootRouteImport,
+  } as any)
+const AuthenticatedTasksTaskIdTrackingRoute =
+  AuthenticatedTasksTaskIdTrackingRouteImport.update({
+    id: '/tasks/$taskId/tracking',
+    path: '/tasks/$taskId/tracking',
+    getParentRoute: () => AuthenticatedRoute,
   } as any)
 const AuthenticatedAcademyCourseSlugQuizRoute =
   AuthenticatedAcademyCourseSlugQuizRouteImport.update({
@@ -703,6 +724,7 @@ export interface FileRoutesByFullPath {
   '/admin/profiles': typeof AuthenticatedAdminProfilesRoute
   '/admin/push-test': typeof AuthenticatedAdminPushTestRoute
   '/admin/runner-approvals': typeof AuthenticatedAdminRunnerApprovalsRoute
+  '/admin/tracking': typeof AuthenticatedAdminTrackingRoute
   '/admin/verifications': typeof AuthenticatedAdminVerificationsRoute
   '/dashboard/analytics': typeof AuthenticatedDashboardAnalyticsRoute
   '/dashboard/favorites': typeof AuthenticatedDashboardFavoritesRoute
@@ -733,10 +755,12 @@ export interface FileRoutesByFullPath {
   '/academy/$courseSlug/$lessonSlug': typeof AuthenticatedAcademyCourseSlugLessonSlugRoute
   '/academy/$courseSlug/certificate': typeof AuthenticatedAcademyCourseSlugCertificateRoute
   '/academy/$courseSlug/quiz': typeof AuthenticatedAcademyCourseSlugQuizRoute
+  '/tasks/$taskId/tracking': typeof AuthenticatedTasksTaskIdTrackingRoute
   '/api/public/hooks/dispatch-sms': typeof ApiPublicHooksDispatchSmsRoute
   '/api/public/hooks/email-nurture': typeof ApiPublicHooksEmailNurtureRoute
   '/api/public/hooks/profile-completion-reminders': typeof ApiPublicHooksProfileCompletionRemindersRoute
   '/api/public/hooks/recurring-tasks': typeof ApiPublicHooksRecurringTasksRoute
+  '/api/public/hooks/sweep-tracking': typeof ApiPublicHooksSweepTrackingRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -796,6 +820,7 @@ export interface FileRoutesByTo {
   '/admin/profiles': typeof AuthenticatedAdminProfilesRoute
   '/admin/push-test': typeof AuthenticatedAdminPushTestRoute
   '/admin/runner-approvals': typeof AuthenticatedAdminRunnerApprovalsRoute
+  '/admin/tracking': typeof AuthenticatedAdminTrackingRoute
   '/admin/verifications': typeof AuthenticatedAdminVerificationsRoute
   '/dashboard/analytics': typeof AuthenticatedDashboardAnalyticsRoute
   '/dashboard/favorites': typeof AuthenticatedDashboardFavoritesRoute
@@ -826,10 +851,12 @@ export interface FileRoutesByTo {
   '/academy/$courseSlug/$lessonSlug': typeof AuthenticatedAcademyCourseSlugLessonSlugRoute
   '/academy/$courseSlug/certificate': typeof AuthenticatedAcademyCourseSlugCertificateRoute
   '/academy/$courseSlug/quiz': typeof AuthenticatedAcademyCourseSlugQuizRoute
+  '/tasks/$taskId/tracking': typeof AuthenticatedTasksTaskIdTrackingRoute
   '/api/public/hooks/dispatch-sms': typeof ApiPublicHooksDispatchSmsRoute
   '/api/public/hooks/email-nurture': typeof ApiPublicHooksEmailNurtureRoute
   '/api/public/hooks/profile-completion-reminders': typeof ApiPublicHooksProfileCompletionRemindersRoute
   '/api/public/hooks/recurring-tasks': typeof ApiPublicHooksRecurringTasksRoute
+  '/api/public/hooks/sweep-tracking': typeof ApiPublicHooksSweepTrackingRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -896,6 +923,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/profiles': typeof AuthenticatedAdminProfilesRoute
   '/_authenticated/admin/push-test': typeof AuthenticatedAdminPushTestRoute
   '/_authenticated/admin/runner-approvals': typeof AuthenticatedAdminRunnerApprovalsRoute
+  '/_authenticated/admin/tracking': typeof AuthenticatedAdminTrackingRoute
   '/_authenticated/admin/verifications': typeof AuthenticatedAdminVerificationsRoute
   '/_authenticated/dashboard/analytics': typeof AuthenticatedDashboardAnalyticsRoute
   '/_authenticated/dashboard/favorites': typeof AuthenticatedDashboardFavoritesRoute
@@ -926,10 +954,12 @@ export interface FileRoutesById {
   '/_authenticated/academy/$courseSlug/$lessonSlug': typeof AuthenticatedAcademyCourseSlugLessonSlugRoute
   '/_authenticated/academy/$courseSlug/certificate': typeof AuthenticatedAcademyCourseSlugCertificateRoute
   '/_authenticated/academy/$courseSlug/quiz': typeof AuthenticatedAcademyCourseSlugQuizRoute
+  '/_authenticated/tasks/$taskId/tracking': typeof AuthenticatedTasksTaskIdTrackingRoute
   '/api/public/hooks/dispatch-sms': typeof ApiPublicHooksDispatchSmsRoute
   '/api/public/hooks/email-nurture': typeof ApiPublicHooksEmailNurtureRoute
   '/api/public/hooks/profile-completion-reminders': typeof ApiPublicHooksProfileCompletionRemindersRoute
   '/api/public/hooks/recurring-tasks': typeof ApiPublicHooksRecurringTasksRoute
+  '/api/public/hooks/sweep-tracking': typeof ApiPublicHooksSweepTrackingRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -996,6 +1026,7 @@ export interface FileRouteTypes {
     | '/admin/profiles'
     | '/admin/push-test'
     | '/admin/runner-approvals'
+    | '/admin/tracking'
     | '/admin/verifications'
     | '/dashboard/analytics'
     | '/dashboard/favorites'
@@ -1026,10 +1057,12 @@ export interface FileRouteTypes {
     | '/academy/$courseSlug/$lessonSlug'
     | '/academy/$courseSlug/certificate'
     | '/academy/$courseSlug/quiz'
+    | '/tasks/$taskId/tracking'
     | '/api/public/hooks/dispatch-sms'
     | '/api/public/hooks/email-nurture'
     | '/api/public/hooks/profile-completion-reminders'
     | '/api/public/hooks/recurring-tasks'
+    | '/api/public/hooks/sweep-tracking'
     | '/api/public/payments/webhook'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -1089,6 +1122,7 @@ export interface FileRouteTypes {
     | '/admin/profiles'
     | '/admin/push-test'
     | '/admin/runner-approvals'
+    | '/admin/tracking'
     | '/admin/verifications'
     | '/dashboard/analytics'
     | '/dashboard/favorites'
@@ -1119,10 +1153,12 @@ export interface FileRouteTypes {
     | '/academy/$courseSlug/$lessonSlug'
     | '/academy/$courseSlug/certificate'
     | '/academy/$courseSlug/quiz'
+    | '/tasks/$taskId/tracking'
     | '/api/public/hooks/dispatch-sms'
     | '/api/public/hooks/email-nurture'
     | '/api/public/hooks/profile-completion-reminders'
     | '/api/public/hooks/recurring-tasks'
+    | '/api/public/hooks/sweep-tracking'
     | '/api/public/payments/webhook'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -1188,6 +1224,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/profiles'
     | '/_authenticated/admin/push-test'
     | '/_authenticated/admin/runner-approvals'
+    | '/_authenticated/admin/tracking'
     | '/_authenticated/admin/verifications'
     | '/_authenticated/dashboard/analytics'
     | '/_authenticated/dashboard/favorites'
@@ -1218,10 +1255,12 @@ export interface FileRouteTypes {
     | '/_authenticated/academy/$courseSlug/$lessonSlug'
     | '/_authenticated/academy/$courseSlug/certificate'
     | '/_authenticated/academy/$courseSlug/quiz'
+    | '/_authenticated/tasks/$taskId/tracking'
     | '/api/public/hooks/dispatch-sms'
     | '/api/public/hooks/email-nurture'
     | '/api/public/hooks/profile-completion-reminders'
     | '/api/public/hooks/recurring-tasks'
+    | '/api/public/hooks/sweep-tracking'
     | '/api/public/payments/webhook'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -1263,6 +1302,7 @@ export interface RootRouteChildren {
   ApiPublicHooksEmailNurtureRoute: typeof ApiPublicHooksEmailNurtureRoute
   ApiPublicHooksProfileCompletionRemindersRoute: typeof ApiPublicHooksProfileCompletionRemindersRoute
   ApiPublicHooksRecurringTasksRoute: typeof ApiPublicHooksRecurringTasksRoute
+  ApiPublicHooksSweepTrackingRoute: typeof ApiPublicHooksSweepTrackingRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
@@ -1770,6 +1810,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminVerificationsRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/tracking': {
+      id: '/_authenticated/admin/tracking'
+      path: '/tracking'
+      fullPath: '/admin/tracking'
+      preLoaderRoute: typeof AuthenticatedAdminTrackingRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/runner-approvals': {
       id: '/_authenticated/admin/runner-approvals'
       path: '/runner-approvals'
@@ -1903,6 +1950,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicPaymentsWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/sweep-tracking': {
+      id: '/api/public/hooks/sweep-tracking'
+      path: '/api/public/hooks/sweep-tracking'
+      fullPath: '/api/public/hooks/sweep-tracking'
+      preLoaderRoute: typeof ApiPublicHooksSweepTrackingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/recurring-tasks': {
       id: '/api/public/hooks/recurring-tasks'
       path: '/api/public/hooks/recurring-tasks'
@@ -1930,6 +1984,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/api/public/hooks/dispatch-sms'
       preLoaderRoute: typeof ApiPublicHooksDispatchSmsRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/tasks/$taskId/tracking': {
+      id: '/_authenticated/tasks/$taskId/tracking'
+      path: '/tasks/$taskId/tracking'
+      fullPath: '/tasks/$taskId/tracking'
+      preLoaderRoute: typeof AuthenticatedTasksTaskIdTrackingRouteImport
+      parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/academy/$courseSlug/quiz': {
       id: '/_authenticated/academy/$courseSlug/quiz'
@@ -2005,6 +2066,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminProfilesRoute: typeof AuthenticatedAdminProfilesRoute
   AuthenticatedAdminPushTestRoute: typeof AuthenticatedAdminPushTestRoute
   AuthenticatedAdminRunnerApprovalsRoute: typeof AuthenticatedAdminRunnerApprovalsRoute
+  AuthenticatedAdminTrackingRoute: typeof AuthenticatedAdminTrackingRoute
   AuthenticatedAdminVerificationsRoute: typeof AuthenticatedAdminVerificationsRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
 }
@@ -2024,6 +2086,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminPushTestRoute: AuthenticatedAdminPushTestRoute,
   AuthenticatedAdminRunnerApprovalsRoute:
     AuthenticatedAdminRunnerApprovalsRoute,
+  AuthenticatedAdminTrackingRoute: AuthenticatedAdminTrackingRoute,
   AuthenticatedAdminVerificationsRoute: AuthenticatedAdminVerificationsRoute,
   AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
 }
@@ -2108,6 +2171,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedProfileIdVerificationRoute: typeof AuthenticatedProfileIdVerificationRoute
   AuthenticatedProfileVerificationRoute: typeof AuthenticatedProfileVerificationRoute
   AuthenticatedDashboardIndexRoute: typeof AuthenticatedDashboardIndexRoute
+  AuthenticatedTasksTaskIdTrackingRoute: typeof AuthenticatedTasksTaskIdTrackingRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
@@ -2139,6 +2203,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
     AuthenticatedProfileIdVerificationRoute,
   AuthenticatedProfileVerificationRoute: AuthenticatedProfileVerificationRoute,
   AuthenticatedDashboardIndexRoute: AuthenticatedDashboardIndexRoute,
+  AuthenticatedTasksTaskIdTrackingRoute: AuthenticatedTasksTaskIdTrackingRoute,
 }
 
 const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
@@ -2199,6 +2264,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicHooksProfileCompletionRemindersRoute:
     ApiPublicHooksProfileCompletionRemindersRoute,
   ApiPublicHooksRecurringTasksRoute: ApiPublicHooksRecurringTasksRoute,
+  ApiPublicHooksSweepTrackingRoute: ApiPublicHooksSweepTrackingRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
