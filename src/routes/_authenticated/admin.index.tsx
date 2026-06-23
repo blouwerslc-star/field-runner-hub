@@ -24,7 +24,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Loader2, Users, ClipboardList, UserCog, Plus, ShieldCheck, Send, BarChart3, Activity, BadgeCheck, Mail, AlertTriangle, DollarSign, RefreshCw, FileSearch, MessageSquare } from "lucide-react";
+import { Loader2, Users, ClipboardList, UserCog, Plus, ShieldCheck, Send, BarChart3, Activity, BadgeCheck, Mail, AlertTriangle, DollarSign, RefreshCw, FileSearch, MessageSquare, MapPin } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { listPayouts, markPayoutPaid } from "@/lib/payments.functions";
