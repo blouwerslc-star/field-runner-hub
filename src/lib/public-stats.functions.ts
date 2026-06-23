@@ -104,3 +104,208 @@ export const getCoveragePoints = createServerFn({ method: "GET" }).handler(async
 
   return { points };
 });
+
+/**
+ * Full coverage dashboard payload for /coverage public page.
+ * Aggregates totals + 7d deltas, state-level coverage, recent signups, and
+ * underserved markets (cities with open tasks but few runners).
+ * Honest live numbers — no fabricated counts.
+ */
+export const getCoverageDashboard = createServerFn({ method: "GET" }).handler(async () => {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const now = Date.now();
+  const since7 = new Date(now - 7 * 86400_000).toISOString();
+  const since30 = new Date(now - 30 * 86400_000).toISOString();
+
+  const [runnerRoles, investorRoles, profiles, tasks, recentProfiles] = await Promise.all([
+    supabaseAdmin.from("user_roles").select("user_id, created_at").eq("role", "runner"),
+    supabaseAdmin.from("user_roles").select("user_id, created_at").eq("role", "investor"),
+    supabaseAdmin
+      .from("profiles")
+      .select("user_id, first_name, city, state, created_at")
+      .not("city", "is", null)
+      .not("state", "is", null),
+    supabaseAdmin
+      .from("tasks")
+      .select("city, state, status, created_at")
+      .not("city", "is", null)
+      .not("state", "is", null)
+      .limit(2000),
+    supabaseAdmin
+      .from("profiles")
+      .select("user_id, first_name, city, state, created_at")
+      .order("created_at", { ascending: false })
+      .limit(20),
+  ]);
+
+  const runnerIds = new Set((runnerRoles.data ?? []).map((r: any) => r.user_id));
+  const investorIds = new Set((investorRoles.data ?? []).map((r: any) => r.user_id));
+
+  type Bucket = {
+    state: string;
+    cities: Set<string>;
+    runners: number;
+    investors: number;
+    tasks_total: number;
+    tasks_open: number;
+    tasks_completed: number;
+  };
+  type CityBucket = {
+    city: string;
+    state: string;
+    runners: number;
+    open_tasks: number;
+    completed_tasks: number;
+  };
+
+  const byState = new Map<string, Bucket>();
+  const byCity = new Map<string, CityBucket>();
+
+  const ensureState = (state: string): Bucket => {
+    const key = state.toLowerCase();
+    let b = byState.get(key);
+    if (!b) {
+      b = {
+        state,
+        cities: new Set(),
+        runners: 0,
+        investors: 0,
+        tasks_total: 0,
+        tasks_open: 0,
+        tasks_completed: 0,
+      };
+      byState.set(key, b);
+    }
+    return b;
+  };
+  const ensureCity = (city: string, state: string): CityBucket => {
+    const key = `${city.toLowerCase()}|${state.toLowerCase()}`;
+    let b = byCity.get(key);
+    if (!b) {
+      b = { city, state, runners: 0, open_tasks: 0, completed_tasks: 0 };
+      byCity.set(key, b);
+    }
+    return b;
+  };
+
+  for (const p of profiles.data ?? []) {
+    const city = (p as any).city?.trim?.();
+    const state = (p as any).state?.trim?.();
+    if (!city || !state) continue;
+    const sb = ensureState(state);
+    sb.cities.add(city.toLowerCase());
+    const cb = ensureCity(city, state);
+    if (runnerIds.has((p as any).user_id)) {
+      sb.runners += 1;
+      cb.runners += 1;
+    }
+    if (investorIds.has((p as any).user_id)) {
+      sb.investors += 1;
+    }
+  }
+
+  for (const t of tasks.data ?? []) {
+    const city = (t as any).city?.trim?.();
+    const state = (t as any).state?.trim?.();
+    if (!city || !state) continue;
+    const sb = ensureState(state);
+    sb.cities.add(city.toLowerCase());
+    const cb = ensureCity(city, state);
+    sb.tasks_total += 1;
+    const status = (t as any).status;
+    if (status === "open") {
+      sb.tasks_open += 1;
+      cb.open_tasks += 1;
+    } else if (["completed", "approved", "paid"].includes(status)) {
+      sb.tasks_completed += 1;
+      cb.completed_tasks += 1;
+    }
+  }
+
+  const states = Array.from(byState.values())
+    .map((b) => ({
+      state: b.state,
+      cities: b.cities.size,
+      runners: b.runners,
+      investors: b.investors,
+      tasks_total: b.tasks_total,
+      tasks_open: b.tasks_open,
+      tasks_completed: b.tasks_completed,
+    }))
+    .sort((a, b) => b.runners + b.tasks_total - (a.runners + a.tasks_total));
+
+  // Underserved: cities with open tasks but fewer than 2 runners
+  const underserved = Array.from(byCity.values())
+    .filter((c) => c.open_tasks > 0 && c.runners < 2)
+    .sort((a, b) => b.open_tasks - a.open_tasks)
+    .slice(0, 12);
+
+  // Totals & 7d deltas
+  const totalRunners = runnerIds.size;
+  const totalInvestors = investorIds.size;
+  const newRunners7d = (runnerRoles.data ?? []).filter(
+    (r: any) => r.created_at && r.created_at >= since7,
+  ).length;
+  const newInvestors7d = (investorRoles.data ?? []).filter(
+    (r: any) => r.created_at && r.created_at >= since7,
+  ).length;
+  const newRunners30d = (runnerRoles.data ?? []).filter(
+    (r: any) => r.created_at && r.created_at >= since30,
+  ).length;
+
+  const allTasks = tasks.data ?? [];
+  const tasksTotal = allTasks.length;
+  const tasksCompleted = allTasks.filter((t: any) =>
+    ["completed", "approved", "paid"].includes(t.status),
+  ).length;
+  const tasksOpen = allTasks.filter((t: any) => t.status === "open").length;
+  const newTasks7d = allTasks.filter(
+    (t: any) => t.created_at && t.created_at >= since7,
+  ).length;
+
+  const citiesActive = byCity.size;
+  const statesActive = byState.size;
+
+  // Recent signups — first name + initial only, plus city/state
+  const recent = (recentProfiles.data ?? [])
+    .filter((p: any) => p.first_name)
+    .slice(0, 10)
+    .map((p: any) => {
+      const role = runnerIds.has(p.user_id)
+        ? "runner"
+        : investorIds.has(p.user_id)
+          ? "investor"
+          : "member";
+      const name = (p.first_name as string).trim().split(/\s+/)[0];
+      return {
+        name,
+        role,
+        city: (p.city || "").trim() || null,
+        state: (p.state || "").trim() || null,
+        joined_at: p.created_at,
+      };
+    });
+
+  return {
+    totals: {
+      runners: totalRunners,
+      investors: totalInvestors,
+      tasks_total: tasksTotal,
+      tasks_open: tasksOpen,
+      tasks_completed: tasksCompleted,
+      cities_active: citiesActive,
+      states_active: statesActive,
+    },
+    deltas_7d: {
+      runners: newRunners7d,
+      investors: newInvestors7d,
+      tasks: newTasks7d,
+    },
+    deltas_30d: {
+      runners: newRunners30d,
+    },
+    states,
+    underserved,
+    recent_signups: recent,
+  };
+});
