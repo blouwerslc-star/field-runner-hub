@@ -176,6 +176,7 @@ type Task = {
   description: string | null;
   funded?: boolean;
   requires_interior_access?: boolean;
+  runner_id?: string | null;
 };
 
 function InvestorTaskCard({ task }: { task: Task }) {
