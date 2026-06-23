@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate, redirect as routerRedirect } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -22,6 +22,14 @@ export const Route = createFileRoute("/signup")({
     role: (s.role === "investor" || s.role === "runner" ? s.role : undefined) as RoleParam | undefined,
     redirect: typeof s.redirect === "string" ? s.redirect : undefined,
   }),
+  beforeLoad: async ({ search }) => {
+    if (typeof window === "undefined") return;
+    const { data } = await supabase.auth.getSession();
+    if (data.session?.user) {
+      const to = (search as { redirect?: string }).redirect || "/dashboard";
+      throw routerRedirect({ to });
+    }
+  },
   component: SignupPage,
   head: () => ({
     meta: [
@@ -107,7 +115,7 @@ function SignupPage() {
         return;
       }
       toast.success("Account created.");
-      navigate({ to: postSignupRedirect });
+      navigate({ to: postSignupRedirect, replace: true });
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Signup failed";
       setFormError(msg);
@@ -130,7 +138,7 @@ function SignupPage() {
       });
       if (result.redirected) return;
       if (result.error) throw result.error;
-      navigate({ to: postSignupRedirect });
+      navigate({ to: postSignupRedirect, replace: true });
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Google sign-in failed";
       toast.error(msg);
@@ -151,7 +159,7 @@ function SignupPage() {
       });
       if (result.redirected) return;
       if (result.error) throw result.error;
-      navigate({ to: postSignupRedirect });
+      navigate({ to: postSignupRedirect, replace: true });
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Apple sign-in failed";
       toast.error(msg);
