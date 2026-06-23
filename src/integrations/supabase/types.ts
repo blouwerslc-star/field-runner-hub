@@ -1396,6 +1396,8 @@ export type Database = {
           real_estate_years: number | null
           realtor_experience: boolean
           realtor_years: number | null
+          referral_code: string | null
+          referred_by: string | null
           repeat_client_count: number
           repeat_client_rate: number
           response_time: string | null
@@ -1492,6 +1494,8 @@ export type Database = {
           real_estate_years?: number | null
           realtor_experience?: boolean
           realtor_years?: number | null
+          referral_code?: string | null
+          referred_by?: string | null
           repeat_client_count?: number
           repeat_client_rate?: number
           response_time?: string | null
@@ -1588,6 +1592,8 @@ export type Database = {
           real_estate_years?: number | null
           realtor_experience?: boolean
           realtor_years?: number | null
+          referral_code?: string | null
+          referred_by?: string | null
           repeat_client_count?: number
           repeat_client_rate?: number
           response_time?: string | null
@@ -1672,6 +1678,56 @@ export type Database = {
           user_id?: string | null
         }
         Relationships: []
+      }
+      referrals: {
+        Row: {
+          code: string
+          created_at: string
+          id: string
+          qualified_at: string | null
+          qualifying_task_id: string | null
+          referee_id: string
+          referrer_id: string
+          reward_amount_cents: number
+          rewarded_at: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          id?: string
+          qualified_at?: string | null
+          qualifying_task_id?: string | null
+          referee_id: string
+          referrer_id: string
+          reward_amount_cents?: number
+          rewarded_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          id?: string
+          qualified_at?: string | null
+          qualifying_task_id?: string | null
+          referee_id?: string
+          referrer_id?: string
+          reward_amount_cents?: number
+          rewarded_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "referrals_qualifying_task_id_fkey"
+            columns: ["qualifying_task_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       reports: {
         Row: {
