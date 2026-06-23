@@ -506,6 +506,38 @@ export function PostTaskWizard({
               <p>Funds go into escrow when you fund the task. On approval, your runner receives 80% and REI Runner keeps a 20% platform fee. Tips are 100% runner.</p>
             </div>
 
+            {!bulkMode && (
+              <div className="rounded-xl border border-border bg-card/40 p-3 space-y-2">
+                <Label className="text-sm font-medium text-foreground">Repeat this task</Label>
+                <div className="flex flex-wrap gap-2">
+                  {([
+                    { v: "", label: "One-time" },
+                    { v: "weekly", label: "Every week" },
+                    { v: "biweekly", label: "Every 2 weeks" },
+                    { v: "monthly", label: "Every month" },
+                  ] as Array<{ v: Recurrence; label: string }>).map((opt) => (
+                    <button
+                      key={opt.v || "once"}
+                      type="button"
+                      onClick={() => setRecurrence(opt.v)}
+                      className={`px-3 py-1.5 rounded-full text-xs border transition ${
+                        recurrence === opt.v
+                          ? "border-primary bg-primary/10 text-primary"
+                          : "border-border text-muted-foreground hover:border-primary/50"
+                      }`}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+                {recurrence && (
+                  <p className="text-xs text-muted-foreground">
+                    A new task will auto-post on the same schedule. You can pause it any time from the task card.
+                  </p>
+                )}
+              </div>
+            )}
+
             {/* Live preview */}
             <div className="rounded-xl border border-border bg-muted/10 p-3">
               <div className="text-xs uppercase tracking-wider text-muted-foreground mb-2">Preview</div>
