@@ -2,14 +2,13 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { LogOut, UserCog, Compass, Settings, MessageSquare, Store, Briefcase, Wallet, Activity, ShieldAlert, Menu, DollarSign, BarChart3, ShieldCheck, GraduationCap, ShieldEllipsis } from "lucide-react";
+import { LogOut, UserCog, Compass, Settings, MessageSquare, Store, Briefcase, Wallet, Activity, ShieldAlert, Menu, DollarSign, BarChart3, ShieldCheck, GraduationCap, ShieldEllipsis, X } from "lucide-react";
 import { BrandLogo } from "@/components/brand/BrandLogo";
 import { Toaster } from "@/components/ui/sonner";
 import { NotificationBell } from "@/components/dashboard/NotificationBell";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { getUnreadCount } from "@/lib/messages.functions";
-import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { useEffect, useState } from "react";
 import { MobileBottomNav } from "@/components/dashboard/MobileBottomNav";
 
@@ -85,6 +84,18 @@ export function DashboardShell({
     navigate({ to: "/", replace: true });
   }
 
+  // Lock body scroll while the drawer is open without using Radix's portal
+  // scroll-lock (which mis-renders inside the Android Capacitor WebView and
+  // squeezes page content into a narrow column).
+  useEffect(() => {
+    if (!open) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [open]);
+
   return (
     <div className="min-h-screen bg-background text-foreground pt-safe">
       <Toaster richColors closeButton position="top-center" theme="dark" />
@@ -125,44 +136,82 @@ export function DashboardShell({
               </Link>
             </Button>
             <NotificationBell />
-            <Sheet open={open} onOpenChange={setOpen}>
-              <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" aria-label="Open menu" className="min-h-11 min-w-11">
-                  <Menu className="size-5" />
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="right" className="w-72 p-0 flex flex-col">
-                <SheetHeader className="p-5 border-b border-border/60">
-                  <SheetTitle className="text-left">Menu</SheetTitle>
-                </SheetHeader>
-                <nav className="flex-1 overflow-y-auto p-3 space-y-1">
-                  {navItems.map((item) => (
-                    <Link
-                      key={item.to}
-                      to={item.to}
-                      onClick={() => setOpen(false)}
-                      className="flex items-center gap-3 rounded-md px-3 py-2.5 text-sm hover:bg-muted/60 transition-colors"
-                    >
-                      <item.icon className={`size-4 ${item.to === "/admin" ? "text-primary" : "text-muted-foreground"}`} />
-                      <span>{item.label}</span>
-                      {item.to === "/messages" && unreadTotal > 0 && (
-                        <span className="ml-auto size-5 rounded-full bg-primary text-[10px] font-bold text-primary-foreground grid place-items-center">
-                          {unreadTotal > 9 ? "9+" : unreadTotal}
-                        </span>
-                      )}
-                    </Link>
-                  ))}
-                </nav>
-                <div className="p-3 border-t border-border/60">
-                  <Button variant="ghost" size="sm" className="w-full justify-start" onClick={() => { setOpen(false); signOut(); }}>
-                    <LogOut className="size-4 mr-2" /> Sign out
-                  </Button>
-                </div>
-              </SheetContent>
-            </Sheet>
+            <Button
+              variant="ghost"
+              size="icon"
+              aria-label="Open menu"
+              aria-expanded={open}
+              aria-controls="mobile-drawer"
+              className="min-h-11 min-w-11"
+              onClick={() => setOpen(true)}
+            >
+              <Menu className="size-5" />
+            </Button>
           </div>
         </div>
       </header>
+
+      {/* Mobile drawer — plain fixed elements, no Radix portal. Robust inside
+          the Android Capacitor WebView where Radix Dialog mis-renders. */}
+      <div
+        aria-hidden={!open}
+        className={`xl:hidden fixed inset-0 z-[60] transition-opacity duration-200 ${
+          open ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+        }`}
+      >
+        <button
+          type="button"
+          aria-label="Close menu"
+          tabIndex={open ? 0 : -1}
+          onClick={() => setOpen(false)}
+          className="absolute inset-0 bg-black/70"
+        />
+        <aside
+          id="mobile-drawer"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Menu"
+          className={`absolute top-0 right-0 h-full w-72 max-w-[85vw] bg-background border-l border-border/60 shadow-2xl flex flex-col transition-transform duration-300 ease-out pt-safe ${
+            open ? "translate-x-0" : "translate-x-full"
+          }`}
+        >
+          <div className="flex items-center justify-between p-5 border-b border-border/60">
+            <span className="text-lg font-semibold">Menu</span>
+            <button
+              type="button"
+              aria-label="Close menu"
+              onClick={() => setOpen(false)}
+              className="p-2 -mr-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/60"
+            >
+              <X className="size-5" />
+            </button>
+          </div>
+          <nav className="flex-1 overflow-y-auto p-3 space-y-1">
+            {navItems.map((item) => (
+              <Link
+                key={item.to}
+                to={item.to}
+                onClick={() => setOpen(false)}
+                className="flex items-center gap-3 rounded-md px-3 py-3 text-sm hover:bg-muted/60 transition-colors"
+              >
+                <item.icon className={`size-4 ${item.to === "/admin" ? "text-primary" : "text-muted-foreground"}`} />
+                <span>{item.label}</span>
+                {item.to === "/messages" && unreadTotal > 0 && (
+                  <span className="ml-auto size-5 rounded-full bg-primary text-[10px] font-bold text-primary-foreground grid place-items-center">
+                    {unreadTotal > 9 ? "9+" : unreadTotal}
+                  </span>
+                )}
+              </Link>
+            ))}
+          </nav>
+          <div className="p-3 border-t border-border/60 pb-safe">
+            <Button variant="ghost" size="sm" className="w-full justify-start" onClick={() => { setOpen(false); signOut(); }}>
+              <LogOut className="size-4 mr-2" /> Sign out
+            </Button>
+          </div>
+        </aside>
+      </div>
+
       <main className="mx-auto max-w-5xl px-5 pt-8 pb-28 md:py-14">
         <div className="mb-8">
           <h1 className="text-3xl md:text-4xl font-bold tracking-tight">{title}</h1>
