@@ -192,6 +192,17 @@ function InvestorTaskCard({ task }: { task: Task }) {
     },
     onError: (e: Error) => toast.error(e.message),
   });
+  const toggleRecFn = useServerFn(toggleTaskRecurrence);
+  const recRule = (task as unknown as { recurrence_rule?: string | null }).recurrence_rule ?? null;
+  const recActive = (task as unknown as { recurrence_active?: boolean | null }).recurrence_active ?? false;
+  const toggleRec = useMutation({
+    mutationFn: () => toggleRecFn({ data: { taskId: task.id, active: !recActive } }),
+    onSuccess: () => {
+      toast.success(recActive ? "Recurring schedule paused" : "Recurring schedule resumed");
+      qc.invalidateQueries({ queryKey: ["my-tasks"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
   const needsFunding = !task.funded && task.payout_amount != null && Number(task.payout_amount) > 0;
   const canTip = task.status === "approved" || task.status === "paid";
   return (
