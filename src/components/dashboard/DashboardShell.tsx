@@ -11,6 +11,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { getUnreadCount } from "@/lib/messages.functions";
 import { useEffect, useState } from "react";
 import { MobileBottomNav } from "@/components/dashboard/MobileBottomNav";
+import { MobileDrawer } from "@/components/navigation/MobileDrawer";
 
 const NAV_ITEMS = [
   { to: "/profiles", label: "Browse", icon: Compass },
@@ -84,18 +85,6 @@ export function DashboardShell({
     navigate({ to: "/", replace: true });
   }
 
-  // Lock body scroll while the drawer is open without using Radix's portal
-  // scroll-lock (which mis-renders inside the Android Capacitor WebView and
-  // squeezes page content into a narrow column).
-  useEffect(() => {
-    if (!open) return;
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = prev;
-    };
-  }, [open]);
-
   return (
     <div className="min-h-screen bg-background text-foreground pt-safe">
       <Toaster richColors closeButton position="top-center" theme="dark" />
@@ -151,30 +140,7 @@ export function DashboardShell({
         </div>
       </header>
 
-      {/* Mobile drawer — plain fixed elements, no Radix portal. Robust inside
-          the Android Capacitor WebView where Radix Dialog mis-renders. */}
-      <div
-        aria-hidden={!open}
-        className={`xl:hidden fixed inset-0 z-[60] transition-opacity duration-200 ${
-          open ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
-        }`}
-      >
-        <button
-          type="button"
-          aria-label="Close menu"
-          tabIndex={open ? 0 : -1}
-          onClick={() => setOpen(false)}
-          className="absolute inset-0 bg-black/70"
-        />
-        <aside
-          id="mobile-drawer"
-          role="dialog"
-          aria-modal="true"
-          aria-label="Menu"
-          className={`absolute top-0 right-0 h-full w-72 max-w-[85vw] bg-background border-l border-border/60 shadow-2xl flex flex-col transition-transform duration-300 ease-out pt-safe ${
-            open ? "translate-x-0" : "translate-x-full"
-          }`}
-        >
+      <MobileDrawer open={open} onClose={() => setOpen(false)} id="mobile-drawer" label="Menu">
           <div className="flex items-center justify-between p-5 border-b border-border/60">
             <span className="text-lg font-semibold">Menu</span>
             <button
@@ -209,8 +175,7 @@ export function DashboardShell({
               <LogOut className="size-4 mr-2" /> Sign out
             </Button>
           </div>
-        </aside>
-      </div>
+      </MobileDrawer>
 
       <main className="mx-auto max-w-5xl px-5 pt-8 pb-28 md:py-14">
         <div className="mb-8">
