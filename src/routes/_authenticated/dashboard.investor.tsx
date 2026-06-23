@@ -18,7 +18,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Loader2, MapPin, Calendar, DollarSign, CheckCircle2, XCircle, FileImage, ShieldCheck, Heart } from "lucide-react";
+import { Loader2, MapPin, Calendar, DollarSign, CheckCircle2, XCircle, FileImage, ShieldCheck, Heart, Maximize2 } from "lucide-react";
 import { toast } from "sonner";
 import { listMyTasks, getTaskDetail, reviewSubmission } from "@/lib/tasks.functions";
 import { getSignedDownloadUrl } from "@/lib/storage.functions";
@@ -31,6 +31,7 @@ import { SLABadge } from "@/components/dashboard/investor/SLABadge";
 import { SpendAnalyticsCard } from "@/components/dashboard/investor/SpendAnalyticsCard";
 import { RunnerDiscoveryStrip } from "@/components/dashboard/investor/RunnerDiscoveryStrip";
 import { PostTaskWizard } from "@/components/dashboard/investor/PostTaskWizard";
+import { DeliverableReviewWorkspace, buildReshootReason, type FeedbackState } from "@/components/dashboard/investor/DeliverableReviewWorkspace";
 import { getMyProfile } from "@/lib/profiles.functions";
 import { Users } from "lucide-react";
 import { Link } from "@tanstack/react-router";
@@ -341,6 +342,9 @@ function InvestorTaskPanelInner({ task, onDone }: { task: Task; onDone: () => vo
   });
 
   const [rejectReason, setRejectReason] = useState("");
+  const [workspaceOpen, setWorkspaceOpen] = useState(false);
+  const [workspaceStart, setWorkspaceStart] = useState(0);
+  const [feedback, setFeedback] = useState<FeedbackState>({});
 
   const review = useMutation({
     mutationFn: (v: { submissionId: string; action: "approve" | "reject"; reason?: string }) =>
@@ -387,18 +391,39 @@ function InvestorTaskPanelInner({ task, onDone }: { task: Task; onDone: () => vo
         {files.length === 0 ? (
           <p className="text-xs text-muted-foreground mt-2">No files yet.</p>
         ) : (
-          <div className="mt-2 grid grid-cols-3 gap-2">
-            {files.map((f) => (
-              <button
-                key={f.id}
-                onClick={() => openFile(f.bucket, f.path)}
-                className="aspect-square rounded-lg bg-muted/30 border border-border grid place-items-center text-xs text-muted-foreground p-2 text-center hover:border-primary/50 transition"
-              >
-                <FileImage className="size-5 mb-1" />
-                {f.kind}
-              </button>
-            ))}
-          </div>
+          <>
+            <div className="mt-2 flex items-center justify-between">
+              <p className="text-xs text-muted-foreground">Click a thumbnail or open the review workspace for full-size review with per-file feedback.</p>
+              <Button size="sm" variant="outline" onClick={() => { setWorkspaceStart(0); setWorkspaceOpen(true); }}>
+                <Maximize2 className="size-3.5 mr-1" /> Open review workspace
+              </Button>
+            </div>
+            <div className="mt-2 grid grid-cols-3 gap-2">
+              {files.map((f, i) => (
+                <button
+                  key={f.id}
+                  onClick={() => { setWorkspaceStart(i); setWorkspaceOpen(true); }}
+                  onDoubleClick={() => openFile(f.bucket, f.path)}
+                  className="aspect-square rounded-lg bg-muted/30 border border-border grid place-items-center text-xs text-muted-foreground p-2 text-center hover:border-primary/50 transition"
+                >
+                  <FileImage className="size-5 mb-1" />
+                  {f.kind}
+                </button>
+              ))}
+            </div>
+            <DeliverableReviewWorkspace
+              files={files as never}
+              feedback={feedback}
+              onChangeFeedback={(next) => {
+                setFeedback(next);
+                const summary = buildReshootReason(files as never, next);
+                if (summary) setRejectReason(summary);
+              }}
+              open={workspaceOpen}
+              onClose={() => setWorkspaceOpen(false)}
+              startIndex={workspaceStart}
+            />
+          </>
         )}
       </div>
 
