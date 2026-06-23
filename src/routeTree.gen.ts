@@ -77,6 +77,7 @@ import { Route as AuthenticatedMessagesConversationIdRouteImport } from './route
 import { Route as AuthenticatedDashboardRunnerRouteImport } from './routes/_authenticated/dashboard.runner'
 import { Route as AuthenticatedDashboardInvestorRouteImport } from './routes/_authenticated/dashboard.investor'
 import { Route as AuthenticatedDashboardFavoritesRouteImport } from './routes/_authenticated/dashboard.favorites'
+import { Route as AuthenticatedDashboardAnalyticsRouteImport } from './routes/_authenticated/dashboard.analytics'
 import { Route as AuthenticatedAdminVerificationsRouteImport } from './routes/_authenticated/admin.verifications'
 import { Route as AuthenticatedAdminRunnerApprovalsRouteImport } from './routes/_authenticated/admin.runner-approvals'
 import { Route as AuthenticatedAdminPushTestRouteImport } from './routes/_authenticated/admin.push-test'
@@ -470,6 +471,12 @@ const AuthenticatedDashboardFavoritesRoute =
     path: '/dashboard/favorites',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const AuthenticatedDashboardAnalyticsRoute =
+  AuthenticatedDashboardAnalyticsRouteImport.update({
+    id: '/dashboard/analytics',
+    path: '/dashboard/analytics',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedAdminVerificationsRoute =
   AuthenticatedAdminVerificationsRouteImport.update({
     id: '/verifications',
@@ -676,6 +683,7 @@ export interface FileRoutesByFullPath {
   '/admin/push-test': typeof AuthenticatedAdminPushTestRoute
   '/admin/runner-approvals': typeof AuthenticatedAdminRunnerApprovalsRoute
   '/admin/verifications': typeof AuthenticatedAdminVerificationsRoute
+  '/dashboard/analytics': typeof AuthenticatedDashboardAnalyticsRoute
   '/dashboard/favorites': typeof AuthenticatedDashboardFavoritesRoute
   '/dashboard/investor': typeof AuthenticatedDashboardInvestorRoute
   '/dashboard/runner': typeof AuthenticatedDashboardRunnerRoute
@@ -765,6 +773,7 @@ export interface FileRoutesByTo {
   '/admin/push-test': typeof AuthenticatedAdminPushTestRoute
   '/admin/runner-approvals': typeof AuthenticatedAdminRunnerApprovalsRoute
   '/admin/verifications': typeof AuthenticatedAdminVerificationsRoute
+  '/dashboard/analytics': typeof AuthenticatedDashboardAnalyticsRoute
   '/dashboard/favorites': typeof AuthenticatedDashboardFavoritesRoute
   '/dashboard/investor': typeof AuthenticatedDashboardInvestorRoute
   '/dashboard/runner': typeof AuthenticatedDashboardRunnerRoute
@@ -861,6 +870,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/push-test': typeof AuthenticatedAdminPushTestRoute
   '/_authenticated/admin/runner-approvals': typeof AuthenticatedAdminRunnerApprovalsRoute
   '/_authenticated/admin/verifications': typeof AuthenticatedAdminVerificationsRoute
+  '/_authenticated/dashboard/analytics': typeof AuthenticatedDashboardAnalyticsRoute
   '/_authenticated/dashboard/favorites': typeof AuthenticatedDashboardFavoritesRoute
   '/_authenticated/dashboard/investor': typeof AuthenticatedDashboardInvestorRoute
   '/_authenticated/dashboard/runner': typeof AuthenticatedDashboardRunnerRoute
@@ -957,6 +967,7 @@ export interface FileRouteTypes {
     | '/admin/push-test'
     | '/admin/runner-approvals'
     | '/admin/verifications'
+    | '/dashboard/analytics'
     | '/dashboard/favorites'
     | '/dashboard/investor'
     | '/dashboard/runner'
@@ -1046,6 +1057,7 @@ export interface FileRouteTypes {
     | '/admin/push-test'
     | '/admin/runner-approvals'
     | '/admin/verifications'
+    | '/dashboard/analytics'
     | '/dashboard/favorites'
     | '/dashboard/investor'
     | '/dashboard/runner'
@@ -1141,6 +1153,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/push-test'
     | '/_authenticated/admin/runner-approvals'
     | '/_authenticated/admin/verifications'
+    | '/_authenticated/dashboard/analytics'
     | '/_authenticated/dashboard/favorites'
     | '/_authenticated/dashboard/investor'
     | '/_authenticated/dashboard/runner'
@@ -1695,6 +1708,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardFavoritesRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/dashboard/analytics': {
+      id: '/_authenticated/dashboard/analytics'
+      path: '/dashboard/analytics'
+      fullPath: '/dashboard/analytics'
+      preLoaderRoute: typeof AuthenticatedDashboardAnalyticsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/admin/verifications': {
       id: '/_authenticated/admin/verifications'
       path: '/verifications'
@@ -2016,6 +2036,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedRunnerRatesRoute: typeof AuthenticatedRunnerRatesRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRouteWithChildren
   AuthenticatedTemplatesRoute: typeof AuthenticatedTemplatesRoute
+  AuthenticatedDashboardAnalyticsRoute: typeof AuthenticatedDashboardAnalyticsRoute
   AuthenticatedDashboardFavoritesRoute: typeof AuthenticatedDashboardFavoritesRoute
   AuthenticatedDashboardInvestorRoute: typeof AuthenticatedDashboardInvestorRoute
   AuthenticatedDashboardRunnerRoute: typeof AuthenticatedDashboardRunnerRoute
@@ -2043,6 +2064,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedRunnerRatesRoute: AuthenticatedRunnerRatesRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRouteWithChildren,
   AuthenticatedTemplatesRoute: AuthenticatedTemplatesRoute,
+  AuthenticatedDashboardAnalyticsRoute: AuthenticatedDashboardAnalyticsRoute,
   AuthenticatedDashboardFavoritesRoute: AuthenticatedDashboardFavoritesRoute,
   AuthenticatedDashboardInvestorRoute: AuthenticatedDashboardInvestorRoute,
   AuthenticatedDashboardRunnerRoute: AuthenticatedDashboardRunnerRoute,

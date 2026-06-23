@@ -104,7 +104,14 @@ function InvestorDashboard() {
 
       {/* Spend + Runner discovery */}
       <div className="grid gap-4 lg:grid-cols-2 mb-6">
-        <SpendAnalyticsCard tasks={tasks as never} />
+        <div className="space-y-3">
+          <SpendAnalyticsCard tasks={tasks as never} />
+          <Button asChild variant="outline" size="sm" className="w-full">
+            <Link to="/dashboard/analytics">
+              View full analytics dashboard →
+            </Link>
+          </Button>
+        </div>
         <RunnerDiscoveryStrip state={myState} city={myCity} />
       </div>
 
