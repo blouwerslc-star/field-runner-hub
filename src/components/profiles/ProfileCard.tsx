@@ -22,6 +22,7 @@ export type PublicProfile = {
   roles: string[];
   verification_level?: number;
   academy_certification?: { level: string | null; status: string | null } | null;
+  academy_certifications?: string[];
 };
 
 function initials(name: string | null) {
@@ -69,6 +70,24 @@ export function ProfileCard({ p, viewerAuthenticated = true }: { p: PublicProfil
               <GraduationCap className="size-3" />
               Academy Certified{p.academy_certification.level ? ` · ${p.academy_certification.level}` : ""}
             </span>
+          </div>
+        )}
+        {(p.academy_certifications ?? []).length > 0 && (
+          <div className="flex flex-wrap gap-1">
+            {(p.academy_certifications ?? []).slice(0, 3).map((slug) => (
+              <span
+                key={slug}
+                className="rounded-full bg-primary/10 text-primary border border-primary/30 px-1.5 py-0.5 text-[10px] font-medium"
+                title={`Academy: ${slug}`}
+              >
+                {slug.replace(/-/g, " ")}
+              </span>
+            ))}
+            {(p.academy_certifications ?? []).length > 3 && (
+              <span className="text-[10px] text-muted-foreground">
+                +{(p.academy_certifications ?? []).length - 3}
+              </span>
+            )}
           </div>
         )}
         {p.headline && <p className="text-xs text-muted-foreground line-clamp-1">{p.headline}</p>}

@@ -2,14 +2,14 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
-import { listPublicProfiles } from "@/lib/profiles.functions";
+import { listPublicProfiles, listAcademyCertOptions } from "@/lib/profiles.functions";
 import { ProfileCard, type PublicProfile } from "@/components/profiles/ProfileCard";
 import { BrandLogo } from "@/components/brand/BrandLogo";
 import { MarketplaceMap, type MapPoint } from "@/components/maps/MarketplaceMap";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { Loader2, Search, BadgeCheck, Star, Trophy, Lock, ShieldCheck, MapPinned } from "lucide-react";
+import { Loader2, Search, BadgeCheck, Star, Trophy, Lock, ShieldCheck, MapPinned, GraduationCap } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/profiles")({
@@ -42,6 +42,14 @@ function ProfilesDirectory() {
   const [service, setService] = useState("");
   const [availability, setAvailability] = useState<"all" | "available" | "busy" | "unavailable">("all");
   const [sort, setSort] = useState<"featured" | "rating" | "completed" | "newest">("featured");
+  const [certs, setCerts] = useState<string[]>([]);
+
+  const certOptsFn = useServerFn(listAcademyCertOptions);
+  const { data: certOpts } = useQuery({
+    queryKey: ["academy-cert-options"],
+    queryFn: () => certOptsFn(),
+    staleTime: 60 * 60_000,
+  });
 
   const filters = {
     q: q || undefined,
@@ -52,6 +60,7 @@ function ProfilesDirectory() {
     availability: availability === "all" ? undefined : availability,
     sort,
     viewerLoggedIn: authed,
+    certifications: certs.length > 0 ? certs : undefined,
   };
 
   const { data, isLoading, refetch, isFetching } = useQuery({
@@ -202,6 +211,47 @@ function ProfilesDirectory() {
             Search
           </Button>
         </form>
+
+        {/* Academy certification filter chips */}
+        {(certOpts?.courses ?? []).length > 0 && (
+          <div className="mb-6 flex flex-wrap items-center gap-2">
+            <span className="inline-flex items-center gap-1.5 text-xs uppercase tracking-wider text-muted-foreground mr-1">
+              <GraduationCap className="size-3.5 text-primary" /> Academy
+            </span>
+            {(certOpts?.courses ?? []).map((c) => {
+              const active = certs.includes(c.slug);
+              return (
+                <button
+                  key={c.slug}
+                  type="button"
+                  onClick={() =>
+                    setCerts((prev) =>
+                      prev.includes(c.slug) ? prev.filter((s) => s !== c.slug) : [...prev, c.slug],
+                    )
+                  }
+                  className={
+                    "rounded-full border px-3 py-1 text-xs transition " +
+                    (active
+                      ? "bg-primary/15 border-primary/50 text-primary"
+                      : "border-border/60 text-muted-foreground hover:border-primary/40 hover:text-foreground")
+                  }
+                  aria-pressed={active}
+                >
+                  {c.title}
+                </button>
+              );
+            })}
+            {certs.length > 0 && (
+              <button
+                type="button"
+                onClick={() => setCerts([])}
+                className="text-xs text-muted-foreground hover:text-foreground underline ml-1"
+              >
+                Clear
+              </button>
+            )}
+          </div>
+        )}
 
         {isLoading ? (
           <Loader2 className="size-6 animate-spin text-primary" />
