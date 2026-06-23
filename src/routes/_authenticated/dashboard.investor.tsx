@@ -52,19 +52,6 @@ export const Route = createFileRoute("/_authenticated/dashboard/investor")({
   ),
 });
 
-function statusColor(status: string) {
-  switch (status) {
-    case "open": return "bg-yellow-500/15 text-yellow-300 border-yellow-500/30";
-    case "assigned": return "bg-blue-500/15 text-blue-300 border-blue-500/30";
-    case "in_progress": return "bg-purple-500/15 text-purple-300 border-purple-500/30";
-    case "submitted": return "bg-cyan-500/15 text-cyan-300 border-cyan-500/30";
-    case "approved": return "bg-emerald-500/15 text-emerald-300 border-emerald-500/30";
-    case "revision_requested": return "bg-red-500/15 text-red-300 border-red-500/30";
-    case "paid": return "bg-emerald-600/20 text-emerald-200 border-emerald-500/40";
-    default: return "bg-muted text-muted-foreground";
-  }
-}
-
 function InvestorDashboard() {
   const fetchTasks = useServerFn(listMyTasks);
   const { data, isLoading } = useQuery({ queryKey: ["my-tasks"], queryFn: () => fetchTasks() });
