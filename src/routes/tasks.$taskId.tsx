@@ -7,7 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { BrandLogo } from "@/components/brand/BrandLogo";
-import { Loader2, MapPin, DollarSign, Calendar, BadgeCheck, Bookmark, BookmarkCheck, Star, ShieldCheck, Camera, Wallet, Clock } from "lucide-react";
+import { Loader2, MapPin, DollarSign, Calendar, BadgeCheck, Bookmark, BookmarkCheck, Star, ShieldCheck, Camera, Wallet, Clock, Navigation } from "lucide-react";
 import { toast } from "sonner";
 import { Toaster } from "@/components/ui/sonner";
 import { RouteErrorState, EmptyState } from "@/components/dashboard/UiStates";
@@ -179,6 +179,15 @@ function TaskDetailPage() {
                 <div className="font-semibold">Your application</div>
                 <div className="text-muted-foreground">Status: <span className="font-medium text-foreground capitalize">{myApp.application.status}</span></div>
                 {myApp.application.message && <p className="text-xs text-muted-foreground italic">"{myApp.application.message}"</p>}
+                {myApp.application.status === "approved" && (
+                  <Link
+                    to="/tasks/$taskId/tracking"
+                    params={{ taskId }}
+                    className="mt-2 inline-flex w-full items-center justify-center rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+                  >
+                    <Navigation className="mr-2 h-4 w-4" /> Open task tracking
+                  </Link>
+                )}
               </div>
             ) : (
               <>
