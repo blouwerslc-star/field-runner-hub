@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
 import { finalizeSignupProfile } from "@/lib/signup.functions";
 import { trackSignup } from "@/lib/tracking";
+import { getPendingReferralCode, clearPendingReferralCode } from "@/lib/referral-tracking";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
