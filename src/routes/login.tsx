@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate, redirect as routerRedirect } from "@tanstack/react-router";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
@@ -14,6 +14,13 @@ export const Route = createFileRoute("/login")({
   validateSearch: (s: Record<string, unknown>) => ({
     redirect: typeof s.redirect === "string" ? s.redirect : "/dashboard",
   }),
+  beforeLoad: async ({ search }) => {
+    if (typeof window === "undefined") return;
+    const { data } = await supabase.auth.getSession();
+    if (data.session?.user) {
+      throw routerRedirect({ to: (search as { redirect?: string }).redirect || "/dashboard" });
+    }
+  },
   component: LoginPage,
   head: () => ({
     meta: [
@@ -41,7 +48,7 @@ function LoginPage() {
     try {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) throw error;
-      navigate({ to: redirect });
+      navigate({ to: redirect, replace: true });
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Sign in failed";
       toast.error(msg);
@@ -58,7 +65,7 @@ function LoginPage() {
       });
       if (result.redirected) return;
       if (result.error) throw result.error;
-      navigate({ to: redirect });
+      navigate({ to: redirect, replace: true });
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Google sign-in failed";
       toast.error(msg);
@@ -74,7 +81,7 @@ function LoginPage() {
       });
       if (result.redirected) return;
       if (result.error) throw result.error;
-      navigate({ to: redirect });
+      navigate({ to: redirect, replace: true });
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Apple sign-in failed";
       toast.error(msg);
