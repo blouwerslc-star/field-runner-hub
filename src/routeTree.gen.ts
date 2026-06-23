@@ -96,6 +96,7 @@ import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/e
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
+import { Route as ApiPublicHooksRecurringTasksRouteImport } from './routes/api/public/hooks/recurring-tasks'
 import { Route as ApiPublicHooksProfileCompletionRemindersRouteImport } from './routes/api/public/hooks/profile-completion-reminders'
 import { Route as AuthenticatedAcademyCourseSlugQuizRouteImport } from './routes/_authenticated/academy.$courseSlug.quiz'
 import { Route as AuthenticatedAcademyCourseSlugCertificateRouteImport } from './routes/_authenticated/academy.$courseSlug.certificate'
@@ -581,6 +582,12 @@ const ApiPublicPaymentsWebhookRoute =
     path: '/api/public/payments/webhook',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksRecurringTasksRoute =
+  ApiPublicHooksRecurringTasksRouteImport.update({
+    id: '/api/public/hooks/recurring-tasks',
+    path: '/api/public/hooks/recurring-tasks',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicHooksProfileCompletionRemindersRoute =
   ApiPublicHooksProfileCompletionRemindersRouteImport.update({
     id: '/api/public/hooks/profile-completion-reminders',
@@ -690,6 +697,7 @@ export interface FileRoutesByFullPath {
   '/academy/$courseSlug/certificate': typeof AuthenticatedAcademyCourseSlugCertificateRoute
   '/academy/$courseSlug/quiz': typeof AuthenticatedAcademyCourseSlugQuizRoute
   '/api/public/hooks/profile-completion-reminders': typeof ApiPublicHooksProfileCompletionRemindersRoute
+  '/api/public/hooks/recurring-tasks': typeof ApiPublicHooksRecurringTasksRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -777,6 +785,7 @@ export interface FileRoutesByTo {
   '/academy/$courseSlug/certificate': typeof AuthenticatedAcademyCourseSlugCertificateRoute
   '/academy/$courseSlug/quiz': typeof AuthenticatedAcademyCourseSlugQuizRoute
   '/api/public/hooks/profile-completion-reminders': typeof ApiPublicHooksProfileCompletionRemindersRoute
+  '/api/public/hooks/recurring-tasks': typeof ApiPublicHooksRecurringTasksRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -871,6 +880,7 @@ export interface FileRoutesById {
   '/_authenticated/academy/$courseSlug/certificate': typeof AuthenticatedAcademyCourseSlugCertificateRoute
   '/_authenticated/academy/$courseSlug/quiz': typeof AuthenticatedAcademyCourseSlugQuizRoute
   '/api/public/hooks/profile-completion-reminders': typeof ApiPublicHooksProfileCompletionRemindersRoute
+  '/api/public/hooks/recurring-tasks': typeof ApiPublicHooksRecurringTasksRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -965,6 +975,7 @@ export interface FileRouteTypes {
     | '/academy/$courseSlug/certificate'
     | '/academy/$courseSlug/quiz'
     | '/api/public/hooks/profile-completion-reminders'
+    | '/api/public/hooks/recurring-tasks'
     | '/api/public/payments/webhook'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -1052,6 +1063,7 @@ export interface FileRouteTypes {
     | '/academy/$courseSlug/certificate'
     | '/academy/$courseSlug/quiz'
     | '/api/public/hooks/profile-completion-reminders'
+    | '/api/public/hooks/recurring-tasks'
     | '/api/public/payments/webhook'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -1145,6 +1157,7 @@ export interface FileRouteTypes {
     | '/_authenticated/academy/$courseSlug/certificate'
     | '/_authenticated/academy/$courseSlug/quiz'
     | '/api/public/hooks/profile-completion-reminders'
+    | '/api/public/hooks/recurring-tasks'
     | '/api/public/payments/webhook'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -1182,6 +1195,7 @@ export interface RootRouteChildren {
   ProfileSlugRoute: typeof ProfileSlugRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
   ApiPublicHooksProfileCompletionRemindersRoute: typeof ApiPublicHooksProfileCompletionRemindersRoute
+  ApiPublicHooksRecurringTasksRoute: typeof ApiPublicHooksRecurringTasksRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
@@ -1801,6 +1815,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicPaymentsWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/recurring-tasks': {
+      id: '/api/public/hooks/recurring-tasks'
+      path: '/api/public/hooks/recurring-tasks'
+      fullPath: '/api/public/hooks/recurring-tasks'
+      preLoaderRoute: typeof ApiPublicHooksRecurringTasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/profile-completion-reminders': {
       id: '/api/public/hooks/profile-completion-reminders'
       path: '/api/public/hooks/profile-completion-reminders'
@@ -2068,6 +2089,7 @@ const rootRouteChildren: RootRouteChildren = {
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
   ApiPublicHooksProfileCompletionRemindersRoute:
     ApiPublicHooksProfileCompletionRemindersRoute,
+  ApiPublicHooksRecurringTasksRoute: ApiPublicHooksRecurringTasksRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
