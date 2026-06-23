@@ -486,6 +486,7 @@ function Index() {
             <button type="button" onClick={() => scrollToId("how")} className="hover:text-foreground transition">How it works</button>
             <Link to="/pricing" className="hover:text-foreground transition">Pricing</Link>
             <Link to="/trust" className="hover:text-foreground transition">Trust & Safety</Link>
+            <Link to="/coverage" className="hover:text-foreground transition">Coverage</Link>
             <Link to="/story" className="hover:text-foreground transition">Our Story</Link>
             <Link to="/runners" className="hover:text-foreground transition">For Runners</Link>
             <Link to="/investors" className="hover:text-foreground transition">For Investors</Link>
@@ -1097,6 +1098,7 @@ function Index() {
                <li><Link to="/story" className="hover:text-foreground">Our story</Link></li>
                <li><Link to="/about" className="hover:text-foreground">About</Link></li>
               <li><Link to="/trust" className="hover:text-foreground">Trust & Safety</Link></li>
+              <li><Link to="/coverage" className="hover:text-foreground">Coverage map</Link></li>
               <li><Link to="/pricing" className="hover:text-foreground">Pricing</Link></li>
               <li><Link to="/investors" className="hover:text-foreground">For investors</Link></li>
               <li><Link to="/runners" className="hover:text-foreground">For runners</Link></li>
