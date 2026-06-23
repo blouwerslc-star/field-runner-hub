@@ -1,0 +1,2 @@
+ALTER TABLE public.tasks ADD COLUMN IF NOT EXISTS preferred_runner_id uuid REFERENCES auth.users(id) ON DELETE SET NULL;
+CREATE INDEX IF NOT EXISTS tasks_preferred_runner_id_idx ON public.tasks(preferred_runner_id);

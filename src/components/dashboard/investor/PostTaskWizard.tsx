@@ -74,12 +74,26 @@ const EMPTY: FormState = {
   payout_amount: "", due_date: "",
 };
 
-export function PostTaskWizard() {
+export function PostTaskWizard({
+  controlledOpen,
+  onControlledOpenChange,
+  preferredRunner,
+}: {
+  controlledOpen?: boolean;
+  onControlledOpenChange?: (open: boolean) => void;
+  preferredRunner?: { id: string; name: string } | null;
+} = {}) {
   const qc = useQueryClient();
   const createFn = useServerFn(createInvestorTask);
   const fetchPricing = useServerFn(getPricingCatalog);
 
-  const [open, setOpen] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
+  const isControlled = controlledOpen !== undefined;
+  const open = isControlled ? controlledOpen! : internalOpen;
+  const setOpen = (o: boolean) => {
+    if (isControlled) onControlledOpenChange?.(o);
+    else setInternalOpen(o);
+  };
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [form, setForm] = useState<FormState>(EMPTY);
   const [interiorTouched, setInteriorTouched] = useState(false);
@@ -126,10 +140,15 @@ export function PostTaskWizard() {
         due_date: form.due_date || null,
         description: form.description || null,
         requires_interior_access: effectiveRequiresInterior,
+        preferred_runner_id: preferredRunner?.id ?? null,
       },
     }),
     onSuccess: () => {
-      toast.success("Task posted. We'll start matching a local runner.");
+      toast.success(
+        preferredRunner
+          ? `Task posted and sent to ${preferredRunner.name}.`
+          : "Task posted. We'll start matching a local runner.",
+      );
       qc.invalidateQueries({ queryKey: ["my-tasks"] });
       setOpen(false);
       reset();
@@ -145,15 +164,25 @@ export function PostTaskWizard() {
 
   return (
     <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) reset(); }}>
-      <DialogTrigger asChild>
-        <Button className="bg-gradient-primary shadow-glow">
-          <Plus className="size-4 mr-1.5" /> New task
-        </Button>
-      </DialogTrigger>
+      {!isControlled && (
+        <DialogTrigger asChild>
+          <Button className="bg-gradient-primary shadow-glow">
+            <Plus className="size-4 mr-1.5" /> New task
+          </Button>
+        </DialogTrigger>
+      )}
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Post a task</DialogTitle>
+          <DialogTitle>
+            {preferredRunner ? `Post a task for ${preferredRunner.name}` : "Post a task"}
+          </DialogTitle>
         </DialogHeader>
+
+        {preferredRunner && (
+          <div className="rounded-xl border border-primary/30 bg-primary/5 p-2.5 text-xs text-muted-foreground">
+            This task will be sent directly to <span className="text-foreground font-medium">{preferredRunner.name}</span> as a private invite.
+          </div>
+        )}
 
         <StepIndicator step={step} />
 

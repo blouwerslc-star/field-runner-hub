@@ -2217,6 +2217,7 @@ export type Database = {
           id: string
           investor_id: string | null
           payout_amount: number | null
+          preferred_runner_id: string | null
           property_address: string
           requires_interior_access: boolean
           runner_id: string | null
@@ -2239,6 +2240,7 @@ export type Database = {
           id?: string
           investor_id?: string | null
           payout_amount?: number | null
+          preferred_runner_id?: string | null
           property_address: string
           requires_interior_access?: boolean
           runner_id?: string | null
@@ -2261,6 +2263,7 @@ export type Database = {
           id?: string
           investor_id?: string | null
           payout_amount?: number | null
+          preferred_runner_id?: string | null
           property_address?: string
           requires_interior_access?: boolean
           runner_id?: string | null
