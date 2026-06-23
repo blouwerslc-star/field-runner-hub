@@ -66,6 +66,7 @@ function RunnerDashboard() {
     <DashboardShell title="Runner Dashboard" subtitle="Your assigned tasks. Complete the work, upload deliverables, and get paid.">
       <ProfileCompletionBanner role="runner" />
       <RunnerVerificationCard />
+      <ReferralBanner />
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
         <StatTile label="Assigned" value={buckets.assigned.length} />
         <StatTile label="In progress" value={buckets.in_progress.length} />
