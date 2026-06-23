@@ -440,6 +440,8 @@ function InvestorTaskPanelInner({ task, onDone }: { task: Task; onDone: () => vo
         </div>
       )}
 
+      <TaskMessageThread taskId={task.id} hasRunner={!!task.runner_id} />
+
       <div>
         <Label>Deliverables ({files.length})</Label>
         {files.length === 0 ? (
