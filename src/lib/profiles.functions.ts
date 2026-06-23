@@ -409,7 +409,6 @@ export const listAcademyCertOptions = createServerFn({ method: "GET" }).handler(
   return { courses: (data ?? []) as Array<{ slug: string; title: string; category: string | null; sort_order: number }> };
 });
 
-async function _unused_assertAdmin(supabase: import("@supabase/supabase-js").SupabaseClient, userId: string) {
 export const adminListProfiles = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
