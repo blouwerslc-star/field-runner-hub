@@ -26,7 +26,7 @@ import { DashboardLoadingSkeleton, RouteErrorState } from "@/components/dashboar
 import { TaskMessageThread } from "@/components/dashboard/investor/TaskMessageThread";
 import { TaskTimeline } from "@/components/tasks/TaskTimeline";
 import { recordTaskTrackingEvent } from "@/lib/task-timeline.functions";
-import { Navigation, MapPin } from "lucide-react";
+import { Navigation } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/dashboard/runner")({
   component: RunnerDashboard,
