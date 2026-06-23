@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { getOrCreateTaskConversation } from "@/lib/task-conversations.functions";
 import { getConversation, sendMessage } from "@/lib/messages.functions";
 import { Link } from "@tanstack/react-router";
+import { supabase } from "@/integrations/supabase/client";
 
 export function TaskMessageThread({
   taskId,
@@ -35,8 +36,30 @@ export function TaskMessageThread({
     queryKey: ["task-conv-thread", conversationId],
     queryFn: () => fetchConv({ data: { conversationId: conversationId! } }),
     enabled: !!conversationId,
-    refetchInterval: 15_000,
   });
+
+  // Realtime: refetch the thread whenever a new message lands in this conversation.
+  useEffect(() => {
+    if (!conversationId) return;
+    const channel = supabase
+      .channel(`task-conv-${conversationId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "messages",
+          filter: `conversation_id=eq.${conversationId}`,
+        },
+        () => {
+          qc.invalidateQueries({ queryKey: ["task-conv-thread", conversationId] });
+        },
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [conversationId, qc]);
 
   useEffect(() => {
     if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
