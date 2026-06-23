@@ -79,7 +79,7 @@ export function InstallPrompt() {
         <div className="flex-1">
           <p className="text-sm font-semibold text-foreground">Install REI Runner</p>
           <p className="mt-0.5 text-xs text-muted-foreground">
-            Add to your home screen for faster access and offline support.
+            Add to your home screen for faster access.
           </p>
           <div className="mt-2 flex gap-2">
             <Button size="sm" onClick={install}>
