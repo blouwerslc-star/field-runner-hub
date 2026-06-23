@@ -31,6 +31,7 @@ import { SLABadge } from "@/components/dashboard/investor/SLABadge";
 import { SpendAnalyticsCard } from "@/components/dashboard/investor/SpendAnalyticsCard";
 import { RunnerDiscoveryStrip } from "@/components/dashboard/investor/RunnerDiscoveryStrip";
 import { PostTaskWizard } from "@/components/dashboard/investor/PostTaskWizard";
+import { SavedRunnersStrip } from "@/components/dashboard/investor/SavedRunnersStrip";
 import { DeliverableReviewWorkspace, buildReshootReason, type FeedbackState } from "@/components/dashboard/investor/DeliverableReviewWorkspace";
 import { getMyProfile } from "@/lib/profiles.functions";
 import { Users } from "lucide-react";
@@ -103,6 +104,10 @@ function InvestorDashboard() {
       <div className="grid gap-4 lg:grid-cols-2 mb-6">
         <SpendAnalyticsCard tasks={tasks as never} />
         <RunnerDiscoveryStrip state={myState} city={myCity} />
+      </div>
+
+      <div className="mb-6">
+        <SavedRunnersStrip />
       </div>
 
       {isLoading ? (
