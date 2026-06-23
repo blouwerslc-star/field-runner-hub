@@ -293,3 +293,20 @@ export const getTaskTrackingState = createServerFn({ method: "POST" })
     if (!t) throw new Error("Task not found");
     return { task: t };
   });
+
+/** Returns the runner's currently active task, if any (for the global banner). */
+export const getMyActiveTrackingTask = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { supabase, userId } = context;
+    const { data, error } = await supabase
+      .from("tasks")
+      .select("id, title, runner_state")
+      .eq("runner_id", userId)
+      .eq("tracking_active", true)
+      .order("en_route_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    return { task: data ?? null };
+  });
