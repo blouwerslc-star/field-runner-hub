@@ -25,6 +25,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as InvestorsRouteImport } from './routes/investors'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as FaqRouteImport } from './routes/faq'
+import { Route as CoverageRouteImport } from './routes/coverage'
 import { Route as AuthTestRouteImport } from './routes/auth-test'
 import { Route as ApplyRouteImport } from './routes/apply'
 import { Route as AboutRouteImport } from './routes/about'
@@ -180,6 +181,11 @@ const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
 const FaqRoute = FaqRouteImport.update({
   id: '/faq',
   path: '/faq',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CoverageRoute = CoverageRouteImport.update({
+  id: '/coverage',
+  path: '/coverage',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthTestRoute = AuthTestRouteImport.update({
@@ -619,6 +625,7 @@ export interface FileRoutesByFullPath {
   '/about': typeof AboutRoute
   '/apply': typeof ApplyRoute
   '/auth-test': typeof AuthTestRoute
+  '/coverage': typeof CoverageRoute
   '/faq': typeof FaqRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/investors': typeof InvestorsRoute
@@ -712,6 +719,7 @@ export interface FileRoutesByTo {
   '/about': typeof AboutRoute
   '/apply': typeof ApplyRoute
   '/auth-test': typeof AuthTestRoute
+  '/coverage': typeof CoverageRoute
   '/faq': typeof FaqRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/investors': typeof InvestorsRoute
@@ -802,6 +810,7 @@ export interface FileRoutesById {
   '/about': typeof AboutRoute
   '/apply': typeof ApplyRoute
   '/auth-test': typeof AuthTestRoute
+  '/coverage': typeof CoverageRoute
   '/faq': typeof FaqRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/investors': typeof InvestorsRoute
@@ -897,6 +906,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/apply'
     | '/auth-test'
+    | '/coverage'
     | '/faq'
     | '/forgot-password'
     | '/investors'
@@ -990,6 +1000,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/apply'
     | '/auth-test'
+    | '/coverage'
     | '/faq'
     | '/forgot-password'
     | '/investors'
@@ -1079,6 +1090,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/apply'
     | '/auth-test'
+    | '/coverage'
     | '/faq'
     | '/forgot-password'
     | '/investors'
@@ -1174,6 +1186,7 @@ export interface RootRouteChildren {
   AboutRoute: typeof AboutRoute
   ApplyRoute: typeof ApplyRoute
   AuthTestRoute: typeof AuthTestRoute
+  CoverageRoute: typeof CoverageRoute
   FaqRoute: typeof FaqRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   InvestorsRoute: typeof InvestorsRoute
@@ -1316,6 +1329,13 @@ declare module '@tanstack/react-router' {
       path: '/faq'
       fullPath: '/faq'
       preLoaderRoute: typeof FaqRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/coverage': {
+      id: '/coverage'
+      path: '/coverage'
+      fullPath: '/coverage'
+      preLoaderRoute: typeof CoverageRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth-test': {
@@ -2067,6 +2087,7 @@ const rootRouteChildren: RootRouteChildren = {
   AboutRoute: AboutRoute,
   ApplyRoute: ApplyRoute,
   AuthTestRoute: AuthTestRoute,
+  CoverageRoute: CoverageRoute,
   FaqRoute: FaqRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,
   InvestorsRoute: InvestorsRoute,
