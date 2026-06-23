@@ -192,21 +192,34 @@ export const bulkCreateInvestorTasks = createServerFn({ method: "POST" })
       typeof data.requires_interior_access === "boolean"
         ? data.requires_interior_access
         : defaultRequiresInteriorAccess(data.task_type);
-    const rows = data.properties.map((p) => ({
-      investor_id: userId,
-      title: data.title,
-      description: data.description ?? null,
-      task_type: data.task_type,
-      property_address: p.property_address,
-      city: p.city,
-      state: p.state,
-      zip_code: p.zip_code ?? null,
-      payout_amount: data.payout_amount ?? null,
-      due_date: data.due_date ?? null,
-      requires_interior_access: requiresInterior,
-      preferred_runner_id: data.preferred_runner_id ?? null,
-      status: "open" as const,
-    }));
+    const { geocodeAddress } = await import("./geocoding.server");
+    const rows = await Promise.all(
+      data.properties.map(async (p) => {
+        const geo = await geocodeAddress({
+          address: p.property_address,
+          city: p.city,
+          state: p.state,
+          zip: p.zip_code,
+        });
+        return {
+          investor_id: userId,
+          title: data.title,
+          description: data.description ?? null,
+          task_type: data.task_type,
+          property_address: p.property_address,
+          city: p.city,
+          state: p.state,
+          zip_code: p.zip_code ?? null,
+          payout_amount: data.payout_amount ?? null,
+          due_date: data.due_date ?? null,
+          requires_interior_access: requiresInterior,
+          preferred_runner_id: data.preferred_runner_id ?? null,
+          status: "open" as const,
+          property_lat: geo?.lat ?? null,
+          property_lng: geo?.lng ?? null,
+        };
+      }),
+    );
     const { data: inserted, error } = await supabase
       .from("tasks")
       .insert(rows)
