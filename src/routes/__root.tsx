@@ -23,6 +23,7 @@ import { captureReferralFromUrl } from "@/lib/referral-tracking";
 import { registerPwa } from "@/lib/pwa-register";
 import { InstallPrompt } from "@/components/pwa/InstallPrompt";
 import { OfflineIndicator } from "@/components/pwa/OfflineIndicator";
+import { TrackingActiveBanner } from "@/components/tracking/TrackingActiveBanner";
 
 function NotFoundComponent() {
   return (
@@ -288,6 +289,7 @@ function RootComponent() {
       <BackButton />
       <OfflineIndicator />
       <InstallPrompt />
+      <TrackingActiveBanner />
     </QueryClientProvider>
   );
 }
