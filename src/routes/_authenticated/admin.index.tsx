@@ -161,6 +161,7 @@ function AdminDashboard() {
         <Button asChild variant="outline" size="sm" className="justify-start"><Link to="/admin/analytics"><BarChart3 className="size-4 mr-2" /> Analytics</Link></Button>
         <Button asChild variant="outline" size="sm" className="justify-start"><Link to="/admin/broadcasts"><Send className="size-4 mr-2" /> Broadcasts</Link></Button>
         <Button asChild variant="outline" size="sm" className="justify-start"><Link to="/admin/email-monitor"><Mail className="size-4 mr-2" /> Email monitor</Link></Button>
+        <Button asChild variant="outline" size="sm" className="justify-start"><Link to="/admin/tracking"><MapPin className="size-4 mr-2" /> GPS Tracking</Link></Button>
       </div>
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
         <StatTile icon={Users} label="Runners" value={runners.length} />
