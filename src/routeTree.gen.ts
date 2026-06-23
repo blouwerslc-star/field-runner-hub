@@ -100,6 +100,7 @@ import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/e
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
+import { Route as ApiPublicHooksSweepTrackingRouteImport } from './routes/api/public/hooks/sweep-tracking'
 import { Route as ApiPublicHooksRecurringTasksRouteImport } from './routes/api/public/hooks/recurring-tasks'
 import { Route as ApiPublicHooksProfileCompletionRemindersRouteImport } from './routes/api/public/hooks/profile-completion-reminders'
 import { Route as ApiPublicHooksEmailNurtureRouteImport } from './routes/api/public/hooks/email-nurture'
@@ -612,6 +613,12 @@ const ApiPublicPaymentsWebhookRoute =
     path: '/api/public/payments/webhook',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksSweepTrackingRoute =
+  ApiPublicHooksSweepTrackingRouteImport.update({
+    id: '/api/public/hooks/sweep-tracking',
+    path: '/api/public/hooks/sweep-tracking',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicHooksRecurringTasksRoute =
   ApiPublicHooksRecurringTasksRouteImport.update({
     id: '/api/public/hooks/recurring-tasks',
@@ -753,6 +760,7 @@ export interface FileRoutesByFullPath {
   '/api/public/hooks/email-nurture': typeof ApiPublicHooksEmailNurtureRoute
   '/api/public/hooks/profile-completion-reminders': typeof ApiPublicHooksProfileCompletionRemindersRoute
   '/api/public/hooks/recurring-tasks': typeof ApiPublicHooksRecurringTasksRoute
+  '/api/public/hooks/sweep-tracking': typeof ApiPublicHooksSweepTrackingRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -848,6 +856,7 @@ export interface FileRoutesByTo {
   '/api/public/hooks/email-nurture': typeof ApiPublicHooksEmailNurtureRoute
   '/api/public/hooks/profile-completion-reminders': typeof ApiPublicHooksProfileCompletionRemindersRoute
   '/api/public/hooks/recurring-tasks': typeof ApiPublicHooksRecurringTasksRoute
+  '/api/public/hooks/sweep-tracking': typeof ApiPublicHooksSweepTrackingRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -950,6 +959,7 @@ export interface FileRoutesById {
   '/api/public/hooks/email-nurture': typeof ApiPublicHooksEmailNurtureRoute
   '/api/public/hooks/profile-completion-reminders': typeof ApiPublicHooksProfileCompletionRemindersRoute
   '/api/public/hooks/recurring-tasks': typeof ApiPublicHooksRecurringTasksRoute
+  '/api/public/hooks/sweep-tracking': typeof ApiPublicHooksSweepTrackingRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -1052,6 +1062,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/email-nurture'
     | '/api/public/hooks/profile-completion-reminders'
     | '/api/public/hooks/recurring-tasks'
+    | '/api/public/hooks/sweep-tracking'
     | '/api/public/payments/webhook'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -1147,6 +1158,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/email-nurture'
     | '/api/public/hooks/profile-completion-reminders'
     | '/api/public/hooks/recurring-tasks'
+    | '/api/public/hooks/sweep-tracking'
     | '/api/public/payments/webhook'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -1248,6 +1260,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/email-nurture'
     | '/api/public/hooks/profile-completion-reminders'
     | '/api/public/hooks/recurring-tasks'
+    | '/api/public/hooks/sweep-tracking'
     | '/api/public/payments/webhook'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -1289,6 +1302,7 @@ export interface RootRouteChildren {
   ApiPublicHooksEmailNurtureRoute: typeof ApiPublicHooksEmailNurtureRoute
   ApiPublicHooksProfileCompletionRemindersRoute: typeof ApiPublicHooksProfileCompletionRemindersRoute
   ApiPublicHooksRecurringTasksRoute: typeof ApiPublicHooksRecurringTasksRoute
+  ApiPublicHooksSweepTrackingRoute: typeof ApiPublicHooksSweepTrackingRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
@@ -1936,6 +1950,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicPaymentsWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/sweep-tracking': {
+      id: '/api/public/hooks/sweep-tracking'
+      path: '/api/public/hooks/sweep-tracking'
+      fullPath: '/api/public/hooks/sweep-tracking'
+      preLoaderRoute: typeof ApiPublicHooksSweepTrackingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/recurring-tasks': {
       id: '/api/public/hooks/recurring-tasks'
       path: '/api/public/hooks/recurring-tasks'
@@ -2243,6 +2264,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicHooksProfileCompletionRemindersRoute:
     ApiPublicHooksProfileCompletionRemindersRoute,
   ApiPublicHooksRecurringTasksRoute: ApiPublicHooksRecurringTasksRoute,
+  ApiPublicHooksSweepTrackingRoute: ApiPublicHooksSweepTrackingRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
