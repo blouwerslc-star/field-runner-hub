@@ -203,9 +203,6 @@ function InvestorTaskCard({ task }: { task: Task }) {
         <div>
           <div className="flex items-center gap-2 flex-wrap">
             <h3 className="font-semibold">{task.title}</h3>
-            <Badge variant="outline" className={statusColor(task.status)}>
-              {task.status.replace("_", " ")}
-            </Badge>
             <Badge variant="outline" className="text-xs">{task.task_type}</Badge>
             {task.requires_interior_access && (
               <Badge variant="outline" className="text-xs border-primary/40 text-primary flex items-center gap-1">
@@ -217,6 +214,7 @@ function InvestorTaskCard({ task }: { task: Task }) {
             ) : needsFunding ? (
               <Badge variant="outline" className="text-xs border-amber-500/30 text-amber-300">Unfunded</Badge>
             ) : null}
+            <SLABadge dueDate={task.due_date} status={task.status} />
           </div>
           <p className="text-sm text-muted-foreground mt-1 flex items-center gap-1.5">
             <MapPin className="size-3.5" />
@@ -284,6 +282,9 @@ function InvestorTaskCard({ task }: { task: Task }) {
           </DialogContent>
           </Dialog>
         </div>
+      </div>
+      <div className="mt-4 pt-3 border-t border-border/60">
+        <StatusTimeline status={task.status} />
       </div>
     </div>
   );
