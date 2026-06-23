@@ -22,6 +22,7 @@ import { listMyTasks, getTaskDetail, startTask, submitTaskWork } from "@/lib/tas
 import { createUploadUrl, recordTaskFile } from "@/lib/storage.functions";
 import { RunnerVerificationCard } from "@/components/dashboard/RunnerVerificationCard";
 import { ProfileCompletionBanner } from "@/components/dashboard/ProfileCompletionBanner";
+import { ReferralBanner } from "@/components/dashboard/ReferralBanner";
 import { DashboardLoadingSkeleton, RouteErrorState } from "@/components/dashboard/UiStates";
 import { TaskMessageThread } from "@/components/dashboard/investor/TaskMessageThread";
 import { TaskTimeline } from "@/components/tasks/TaskTimeline";
