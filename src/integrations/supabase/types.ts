@@ -2085,6 +2085,50 @@ export type Database = {
           },
         ]
       }
+      task_status_events: {
+        Row: {
+          actor_id: string | null
+          created_at: string
+          event_code: string
+          id: string
+          latitude: number | null
+          longitude: number | null
+          metadata: Json
+          note: string | null
+          task_id: string
+        }
+        Insert: {
+          actor_id?: string | null
+          created_at?: string
+          event_code: string
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          metadata?: Json
+          note?: string | null
+          task_id: string
+        }
+        Update: {
+          actor_id?: string | null
+          created_at?: string
+          event_code?: string
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          metadata?: Json
+          note?: string | null
+          task_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "task_status_events_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       task_submissions: {
         Row: {
           created_at: string

@@ -1,90 +1,89 @@
-## Goal
-Lift investor signups and funded tasks. Reinforce one message everywhere:
-**"REI Runner is the nationwide boots-on-the-ground network for real estate investors."**
+# REI Runner Growth & Scale Rollout
 
-Keep the existing visual design language. Changes are copy, structure, metadata, and small UX additions only.
+This is an 8-system platform upgrade. I'll ship it in phased milestones so each phase is shippable on its own and the next builds on solid ground. Each phase is roughly one focused build pass.
 
----
+## Sequencing (why this order)
 
-## 1. Investor-first conversion funnel (highest leverage)
+```text
+Foundations → Trust/Proof → Engagement → Growth loops
+  1. Real-time task tracking      ← schema everything else hangs off
+  2. Coverage / growth map        ← public proof + SEO surface
+  3. Academy certifications       ← runner trust + investor filter
+  4. Investor analytics dashboard ← retention + sales surface
+  5. Referral program             ← growth loop
+  6. SMS notifications            ← lifecycle channel
+  7. Automated email nurturing    ← lifecycle channel (uses Lovable Emails)
+  8. PWA polish (already started) ← push notifications + offline shell
+```
 
-**`src/routes/index.tsx` (home)**
-- Rewrite hero H1 + subhead around the positioning line above.
-- Make the primary CTA "Post Your First Task" (investor) and the secondary "Apply as a Runner". Currently they're balanced — investors should be the dominant path.
-- Add a trust strip directly under the hero: escrow-protected payments, ID-verified runners, nationwide coverage, no platform fee on top of task price.
-- Add a 3-step "How it works (for investors)" section before the runner pitch.
-- Add a results/proof section (live counts of runners, cities covered, tasks completed) pulled from `public-stats.functions.ts` if available; otherwise static placeholders flagged with a TODO.
+PWA installability was wired this turn (manifest + icons + meta). Phase 8 finishes it (push + offline shell) once push-worthy events from phases 1, 5, 6 exist.
 
-**`src/routes/investors.tsx`**
-- Tighten hero, add concrete sample tasks with price ranges, emphasize the 80/20 split from total (already correct backend-side).
-- Add an FAQ block (pulled from `/faq` content) addressing the top 5 investor objections: trust, payment safety, runner vetting, dispute process, coverage area.
-- End with a strong "Fund your first task" CTA.
+## Phase 1 — Real-time task tracking (Uber-style)
 
-**`src/routes/runners.tsx`**
-- Lighter touch — keep current structure, sharpen headline + benefits copy.
+- Extend `tasks.status` enum: `posted, accepted, en_route, on_site, in_progress, completed, verified` (keep existing values mapped).
+- New `task_status_events` table (task_id, from_status, to_status, actor_id, note, location?, created_at) — append-only timeline.
+- Trigger on `tasks` status change → insert event row + notification.
+- Runner detail view: status action buttons gated by current status. Optional geolocation capture on `en_route` / `on_site`.
+- Investor task view: vertical timeline component subscribed to `task_status_events` via Supabase Realtime.
+- Add `verified` action for investors after `completed`.
 
-**`src/components/landing/ApplicationForms.tsx`**
-- Add a one-line "what happens next" reassurance below the submit button (account created, immediate dashboard access, confirmation email sent).
-- No structural changes to fields.
+## Phase 2 — Public coverage & marketplace growth map
 
----
+- New public route `/coverage` (SSR, full head/OG metadata).
+- Server fn aggregates from `profiles` + `tasks`: runners per state/city, tasks completed, states covered, cities covered, recent signups, 7-day deltas. Cached in a materialized view refreshed hourly via pg_cron.
+- Mapbox map (token already in secrets) with state choropleth + city density bubbles + "recently joined" pins.
+- Live stat strip (totals + weekly growth) reused on homepage hero.
+- "Underserved markets" panel: cities with investor demand but <N runners → CTA to apply.
 
-## 2. SEO + metadata sweep
+## Phase 3 — Academy certifications
 
-Audit every public route's `head()` and ensure each has unique title, description, og:title, og:description, og:url, canonical. Currently several routes share or omit these.
+- Tables already exist (`academy_courses`, `lessons`, `quizzes`, `quiz_results`, `certifications`). Wire the missing pieces:
+  - Certification definitions for Photography, Occupancy Verification, Lockbox Install, Property Walkthroughs, Field Safety.
+  - Award flow: pass quiz ≥80% → insert `academy_certifications` row → badge appears on runner profile.
+  - PDF certificate generator (server fn, html-to-pdf via a Worker-compatible lib or simple printable page).
+  - Investor-side runner directory: filter chips by certification.
 
-Routes to update:
-- `/` (index), `/investors`, `/runners`, `/about`, `/trust`, `/faq`, `/pricing`, `/story`, `/apply`, `/login`, `/signup`, `/privacy`, `/terms`
+## Phase 4 — Investor analytics dashboard
 
-Add JSON-LD where applicable:
-- `__root.tsx` — Organization (already present? verify) + WebSite with SearchAction.
-- `/faq` — FAQPage schema generated from the actual FAQ items.
-- `/investors`, `/runners` — Service schema.
-- `/about` — already has AboutPage + BreadcrumbList (keep).
+- New tab on investor dashboard `/dashboard/investor/analytics`.
+- Server fns return: task counts by status, completion rate, avg time-to-complete, active runners in their served markets, spend total + monthly trend, coverage map of their tasks.
+- Charts via Recharts. Date-range picker, CSV export.
 
-Verify `public/robots.txt` allows crawl + references sitemap. Verify `src/routes/sitemap[.]xml.ts` includes all public routes (the index file shows it exists).
+## Phase 5 — Referral program
 
-Titles target investor-intent keywords: "boots on the ground real estate", "property inspection service", "real estate runner near me", "remote real estate investor tools".
+- `referrals` table (referrer_id, code unique, referred_user_id?, role, signed_up_at, qualified_at, reward_status).
+- Generate code on profile create. Public `/r/:code` page sets cookie, attribution captured at signup.
+- Referral dashboard widget for both roles: link, copy/share buttons, list of invited users, status pills.
+- Hooks for future reward payouts (status enum: `pending → qualified → rewarded`).
 
----
+## Phase 6 — SMS notifications
 
-## 3. Marketplace/browse UX (`/profiles`)
+- Use **Twilio connector** (already preferred path on Lovable).
+- `user_notification_preferences` table: per-channel (email/sms/push) per-event toggles.
+- Phone verification flow (send code, verify).
+- Server-side dispatcher fn called from existing notification triggers — fans out to SMS when user has phone verified + opted in.
+- Settings page for prefs.
 
-Light touches — don't redesign:
-- Add a trust microcopy bar above the grid ("All runners ID-verified · Escrow-protected payments · Nationwide coverage").
-- Add an empty-state for filters that return 0 results with a "Clear filters" action.
-- Ensure mobile map+list collapse works (already changed recently).
-- Add count + "Showing X of Y runners nationwide" microcopy.
+## Phase 7 — Automated email nurturing
 
----
+- Use Lovable Emails (infra already set up per the email_send_log table).
+- Scaffold templates: welcome (runner), welcome (investor), incomplete-application reminder (24h/72h), academy progress nudges, task posted/assigned/completed, weekly digest, re-engagement (14d/30d inactive).
+- Trigger via pg_cron job that scans state tables and enqueues into `transactional_emails` queue with idempotency keys.
+- Admin segment view (read-only) backed by existing `email_send_log` for visibility.
 
-## 4. What I will NOT change
+## Phase 8 — PWA finish
 
-- No visual redesign or new design tokens.
-- No backend logic, schema, or payment flow changes.
-- No new routes beyond what already exists.
-- No changes to authenticated dashboard surfaces.
-- No image generation unless a specific page is missing an og:image and would clearly benefit (will ask first).
+- Web push via OneSignal (already integrated — `initOneSignal` exists). Wire push events for task status changes, messages, referrals.
+- Optional: vite-plugin-pwa with `generateSW`, NetworkFirst for navigations, guarded registration for preview safety (per the PWA skill).
+- Pull-to-refresh + bottom-tab nav for installed-app feel on mobile dashboards.
 
----
+## Cross-cutting
 
-## Technical notes
+- **Marketplace stats** surfaced from a shared `useMarketplaceStats()` hook (homepage, coverage page, footer, dashboards).
+- **SEO**: every new public route gets head() with title, description, og:title/desc/image, twitter card.
+- **RLS**: every new table ships with grants + policies in the same migration.
+- **Mobile-first**: every new screen designed at 411px first.
 
-- TanStack Start route `head()` pattern; canonical only on leaves, og:url self-referencing each route.
-- JSON-LD via `scripts` array, stringified.
-- Stats pulled via existing `getPublicStats` server fn if it exists; otherwise hard-coded values with a comment so they're easy to wire later.
-- No new dependencies.
+## What I need from you to start
 
----
-
-## Order of execution
-
-1. SEO sweep across all listed public routes (mechanical, low risk).
-2. Home page rewrite (investor-first).
-3. Investors page tightening + FAQ block.
-4. Profiles page trust strip + empty-state.
-5. Runners page + ApplicationForms small polish.
-
-Estimated files touched: ~12–15. No migrations.
-
-Reply "go" to start, or tell me which sections to drop/add.
+Pick the entry point — I recommend starting with **Phase 1 (real-time task tracking)** because the status timeline is referenced by phases 4, 6, 7, and 8. Reply with the phase number (or "1" to start there) and I'll begin building immediately. If you'd rather I reshuffle the order (e.g. coverage map first for marketing), say so.
