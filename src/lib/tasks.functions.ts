@@ -89,7 +89,18 @@ const createTaskSchema = z.object({
   due_date: z.string().max(20).optional().nullable(),
   requires_interior_access: z.boolean().optional(),
   preferred_runner_id: z.string().uuid().optional().nullable(),
+  recurrence_rule: z.enum(["weekly", "biweekly", "monthly"]).optional().nullable(),
 });
+
+function computeNextRunAt(rule: string | null | undefined, from: Date = new Date()): string | null {
+  if (!rule) return null;
+  const next = new Date(from);
+  if (rule === "weekly") next.setDate(next.getDate() + 7);
+  else if (rule === "biweekly") next.setDate(next.getDate() + 14);
+  else if (rule === "monthly") next.setMonth(next.getMonth() + 1);
+  else return null;
+  return next.toISOString();
+}
 
 export const createInvestorTask = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -115,12 +126,31 @@ export const createInvestorTask = createServerFn({ method: "POST" })
         due_date: data.due_date ?? null,
         requires_interior_access: requiresInterior,
         preferred_runner_id: data.preferred_runner_id ?? null,
+        recurrence_rule: data.recurrence_rule ?? null,
+        recurrence_next_at: computeNextRunAt(data.recurrence_rule ?? null),
+        recurrence_active: data.recurrence_rule ? true : false,
         status: "open",
       })
       .select("*")
       .single();
     if (error) throw new Error(error.message);
     return { task: row };
+  });
+
+export const toggleTaskRecurrence = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i: unknown) =>
+    z.object({ taskId: z.string().uuid(), active: z.boolean() }).parse(i),
+  )
+  .handler(async ({ context, data }) => {
+    const { supabase, userId } = context;
+    const { error } = await supabase
+      .from("tasks")
+      .update({ recurrence_active: data.active })
+      .eq("id", data.taskId)
+      .eq("investor_id", userId);
+    if (error) throw new Error(error.message);
+    return { ok: true };
   });
 
 const bulkCreateSchema = z.object({
