@@ -165,36 +165,6 @@ function TaskTypesGrid({
   );
 }
 
-/**
- * Hidden honeypot field. Real users never see or fill it; bots that
- * auto-fill every input do. Server-side precheck rejects any submission
- * where this comes back non-empty.
- */
-function HoneypotField() {
-  return (
-    <div
-      aria-hidden="true"
-      style={{
-        position: "absolute",
-        left: "-10000px",
-        width: "1px",
-        height: "1px",
-        overflow: "hidden",
-      }}
-    >
-      <label aria-hidden="true">
-        <input
-          type="text"
-          name="hp_extra_field"
-          tabIndex={-1}
-          autoComplete="off"
-          aria-hidden="true"
-        />
-      </label>
-    </div>
-  );
-}
-
 function SuccessCard({
   onReset,
   needsEmailVerification,
@@ -290,7 +260,6 @@ export function FieldRunnerForm() {
     const state = String(f.get("state") || "").trim();
     const password = String(f.get("password") || "");
     const confirm_password = String(f.get("confirm_password") || "");
-    const honeypot = String(f.get("hp_extra_field") || "");
 
     if (!full_name || !email || !phone || !city || !state) {
       toast.error("Please complete all required fields.");
@@ -317,7 +286,7 @@ export function FieldRunnerForm() {
     try {
       const elapsed_ms = Date.now() - formMountedAt.current;
       const check = await precheck({
-        data: { email, role: "runner", honeypot, elapsed_ms },
+        data: { email, role: "runner", elapsed_ms },
       });
       if (!check.ok) {
         setFormError(check.reason);
@@ -374,7 +343,6 @@ export function FieldRunnerForm() {
 
   return (
     <form key={reset} onSubmit={handleSubmit} className="space-y-5">
-      <HoneypotField />
       {formError && (
         <Alert variant="destructive">
           <AlertCircle className="size-4" />
@@ -470,7 +438,6 @@ export function ProForm() {
     const markets_served = String(f.get("markets_served") || "").trim();
     const password = String(f.get("password") || "");
     const confirm_password = String(f.get("confirm_password") || "");
-    const honeypot = String(f.get("hp_extra_field") || "");
 
     if (!full_name || !email || !phone || !markets_served) {
       toast.error("Please complete all required fields.");
@@ -493,7 +460,7 @@ export function ProForm() {
     try {
       const elapsed_ms = Date.now() - formMountedAt.current;
       const check = await precheck({
-        data: { email, role: "investor", honeypot, elapsed_ms },
+        data: { email, role: "investor", elapsed_ms },
       });
       if (!check.ok) {
         setFormError(check.reason);
@@ -547,7 +514,6 @@ export function ProForm() {
 
   return (
     <form key={reset} onSubmit={handleSubmit} className="space-y-5">
-      <HoneypotField />
       {formError && (
         <Alert variant="destructive">
           <AlertCircle className="size-4" />

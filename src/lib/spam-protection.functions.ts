@@ -1,21 +1,21 @@
 import { createServerFn } from "@tanstack/react-start";
-import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { getRequest } from "@tanstack/react-start/server";
 import { createHash } from "crypto";
 import { z } from "zod";
 const precheckSchema = z.object({
   email: z.string().trim().email().max(200),
   role: z.enum(["runner", "investor"]),
-  // Hidden honeypot field — real users never see or fill it.
+  // Legacy field kept for old clients, but ignored because browser autofill
+  // and password managers were filling it for real applicants.
   honeypot: z.string().max(200).optional().default(""),
   // Milliseconds the form was visible before submit. Bots submit instantly.
   elapsed_ms: z.number().int().min(0).max(60 * 60 * 1000),
 });
 
-// Sliding window limits (per IP, per hour).
-const MAX_ATTEMPTS_PER_IP_PER_HOUR = 6;
-// Per email (any IP), per day. Lower because legitimate signups happen once.
-const MAX_ATTEMPTS_PER_EMAIL_PER_DAY = 5;
+// Sliding window limits. Keep these generous enough that a real applicant can
+// retry after correcting validation/auth issues without getting locked out.
+const MAX_ATTEMPTS_PER_IP_PER_HOUR = 30;
+const MAX_ATTEMPTS_PER_EMAIL_PER_DAY = 20;
 // Minimum human fill time. Lower than typical form completion.
 const MIN_ELAPSED_MS = 2000;
 
@@ -55,6 +55,7 @@ async function logAttempt(opts: {
   reason: string | null;
   userAgent: string | null;
 }) {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   await supabaseAdmin.from("signup_attempts").insert({
     ip_hash: opts.ipHash,
     email: opts.email.toLowerCase(),
@@ -71,7 +72,7 @@ export type PrecheckResult =
 
 /**
  * Server-side spam precheck. Called from signup forms BEFORE the client invokes
- * supabase.auth.signUp(). Blocks the obvious bots (honeypot, instant submit,
+ * supabase.auth.signUp(). Blocks obvious automated abuse (instant submit,
  * IP/email flood) without requiring a third-party CAPTCHA.
  */
 export const precheckSignupAttempt = createServerFn({ method: "POST" })
@@ -82,20 +83,7 @@ export const precheckSignupAttempt = createServerFn({ method: "POST" })
     const userAgent = getUserAgent();
     const email = data.email.toLowerCase();
 
-    // 1) Honeypot trip — silent-ish block, generic message to bots.
-    if (data.honeypot && data.honeypot.trim().length > 0) {
-      await logAttempt({
-        ipHash,
-        email,
-        role: data.role,
-        blocked: true,
-        reason: "honeypot",
-        userAgent,
-      });
-      return { ok: false, reason: "Submission rejected. Please reload and try again." };
-    }
-
-    // 2) Instant submit — almost certainly automated.
+    // 1) Instant submit — almost certainly automated.
     if (data.elapsed_ms < MIN_ELAPSED_MS) {
       await logAttempt({
         ipHash,
@@ -111,13 +99,17 @@ export const precheckSignupAttempt = createServerFn({ method: "POST" })
       };
     }
 
-    // 3) Per-IP rate limit (last hour).
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    // 2) Per-IP rate limit (last hour). Only count prechecks that passed;
+    // blocked attempts should not make a legitimate user permanently stuck.
     if (ipHash) {
       const sinceHour = new Date(Date.now() - 60 * 60 * 1000).toISOString();
       const { count: ipCount } = await supabaseAdmin
         .from("signup_attempts")
         .select("id", { head: true, count: "exact" })
         .eq("ip_hash", ipHash)
+        .eq("blocked", false)
         .gte("created_at", sinceHour);
 
       if ((ipCount ?? 0) >= MAX_ATTEMPTS_PER_IP_PER_HOUR) {
@@ -136,12 +128,13 @@ export const precheckSignupAttempt = createServerFn({ method: "POST" })
       }
     }
 
-    // 4) Per-email rate limit (last day).
+    // 3) Per-email rate limit (last day). Only count prechecks that passed.
     const sinceDay = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
     const { count: emailCount } = await supabaseAdmin
       .from("signup_attempts")
       .select("id", { head: true, count: "exact" })
       .eq("email", email)
+      .eq("blocked", false)
       .gte("created_at", sinceDay);
 
     if ((emailCount ?? 0) >= MAX_ATTEMPTS_PER_EMAIL_PER_DAY) {
