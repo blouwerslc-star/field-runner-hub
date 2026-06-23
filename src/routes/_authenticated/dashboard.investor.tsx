@@ -298,6 +298,24 @@ function InvestorTaskCard({ task }: { task: Task }) {
             {dup.isPending ? <Loader2 className="size-3.5 animate-spin" /> : <Copy className="size-3.5" />}
             <span className="hidden sm:inline">Duplicate</span>
           </Button>
+          {recRule && (
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => toggleRec.mutate()}
+              disabled={toggleRec.isPending}
+              title={recActive ? "Pause recurring schedule" : "Resume recurring schedule"}
+            >
+              {toggleRec.isPending ? (
+                <Loader2 className="size-3.5 animate-spin" />
+              ) : recActive ? (
+                <Pause className="size-3.5" />
+              ) : (
+                <Play className="size-3.5" />
+              )}
+              <span className="hidden sm:inline">{recActive ? "Pause" : "Resume"}</span>
+            </Button>
+          )}
         </div>
       </div>
       <div className="mt-4 pt-3 border-t border-border/60">
