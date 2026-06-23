@@ -410,15 +410,6 @@ export const listAcademyCertOptions = createServerFn({ method: "GET" }).handler(
 });
 
 async function _unused_assertAdmin(supabase: import("@supabase/supabase-js").SupabaseClient, userId: string) {
-  const { data } = await supabase
-    .from("user_roles")
-    .select("role")
-    .eq("user_id", userId)
-    .eq("role", "admin")
-    .maybeSingle();
-  if (!data) throw new Error("Admin only");
-}
-
 export const adminListProfiles = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
