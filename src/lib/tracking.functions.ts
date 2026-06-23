@@ -286,12 +286,7 @@ export const getTaskTrackingState = createServerFn({ method: "POST" })
     const { supabase } = context;
     const { data: t, error } = await supabase
       .from("tasks")
-      .select(
-        "id, title, runner_id, investor_id, status, runner_state, tracking_active, " +
-        "property_lat, property_lng, geofence_radius_ft, " +
-        "last_ping_at, last_ping_lat, last_ping_lng, last_ping_within_geofence, last_ping_distance_ft, " +
-        "accepted_at, en_route_at, arrived_at, started_at, completed_at, verified_at",
-      )
+      .select("id,title,runner_id,investor_id,status,runner_state,tracking_active,property_lat,property_lng,geofence_radius_ft,last_ping_at,last_ping_lat,last_ping_lng,last_ping_within_geofence,last_ping_distance_ft,accepted_at,en_route_at,arrived_at,started_at,completed_at,verified_at")
       .eq("id", data.taskId)
       .maybeSingle();
     if (error) throw new Error(error.message);
