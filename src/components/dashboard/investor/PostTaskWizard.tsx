@@ -31,12 +31,17 @@ import {
   ShieldCheck,
   Check,
   Sparkles,
+  Bookmark,
+  Layers,
+  Save,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
   createInvestorTask,
+  bulkCreateInvestorTasks,
   defaultRequiresInteriorAccess,
 } from "@/lib/tasks.functions";
+import { listTaskTemplates, upsertTaskTemplate } from "@/lib/templates.functions";
 import { getPricingCatalog, type PricingTemplate } from "@/lib/pricing.functions";
 import { cn } from "@/lib/utils";
 
@@ -85,7 +90,10 @@ export function PostTaskWizard({
 } = {}) {
   const qc = useQueryClient();
   const createFn = useServerFn(createInvestorTask);
+  const bulkCreateFn = useServerFn(bulkCreateInvestorTasks);
   const fetchPricing = useServerFn(getPricingCatalog);
+  const fetchTemplates = useServerFn(listTaskTemplates);
+  const saveTemplateFn = useServerFn(upsertTaskTemplate);
 
   const [internalOpen, setInternalOpen] = useState(false);
   const isControlled = controlledOpen !== undefined;
@@ -98,6 +106,8 @@ export function PostTaskWizard({
   const [form, setForm] = useState<FormState>(EMPTY);
   const [interiorTouched, setInteriorTouched] = useState(false);
   const [requiresInterior, setRequiresInterior] = useState(false);
+  const [bulkMode, setBulkMode] = useState(false);
+  const [bulkText, setBulkText] = useState("");
 
   const { data: pricingData } = useQuery({
     queryKey: ["pricing-catalog-investor-wizard"],
@@ -105,6 +115,17 @@ export function PostTaskWizard({
     enabled: open,
     staleTime: 10 * 60_000,
   });
+  const { data: templatesData } = useQuery({
+    queryKey: ["my-task-templates-wizard"],
+    queryFn: () => fetchTemplates(),
+    enabled: open,
+    staleTime: 60_000,
+  });
+  const templates = (templatesData?.templates ?? []) as Array<{
+    id: string; name: string; task_type: string; title: string;
+    description: string | null; default_payout: number | null;
+    is_system: boolean; owner_id: string | null;
+  }>;
 
   const matchingTemplates = useMemo(() => {
     const list = (pricingData?.templates ?? []) as PricingTemplate[];
@@ -125,29 +146,63 @@ export function PostTaskWizard({
     setStep(1);
     setInteriorTouched(false);
     setRequiresInterior(false);
+    setBulkMode(false);
+    setBulkText("");
   };
 
+  const parsedBulk = useMemo(() => {
+    if (!bulkMode) return [] as Array<{ property_address: string; city: string; state: string; zip_code: string | null }>;
+    const out: Array<{ property_address: string; city: string; state: string; zip_code: string | null }> = [];
+    for (const line of bulkText.split("\n")) {
+      const parts = line.split(",").map((s) => s.trim()).filter(Boolean);
+      if (parts.length < 3) continue;
+      const [address, city, state, zip] = parts;
+      if (!address || !city || !state) continue;
+      out.push({ property_address: address, city, state: state.slice(0, 2).toUpperCase(), zip_code: zip ?? null });
+    }
+    return out;
+  }, [bulkMode, bulkText]);
+
   const create = useMutation({
-    mutationFn: () => createFn({
-      data: {
-        title: form.title,
-        task_type: form.task_type,
-        property_address: form.property_address,
-        city: form.city,
-        state: form.state,
-        zip_code: form.zip_code || null,
-        payout_amount: form.payout_amount ? Number(form.payout_amount) : null,
-        due_date: form.due_date || null,
-        description: form.description || null,
-        requires_interior_access: effectiveRequiresInterior,
-        preferred_runner_id: preferredRunner?.id ?? null,
-      },
-    }),
-    onSuccess: () => {
+    mutationFn: async () => {
+      if (bulkMode) {
+        return await bulkCreateFn({
+          data: {
+            title: form.title,
+            task_type: form.task_type,
+            description: form.description || null,
+            payout_amount: form.payout_amount ? Number(form.payout_amount) : null,
+            due_date: form.due_date || null,
+            requires_interior_access: effectiveRequiresInterior,
+            preferred_runner_id: preferredRunner?.id ?? null,
+            properties: parsedBulk,
+          },
+        });
+      }
+      return await createFn({
+        data: {
+          title: form.title,
+          task_type: form.task_type,
+          property_address: form.property_address,
+          city: form.city,
+          state: form.state,
+          zip_code: form.zip_code || null,
+          payout_amount: form.payout_amount ? Number(form.payout_amount) : null,
+          due_date: form.due_date || null,
+          description: form.description || null,
+          requires_interior_access: effectiveRequiresInterior,
+          preferred_runner_id: preferredRunner?.id ?? null,
+        },
+      });
+    },
+    onSuccess: (res: unknown) => {
+      const count = (res as { count?: number })?.count;
       toast.success(
-        preferredRunner
-          ? `Task posted and sent to ${preferredRunner.name}.`
-          : "Task posted. We'll start matching a local runner.",
+        bulkMode
+          ? `Posted ${count ?? parsedBulk.length} tasks. We'll start matching runners.`
+          : preferredRunner
+            ? `Task posted and sent to ${preferredRunner.name}.`
+            : "Task posted. We'll start matching a local runner.",
       );
       qc.invalidateQueries({ queryKey: ["my-tasks"] });
       setOpen(false);
@@ -156,8 +211,41 @@ export function PostTaskWizard({
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const saveTemplate = useMutation({
+    mutationFn: () => saveTemplateFn({
+      data: {
+        name: form.title.slice(0, 80) || `${selectedType?.label ?? "Task"} template`,
+        task_type: form.task_type,
+        title: form.title,
+        description: form.description || null,
+        default_payout: form.payout_amount ? Number(form.payout_amount) : null,
+      },
+    }),
+    onSuccess: () => {
+      toast.success("Saved to your templates.");
+      qc.invalidateQueries({ queryKey: ["my-task-templates-wizard"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  function applyTemplate(id: string) {
+    const tpl = templates.find((t) => t.id === id);
+    if (!tpl) return;
+    setForm((f) => ({
+      ...f,
+      title: tpl.title,
+      task_type: tpl.task_type,
+      description: tpl.description ?? "",
+      payout_amount: tpl.default_payout != null ? String(tpl.default_payout) : f.payout_amount,
+    }));
+    setInteriorTouched(false);
+    toast.success(`Loaded template: ${tpl.name}`);
+  }
+
   const canAdvanceStep1 = form.task_type && form.title.trim().length >= 2;
-  const canAdvanceStep2 = form.property_address.trim() && form.city.trim() && form.state.trim();
+  const canAdvanceStep2 = bulkMode
+    ? parsedBulk.length > 0
+    : (form.property_address.trim() && form.city.trim() && form.state.trim());
   const canSubmit = canAdvanceStep1 && canAdvanceStep2;
 
   const selectedType = TASK_TYPES.find((t) => t.value === form.task_type);
@@ -188,6 +276,27 @@ export function PostTaskWizard({
 
         {step === 1 && (
           <div className="space-y-4">
+            {templates.length > 0 && (
+              <div className="rounded-xl border border-border bg-card/40 p-3">
+                <div className="flex items-center gap-2 mb-2">
+                  <Bookmark className="size-3.5 text-primary" />
+                  <span className="text-xs uppercase tracking-wider text-muted-foreground">Use a template</span>
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                  {templates.slice(0, 8).map((t) => (
+                    <button
+                      key={t.id}
+                      type="button"
+                      onClick={() => applyTemplate(t.id)}
+                      className="text-xs rounded-md border border-border bg-background/60 px-2 py-1 hover:border-primary/50 hover:bg-primary/10"
+                    >
+                      {t.name}
+                      {t.is_system && <span className="ml-1 text-[10px] text-muted-foreground">(default)</span>}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
             <div>
               <Label className="mb-2 block">What do you need?</Label>
               <div className="grid grid-cols-2 gap-2">
@@ -248,6 +357,37 @@ export function PostTaskWizard({
 
         {step === 2 && (
           <div className="space-y-4">
+            <div className="flex items-center justify-between rounded-lg border border-border bg-muted/20 p-2.5">
+              <div className="flex items-center gap-2 text-sm">
+                <Layers className="size-4 text-primary" />
+                <span className="font-medium">Bulk post (multiple addresses)</span>
+              </div>
+              <Checkbox
+                checked={bulkMode}
+                onCheckedChange={(v) => setBulkMode(v === true)}
+              />
+            </div>
+
+            {bulkMode ? (
+              <div>
+                <Label htmlFor="bulk">Addresses — one per line, comma-separated</Label>
+                <Textarea
+                  id="bulk"
+                  rows={6}
+                  value={bulkText}
+                  onChange={(e) => setBulkText(e.target.value)}
+                  placeholder={"123 Main St, Austin, TX, 78701\n456 Oak Ave, Dallas, TX\n789 Pine Rd, Houston, TX, 77002"}
+                  className="font-mono text-xs"
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Format: <span className="font-mono">address, city, state, zip</span> (zip optional). Up to 50 at a time.
+                </p>
+                <div className="text-xs mt-2">
+                  Parsed: <span className="text-primary font-semibold">{parsedBulk.length}</span> task{parsedBulk.length === 1 ? "" : "s"}
+                </div>
+              </div>
+            ) : (
+              <>
             <div>
               <Label htmlFor="addr" className="flex items-center gap-1.5">
                 <MapPin className="size-3.5" /> Property address
@@ -274,6 +414,8 @@ export function PostTaskWizard({
                 <Input id="zip" value={form.zip_code} onChange={(e) => setForm({ ...form, zip_code: e.target.value })} />
               </div>
             </div>
+              </>
+            )}
             <div className="rounded-xl border border-border bg-muted/20 p-3 flex items-start gap-3">
               <Checkbox
                 id="requires-interior-wizard"
@@ -384,6 +526,19 @@ export function PostTaskWizard({
           >
             <ChevronLeft className="size-4 mr-1" /> Back
           </Button>
+          <div className="flex items-center gap-2">
+            {step === 3 && form.title.trim().length >= 2 && (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => saveTemplate.mutate()}
+                disabled={saveTemplate.isPending}
+              >
+                <Save className="size-3.5 mr-1" />
+                {saveTemplate.isPending ? "Saving…" : "Save as template"}
+              </Button>
+            )}
           {step < 3 ? (
             <Button
               type="button"
@@ -401,9 +556,10 @@ export function PostTaskWizard({
               className="bg-gradient-primary shadow-glow"
             >
               {create.isPending ? <Loader2 className="size-4 mr-2 animate-spin" /> : null}
-              Post task
+              {bulkMode ? `Post ${parsedBulk.length} tasks` : "Post task"}
             </Button>
           )}
+          </div>
         </DialogFooter>
       </DialogContent>
     </Dialog>

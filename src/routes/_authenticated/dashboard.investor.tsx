@@ -18,9 +18,9 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Loader2, MapPin, Calendar, DollarSign, CheckCircle2, XCircle, FileImage, ShieldCheck, Heart, Maximize2 } from "lucide-react";
+import { Loader2, MapPin, Calendar, DollarSign, CheckCircle2, XCircle, FileImage, ShieldCheck, Heart, Maximize2, Copy } from "lucide-react";
 import { toast } from "sonner";
-import { listMyTasks, getTaskDetail, reviewSubmission } from "@/lib/tasks.functions";
+import { listMyTasks, getTaskDetail, reviewSubmission, duplicateTask } from "@/lib/tasks.functions";
 import { getSignedDownloadUrl } from "@/lib/storage.functions";
 import { TaskFundingCheckout } from "@/components/payments/TaskFundingCheckout";
 import { TaskTipCheckout } from "@/components/payments/TaskTipCheckout";
@@ -181,6 +181,16 @@ function InvestorTaskCard({ task }: { task: Task }) {
   const [open, setOpen] = useState(false);
   const [fundOpen, setFundOpen] = useState(false);
   const [tipOpen, setTipOpen] = useState(false);
+  const qc = useQueryClient();
+  const dupFn = useServerFn(duplicateTask);
+  const dup = useMutation({
+    mutationFn: () => dupFn({ data: { taskId: task.id } }),
+    onSuccess: () => {
+      toast.success("Duplicated. Find it under Active.");
+      qc.invalidateQueries({ queryKey: ["my-tasks"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
   const needsFunding = !task.funded && task.payout_amount != null && Number(task.payout_amount) > 0;
   const canTip = task.status === "approved" || task.status === "paid";
   return (
@@ -267,6 +277,10 @@ function InvestorTaskCard({ task }: { task: Task }) {
             <InvestorTaskPanel task={task} onDone={() => setOpen(false)} />
           </DialogContent>
           </Dialog>
+          <Button size="sm" variant="ghost" onClick={() => dup.mutate()} disabled={dup.isPending} title="Duplicate this task">
+            {dup.isPending ? <Loader2 className="size-3.5 animate-spin" /> : <Copy className="size-3.5" />}
+            <span className="hidden sm:inline">Duplicate</span>
+          </Button>
         </div>
       </div>
       <div className="mt-4 pt-3 border-t border-border/60">
