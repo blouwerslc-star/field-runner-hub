@@ -74,5 +74,34 @@ export async function initNativeShell(onDeepLink?: (path: string) => void) {
         onDeepLink?.(path);
       } catch {}
     });
+    // Android hardware back button. Without this, the default behavior can
+    // reload the WebView start URL or exit unexpectedly, which on a logged-in
+    // dashboard looks like a sign-out. Priority:
+    //  1. If a Radix overlay (Sheet/Dialog/Popover) is open, close it.
+    //  2. Else if browser has history, go back.
+    //  3. Else minimize the app (don't exit; don't sign user out).
+    App.addListener("backButton", async () => {
+      try {
+        // Close any open Radix overlay by dispatching Escape — Radix listens
+        // for it on document and unmounts the topmost layer.
+        const hasOverlay = document.querySelector(
+          '[data-state="open"][role="dialog"], [data-radix-popper-content-wrapper]',
+        );
+        if (hasOverlay) {
+          document.dispatchEvent(
+            new KeyboardEvent("keydown", { key: "Escape", bubbles: true }),
+          );
+          return;
+        }
+        if (window.history.length > 1) {
+          window.history.back();
+          return;
+        }
+        await App.minimizeApp().catch(async () => {
+          // iOS has no minimizeApp; fall through silently. Never exit the app
+          // automatically — it confuses users into thinking they were signed out.
+        });
+      } catch {}
+    });
   } catch {}
 }
