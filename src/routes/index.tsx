@@ -52,6 +52,7 @@ import { getCoveragePoints } from "@/lib/public-stats.functions";
 import { MarketplaceMap, type MapPoint } from "@/components/maps/MarketplaceMap";
 import { TestimonialsSection } from "@/components/landing/TestimonialsSection";
 import { SampleDeliverablesSection } from "@/components/landing/SampleDeliverablesSection";
+import { MobileDrawer } from "@/components/navigation/MobileDrawer";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -449,16 +450,6 @@ function Index() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // Lock body scroll while the mobile drawer is open.
-  useEffect(() => {
-    if (!mobileNavOpen) return;
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = prev;
-    };
-  }, [mobileNavOpen]);
-
   const closeNavThen = (fn: () => void) => () => {
     setMobileNavOpen(false);
     setTimeout(fn, 80);
@@ -517,30 +508,14 @@ function Index() {
         </div>
       </header>
 
-      {/* Mobile drawer — plain fixed elements (no Radix portal) for reliable
-          rendering inside the Android Capacitor WebView. */}
-      <div
-        aria-hidden={!mobileNavOpen}
-        className={`md:hidden fixed inset-0 z-[60] transition-opacity duration-200 ${
-          mobileNavOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
-        }`}
+      <MobileDrawer
+        open={mobileNavOpen}
+        onClose={() => setMobileNavOpen(false)}
+        id="landing-mobile-drawer"
+        label="Menu"
+        hiddenAt="md"
+        className="sm:max-w-sm"
       >
-        <button
-          type="button"
-          aria-label="Close menu"
-          tabIndex={mobileNavOpen ? 0 : -1}
-          onClick={() => setMobileNavOpen(false)}
-          className="absolute inset-0 bg-black/70"
-        />
-        <aside
-          id="landing-mobile-drawer"
-          role="dialog"
-          aria-modal="true"
-          aria-label="Menu"
-          className={`absolute top-0 right-0 h-full w-[85vw] sm:max-w-sm bg-background border-l border-border/60 shadow-2xl flex flex-col transition-transform duration-300 ease-out pt-safe ${
-            mobileNavOpen ? "translate-x-0" : "translate-x-full"
-          }`}
-        >
           <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-border/60">
             <BrandLogo />
             <button
@@ -620,8 +595,7 @@ function Index() {
               Sign in
             </Link>
           </div>
-        </aside>
-      </div>
+      </MobileDrawer>
 
       {/* HERO */}
       <section id="top" className="relative isolate overflow-hidden">

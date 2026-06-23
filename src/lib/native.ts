@@ -85,7 +85,7 @@ export async function initNativeShell(onDeepLink?: (path: string) => void) {
         // Close any open Radix overlay by dispatching Escape — Radix listens
         // for it on document and unmounts the topmost layer.
         const hasOverlay = document.querySelector(
-          '[data-state="open"][role="dialog"], [data-radix-popper-content-wrapper]',
+          '[data-state="open"][role="dialog"], [data-mobile-drawer-root][data-state="open"], [data-radix-popper-content-wrapper]',
         );
         if (hasOverlay) {
           document.dispatchEvent(
