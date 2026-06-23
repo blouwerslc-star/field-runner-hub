@@ -1,89 +1,118 @@
-# REI Runner Growth & Scale Rollout
+## Phase 9 — Task-Only GPS Tracking
 
-This is an 8-system platform upgrade. I'll ship it in phased milestones so each phase is shippable on its own and the next builds on solid ground. Each phase is roughly one focused build pass.
+A privacy-respecting GPS layer that only runs while a runner is actively working an assigned task. Built on the existing tasks/notifications stack, Mapbox (token already configured), and Supabase Realtime.
 
-## Sequencing (why this order)
+### 1. Database (one migration)
 
-```text
-Foundations → Trust/Proof → Engagement → Growth loops
-  1. Real-time task tracking      ← schema everything else hangs off
-  2. Coverage / growth map        ← public proof + SEO surface
-  3. Academy certifications       ← runner trust + investor filter
-  4. Investor analytics dashboard ← retention + sales surface
-  5. Referral program             ← growth loop
-  6. SMS notifications            ← lifecycle channel
-  7. Automated email nurturing    ← lifecycle channel (uses Lovable Emails)
-  8. PWA polish (already started) ← push notifications + offline shell
-```
+**Add columns to `tasks`:**
+- `property_lat numeric(9,6)`, `property_lng numeric(9,6)` — geocoded once on task post/update
+- `geofence_radius_ft integer default 250`
+- `runner_state text` — one of `accepted | en_route | arrived | in_progress | completed | verified` (parallel to existing `status`; existing flows untouched)
+- `runner_state_at timestamptz` columns per transition (`accepted_at`, `en_route_at`, `arrived_at`, `started_at`, `completed_at`, `verified_at`)
+- `tracking_active boolean default false`
+- `last_ping_at timestamptz`, `last_ping_within_geofence boolean`
 
-PWA installability was wired this turn (manifest + icons + meta). Phase 8 finishes it (push + offline shell) once push-worthy events from phases 1, 5, 6 exist.
+**New table `task_location_pings`:**
+- `id uuid pk`, `task_id uuid fk`, `runner_id uuid`, `investor_id uuid`
+- `latitude numeric(9,6)`, `longitude numeric(9,6)`, `accuracy_m numeric`, `speed_mps numeric`, `heading_deg numeric`
+- `runner_state text`, `within_geofence boolean`, `distance_ft numeric`
+- `created_at timestamptz default now()`
+- Indexes: `(task_id, created_at desc)`, `(runner_id, created_at desc)`
 
-## Phase 1 — Real-time task tracking (Uber-style)
+**New table `task_permission_events`** — logs permission grants/denials/failures for admin audit.
 
-- Extend `tasks.status` enum: `posted, accepted, en_route, on_site, in_progress, completed, verified` (keep existing values mapped).
-- New `task_status_events` table (task_id, from_status, to_status, actor_id, note, location?, created_at) — append-only timeline.
-- Trigger on `tasks` status change → insert event row + notification.
-- Runner detail view: status action buttons gated by current status. Optional geolocation capture on `en_route` / `on_site`.
-- Investor task view: vertical timeline component subscribed to `task_status_events` via Supabase Realtime.
-- Add `verified` action for investors after `completed`.
+**Realtime:** add both tables to `supabase_realtime` publication.
 
-## Phase 2 — Public coverage & marketplace growth map
+**RLS (strict):**
+- Pings: runner can INSERT only when `runner_id = auth.uid()` AND assigned to that task AND `tracking_active = true`. SELECT visible only to assigned runner, assigned investor, and admin. No anon.
+- Tasks geofence columns: read via existing tasks RLS; investor sees `property_lat/lng` only for tasks they own; runner sees only for their assigned tasks. Implemented via a security-definer `get_task_geofence(task_id)` returning the safe subset.
+- Admin override RPC: `admin_override_task_completion(task_id, reason)` — admin-only via `has_role`.
 
-- New public route `/coverage` (SSR, full head/OG metadata).
-- Server fn aggregates from `profiles` + `tasks`: runners per state/city, tasks completed, states covered, cities covered, recent signups, 7-day deltas. Cached in a materialized view refreshed hourly via pg_cron.
-- Mapbox map (token already in secrets) with state choropleth + city density bubbles + "recently joined" pins.
-- Live stat strip (totals + weekly growth) reused on homepage hero.
-- "Underserved markets" panel: cities with investor demand but <N runners → CTA to apply.
+**Geofence helper:** SQL function `haversine_ft(lat1, lng1, lat2, lng2)` for distance computation; trigger on ping insert auto-fills `within_geofence` and `distance_ft` and updates `tasks.last_ping_*`.
 
-## Phase 3 — Academy certifications
+**Auto-stop trigger:** when `tasks.runner_state` becomes `completed`/`verified` or `tasks.status` becomes `cancelled`, set `tracking_active = false`.
 
-- Tables already exist (`academy_courses`, `lessons`, `quizzes`, `quiz_results`, `certifications`). Wire the missing pieces:
-  - Certification definitions for Photography, Occupancy Verification, Lockbox Install, Property Walkthroughs, Field Safety.
-  - Award flow: pass quiz ≥80% → insert `academy_certifications` row → badge appears on runner profile.
-  - PDF certificate generator (server fn, html-to-pdf via a Worker-compatible lib or simple printable page).
-  - Investor-side runner directory: filter chips by certification.
+### 2. Server logic (`createServerFn`)
 
-## Phase 4 — Investor analytics dashboard
+`src/lib/tracking.functions.ts`:
+- `startTracking({ taskId })` — verifies caller is assigned runner; sets `runner_state='en_route'`, `tracking_active=true`, stamps `en_route_at`.
+- `transitionRunnerState({ taskId, state })` — validates transition (accepted→en_route→arrived→in_progress→completed); stamps the matching timestamp; on `completed` also flips `tracking_active=false`.
+- `submitPing({ taskId, lat, lng, accuracy, speed, heading })` — inserts into `task_location_pings`. Server validates assignment + `tracking_active=true`.
+- `stopTracking({ taskId, reason })` — runner can stop manually; flips flag, logs reason.
+- `logPermissionEvent({ taskId, outcome, error })` — records denied/unavailable.
 
-- New tab on investor dashboard `/dashboard/investor/analytics`.
-- Server fns return: task counts by status, completion rate, avg time-to-complete, active runners in their served markets, spend total + monthly trend, coverage map of their tasks.
-- Charts via Recharts. Date-range picker, CSV export.
+`src/lib/tracking-admin.functions.ts`:
+- `getTaskTrail({ taskId })` — admin/investor/runner-scoped; returns ordered pings.
+- `flagSuspiciousTasks()` — admin list: tasks completed with last ping outside geofence.
+- `adminOverrideCompletion({ taskId, reason })` — admin-only.
 
-## Phase 5 — Referral program
+`src/lib/geocoding.server.ts`:
+- `geocodeAddress(address, city, state, zip)` via Mapbox forward geocoding using `MAPBOX_PUBLIC_TOKEN`.
+- Called from existing task create/update server fns to fill `property_lat/lng` (one-shot, cached).
 
-- `referrals` table (referrer_id, code unique, referred_user_id?, role, signed_up_at, qualified_at, reward_status).
-- Generate code on profile create. Public `/r/:code` page sets cookie, attribution captured at signup.
-- Referral dashboard widget for both roles: link, copy/share buttons, list of invited users, status pills.
-- Hooks for future reward payouts (status enum: `pending → qualified → rewarded`).
+### 3. Runner UX (mobile-first)
 
-## Phase 6 — SMS notifications
+`src/components/tracking/TaskTrackingPanel.tsx` (rendered inside the existing task detail / runner dashboard):
+- **Status pill** showing current `runner_state` with action button:
+  - Accepted → **Start Navigation** (consent sheet → permission → state=en_route → `watchPosition` starts)
+  - En Route → **I've Arrived** (only enabled when geofence-inside)
+  - Arrived → **Start Task**
+  - In Progress → **Complete Task** (warns + requires confirmation if outside geofence)
+- **Consent sheet** (`TrackingConsentSheet.tsx`) — explains exactly what's tracked, when it stops, who sees it. Required before first start.
+- **TrackingActiveBanner** — persistent top bar while `tracking_active=true`: pulsing dot + "Tracking active for [task title] · Stop".
+- **useTaskTracking() hook** — owns `navigator.geolocation.watchPosition`; throttles to one ping per 20 s OR ≥30 m movement (Haversine). Pings the server fn. Auto-stops on unmount, on `visibilitychange` to hidden for >5 min, on task state transition, and when the page unloads. Backoff and retry on transient network failures; buffers up to 20 pings while offline (already cached by PWA SW) and flushes on reconnect.
+- Permission denial / position-unavailable → fallback UI, logs permission event, surfaces "Enable location to continue this task" with retry.
 
-- Use **Twilio connector** (already preferred path on Lovable).
-- `user_notification_preferences` table: per-channel (email/sms/push) per-event toggles.
-- Phone verification flow (send code, verify).
-- Server-side dispatcher fn called from existing notification triggers — fans out to SMS when user has phone verified + opted in.
-- Settings page for prefs.
+### 4. Investor UX
 
-## Phase 7 — Automated email nurturing
+`src/routes/_authenticated/tasks.$taskId.tracking.tsx`:
+- **Map** (Mapbox GL) showing property marker, geofence circle, runner's latest ping with timestamp + accuracy.
+- **Status timeline** — accepted → en route → arrived → in progress → completed → verified with timestamps.
+- **Inside radius?** badge — green/red.
+- Realtime channel subscribed to `task_location_pings` filtered by `task_id` for live updates.
+- Submission view augmented: completion photos + GPS verification stamp side-by-side.
 
-- Use Lovable Emails (infra already set up per the email_send_log table).
-- Scaffold templates: welcome (runner), welcome (investor), incomplete-application reminder (24h/72h), academy progress nudges, task posted/assigned/completed, weekly digest, re-engagement (14d/30d inactive).
-- Trigger via pg_cron job that scans state tables and enqueues into `transactional_emails` queue with idempotency keys.
-- Admin segment view (read-only) backed by existing `email_send_log` for visibility.
+### 5. Admin UX
 
-## Phase 8 — PWA finish
+`src/routes/_authenticated/admin/tracking.tsx`:
+- Tab: **Flagged tasks** — list of completed tasks where last ping was outside geofence or no pings exist.
+- Detail drill-in: full ping trail rendered as polyline on Mapbox, ping list with timestamps/accuracy/distance, permission event log, "Verify" and "Override completion" buttons.
 
-- Web push via OneSignal (already integrated — `initOneSignal` exists). Wire push events for task status changes, messages, referrals.
-- Optional: vite-plugin-pwa with `generateSW`, NetworkFirst for navigations, guarded registration for preview safety (per the PWA skill).
-- Pull-to-refresh + bottom-tab nav for installed-app feel on mobile dashboards.
+### 6. Privacy guarantees enforced
 
-## Cross-cutting
+- Server fn refuses pings when `tasks.runner_state ∈ {completed, verified, cancelled}` or `tracking_active=false`.
+- Auto-stop trigger on terminal states.
+- `last_active_at` heartbeat on the runner page; if no ping/heartbeat for 10 min, server fn `sweepStaleTracking` (cron, daily-but-can-be-frequent) flips `tracking_active=false` and inserts a `task_status_events` "tracking_auto_stopped" entry.
+- RLS scopes pings to (runner, investor, admin) only.
+- Runner-visible "Stop tracking" button always available.
+- No tracking outside an active task window — there is no `users.location` table at all.
 
-- **Marketplace stats** surfaced from a shared `useMarketplaceStats()` hook (homepage, coverage page, footer, dashboards).
-- **SEO**: every new public route gets head() with title, description, og:title/desc/image, twitter card.
-- **RLS**: every new table ships with grants + policies in the same migration.
-- **Mobile-first**: every new screen designed at 411px first.
+### 7. Geocoding lifecycle
 
-## What I need from you to start
+- On task create/update of address fields, call `geocodeAddress` → fill `property_lat/lng`. If geocoding fails, task still posts but tracking marks `geofence_unknown` and skips the inside-radius check (admin gets a "missing coordinates" flag).
 
-Pick the entry point — I recommend starting with **Phase 1 (real-time task tracking)** because the status timeline is referenced by phases 4, 6, 7, and 8. Reply with the phase number (or "1" to start there) and I'll begin building immediately. If you'd rather I reshuffle the order (e.g. coverage map first for marketing), say so.
+### Files to create
+- `supabase/migrations/<ts>_task_gps_tracking.sql`
+- `src/lib/tracking.functions.ts`
+- `src/lib/tracking-admin.functions.ts`
+- `src/lib/geocoding.server.ts`
+- `src/hooks/useTaskTracking.ts`
+- `src/components/tracking/TaskTrackingPanel.tsx`
+- `src/components/tracking/TrackingConsentSheet.tsx`
+- `src/components/tracking/TrackingActiveBanner.tsx`
+- `src/components/tracking/TaskMap.tsx` (Mapbox wrapper — geofence circle + markers + trail polyline)
+- `src/routes/_authenticated/tasks.$taskId.tracking.tsx`
+- `src/routes/_authenticated/admin/tracking.tsx`
+
+### Files to edit
+- `src/lib/tasks.functions.ts` — call geocoder on create/update; expose `runner_state` transitions
+- Runner dashboard / task detail — mount `TaskTrackingPanel`
+- Investor dashboard / task detail — add "Track runner" link
+- Admin nav — add Tracking entry
+- `src/routes/__root.tsx` — mount `TrackingActiveBanner` so it persists across routes
+- `src/integrations/supabase/types.ts` (regen)
+
+### Out of scope (call out, don't build)
+- Background tracking when the PWA tab is fully closed — browsers don't allow it. Tracking pauses when the tab is backgrounded by the OS; we surface this clearly in the consent sheet ("keep this screen open while on the way"). Native background tracking would require Capacitor `@capacitor/geolocation` + a foreground service, which we can add later if needed.
+
+Reply **go** to build, or tell me what to change.

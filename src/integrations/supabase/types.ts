@@ -2221,6 +2221,100 @@ export type Database = {
           },
         ]
       }
+      task_location_pings: {
+        Row: {
+          accuracy_m: number | null
+          created_at: string
+          distance_ft: number | null
+          heading_deg: number | null
+          id: string
+          investor_id: string | null
+          latitude: number
+          longitude: number
+          runner_id: string
+          runner_state: string | null
+          speed_mps: number | null
+          task_id: string
+          within_geofence: boolean | null
+        }
+        Insert: {
+          accuracy_m?: number | null
+          created_at?: string
+          distance_ft?: number | null
+          heading_deg?: number | null
+          id?: string
+          investor_id?: string | null
+          latitude: number
+          longitude: number
+          runner_id: string
+          runner_state?: string | null
+          speed_mps?: number | null
+          task_id: string
+          within_geofence?: boolean | null
+        }
+        Update: {
+          accuracy_m?: number | null
+          created_at?: string
+          distance_ft?: number | null
+          heading_deg?: number | null
+          id?: string
+          investor_id?: string | null
+          latitude?: number
+          longitude?: number
+          runner_id?: string
+          runner_state?: string | null
+          speed_mps?: number | null
+          task_id?: string
+          within_geofence?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "task_location_pings_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      task_permission_events: {
+        Row: {
+          created_at: string
+          error_message: string | null
+          id: string
+          outcome: string
+          runner_id: string
+          task_id: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          outcome: string
+          runner_id: string
+          task_id?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          outcome?: string
+          runner_id?: string
+          task_id?: string | null
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "task_permission_events_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       task_status_events: {
         Row: {
           actor_id: string | null
@@ -2386,84 +2480,132 @@ export type Database = {
       }
       tasks: {
         Row: {
+          accepted_at: string | null
           admin_notes: string | null
+          arrived_at: string | null
           city: string
+          completed_at: string | null
           created_at: string
           deliverable_url: string | null
           description: string | null
           due_date: string | null
+          en_route_at: string | null
           funded: boolean
           funding_payment_id: string | null
+          geofence_radius_ft: number
           id: string
           investor_id: string | null
+          last_ping_at: string | null
+          last_ping_distance_ft: number | null
+          last_ping_lat: number | null
+          last_ping_lng: number | null
+          last_ping_within_geofence: boolean | null
           payout_amount: number | null
           preferred_runner_id: string | null
           property_address: string
+          property_lat: number | null
+          property_lng: number | null
           recurrence_active: boolean
           recurrence_next_at: string | null
           recurrence_parent_id: string | null
           recurrence_rule: string | null
           requires_interior_access: boolean
           runner_id: string | null
+          runner_state: string | null
+          started_at: string | null
           state: string
           status: string
           task_type: string
           title: string
+          tracking_active: boolean
           updated_at: string
+          verified_at: string | null
           zip_code: string | null
         }
         Insert: {
+          accepted_at?: string | null
           admin_notes?: string | null
+          arrived_at?: string | null
           city: string
+          completed_at?: string | null
           created_at?: string
           deliverable_url?: string | null
           description?: string | null
           due_date?: string | null
+          en_route_at?: string | null
           funded?: boolean
           funding_payment_id?: string | null
+          geofence_radius_ft?: number
           id?: string
           investor_id?: string | null
+          last_ping_at?: string | null
+          last_ping_distance_ft?: number | null
+          last_ping_lat?: number | null
+          last_ping_lng?: number | null
+          last_ping_within_geofence?: boolean | null
           payout_amount?: number | null
           preferred_runner_id?: string | null
           property_address: string
+          property_lat?: number | null
+          property_lng?: number | null
           recurrence_active?: boolean
           recurrence_next_at?: string | null
           recurrence_parent_id?: string | null
           recurrence_rule?: string | null
           requires_interior_access?: boolean
           runner_id?: string | null
+          runner_state?: string | null
+          started_at?: string | null
           state: string
           status?: string
           task_type: string
           title: string
+          tracking_active?: boolean
           updated_at?: string
+          verified_at?: string | null
           zip_code?: string | null
         }
         Update: {
+          accepted_at?: string | null
           admin_notes?: string | null
+          arrived_at?: string | null
           city?: string
+          completed_at?: string | null
           created_at?: string
           deliverable_url?: string | null
           description?: string | null
           due_date?: string | null
+          en_route_at?: string | null
           funded?: boolean
           funding_payment_id?: string | null
+          geofence_radius_ft?: number
           id?: string
           investor_id?: string | null
+          last_ping_at?: string | null
+          last_ping_distance_ft?: number | null
+          last_ping_lat?: number | null
+          last_ping_lng?: number | null
+          last_ping_within_geofence?: boolean | null
           payout_amount?: number | null
           preferred_runner_id?: string | null
           property_address?: string
+          property_lat?: number | null
+          property_lng?: number | null
           recurrence_active?: boolean
           recurrence_next_at?: string | null
           recurrence_parent_id?: string | null
           recurrence_rule?: string | null
           requires_interior_access?: boolean
           runner_id?: string | null
+          runner_state?: string | null
+          started_at?: string | null
           state?: string
           status?: string
           task_type?: string
           title?: string
+          tracking_active?: boolean
           updated_at?: string
+          verified_at?: string | null
           zip_code?: string | null
         }
         Relationships: [
@@ -2684,6 +2826,10 @@ export type Database = {
       }
     }
     Functions: {
+      admin_override_task_completion: {
+        Args: { _reason: string; _task_id: string }
+        Returns: undefined
+      }
       delete_email: {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
@@ -2708,6 +2854,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      haversine_ft: {
+        Args: { lat1: number; lat2: number; lng1: number; lng2: number }
+        Returns: number
+      }
       is_conversation_participant: {
         Args: { _conv_id: string; _user_id: string }
         Returns: boolean
@@ -2729,6 +2879,7 @@ export type Database = {
           read_ct: number
         }[]
       }
+      sweep_stale_tracking: { Args: { _minutes?: number }; Returns: number }
     }
     Enums: {
       app_role: "runner" | "investor" | "admin"
