@@ -3,7 +3,9 @@ import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
-import { finalizeSignupProfile } from "@/lib/signup.functions";
+import { finalizeSignupProfile, ensureUserSetup } from "@/lib/signup.functions";
+import { logSignupFailure } from "@/lib/spam-protection.functions";
+import { friendlySignupError, errorCodeFor, type FriendlyError } from "@/lib/signup-errors";
 import { trackSignup } from "@/lib/tracking";
 import { getPendingReferralCode, clearPendingReferralCode } from "@/lib/referral-tracking";
 import { Button } from "@/components/ui/button";
@@ -47,6 +49,8 @@ function SignupPage() {
   const { role, redirect } = Route.useSearch();
   const navigate = useNavigate();
   const finalizeProfile = useServerFn(finalizeSignupProfile);
+  const ensureSetup = useServerFn(ensureUserSetup);
+  const logFailure = useServerFn(logSignupFailure);
   const [activeRole, setActiveRole] = useState<RoleParam | null>(role ?? null);
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -54,7 +58,7 @@ function SignupPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [phone, setPhone] = useState("");
   const [loading, setLoading] = useState(false);
-  const [formError, setFormError] = useState<string | null>(null);
+  const [formError, setFormError] = useState<FriendlyError | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const [debug, setDebug] = useState<{ authUserId: string; email: string; role: RoleParam; profileStatus: string } | null>(null);
 
@@ -92,21 +96,56 @@ function SignupPage() {
           },
         },
       });
-      if (error) throw error;
+      if (error) {
+        // Log auth failure for admin visibility, then surface a friendly message.
+        void logFailure({
+          data: {
+            email,
+            role: activeRole,
+            stage: "auth_signup",
+            error_code: errorCodeFor(error),
+            error_message: error.message,
+          },
+        }).catch(() => {});
+        throw error;
+      }
       if (!data.user) throw new Error("Sign-up didn't return a user. Please try again.");
       clearPendingReferralCode();
       let profileStatus = "Created by database trigger; sign in after email verification to confirm profile access.";
       if (data.session) {
-        const result = await finalizeProfile({
-          data: {
-            userId: data.user.id,
-            email: data.user.email ?? email,
-            full_name: fullName,
-            phone,
-            role: activeRole,
-          },
-        });
-        profileStatus = result.profileStatus;
+        try {
+          const result = await finalizeProfile({
+            data: {
+              userId: data.user.id,
+              email: data.user.email ?? email,
+              full_name: fullName,
+              phone,
+              role: activeRole,
+            },
+          });
+          profileStatus = result.profileStatus;
+        } catch (finalizeErr) {
+          // Profile finalize failed — log and self-heal so the user isn't stuck.
+          const fmsg = finalizeErr instanceof Error ? finalizeErr.message : String(finalizeErr);
+          void logFailure({
+            data: {
+              email,
+              role: activeRole,
+              stage: "profile_finalize",
+              error_code: errorCodeFor(finalizeErr),
+              error_message: fmsg,
+            },
+          }).catch(() => {});
+          try {
+            await ensureSetup({
+              data: { preferred_role: activeRole, full_name: fullName },
+            });
+            profileStatus = "Auto-recovered via self-heal.";
+          } catch {
+            // swallow — user can still sign in; _authenticated will self-heal next visit
+            profileStatus = "Profile will be completed on first sign-in.";
+          }
+        }
       }
       setDebug({ authUserId: data.user.id, email: data.user.email ?? email, role: activeRole, profileStatus });
       trackSignup(activeRole);
@@ -117,9 +156,9 @@ function SignupPage() {
       toast.success("Account created.");
       navigate({ to: postSignupRedirect, replace: true });
     } catch (err) {
-      const msg = err instanceof Error ? err.message : "Signup failed";
-      setFormError(msg);
-      toast.error(msg);
+      const friendly = friendlySignupError(err);
+      setFormError(friendly);
+      toast.error(friendly.title);
     } finally {
       setLoading(false);
     }
@@ -229,8 +268,27 @@ function SignupPage() {
             {formError && (
               <Alert variant="destructive">
                 <AlertCircle className="size-4" />
-                <AlertTitle>Sign-up failed</AlertTitle>
-                <AlertDescription>{formError}</AlertDescription>
+                <AlertTitle>{formError.title}</AlertTitle>
+                <AlertDescription className="space-y-2">
+                  <p>{formError.message}</p>
+                  <div className="flex flex-wrap gap-3 text-sm">
+                    {formError.action === "sign_in" && (
+                      <Link to="/login" search={{ redirect: postSignupRedirect }} className="underline font-medium">
+                        Sign in instead
+                      </Link>
+                    )}
+                    {formError.action === "reset_password" && (
+                      <Link to="/forgot-password" className="underline font-medium">
+                        Reset password
+                      </Link>
+                    )}
+                    {(formError.action === "contact_support" || !formError.action) && (
+                      <a href="mailto:support@reirunner.com" className="underline font-medium">
+                        Email support
+                      </a>
+                    )}
+                  </div>
+                </AlertDescription>
               </Alert>
             )}
             {debug && (

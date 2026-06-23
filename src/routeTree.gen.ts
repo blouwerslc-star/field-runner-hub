@@ -81,6 +81,7 @@ import { Route as AuthenticatedDashboardFavoritesRouteImport } from './routes/_a
 import { Route as AuthenticatedDashboardAnalyticsRouteImport } from './routes/_authenticated/dashboard.analytics'
 import { Route as AuthenticatedAdminVerificationsRouteImport } from './routes/_authenticated/admin.verifications'
 import { Route as AuthenticatedAdminTrackingRouteImport } from './routes/_authenticated/admin.tracking'
+import { Route as AuthenticatedAdminSignupFailuresRouteImport } from './routes/_authenticated/admin.signup-failures'
 import { Route as AuthenticatedAdminRunnerApprovalsRouteImport } from './routes/_authenticated/admin.runner-approvals'
 import { Route as AuthenticatedAdminPushTestRouteImport } from './routes/_authenticated/admin.push-test'
 import { Route as AuthenticatedAdminProfilesRouteImport } from './routes/_authenticated/admin.profiles'
@@ -501,6 +502,12 @@ const AuthenticatedAdminTrackingRoute =
     path: '/tracking',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminSignupFailuresRoute =
+  AuthenticatedAdminSignupFailuresRouteImport.update({
+    id: '/signup-failures',
+    path: '/signup-failures',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminRunnerApprovalsRoute =
   AuthenticatedAdminRunnerApprovalsRouteImport.update({
     id: '/runner-approvals',
@@ -724,6 +731,7 @@ export interface FileRoutesByFullPath {
   '/admin/profiles': typeof AuthenticatedAdminProfilesRoute
   '/admin/push-test': typeof AuthenticatedAdminPushTestRoute
   '/admin/runner-approvals': typeof AuthenticatedAdminRunnerApprovalsRoute
+  '/admin/signup-failures': typeof AuthenticatedAdminSignupFailuresRoute
   '/admin/tracking': typeof AuthenticatedAdminTrackingRoute
   '/admin/verifications': typeof AuthenticatedAdminVerificationsRoute
   '/dashboard/analytics': typeof AuthenticatedDashboardAnalyticsRoute
@@ -820,6 +828,7 @@ export interface FileRoutesByTo {
   '/admin/profiles': typeof AuthenticatedAdminProfilesRoute
   '/admin/push-test': typeof AuthenticatedAdminPushTestRoute
   '/admin/runner-approvals': typeof AuthenticatedAdminRunnerApprovalsRoute
+  '/admin/signup-failures': typeof AuthenticatedAdminSignupFailuresRoute
   '/admin/tracking': typeof AuthenticatedAdminTrackingRoute
   '/admin/verifications': typeof AuthenticatedAdminVerificationsRoute
   '/dashboard/analytics': typeof AuthenticatedDashboardAnalyticsRoute
@@ -923,6 +932,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/profiles': typeof AuthenticatedAdminProfilesRoute
   '/_authenticated/admin/push-test': typeof AuthenticatedAdminPushTestRoute
   '/_authenticated/admin/runner-approvals': typeof AuthenticatedAdminRunnerApprovalsRoute
+  '/_authenticated/admin/signup-failures': typeof AuthenticatedAdminSignupFailuresRoute
   '/_authenticated/admin/tracking': typeof AuthenticatedAdminTrackingRoute
   '/_authenticated/admin/verifications': typeof AuthenticatedAdminVerificationsRoute
   '/_authenticated/dashboard/analytics': typeof AuthenticatedDashboardAnalyticsRoute
@@ -1026,6 +1036,7 @@ export interface FileRouteTypes {
     | '/admin/profiles'
     | '/admin/push-test'
     | '/admin/runner-approvals'
+    | '/admin/signup-failures'
     | '/admin/tracking'
     | '/admin/verifications'
     | '/dashboard/analytics'
@@ -1122,6 +1133,7 @@ export interface FileRouteTypes {
     | '/admin/profiles'
     | '/admin/push-test'
     | '/admin/runner-approvals'
+    | '/admin/signup-failures'
     | '/admin/tracking'
     | '/admin/verifications'
     | '/dashboard/analytics'
@@ -1224,6 +1236,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/profiles'
     | '/_authenticated/admin/push-test'
     | '/_authenticated/admin/runner-approvals'
+    | '/_authenticated/admin/signup-failures'
     | '/_authenticated/admin/tracking'
     | '/_authenticated/admin/verifications'
     | '/_authenticated/dashboard/analytics'
@@ -1817,6 +1830,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminTrackingRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/signup-failures': {
+      id: '/_authenticated/admin/signup-failures'
+      path: '/signup-failures'
+      fullPath: '/admin/signup-failures'
+      preLoaderRoute: typeof AuthenticatedAdminSignupFailuresRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/runner-approvals': {
       id: '/_authenticated/admin/runner-approvals'
       path: '/runner-approvals'
@@ -2066,6 +2086,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminProfilesRoute: typeof AuthenticatedAdminProfilesRoute
   AuthenticatedAdminPushTestRoute: typeof AuthenticatedAdminPushTestRoute
   AuthenticatedAdminRunnerApprovalsRoute: typeof AuthenticatedAdminRunnerApprovalsRoute
+  AuthenticatedAdminSignupFailuresRoute: typeof AuthenticatedAdminSignupFailuresRoute
   AuthenticatedAdminTrackingRoute: typeof AuthenticatedAdminTrackingRoute
   AuthenticatedAdminVerificationsRoute: typeof AuthenticatedAdminVerificationsRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
@@ -2086,6 +2107,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminPushTestRoute: AuthenticatedAdminPushTestRoute,
   AuthenticatedAdminRunnerApprovalsRoute:
     AuthenticatedAdminRunnerApprovalsRoute,
+  AuthenticatedAdminSignupFailuresRoute: AuthenticatedAdminSignupFailuresRoute,
   AuthenticatedAdminTrackingRoute: AuthenticatedAdminTrackingRoute,
   AuthenticatedAdminVerificationsRoute: AuthenticatedAdminVerificationsRoute,
   AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
@@ -2275,13 +2297,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

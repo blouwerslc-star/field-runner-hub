@@ -1994,30 +1994,39 @@ export type Database = {
           blocked: boolean
           created_at: string
           email: string | null
+          error_code: string | null
+          error_message: string | null
           id: string
           ip_hash: string | null
           reason: string | null
           role: string | null
+          stage: string | null
           user_agent: string | null
         }
         Insert: {
           blocked?: boolean
           created_at?: string
           email?: string | null
+          error_code?: string | null
+          error_message?: string | null
           id?: string
           ip_hash?: string | null
           reason?: string | null
           role?: string | null
+          stage?: string | null
           user_agent?: string | null
         }
         Update: {
           blocked?: boolean
           created_at?: string
           email?: string | null
+          error_code?: string | null
+          error_message?: string | null
           id?: string
           ip_hash?: string | null
           reason?: string | null
           role?: string | null
+          stage?: string | null
           user_agent?: string | null
         }
         Relationships: []
