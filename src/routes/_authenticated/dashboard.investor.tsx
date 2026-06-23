@@ -18,9 +18,9 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Loader2, MapPin, Calendar, DollarSign, CheckCircle2, XCircle, FileImage, ShieldCheck, Heart, Maximize2, Copy } from "lucide-react";
+import { Loader2, MapPin, Calendar, DollarSign, CheckCircle2, XCircle, FileImage, ShieldCheck, Heart, Maximize2, Copy, Repeat, Pause, Play } from "lucide-react";
 import { toast } from "sonner";
-import { listMyTasks, getTaskDetail, reviewSubmission, duplicateTask } from "@/lib/tasks.functions";
+import { listMyTasks, getTaskDetail, reviewSubmission, duplicateTask, toggleTaskRecurrence } from "@/lib/tasks.functions";
 import { getSignedDownloadUrl } from "@/lib/storage.functions";
 import { TaskFundingCheckout } from "@/components/payments/TaskFundingCheckout";
 import { TaskTipCheckout } from "@/components/payments/TaskTipCheckout";
@@ -33,6 +33,7 @@ import { RunnerDiscoveryStrip } from "@/components/dashboard/investor/RunnerDisc
 import { PostTaskWizard } from "@/components/dashboard/investor/PostTaskWizard";
 import { SavedRunnersStrip } from "@/components/dashboard/investor/SavedRunnersStrip";
 import { DeliverableReviewWorkspace, buildReshootReason, type FeedbackState } from "@/components/dashboard/investor/DeliverableReviewWorkspace";
+import { TaskMessageThread } from "@/components/dashboard/investor/TaskMessageThread";
 import { getMyProfile } from "@/lib/profiles.functions";
 import { Users } from "lucide-react";
 import { Link } from "@tanstack/react-router";
@@ -175,6 +176,7 @@ type Task = {
   description: string | null;
   funded?: boolean;
   requires_interior_access?: boolean;
+  runner_id?: string | null;
 };
 
 function InvestorTaskCard({ task }: { task: Task }) {
@@ -187,6 +189,17 @@ function InvestorTaskCard({ task }: { task: Task }) {
     mutationFn: () => dupFn({ data: { taskId: task.id } }),
     onSuccess: () => {
       toast.success("Duplicated. Find it under Active.");
+      qc.invalidateQueries({ queryKey: ["my-tasks"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+  const toggleRecFn = useServerFn(toggleTaskRecurrence);
+  const recRule = (task as unknown as { recurrence_rule?: string | null }).recurrence_rule ?? null;
+  const recActive = (task as unknown as { recurrence_active?: boolean | null }).recurrence_active ?? false;
+  const toggleRec = useMutation({
+    mutationFn: () => toggleRecFn({ data: { taskId: task.id, active: !recActive } }),
+    onSuccess: () => {
+      toast.success(recActive ? "Recurring schedule paused" : "Recurring schedule resumed");
       qc.invalidateQueries({ queryKey: ["my-tasks"] });
     },
     onError: (e: Error) => toast.error(e.message),
@@ -211,6 +224,11 @@ function InvestorTaskCard({ task }: { task: Task }) {
               <Badge variant="outline" className="text-xs border-amber-500/30 text-amber-300">Unfunded</Badge>
             ) : null}
             <SLABadge dueDate={task.due_date} status={task.status} />
+            {recRule && (
+              <Badge variant="outline" className={`text-xs flex items-center gap-1 ${recActive ? "border-primary/40 text-primary" : "border-muted-foreground/40 text-muted-foreground"}`}>
+                <Repeat className="size-3" /> {recRule}{!recActive ? " · paused" : ""}
+              </Badge>
+            )}
           </div>
           <p className="text-sm text-muted-foreground mt-1 flex items-center gap-1.5">
             <MapPin className="size-3.5" />
@@ -281,6 +299,24 @@ function InvestorTaskCard({ task }: { task: Task }) {
             {dup.isPending ? <Loader2 className="size-3.5 animate-spin" /> : <Copy className="size-3.5" />}
             <span className="hidden sm:inline">Duplicate</span>
           </Button>
+          {recRule && (
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => toggleRec.mutate()}
+              disabled={toggleRec.isPending}
+              title={recActive ? "Pause recurring schedule" : "Resume recurring schedule"}
+            >
+              {toggleRec.isPending ? (
+                <Loader2 className="size-3.5 animate-spin" />
+              ) : recActive ? (
+                <Pause className="size-3.5" />
+              ) : (
+                <Play className="size-3.5" />
+              )}
+              <span className="hidden sm:inline">{recActive ? "Pause" : "Resume"}</span>
+            </Button>
+          )}
         </div>
       </div>
       <div className="mt-4 pt-3 border-t border-border/60">
@@ -404,6 +440,8 @@ function InvestorTaskPanelInner({ task, onDone }: { task: Task; onDone: () => vo
           {pendingSub.notes}
         </div>
       )}
+
+      <TaskMessageThread taskId={task.id} hasRunner={!!task.runner_id} />
 
       <div>
         <Label>Deliverables ({files.length})</Label>

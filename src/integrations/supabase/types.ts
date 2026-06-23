@@ -2219,6 +2219,10 @@ export type Database = {
           payout_amount: number | null
           preferred_runner_id: string | null
           property_address: string
+          recurrence_active: boolean
+          recurrence_next_at: string | null
+          recurrence_parent_id: string | null
+          recurrence_rule: string | null
           requires_interior_access: boolean
           runner_id: string | null
           state: string
@@ -2242,6 +2246,10 @@ export type Database = {
           payout_amount?: number | null
           preferred_runner_id?: string | null
           property_address: string
+          recurrence_active?: boolean
+          recurrence_next_at?: string | null
+          recurrence_parent_id?: string | null
+          recurrence_rule?: string | null
           requires_interior_access?: boolean
           runner_id?: string | null
           state: string
@@ -2265,6 +2273,10 @@ export type Database = {
           payout_amount?: number | null
           preferred_runner_id?: string | null
           property_address?: string
+          recurrence_active?: boolean
+          recurrence_next_at?: string | null
+          recurrence_parent_id?: string | null
+          recurrence_rule?: string | null
           requires_interior_access?: boolean
           runner_id?: string | null
           state?: string
@@ -2274,7 +2286,15 @@ export type Database = {
           updated_at?: string
           zip_code?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "tasks_recurrence_parent_id_fkey"
+            columns: ["recurrence_parent_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       testimonials: {
         Row: {
