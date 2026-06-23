@@ -88,6 +88,7 @@ const createTaskSchema = z.object({
   payout_amount: z.number().nonnegative().max(100000).optional().nullable(),
   due_date: z.string().max(20).optional().nullable(),
   requires_interior_access: z.boolean().optional(),
+  preferred_runner_id: z.string().uuid().optional().nullable(),
 });
 
 export const createInvestorTask = createServerFn({ method: "POST" })
@@ -113,6 +114,7 @@ export const createInvestorTask = createServerFn({ method: "POST" })
         payout_amount: data.payout_amount ?? null,
         due_date: data.due_date ?? null,
         requires_interior_access: requiresInterior,
+        preferred_runner_id: data.preferred_runner_id ?? null,
         status: "open",
       })
       .select("*")
