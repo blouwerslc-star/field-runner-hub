@@ -160,8 +160,10 @@ export const getConversation = createServerFn({ method: "POST" })
     return {
       conversation: conv,
       task,
+      currentUserId: userId,
       participants: (parts ?? []).map((p) => ({
         user_id: p.user_id,
+        last_read_at: p.last_read_at,
         profile: profileMap.get(p.user_id) ?? null,
       })),
       messages: (messages ?? []).map((m) => ({
