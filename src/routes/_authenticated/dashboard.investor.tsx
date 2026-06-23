@@ -18,9 +18,9 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Loader2, MapPin, Calendar, DollarSign, CheckCircle2, XCircle, FileImage, ShieldCheck, Heart, Maximize2, Copy } from "lucide-react";
+import { Loader2, MapPin, Calendar, DollarSign, CheckCircle2, XCircle, FileImage, ShieldCheck, Heart, Maximize2, Copy, Repeat, Pause, Play } from "lucide-react";
 import { toast } from "sonner";
-import { listMyTasks, getTaskDetail, reviewSubmission, duplicateTask } from "@/lib/tasks.functions";
+import { listMyTasks, getTaskDetail, reviewSubmission, duplicateTask, toggleTaskRecurrence } from "@/lib/tasks.functions";
 import { getSignedDownloadUrl } from "@/lib/storage.functions";
 import { TaskFundingCheckout } from "@/components/payments/TaskFundingCheckout";
 import { TaskTipCheckout } from "@/components/payments/TaskTipCheckout";
@@ -33,6 +33,7 @@ import { RunnerDiscoveryStrip } from "@/components/dashboard/investor/RunnerDisc
 import { PostTaskWizard } from "@/components/dashboard/investor/PostTaskWizard";
 import { SavedRunnersStrip } from "@/components/dashboard/investor/SavedRunnersStrip";
 import { DeliverableReviewWorkspace, buildReshootReason, type FeedbackState } from "@/components/dashboard/investor/DeliverableReviewWorkspace";
+import { TaskMessageThread } from "@/components/dashboard/investor/TaskMessageThread";
 import { getMyProfile } from "@/lib/profiles.functions";
 import { Users } from "lucide-react";
 import { Link } from "@tanstack/react-router";
