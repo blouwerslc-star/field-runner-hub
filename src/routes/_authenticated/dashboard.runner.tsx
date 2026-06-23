@@ -24,6 +24,9 @@ import { RunnerVerificationCard } from "@/components/dashboard/RunnerVerificatio
 import { ProfileCompletionBanner } from "@/components/dashboard/ProfileCompletionBanner";
 import { DashboardLoadingSkeleton, RouteErrorState } from "@/components/dashboard/UiStates";
 import { TaskMessageThread } from "@/components/dashboard/investor/TaskMessageThread";
+import { TaskTimeline } from "@/components/tasks/TaskTimeline";
+import { recordTaskTrackingEvent } from "@/lib/task-timeline.functions";
+import { Navigation, MapPin } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/dashboard/runner")({
   component: RunnerDashboard,
@@ -225,6 +228,33 @@ function TaskWorkPanel({ task, onDone }: { task: Task; onDone: () => void }) {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const trackFn = useServerFn(recordTaskTrackingEvent);
+  const track = useMutation({
+    mutationFn: (event: "en_route" | "on_site") =>
+      new Promise<void>((resolve, reject) => {
+        const send = (lat?: number, lng?: number) =>
+          trackFn({
+            data: { taskId: task.id, eventCode: event, latitude: lat, longitude: lng },
+          })
+            .then(() => resolve())
+            .catch(reject);
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(
+            (pos) => send(pos.coords.latitude, pos.coords.longitude),
+            () => send(),
+            { timeout: 6000, maximumAge: 60_000 },
+          );
+        } else {
+          send();
+        }
+      }),
+    onSuccess: () => {
+      toast.success("Status updated");
+      qc.invalidateQueries({ queryKey: ["task-timeline", task.id] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
   const submit = useMutation({
     mutationFn: () => submitFn({ data: { taskId: task.id, notes } }),
     onSuccess: () => {
@@ -287,11 +317,40 @@ function TaskWorkPanel({ task, onDone }: { task: Task; onDone: () => void }) {
       </div>
 
       {task.status === "assigned" && (
-        <Button onClick={() => start.mutate()} disabled={start.isPending} className="w-full">
-          {start.isPending ? <Loader2 className="size-4 mr-2 animate-spin" /> : null}
-          Start task
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+          <Button
+            variant="outline"
+            onClick={() => track.mutate("en_route")}
+            disabled={track.isPending}
+          >
+            <Navigation className="size-4 mr-2" /> On the way
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => track.mutate("on_site")}
+            disabled={track.isPending}
+          >
+            <MapPin className="size-4 mr-2" /> Arrived on site
+          </Button>
+          <Button onClick={() => start.mutate()} disabled={start.isPending}>
+            {start.isPending ? <Loader2 className="size-4 mr-2 animate-spin" /> : null}
+            Start task
+          </Button>
+        </div>
+      )}
+
+      {task.status === "in_progress" && (
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => track.mutate("on_site")}
+          disabled={track.isPending}
+        >
+          <MapPin className="size-4 mr-2" /> Update: arrived on site
         </Button>
       )}
+
+      <TaskTimeline taskId={task.id} />
 
       {(lastSub?.status === "rejected" || task.status === "revision_requested") && (
         <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-sm">
