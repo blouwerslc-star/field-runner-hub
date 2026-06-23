@@ -11,13 +11,6 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
   Dialog,
   DialogContent,
   DialogFooter,
@@ -25,10 +18,9 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Loader2, Plus, MapPin, Calendar, DollarSign, CheckCircle2, XCircle, FileImage, ShieldCheck, Heart } from "lucide-react";
+import { Loader2, MapPin, Calendar, DollarSign, CheckCircle2, XCircle, FileImage, ShieldCheck, Heart } from "lucide-react";
 import { toast } from "sonner";
-import { listMyTasks, getTaskDetail, createInvestorTask, reviewSubmission, defaultRequiresInteriorAccess } from "@/lib/tasks.functions";
-import { Checkbox } from "@/components/ui/checkbox";
+import { listMyTasks, getTaskDetail, reviewSubmission } from "@/lib/tasks.functions";
 import { getSignedDownloadUrl } from "@/lib/storage.functions";
 import { TaskFundingCheckout } from "@/components/payments/TaskFundingCheckout";
 import { TaskTipCheckout } from "@/components/payments/TaskTipCheckout";
@@ -38,6 +30,7 @@ import { StatusTimeline } from "@/components/dashboard/investor/StatusTimeline";
 import { SLABadge } from "@/components/dashboard/investor/SLABadge";
 import { SpendAnalyticsCard } from "@/components/dashboard/investor/SpendAnalyticsCard";
 import { RunnerDiscoveryStrip } from "@/components/dashboard/investor/RunnerDiscoveryStrip";
+import { PostTaskWizard } from "@/components/dashboard/investor/PostTaskWizard";
 import { getMyProfile } from "@/lib/profiles.functions";
 import { Users } from "lucide-react";
 import { Link } from "@tanstack/react-router";
@@ -87,7 +80,7 @@ function InvestorDashboard() {
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2 md:justify-end">
-            <CreateTaskDialog />
+            <PostTaskWizard />
             <Button asChild variant="outline" size="sm">
               <Link to="/profiles">
                 <Users className="size-4 mr-1.5" />
