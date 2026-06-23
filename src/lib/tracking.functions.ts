@@ -1,6 +1,9 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import type { Database } from "@/integrations/supabase/types";
+
+type TaskUpdate = Database["public"]["Tables"]["tasks"]["Update"];
 
 export type RunnerState =
   | "accepted"
@@ -56,7 +59,7 @@ export const startTracking = createServerFn({ method: "POST" })
     if (task.runner_id !== userId) throw new Error("Not assigned to this task");
 
     const now = new Date().toISOString();
-    const patch: Record<string, unknown> = {
+    const patch: TaskUpdate = {
       runner_state: "en_route",
       en_route_at: now,
       tracking_active: true,
@@ -120,8 +123,8 @@ export const transitionRunnerState = createServerFn({ method: "POST" })
     }
 
     const stamp = stampField(data.to);
-    const patch: Record<string, unknown> = { runner_state: data.to };
-    if (stamp) patch[stamp] = new Date().toISOString();
+    const patch: TaskUpdate = { runner_state: data.to };
+    if (stamp) (patch as Record<string, unknown>)[stamp] = new Date().toISOString();
     if (data.to === "completed" || data.to === "verified") {
       patch.tracking_active = false;
     }
