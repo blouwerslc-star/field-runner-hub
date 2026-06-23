@@ -4,6 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { ProfileCompletionBanner } from "@/components/dashboard/ProfileCompletionBanner";
+import { ReferralBanner } from "@/components/dashboard/ReferralBanner";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -73,6 +74,7 @@ function InvestorDashboard() {
     <DashboardShell title="Investor Dashboard" subtitle="Post tasks, review submissions, release payments.">
       <div className="-mx-6 mb-6"><PaymentTestModeBanner /></div>
       <ProfileCompletionBanner role="investor" />
+      <ReferralBanner />
 
       {/* Hero action row */}
       <div className="mb-6 rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/10 via-card/60 to-card/30 backdrop-blur p-5 md:p-6">
