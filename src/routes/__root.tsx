@@ -20,6 +20,9 @@ import {
 } from "@/lib/onesignal";
 import { supabase } from "@/integrations/supabase/client";
 import { captureReferralFromUrl } from "@/lib/referral-tracking";
+import { registerPwa } from "@/lib/pwa-register";
+import { InstallPrompt } from "@/components/pwa/InstallPrompt";
+import { OfflineIndicator } from "@/components/pwa/OfflineIndicator";
 
 function NotFoundComponent() {
   return (
@@ -206,6 +209,7 @@ function RootComponent() {
     });
     initOneSignal();
     captureReferralFromUrl();
+    registerPwa();
   }, [router]);
 
   useEffect(() => {
@@ -282,6 +286,8 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <Outlet />
       <BackButton />
+      <OfflineIndicator />
+      <InstallPrompt />
     </QueryClientProvider>
   );
 }
