@@ -399,6 +399,26 @@ async function assertAdmin(supabase: import("@supabase/supabase-js").SupabaseCli
   if (!data) throw new Error("Admin only");
 }
 
+// Public list of available academy certification courses, used for filter chips.
+export const listAcademyCertOptions = createServerFn({ method: "GET" }).handler(async () => {
+  const { data, error } = await supabaseAdmin
+    .from("academy_courses")
+    .select("slug, title, category, sort_order")
+    .order("sort_order", { ascending: true });
+  if (error) throw new Error(error.message);
+  return { courses: (data ?? []) as Array<{ slug: string; title: string; category: string | null; sort_order: number }> };
+});
+
+async function _unused_assertAdmin(supabase: import("@supabase/supabase-js").SupabaseClient, userId: string) {
+  const { data } = await supabase
+    .from("user_roles")
+    .select("role")
+    .eq("user_id", userId)
+    .eq("role", "admin")
+    .maybeSingle();
+  if (!data) throw new Error("Admin only");
+}
+
 export const adminListProfiles = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
