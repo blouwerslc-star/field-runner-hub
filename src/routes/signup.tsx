@@ -75,7 +75,12 @@ function SignupPage() {
         password,
         options: {
           emailRedirectTo: `${window.location.origin}${postSignupRedirect}`,
-          data: { full_name: fullName, phone, role: activeRole },
+          data: {
+            full_name: fullName,
+            phone,
+            role: activeRole,
+            referral_code: getPendingReferralCode() ?? undefined,
+          },
         },
       });
       if (error) throw error;
