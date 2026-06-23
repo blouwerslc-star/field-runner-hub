@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
 import { finalizeSignupProfile } from "@/lib/signup.functions";
 import { trackSignup } from "@/lib/tracking";
+import { getPendingReferralCode, clearPendingReferralCode } from "@/lib/referral-tracking";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -75,11 +76,17 @@ function SignupPage() {
         password,
         options: {
           emailRedirectTo: `${window.location.origin}${postSignupRedirect}`,
-          data: { full_name: fullName, phone, role: activeRole },
+          data: {
+            full_name: fullName,
+            phone,
+            role: activeRole,
+            referral_code: getPendingReferralCode() ?? undefined,
+          },
         },
       });
       if (error) throw error;
       if (!data.user) throw new Error("Sign-up didn't return a user. Please try again.");
+      clearPendingReferralCode();
       let profileStatus = "Created by database trigger; sign in after email verification to confirm profile access.";
       if (data.session) {
         const result = await finalizeProfile({

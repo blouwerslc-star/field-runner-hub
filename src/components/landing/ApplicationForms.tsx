@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { precheckSignupAttempt } from "@/lib/spam-protection.functions";
 import { sendApplicantWelcomeEmail } from "@/lib/welcome-email.functions";
+import { getPendingReferralCode, clearPendingReferralCode } from "@/lib/referral-tracking";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -87,6 +88,7 @@ async function requestPasswordSignup(opts: {
         role: opts.role,
         full_name: opts.full_name,
         phone: opts.phone,
+        referral_code: getPendingReferralCode() ?? undefined,
         ...opts.extra,
       },
     },
@@ -94,6 +96,7 @@ async function requestPasswordSignup(opts: {
   if (error) {
     throw new Error(mapAuthError((error as { code?: string }).code, error.message));
   }
+  clearPendingReferralCode();
   return {
     debug: {
       authUserId: data.user?.id ?? "pending",

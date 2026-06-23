@@ -75,6 +75,7 @@ import { Route as AuthenticatedProfileBackgroundCheckRouteImport } from './route
 import { Route as AuthenticatedMessagesNewRouteImport } from './routes/_authenticated/messages.new'
 import { Route as AuthenticatedMessagesConversationIdRouteImport } from './routes/_authenticated/messages.$conversationId'
 import { Route as AuthenticatedDashboardRunnerRouteImport } from './routes/_authenticated/dashboard.runner'
+import { Route as AuthenticatedDashboardReferralsRouteImport } from './routes/_authenticated/dashboard.referrals'
 import { Route as AuthenticatedDashboardInvestorRouteImport } from './routes/_authenticated/dashboard.investor'
 import { Route as AuthenticatedDashboardFavoritesRouteImport } from './routes/_authenticated/dashboard.favorites'
 import { Route as AuthenticatedDashboardAnalyticsRouteImport } from './routes/_authenticated/dashboard.analytics'
@@ -459,6 +460,12 @@ const AuthenticatedDashboardRunnerRoute =
     path: '/dashboard/runner',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const AuthenticatedDashboardReferralsRoute =
+  AuthenticatedDashboardReferralsRouteImport.update({
+    id: '/dashboard/referrals',
+    path: '/dashboard/referrals',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedDashboardInvestorRoute =
   AuthenticatedDashboardInvestorRouteImport.update({
     id: '/dashboard/investor',
@@ -686,6 +693,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/analytics': typeof AuthenticatedDashboardAnalyticsRoute
   '/dashboard/favorites': typeof AuthenticatedDashboardFavoritesRoute
   '/dashboard/investor': typeof AuthenticatedDashboardInvestorRoute
+  '/dashboard/referrals': typeof AuthenticatedDashboardReferralsRoute
   '/dashboard/runner': typeof AuthenticatedDashboardRunnerRoute
   '/messages/$conversationId': typeof AuthenticatedMessagesConversationIdRoute
   '/messages/new': typeof AuthenticatedMessagesNewRoute
@@ -776,6 +784,7 @@ export interface FileRoutesByTo {
   '/dashboard/analytics': typeof AuthenticatedDashboardAnalyticsRoute
   '/dashboard/favorites': typeof AuthenticatedDashboardFavoritesRoute
   '/dashboard/investor': typeof AuthenticatedDashboardInvestorRoute
+  '/dashboard/referrals': typeof AuthenticatedDashboardReferralsRoute
   '/dashboard/runner': typeof AuthenticatedDashboardRunnerRoute
   '/messages/$conversationId': typeof AuthenticatedMessagesConversationIdRoute
   '/messages/new': typeof AuthenticatedMessagesNewRoute
@@ -873,6 +882,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard/analytics': typeof AuthenticatedDashboardAnalyticsRoute
   '/_authenticated/dashboard/favorites': typeof AuthenticatedDashboardFavoritesRoute
   '/_authenticated/dashboard/investor': typeof AuthenticatedDashboardInvestorRoute
+  '/_authenticated/dashboard/referrals': typeof AuthenticatedDashboardReferralsRoute
   '/_authenticated/dashboard/runner': typeof AuthenticatedDashboardRunnerRoute
   '/_authenticated/messages/$conversationId': typeof AuthenticatedMessagesConversationIdRoute
   '/_authenticated/messages/new': typeof AuthenticatedMessagesNewRoute
@@ -970,6 +980,7 @@ export interface FileRouteTypes {
     | '/dashboard/analytics'
     | '/dashboard/favorites'
     | '/dashboard/investor'
+    | '/dashboard/referrals'
     | '/dashboard/runner'
     | '/messages/$conversationId'
     | '/messages/new'
@@ -1060,6 +1071,7 @@ export interface FileRouteTypes {
     | '/dashboard/analytics'
     | '/dashboard/favorites'
     | '/dashboard/investor'
+    | '/dashboard/referrals'
     | '/dashboard/runner'
     | '/messages/$conversationId'
     | '/messages/new'
@@ -1156,6 +1168,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard/analytics'
     | '/_authenticated/dashboard/favorites'
     | '/_authenticated/dashboard/investor'
+    | '/_authenticated/dashboard/referrals'
     | '/_authenticated/dashboard/runner'
     | '/_authenticated/messages/$conversationId'
     | '/_authenticated/messages/new'
@@ -1694,6 +1707,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardRunnerRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/dashboard/referrals': {
+      id: '/_authenticated/dashboard/referrals'
+      path: '/dashboard/referrals'
+      fullPath: '/dashboard/referrals'
+      preLoaderRoute: typeof AuthenticatedDashboardReferralsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/dashboard/investor': {
       id: '/_authenticated/dashboard/investor'
       path: '/dashboard/investor'
@@ -2039,6 +2059,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedDashboardAnalyticsRoute: typeof AuthenticatedDashboardAnalyticsRoute
   AuthenticatedDashboardFavoritesRoute: typeof AuthenticatedDashboardFavoritesRoute
   AuthenticatedDashboardInvestorRoute: typeof AuthenticatedDashboardInvestorRoute
+  AuthenticatedDashboardReferralsRoute: typeof AuthenticatedDashboardReferralsRoute
   AuthenticatedDashboardRunnerRoute: typeof AuthenticatedDashboardRunnerRoute
   AuthenticatedProfileBackgroundCheckRoute: typeof AuthenticatedProfileBackgroundCheckRoute
   AuthenticatedProfileEditRoute: typeof AuthenticatedProfileEditRoute
@@ -2067,6 +2088,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedDashboardAnalyticsRoute: AuthenticatedDashboardAnalyticsRoute,
   AuthenticatedDashboardFavoritesRoute: AuthenticatedDashboardFavoritesRoute,
   AuthenticatedDashboardInvestorRoute: AuthenticatedDashboardInvestorRoute,
+  AuthenticatedDashboardReferralsRoute: AuthenticatedDashboardReferralsRoute,
   AuthenticatedDashboardRunnerRoute: AuthenticatedDashboardRunnerRoute,
   AuthenticatedProfileBackgroundCheckRoute:
     AuthenticatedProfileBackgroundCheckRoute,

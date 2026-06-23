@@ -22,6 +22,7 @@ import { listMyTasks, getTaskDetail, startTask, submitTaskWork } from "@/lib/tas
 import { createUploadUrl, recordTaskFile } from "@/lib/storage.functions";
 import { RunnerVerificationCard } from "@/components/dashboard/RunnerVerificationCard";
 import { ProfileCompletionBanner } from "@/components/dashboard/ProfileCompletionBanner";
+import { ReferralBanner } from "@/components/dashboard/ReferralBanner";
 import { DashboardLoadingSkeleton, RouteErrorState } from "@/components/dashboard/UiStates";
 import { TaskMessageThread } from "@/components/dashboard/investor/TaskMessageThread";
 import { TaskTimeline } from "@/components/tasks/TaskTimeline";
@@ -66,6 +67,7 @@ function RunnerDashboard() {
     <DashboardShell title="Runner Dashboard" subtitle="Your assigned tasks. Complete the work, upload deliverables, and get paid.">
       <ProfileCompletionBanner role="runner" />
       <RunnerVerificationCard />
+      <ReferralBanner />
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
         <StatTile label="Assigned" value={buckets.assigned.length} />
         <StatTile label="In progress" value={buckets.in_progress.length} />

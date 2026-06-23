@@ -19,6 +19,7 @@ import {
   logoutOneSignalUser,
 } from "@/lib/onesignal";
 import { supabase } from "@/integrations/supabase/client";
+import { captureReferralFromUrl } from "@/lib/referral-tracking";
 
 function NotFoundComponent() {
   return (
@@ -204,6 +205,7 @@ function RootComponent() {
       router.navigate({ to: path });
     });
     initOneSignal();
+    captureReferralFromUrl();
   }, [router]);
 
   useEffect(() => {
