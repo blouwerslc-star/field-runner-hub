@@ -2,6 +2,8 @@ import { createFileRoute, Link, useNavigate, redirect as routerRedirect } from "
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
+import { useServerFn } from "@tanstack/react-start";
+import { ensureUserSetup } from "@/lib/signup.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -37,6 +39,7 @@ export const Route = createFileRoute("/login")({
 function LoginPage() {
   const { redirect } = Route.useSearch();
   const navigate = useNavigate();
+  const ensureSetup = useServerFn(ensureUserSetup);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -48,6 +51,8 @@ function LoginPage() {
     try {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) throw error;
+      // Self-heal: make sure profile + role rows exist before navigating.
+      void ensureSetup({ data: {} }).catch(() => {});
       navigate({ to: redirect, replace: true });
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Sign in failed";
