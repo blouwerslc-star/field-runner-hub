@@ -4,14 +4,6 @@ import founderPhoto from "@/assets/founder-brian.jpg";
 import { Toaster } from "@/components/ui/sonner";
 import { Button } from "@/components/ui/button";
 import {
-  Sheet,
-  SheetContent,
-  SheetTrigger,
-  SheetHeader,
-  SheetTitle,
-  SheetClose,
-} from "@/components/ui/sheet";
-import {
   Accordion,
   AccordionContent,
   AccordionItem,
@@ -47,6 +39,7 @@ import {
   HelpCircle,
   Quote,
   Menu,
+  X,
 } from "lucide-react";
 import { useNavigate } from "@tanstack/react-router";
 import { BrandLogo } from "@/components/brand/BrandLogo";
