@@ -1,4 +1,4 @@
-import { createFileRoute, notFound, useNavigate, redirect } from "@tanstack/react-router";
+import { createFileRoute, Link, notFound, useNavigate, redirect } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
@@ -6,7 +6,7 @@ import { getPublicProfileBySlug } from "@/lib/profiles.functions";
 import { toggleFavorite, isFavorite } from "@/lib/profile-extras.functions";
 import { Button } from "@/components/ui/button";
 import { RoleBadge, AvailabilityBadge, StarRating, LocationLine } from "@/components/profiles/ProfileBadges";
-import { SiteHeader } from "@/components/navigation/SiteHeader";
+import { BrandLogo } from "@/components/brand/BrandLogo";
 import { CertificationBadge } from "@/components/academy/CertificationBadge";
 import { TrustBadgeRow } from "@/components/profiles/TrustBadgeRow";
 import { PerformanceMetrics } from "@/components/profiles/PerformanceMetrics";
@@ -19,6 +19,7 @@ import { Loader2, MessageSquare, Send, Heart, BookmarkPlus, CalendarDays, Shield
 import { toast } from "sonner";
 import { Toaster } from "@/components/ui/sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { RouteErrorState, EmptyState } from "@/components/dashboard/UiStates";
 
 export const Route = createFileRoute("/profile/$slug")({
   component: PublicProfilePage,
@@ -36,11 +37,15 @@ export const Route = createFileRoute("/profile/$slug")({
       { name: "robots", content: "noindex" },
     ],
   }),
-  errorComponent: ({ error }) => (
-    <div className="min-h-screen grid place-items-center text-sm text-destructive">{error.message}</div>
+  errorComponent: ({ error, reset }) => (
+    <div className="min-h-screen grid place-items-center p-6">
+      <RouteErrorState error={error} reset={reset} title="Couldn't load this profile" />
+    </div>
   ),
   notFoundComponent: () => (
-    <div className="min-h-screen grid place-items-center text-sm text-muted-foreground">Profile not found.</div>
+    <div className="min-h-screen grid place-items-center p-6">
+      <EmptyState title="Profile not found" message="This runner profile may be private or no longer exists." ctaLabel="Browse runners" ctaTo="/profiles" />
+    </div>
   ),
 });
 
@@ -106,7 +111,12 @@ function PublicProfilePage() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Toaster richColors closeButton position="top-center" theme="dark" />
-      <SiteHeader currentPath="/profiles" />
+      <header className="sticky top-0 z-40 backdrop-blur bg-background/70 border-b border-border/60">
+        <div className="mx-auto max-w-6xl px-5 h-16 flex items-center justify-between">
+          <Link to="/" aria-label="REI Runner home"><BrandLogo /></Link>
+          <Link to="/profiles" className="text-sm text-muted-foreground hover:text-foreground">Browse profiles</Link>
+        </div>
+      </header>
 
       <div
         className="h-48 md:h-64 w-full bg-gradient-to-br from-primary/20 to-purple-500/20"

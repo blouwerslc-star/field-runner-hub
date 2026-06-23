@@ -23,7 +23,6 @@ import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as InvestorsRouteImport } from './routes/investors'
-import { Route as FullSiteRouteImport } from './routes/full-site'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as FaqRouteImport } from './routes/faq'
 import { Route as AuthTestRouteImport } from './routes/auth-test'
@@ -170,11 +169,6 @@ const LoginRoute = LoginRouteImport.update({
 const InvestorsRoute = InvestorsRouteImport.update({
   id: '/investors',
   path: '/investors',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const FullSiteRoute = FullSiteRouteImport.update({
-  id: '/full-site',
-  path: '/full-site',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
@@ -620,7 +614,6 @@ export interface FileRoutesByFullPath {
   '/auth-test': typeof AuthTestRoute
   '/faq': typeof FaqRoute
   '/forgot-password': typeof ForgotPasswordRoute
-  '/full-site': typeof FullSiteRoute
   '/investors': typeof InvestorsRoute
   '/login': typeof LoginRoute
   '/pricing': typeof PricingRouteWithChildren
@@ -713,7 +706,6 @@ export interface FileRoutesByTo {
   '/auth-test': typeof AuthTestRoute
   '/faq': typeof FaqRoute
   '/forgot-password': typeof ForgotPasswordRoute
-  '/full-site': typeof FullSiteRoute
   '/investors': typeof InvestorsRoute
   '/login': typeof LoginRoute
   '/pricing': typeof PricingRouteWithChildren
@@ -803,7 +795,6 @@ export interface FileRoutesById {
   '/auth-test': typeof AuthTestRoute
   '/faq': typeof FaqRoute
   '/forgot-password': typeof ForgotPasswordRoute
-  '/full-site': typeof FullSiteRoute
   '/investors': typeof InvestorsRoute
   '/login': typeof LoginRoute
   '/pricing': typeof PricingRouteWithChildren
@@ -898,7 +889,6 @@ export interface FileRouteTypes {
     | '/auth-test'
     | '/faq'
     | '/forgot-password'
-    | '/full-site'
     | '/investors'
     | '/login'
     | '/pricing'
@@ -991,7 +981,6 @@ export interface FileRouteTypes {
     | '/auth-test'
     | '/faq'
     | '/forgot-password'
-    | '/full-site'
     | '/investors'
     | '/login'
     | '/pricing'
@@ -1080,7 +1069,6 @@ export interface FileRouteTypes {
     | '/auth-test'
     | '/faq'
     | '/forgot-password'
-    | '/full-site'
     | '/investors'
     | '/login'
     | '/pricing'
@@ -1175,7 +1163,6 @@ export interface RootRouteChildren {
   AuthTestRoute: typeof AuthTestRoute
   FaqRoute: typeof FaqRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
-  FullSiteRoute: typeof FullSiteRoute
   InvestorsRoute: typeof InvestorsRoute
   LoginRoute: typeof LoginRoute
   PricingRoute: typeof PricingRouteWithChildren
@@ -1301,13 +1288,6 @@ declare module '@tanstack/react-router' {
       path: '/investors'
       fullPath: '/investors'
       preLoaderRoute: typeof InvestorsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/full-site': {
-      id: '/full-site'
-      path: '/full-site'
-      fullPath: '/full-site'
-      preLoaderRoute: typeof FullSiteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/forgot-password': {
@@ -2068,7 +2048,6 @@ const rootRouteChildren: RootRouteChildren = {
   AuthTestRoute: AuthTestRoute,
   FaqRoute: FaqRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,
-  FullSiteRoute: FullSiteRoute,
   InvestorsRoute: InvestorsRoute,
   LoginRoute: LoginRoute,
   PricingRoute: PricingRouteWithChildren,
@@ -2099,13 +2078,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

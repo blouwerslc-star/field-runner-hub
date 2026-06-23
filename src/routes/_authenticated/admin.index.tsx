@@ -33,10 +33,14 @@ import { getSignedDownloadUrl } from "@/lib/storage.functions";
 import { listAdminRunners, type AdminRunner } from "@/lib/admin.functions";
 import { useQuery } from "@tanstack/react-query";
 import { getAdminOverview } from "@/lib/ops.functions";
+import { RouteErrorState } from "@/components/dashboard/UiStates";
 
 export const Route = createFileRoute("/_authenticated/admin/")({
   component: AdminDashboard,
   head: () => ({ meta: [{ title: "Admin — REI Runner" }] }),
+  errorComponent: ({ error, reset }) => (
+    <RouteErrorState error={error} reset={reset} title="Couldn't load admin data" />
+  ),
 });
 
 type FieldRunner = AdminRunner;

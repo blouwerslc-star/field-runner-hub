@@ -4,11 +4,15 @@ import { useQuery } from "@tanstack/react-query";
 import { listReviewableTasks } from "@/lib/reviews.functions";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { ReviewComposer } from "@/components/reviews/ReviewComposer";
-import { Loader2 } from "lucide-react";
+import { DashboardLoadingSkeleton, EmptyState, RouteErrorState } from "@/components/dashboard/UiStates";
+import { Star } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/reviews")({
   component: ReviewsPage,
   head: () => ({ meta: [{ title: "Reviews — REI Runner" }] }),
+  errorComponent: ({ error, reset }) => (
+    <RouteErrorState error={error} reset={reset} title="Couldn't load reviews" />
+  ),
 });
 
 function ReviewsPage() {
@@ -17,11 +21,9 @@ function ReviewsPage() {
   const tasks = data?.tasks ?? [];
   return (
     <DashboardShell title="Leave a review" subtitle="Rate completed tasks. Your feedback helps build trust across the marketplace.">
-      {isLoading ? <Loader2 className="size-5 animate-spin text-primary" /> :
+      {isLoading ? <DashboardLoadingSkeleton tiles={0} rows={3} /> :
         tasks.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-border p-12 text-center text-sm text-muted-foreground">
-            Nothing to review right now. Once a task is completed you can leave a review here.
-          </div>
+          <EmptyState icon={Star} title="Nothing to review yet" message="Once a task is completed you can leave a review here." />
         ) : (
           <div className="space-y-4">
             {tasks.map((t: any) => (

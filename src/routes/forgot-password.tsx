@@ -78,11 +78,15 @@ function ForgotPasswordPage() {
                 <Input
                   id="fp-email"
                   type="email"
+                  inputMode="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
                   maxLength={200}
                   autoComplete="email"
+                  autoCapitalize="none"
+                  autoCorrect="off"
+                  spellCheck={false}
                 />
               </div>
               <Button type="submit" disabled={loading} className="w-full bg-gradient-primary shadow-glow" size="lg">

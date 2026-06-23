@@ -31,8 +31,11 @@ export const createTaskFundingCheckout = createServerFn({ method: "POST" })
       const payout = Number(task.payout_amount ?? 0);
       if (!payout || payout < 1) throw new Error("Task has no payout amount");
 
-      const platformFee = Math.round(payout * 100 * 0.2);
-      const totalCents = Math.round(payout * 100) + platformFee;
+      // Platform fee comes OUT OF the payout (not added on top).
+      // Investor pays the task price; runner receives 80%, platform retains 20%.
+      const totalCents = Math.round(payout * 100);
+      const platformFee = Math.round(totalCents * 0.2);
+      const runnerPayoutCents = totalCents - platformFee;
 
       const stripe = createStripeClient(data.environment as StripeEnv);
       const session = await stripe.checkout.sessions.create({
@@ -51,8 +54,10 @@ export const createTaskFundingCheckout = createServerFn({ method: "POST" })
         metadata: {
           task_id: data.taskId,
           investor_id: userId,
-          payout_cents: String(Math.round(payout * 100)),
+          payout_cents: String(runnerPayoutCents),
           platform_fee_cents: String(platformFee),
+          total_cents: String(totalCents),
+          kind: "task",
         },
       });
       return { clientSecret: session.client_secret ?? "" };
@@ -81,6 +86,7 @@ export const confirmTaskFunding = createServerFn({ method: "POST" })
       const investorId = session.metadata?.investor_id;
       const payoutCents = Number(session.metadata?.payout_cents ?? 0);
       const feeCents = Number(session.metadata?.platform_fee_cents ?? 0);
+      const totalCents = Number(session.metadata?.total_cents ?? payoutCents + feeCents);
       if (!taskId || investorId !== userId) throw new Error("Invalid session");
 
       const pi = typeof session.payment_intent === "string"
@@ -101,10 +107,11 @@ export const confirmTaskFunding = createServerFn({ method: "POST" })
           .insert({
             task_id: taskId,
             investor_id: userId,
-            amount_cents: payoutCents + feeCents,
+            amount_cents: totalCents,
             platform_fee_cents: feeCents,
             runner_payout_cents: payoutCents,
             status: "funded",
+            kind: "task",
             stripe_checkout_session_id: session.id,
             stripe_payment_intent_id: pi,
           })
@@ -207,4 +214,119 @@ export const markPayoutPaid = createServerFn({ method: "POST" })
       await supabase.from("tasks").update({ status: "paid" }).eq("id", payment.task_id);
     }
     return { ok: true };
+  });
+
+// ============================================================================
+// Tipping — investors can leave a tip for the runner after task completion.
+// Tips pass 100% to the runner (no platform fee).
+// ============================================================================
+
+export const createTaskTipCheckout = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i: unknown) =>
+    z.object({
+      taskId: z.string().uuid(),
+      amountCents: z.number().int().min(100).max(100000),
+      returnUrl: z.string().url(),
+      environment: ENV_SCHEMA,
+    }).parse(i),
+  )
+  .handler(async ({ context, data }): Promise<CheckoutResult> => {
+    try {
+      const { supabase, userId } = context;
+      const { data: task, error } = await supabase
+        .from("tasks")
+        .select("id, title, investor_id, runner_id, status")
+        .eq("id", data.taskId)
+        .maybeSingle();
+      if (error) throw new Error(error.message);
+      if (!task) throw new Error("Task not found");
+      if (task.investor_id !== userId) throw new Error("Not your task");
+      if (!task.runner_id) throw new Error("No runner assigned to this task");
+      if (!["approved", "paid", "submitted"].includes(task.status ?? "")) {
+        throw new Error("Tip can only be added after the runner has submitted work");
+      }
+
+      const stripe = createStripeClient(data.environment as StripeEnv);
+      const session = await stripe.checkout.sessions.create({
+        line_items: [{
+          price_data: {
+            currency: "usd",
+            product_data: { name: `Tip for runner — ${task.title}` },
+            unit_amount: data.amountCents,
+          },
+          quantity: 1,
+        }],
+        mode: "payment",
+        ui_mode: "embedded_page",
+        return_url: data.returnUrl,
+        payment_intent_data: { description: `REI Runner tip — ${task.title}` },
+        metadata: {
+          task_id: data.taskId,
+          investor_id: userId,
+          runner_id: task.runner_id,
+          amount_cents: String(data.amountCents),
+          kind: "tip",
+        },
+      });
+      return { clientSecret: session.client_secret ?? "" };
+    } catch (error) {
+      return { error: getStripeErrorMessage(error) };
+    }
+  });
+
+export const confirmTaskTip = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i: unknown) =>
+    z.object({
+      sessionId: z.string().min(1).max(200),
+      environment: ENV_SCHEMA,
+    }).parse(i),
+  )
+  .handler(async ({ context, data }) => {
+    try {
+      const { supabase, userId } = context;
+      const stripe = createStripeClient(data.environment as StripeEnv);
+      const session = await stripe.checkout.sessions.retrieve(data.sessionId);
+      if (session.payment_status !== "paid") {
+        return { paid: false, status: session.payment_status };
+      }
+      const taskId = session.metadata?.task_id;
+      const investorId = session.metadata?.investor_id;
+      const runnerId = session.metadata?.runner_id;
+      const amountCents = Number(session.metadata?.amount_cents ?? 0);
+      if (!taskId || !runnerId || investorId !== userId) throw new Error("Invalid session");
+
+      const pi = typeof session.payment_intent === "string"
+        ? session.payment_intent
+        : session.payment_intent?.id ?? null;
+
+      const { data: existing } = await supabase
+        .from("payments")
+        .select("id")
+        .eq("stripe_checkout_session_id", session.id)
+        .maybeSingle();
+
+      if (!existing) {
+        const { error: insErr } = await supabase
+          .from("payments")
+          .insert({
+            task_id: taskId,
+            investor_id: userId,
+            runner_id: runnerId,
+            amount_cents: amountCents,
+            platform_fee_cents: 0,
+            runner_payout_cents: amountCents,
+            status: "released",
+            kind: "tip",
+            stripe_checkout_session_id: session.id,
+            stripe_payment_intent_id: pi,
+          });
+        if (insErr) throw new Error(insErr.message);
+      }
+
+      return { paid: true, taskId };
+    } catch (error) {
+      return { paid: false, error: getStripeErrorMessage(error) };
+    }
   });

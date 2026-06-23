@@ -3,11 +3,13 @@ import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { getPlatformMetrics } from "@/lib/analytics.functions";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
+import { RouteErrorState } from "@/components/dashboard/UiStates";
 import { Loader2, Users, ClipboardList, DollarSign, Star, ShieldAlert, TrendingUp, Briefcase } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/admin/analytics")({
   component: AdminAnalytics,
   head: () => ({ meta: [{ title: "Platform analytics — REI Runner Admin" }] }),
+  errorComponent: ({ error, reset }) => <RouteErrorState error={error} reset={reset} />,
 });
 
 function fmtMoney(cents: number) {

@@ -1,7 +1,9 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { supabaseAdmin } from "@/integrations/supabase/client.server";
+// NOTE: supabaseAdmin (service role) is loaded lazily inside each handler.
+// Top-level imports of *.server.ts in a .functions.ts file ship server-only
+// modules into the client bundle via the route import graph.
 
 const PUBLIC_TASK_COLS =
   "id, title, description, task_type, city, state, zip_code, payout_amount, due_date, status, investor_id, created_at";
@@ -21,6 +23,7 @@ const filterSchema = z.object({
 export const listOpenTasks = createServerFn({ method: "POST" })
   .inputValidator((i: unknown) => filterSchema.parse(i ?? {}))
   .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     let q = supabaseAdmin
       .from("tasks")
       .select(PUBLIC_TASK_COLS)
@@ -66,6 +69,7 @@ export const listOpenTasks = createServerFn({ method: "POST" })
 export const getPublicTaskDetail = createServerFn({ method: "POST" })
   .inputValidator((i: unknown) => z.object({ taskId: z.string().uuid() }).parse(i))
   .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: t, error } = await supabaseAdmin
       .from("tasks")
       .select(PUBLIC_TASK_COLS + ", property_address")
@@ -244,6 +248,7 @@ export const listApplicationsForMyTasks = createServerFn({ method: "GET" })
     const runnerIds = Array.from(new Set((data ?? []).map((d) => d.runner_id)));
     const profilesMap = new Map<string, any>();
     if (runnerIds.length) {
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
       const { data: profs } = await supabaseAdmin
         .from("profiles")
         .select("user_id, full_name, profile_slug, profile_photo_url, average_rating, review_count, completed_tasks_count, city, state, verified_status")

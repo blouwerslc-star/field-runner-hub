@@ -6,12 +6,16 @@ import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, MapPin, Star, BadgeCheck, DollarSign, Calendar } from "lucide-react";
+import { MapPin, Star, BadgeCheck, DollarSign, Calendar } from "lucide-react";
+import { DashboardLoadingSkeleton, RouteErrorState } from "@/components/dashboard/UiStates";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/applications")({
   component: ApplicationsPage,
   head: () => ({ meta: [{ title: "Applications — REI Runner" }] }),
+  errorComponent: ({ error, reset }) => (
+    <RouteErrorState error={error} reset={reset} title="Couldn't load applications" />
+  ),
 });
 
 function statusBadge(s: string) {
@@ -58,7 +62,7 @@ function ApplicationsPage() {
         </TabsList>
 
         <TabsContent value="mine" className="space-y-3">
-          {mine.isLoading ? <Loader2 className="size-5 animate-spin text-primary" /> :
+          {mine.isLoading ? <DashboardLoadingSkeleton tiles={0} rows={3} /> :
             (mine.data?.applications.length ?? 0) === 0 ? (
               <Empty label="You haven't applied to any tasks yet." cta={<Button asChild><Link to="/tasks">Browse open tasks</Link></Button>} />
             ) : (
@@ -86,7 +90,7 @@ function ApplicationsPage() {
         </TabsContent>
 
         <TabsContent value="incoming" className="space-y-3">
-          {incoming.isLoading ? <Loader2 className="size-5 animate-spin text-primary" /> :
+          {incoming.isLoading ? <DashboardLoadingSkeleton tiles={0} rows={3} /> :
             (incoming.data?.applications.length ?? 0) === 0 ? (
               <Empty label="No applications on your tasks yet." />
             ) : (
@@ -136,7 +140,7 @@ function ApplicationsPage() {
         </TabsContent>
 
         <TabsContent value="saved" className="space-y-3">
-          {saved.isLoading ? <Loader2 className="size-5 animate-spin text-primary" /> :
+          {saved.isLoading ? <DashboardLoadingSkeleton tiles={0} rows={3} /> :
             (saved.data?.saved.length ?? 0) === 0 ? (
               <Empty label="No saved tasks." cta={<Button asChild><Link to="/tasks">Browse open tasks</Link></Button>} />
             ) : (

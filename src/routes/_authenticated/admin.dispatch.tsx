@@ -4,6 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { adminDispatchBoard, adminRankRunnersForTask, adminAssignTask } from "@/lib/ops.functions";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
+import { RouteErrorState } from "@/components/dashboard/UiStates";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, MapPin, Users, Star, Car, CheckCircle2 } from "lucide-react";
@@ -12,6 +13,7 @@ import { toast } from "sonner";
 export const Route = createFileRoute("/_authenticated/admin/dispatch")({
   component: DispatchPage,
   head: () => ({ meta: [{ title: "Dispatch board — Admin" }] }),
+  errorComponent: ({ error, reset }) => <RouteErrorState error={error} reset={reset} />,
 });
 
 function DispatchPage() {

@@ -1,8 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
+import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { supabaseAdmin } from "@/integrations/supabase/client.server";
-
 const PUBLIC_COLUMNS =
   "user_id, profile_slug, full_name, city, state, profile_photo_url, cover_photo_url, headline, bio, services_offered, markets_served, experience_level, years_experience, task_rate, hourly_rate, availability_status, average_rating, review_count, completed_tasks_count, response_time, verified_status, featured, turnaround_time, task_types, transportation_available, service_radius, company_name, company_description, monthly_deal_volume, created_at, verification_level, verification_status, email_verified, phone_verified, identity_verified, background_check_verified, insurance_verified, top_runner, last_active_at, completion_rate, repeat_client_rate, response_time_minutes, specialties, real_estate_experience, real_estate_years, contractor_experience, contractor_years, property_management_experience, property_management_years, realtor_experience, realtor_years, rate_lockbox_install, rate_occupancy_check, rate_property_photos, rate_video_walkthrough, rate_sign_placement, avail_today, avail_this_week, avail_weekends, avail_emergency";
 
@@ -204,7 +203,7 @@ const listSchema = z.object({
   service: z.string().max(60).optional(),
   availability: z.enum(["available", "busy", "unavailable"]).optional(),
   sort: z.enum(["rating", "completed", "newest", "featured"]).default("featured"),
-  limit: z.number().int().min(1).max(60).default(24),
+  limit: z.number().int().min(1).max(200).default(120),
   viewerLoggedIn: z.boolean().optional().default(false),
 });
 

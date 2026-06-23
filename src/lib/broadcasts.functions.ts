@@ -1,8 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
+import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { supabaseAdmin } from "@/integrations/supabase/client.server";
-
 async function assertAdmin(supabase: any, userId: string) {
   const { data, error } = await supabase
     .from("user_roles")
@@ -63,13 +62,26 @@ export const listApplicants = createServerFn({ method: "GET" })
       };
     }
     if (data.audience === "runner") {
-      const { data: rows, error } = await supabaseAdmin
-        .from("field_runner_applications")
-        .select("id, full_name, email, city, state, user_id, created_at")
-        .order("created_at", { ascending: false });
+      const [{ data: rows, error }, { data: roleRows }] = await Promise.all([
+        supabaseAdmin
+          .from("field_runner_applications")
+          .select("id, full_name, email, city, state, user_id, created_at")
+          .order("created_at", { ascending: false }),
+        supabaseAdmin.from("user_roles").select("user_id").eq("role", "runner"),
+      ]);
       if (error) throw new Error(error.message);
-      return {
-        applicants: (rows ?? []).map((r) => ({
+      const runnerIds = (roleRows ?? []).map((r) => r.user_id);
+      const { data: profs } = runnerIds.length
+        ? await supabaseAdmin
+            .from("profiles")
+            .select("user_id, full_name, email, city, state, created_at")
+            .in("user_id", runnerIds)
+        : { data: [] as any[] };
+      const norm = (e?: string | null) => (e ?? "").trim().toLowerCase();
+      const merged = new Map<string, Applicant>();
+      for (const r of rows ?? []) {
+        if (!r.email) continue;
+        merged.set(norm(r.email), {
           id: r.id,
           full_name: r.full_name,
           email: r.email,
@@ -77,16 +89,48 @@ export const listApplicants = createServerFn({ method: "GET" })
           state: r.state,
           has_account: !!r.user_id,
           created_at: r.created_at,
-        })),
-      };
+        });
+      }
+      for (const p of profs ?? []) {
+        if (!p.email) continue;
+        const key = norm(p.email);
+        const existing = merged.get(key);
+        if (existing) {
+          existing.has_account = true;
+          continue;
+        }
+        merged.set(key, {
+          id: p.user_id,
+          full_name: p.full_name ?? p.email,
+          email: p.email,
+          city: p.city,
+          state: p.state,
+          has_account: true,
+          created_at: p.created_at,
+        });
+      }
+      return { applicants: Array.from(merged.values()) };
     }
-    const { data: rows, error } = await supabaseAdmin
-      .from("real_estate_pro_applications")
-      .select("id, full_name, email, market_city, market_state, user_id, created_at")
-      .order("created_at", { ascending: false });
+    const [{ data: rows, error }, { data: roleRows }] = await Promise.all([
+      supabaseAdmin
+        .from("real_estate_pro_applications")
+        .select("id, full_name, email, market_city, market_state, user_id, created_at")
+        .order("created_at", { ascending: false }),
+      supabaseAdmin.from("user_roles").select("user_id").eq("role", "investor"),
+    ]);
     if (error) throw new Error(error.message);
-    return {
-      applicants: (rows ?? []).map((r) => ({
+    const investorIds = (roleRows ?? []).map((r) => r.user_id);
+    const { data: profs } = investorIds.length
+      ? await supabaseAdmin
+          .from("profiles")
+          .select("user_id, full_name, email, city, state, created_at")
+          .in("user_id", investorIds)
+      : { data: [] as any[] };
+    const norm = (e?: string | null) => (e ?? "").trim().toLowerCase();
+    const merged = new Map<string, Applicant>();
+    for (const r of rows ?? []) {
+      if (!r.email) continue;
+      merged.set(norm(r.email), {
         id: r.id,
         full_name: r.full_name,
         email: r.email,
@@ -94,8 +138,27 @@ export const listApplicants = createServerFn({ method: "GET" })
         state: r.market_state,
         has_account: !!r.user_id,
         created_at: r.created_at,
-      })),
-    };
+      });
+    }
+    for (const p of profs ?? []) {
+      if (!p.email) continue;
+      const key = norm(p.email);
+      const existing = merged.get(key);
+      if (existing) {
+        existing.has_account = true;
+        continue;
+      }
+      merged.set(key, {
+        id: p.user_id,
+        full_name: p.full_name ?? p.email,
+        email: p.email,
+        city: p.city,
+        state: p.state,
+        has_account: true,
+        created_at: p.created_at,
+      });
+    }
+    return { applicants: Array.from(merged.values()) };
   });
 
 const sendSchema = z.object({
@@ -139,17 +202,60 @@ export const sendBroadcast = createServerFn({ method: "POST" })
         data.audience === "runner"
           ? "field_runner_applications"
           : "real_estate_pro_applications";
-      const { data: rows, error } = await supabaseAdmin
-        .from(table)
-        .select("id, full_name, email, user_id")
-        .in("id", data.recipientIds);
+      // Recipient IDs may come from either the application table or
+      // directly from profiles.user_id (signed-up users). Look up both.
+      const [{ data: appRows, error }, { data: profRows }] = await Promise.all([
+        supabaseAdmin
+          .from(table)
+          .select("id, full_name, email, user_id")
+          .in("id", data.recipientIds),
+        supabaseAdmin
+          .from("profiles")
+          .select("user_id, full_name, email")
+          .in("user_id", data.recipientIds),
+      ]);
       if (error) throw new Error(error.message);
-      recipients = (rows ?? []).filter((r) => {
-        if (!r.email) return false;
-        if (data.onlyWithoutAccount && r.user_id) return false;
-        return true;
-      });
+      const norm = (e?: string | null) => (e ?? "").trim().toLowerCase();
+      const byEmail = new Map<string, { full_name: string | null; email: string; user_id?: string | null }>();
+      for (const r of appRows ?? []) {
+        if (!r.email) continue;
+        if (data.onlyWithoutAccount && r.user_id) continue;
+        byEmail.set(norm(r.email), { full_name: r.full_name, email: r.email, user_id: r.user_id });
+      }
+      for (const p of profRows ?? []) {
+        if (!p.email) continue;
+        if (data.onlyWithoutAccount) continue; // signed-up profile = has account
+        if (!byEmail.has(norm(p.email))) {
+          byEmail.set(norm(p.email), { full_name: p.full_name, email: p.email, user_id: p.user_id });
+        }
+      }
+      recipients = Array.from(byEmail.values());
     }
+
+    // Fetch live company progress stats to append to every broadcast.
+    const [{ count: runnersCount }, { count: investorsCount }, { count: tasksCount }, { count: leadsCount }] = await Promise.all([
+      supabaseAdmin.from("user_roles").select("user_id", { count: "exact", head: true }).eq("role", "runner"),
+      supabaseAdmin.from("user_roles").select("user_id", { count: "exact", head: true }).eq("role", "investor"),
+      supabaseAdmin.from("tasks").select("id", { count: "exact", head: true }),
+      supabaseAdmin.from("facebook_leads").select("id", { count: "exact", head: true }),
+    ]);
+    const totalSignups = (runnersCount ?? 0) + (investorsCount ?? 0);
+    const totalInterest = totalSignups + (leadsCount ?? 0);
+    const footerHtml = `
+<hr style="border:none;border-top:1px solid #e2e8f0;margin:32px 0 16px" />
+<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:16px;margin:16px 0;font-size:14px;color:#334155">
+  <p style="margin:0 0 8px;font-weight:600;color:#0f172a">📈 REI Runner — where we are right now</p>
+  <ul style="margin:0 0 8px 18px;padding:0;line-height:1.6">
+    <li><strong>${(runnersCount ?? 0).toLocaleString()}</strong> runners signed up</li>
+    <li><strong>${(investorsCount ?? 0).toLocaleString()}</strong> investors signed up</li>
+    <li><strong>${totalInterest.toLocaleString()}</strong> total people on the early-access list</li>
+    <li><strong>${(tasksCount ?? 0).toLocaleString()}</strong> tasks posted to date</li>
+  </ul>
+  <p style="margin:0;color:#475569">We're still building the user base before we start launching live tasks at scale. Thanks for your patience — every signup gets us closer to a busy marketplace in your area.</p>
+</div>
+<p style="font-size:12px;color:#64748b;margin:8px 0 0;line-height:1.5">
+  This is an automated message from REI Runner. If you've already completed the steps suggested above, please disregard — your account is in good standing and no action is needed.
+</p>`;
 
     const GATEWAY_URL = "https://connector-gateway.lovable.dev/brevo";
     const results: { email: string; status: "sent" | "failed"; error?: string }[] = [];
@@ -161,7 +267,8 @@ export const sendBroadcast = createServerFn({ method: "POST" })
       seen.add(email);
 
       const firstName = (r.full_name ?? "").split(" ")[0] || "there";
-      const personalized = data.htmlContent.replaceAll("{{firstName}}", firstName);
+      const personalized =
+        data.htmlContent.replaceAll("{{firstName}}", firstName) + footerHtml;
       let status: "sent" | "failed" = "sent";
       let errorMessage: string | null = null;
       let providerMessageId: string | null = null;

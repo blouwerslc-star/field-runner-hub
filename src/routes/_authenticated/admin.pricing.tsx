@@ -12,6 +12,7 @@ import {
   PRICING_DISCLAIMER,
 } from "@/lib/pricing.functions";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
+import { RouteErrorState } from "@/components/dashboard/UiStates";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,6 +27,7 @@ import { toast } from "sonner";
 export const Route = createFileRoute("/_authenticated/admin/pricing")({
   component: AdminPricingPage,
   head: () => ({ meta: [{ title: "Pricing admin — REI Runner" }] }),
+  errorComponent: ({ error, reset }) => <RouteErrorState error={error} reset={reset} />,
 });
 
 function AdminPricingPage() {

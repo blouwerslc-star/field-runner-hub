@@ -7,6 +7,7 @@ import {
   adminDecideVerification,
 } from "@/lib/verification.functions";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
+import { RouteErrorState } from "@/components/dashboard/UiStates";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -22,6 +23,7 @@ import { VerificationLevelBadge } from "@/components/profiles/VerificationLevelB
 export const Route = createFileRoute("/_authenticated/admin/verifications")({
   component: AdminVerificationsPage,
   head: () => ({ meta: [{ title: "Verifications — Admin" }] }),
+  errorComponent: ({ error, reset }) => <RouteErrorState error={error} reset={reset} />,
 });
 
 type StatusTab = "pending_review" | "verified" | "rejected" | "all";

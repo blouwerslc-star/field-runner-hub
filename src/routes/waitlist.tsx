@@ -3,7 +3,6 @@ import { CheckCircle2, Mail } from "lucide-react";
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { trackLead, trackSignup } from "@/lib/tracking";
-import { SiteHeader } from "@/components/navigation/SiteHeader";
 
 export const Route = createFileRoute("/waitlist")({
   head: () => ({
@@ -26,9 +25,7 @@ function WaitlistPage() {
     trackSignup("email");
   }, []);
   return (
-    <div className="min-h-screen bg-background">
-      <SiteHeader currentPath="/waitlist" />
-      <main className="flex min-h-[calc(100vh-4rem)] items-center justify-center px-4 py-16">
+    <main className="min-h-screen flex items-center justify-center px-4 py-16 bg-background">
       <div className="max-w-xl w-full text-center space-y-6 rounded-2xl border border-border bg-card p-8 sm:p-12 shadow-sm">
         <div className="mx-auto h-14 w-14 rounded-full bg-primary/10 flex items-center justify-center">
           <CheckCircle2 className="h-8 w-8 text-primary" />
@@ -52,7 +49,6 @@ function WaitlistPage() {
           <Link to="/">Back to home</Link>
         </Button>
       </div>
-      </main>
-    </div>
+    </main>
   );
 }

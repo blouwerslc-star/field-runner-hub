@@ -7,13 +7,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
+import { Loader2, Eye, EyeOff } from "lucide-react";
 import { BrandLogo } from "@/components/brand/BrandLogo";
 
 export const Route = createFileRoute("/login")({
   validateSearch: (s: Record<string, unknown>) => ({
     redirect: typeof s.redirect === "string" ? s.redirect : "/dashboard",
-    role: s.role === "investor" || s.role === "runner" ? (s.role as "investor" | "runner") : undefined,
   }),
   component: LoginPage,
   head: () => ({
@@ -29,11 +28,12 @@ export const Route = createFileRoute("/login")({
 });
 
 function LoginPage() {
-  const { redirect, role } = Route.useSearch();
+  const { redirect } = Route.useSearch();
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -82,15 +82,6 @@ function LoginPage() {
     }
   }
 
-  const signupRole =
-    role ??
-    (redirect.includes("/dashboard/investor") || redirect.includes("/investors")
-      ? "investor"
-      : redirect.includes("/dashboard/runner") || redirect.includes("/runners") || redirect.includes("/tasks/")
-        ? "runner"
-        : undefined);
-  const signupSearch = signupRole ? { role: signupRole, redirect } : { redirect };
-
   return (
     <div className="min-h-screen bg-background text-foreground grid place-items-center px-5 py-12">
       <Toaster richColors closeButton position="top-center" theme="dark" />
@@ -105,11 +96,16 @@ function LoginPage() {
           <form onSubmit={handleSubmit} className="mt-6 space-y-4">
             <div className="space-y-1.5">
               <Label htmlFor="li-email">Email</Label>
-              <Input id="li-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required maxLength={200} />
+              <Input id="li-email" type="email" inputMode="email" value={email} onChange={(e) => setEmail(e.target.value)} required maxLength={200} autoComplete="email" autoCapitalize="none" autoCorrect="off" spellCheck={false} />
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="li-pw">Password</Label>
-              <Input id="li-pw" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required maxLength={100} />
+              <div className="relative">
+                <Input id="li-pw" type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} required maxLength={100} autoComplete="current-password" className="pr-10" />
+                <button type="button" onClick={() => setShowPassword((v) => !v)} aria-label={showPassword ? "Hide password" : "Show password"} className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-muted-foreground hover:text-foreground">
+                  {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                </button>
+              </div>
             </div>
             <Button type="submit" disabled={loading} className="w-full bg-gradient-primary shadow-glow" size="lg">
               {loading ? <><Loader2 className="size-4 mr-2 animate-spin" /> Signing in…</> : "Sign in"}
@@ -130,7 +126,7 @@ function LoginPage() {
 
           <p className="mt-6 text-sm text-muted-foreground text-center">
             New here?{" "}
-            <Link to="/signup" search={signupSearch} className="text-primary hover:underline">Create an account</Link>
+            <Link to="/signup" search={{ role: "runner", redirect }} className="text-primary hover:underline">Create an account</Link>
           </p>
           <p className="mt-2 text-sm text-muted-foreground text-center">
             Forgot your password?{" "}

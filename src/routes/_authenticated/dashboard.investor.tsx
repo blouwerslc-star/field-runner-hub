@@ -25,12 +25,13 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Loader2, Plus, MapPin, Calendar, DollarSign, CheckCircle2, XCircle, FileImage, ShieldCheck } from "lucide-react";
+import { Loader2, Plus, MapPin, Calendar, DollarSign, CheckCircle2, XCircle, FileImage, ShieldCheck, Heart } from "lucide-react";
 import { toast } from "sonner";
 import { listMyTasks, getTaskDetail, createInvestorTask, reviewSubmission, defaultRequiresInteriorAccess } from "@/lib/tasks.functions";
 import { Checkbox } from "@/components/ui/checkbox";
 import { getSignedDownloadUrl } from "@/lib/storage.functions";
 import { TaskFundingCheckout } from "@/components/payments/TaskFundingCheckout";
+import { TaskTipCheckout } from "@/components/payments/TaskTipCheckout";
 import { PaymentTestModeBanner } from "@/components/payments/PaymentTestModeBanner";
 import { DashboardLoadingSkeleton, RouteErrorState } from "@/components/dashboard/UiStates";
 
@@ -84,21 +85,14 @@ function InvestorDashboard() {
         <StatTile label="Spent" value={`$${totalSpent.toFixed(0)}`} />
       </div>
 
-      {tasks.length > 0 && (
-        <div className="flex justify-end mb-4">
-          <CreateTaskDialog />
-        </div>
-      )}
+      <div className="flex justify-end mb-4">
+        <CreateTaskDialog />
+      </div>
 
       {isLoading ? (
         <DashboardLoadingSkeleton tiles={0} rows={4} />
       ) : tasks.length === 0 ? (
-        <EmptyState
-          title="Post your first field task"
-          message="Start with photos, a drive-by, an occupancy check, or a walkthrough. The form includes presets so you do not have to build the request from scratch."
-        >
-          <CreateTaskDialog triggerLabel="Post first task" />
-        </EmptyState>
+        <EmptyState message="No tasks yet. Post your first task above to start getting bids from local runners." />
       ) : (
         <Tabs defaultValue="review">
           <TabsList className="mb-6 w-full overflow-x-auto justify-start">
@@ -133,20 +127,10 @@ function StatTile({ label, value }: { label: string; value: string }) {
   );
 }
 
-function EmptyState({
-  title,
-  message,
-  children,
-}: {
-  title?: string;
-  message: string;
-  children?: React.ReactNode;
-}) {
+function EmptyState({ message }: { message: string }) {
   return (
     <div className="rounded-2xl border border-dashed border-border bg-card/30 p-10 text-center text-sm text-muted-foreground">
-      {title && <h3 className="mb-2 text-base font-semibold text-foreground">{title}</h3>}
-      <p className="mx-auto max-w-md">{message}</p>
-      {children && <div className="mt-5 flex justify-center">{children}</div>}
+      {message}
     </div>
   );
 }
@@ -166,50 +150,12 @@ type Task = {
   requires_interior_access?: boolean;
 };
 
-const TASK_PRESETS = [
-  {
-    label: "Exterior photos",
-    task_type: "photos",
-    title: "Exterior photo set",
-    payout_amount: "35",
-    description: "Capture front, sides, rear, street view, roofline, driveway, yard, visible repairs, and any posted notices.",
-    requires_interior_access: false,
-  },
-  {
-    label: "Occupancy check",
-    task_type: "occupancy",
-    title: "Occupancy and vacancy check",
-    payout_amount: "45",
-    description: "Verify whether the property appears vacant, occupied, abandoned, or inaccessible. Include photos of doors, windows, mail, utilities, vehicles, and posted notices.",
-    requires_interior_access: false,
-  },
-  {
-    label: "Walkthrough",
-    task_type: "video",
-    title: "Interior walkthrough video",
-    payout_amount: "95",
-    description: "Record a continuous interior/exterior walkthrough. Narrate visible condition, repairs, utilities, odors, water damage, mechanicals, kitchen, baths, and safety issues.",
-    requires_interior_access: true,
-  },
-  {
-    label: "Lockbox or sign",
-    task_type: "lockbox",
-    title: "Lockbox or yard sign install",
-    payout_amount: "50",
-    description: "Install the lockbox or sign in the agreed location, test access, and upload clear proof photos before leaving the property.",
-    requires_interior_access: true,
-  },
-] as const;
-
 function InvestorTaskCard({ task }: { task: Task }) {
   const [open, setOpen] = useState(false);
   const [fundOpen, setFundOpen] = useState(false);
+  const [tipOpen, setTipOpen] = useState(false);
   const needsFunding = !task.funded && task.payout_amount != null && Number(task.payout_amount) > 0;
-  const checkoutReturnUrl =
-    typeof window === "undefined"
-      ? "https://reirunner.com/checkout/return?session_id={CHECKOUT_SESSION_ID}"
-      : `${window.location.origin}/checkout/return?session_id={CHECKOUT_SESSION_ID}`;
-
+  const canTip = task.status === "approved" || task.status === "paid";
   return (
     <div className="rounded-2xl border border-border bg-card/50 p-5">
       <div className="flex flex-wrap items-start justify-between gap-3">
@@ -261,12 +207,27 @@ function InvestorTaskCard({ task }: { task: Task }) {
                   <DialogTitle>Fund “{task.title}”</DialogTitle>
                 </DialogHeader>
                 <p className="text-sm text-muted-foreground mb-2">
-                  Escrow ${Number(task.payout_amount).toFixed(2)} payout + 20% platform fee. Funds are released to the runner only after you approve their work.
+                  Fund ${Number(task.payout_amount).toFixed(2)} in escrow. Your runner receives 80% on approval; REI Runner retains a 20% platform fee. Funds are released only after you approve the work.
                 </p>
                 <TaskFundingCheckout
                   taskId={task.id}
-                  returnUrl={checkoutReturnUrl}
+                  returnUrl={`${window.location.origin}/checkout/return?session_id={CHECKOUT_SESSION_ID}`}
                 />
+              </DialogContent>
+            </Dialog>
+          )}
+          {canTip && (
+            <Dialog open={tipOpen} onOpenChange={setTipOpen}>
+              <DialogTrigger asChild>
+                <Button size="sm" variant="outline">
+                  <Heart className="size-4 mr-1" /> Leave a tip
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle>Tip your runner</DialogTitle>
+                </DialogHeader>
+                <TipDialogBody taskId={task.id} />
               </DialogContent>
             </Dialog>
           )}
@@ -288,6 +249,65 @@ function InvestorTaskCard({ task }: { task: Task }) {
 }
 
 function InvestorTaskPanel({ task, onDone }: { task: Task; onDone: () => void }) {
+  return <InvestorTaskPanelInner task={task} onDone={onDone} />;
+}
+
+const TIP_PRESETS = [5, 10, 20, 50];
+
+function TipDialogBody({ taskId }: { taskId: string }) {
+  const [amount, setAmount] = useState<number>(10);
+  const [custom, setCustom] = useState<string>("");
+  const cents = Math.round((amount || 0) * 100);
+  const valid = cents >= 100 && cents <= 100000;
+  return (
+    <div className="space-y-4">
+      <p className="text-sm text-muted-foreground">
+        100% of your tip goes to your runner. No platform fee on tips.
+      </p>
+      <div className="flex flex-wrap gap-2">
+        {TIP_PRESETS.map((v) => (
+          <Button
+            key={v}
+            type="button"
+            size="sm"
+            variant={amount === v && !custom ? "default" : "outline"}
+            onClick={() => { setAmount(v); setCustom(""); }}
+          >
+            ${v}
+          </Button>
+        ))}
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-muted-foreground">Custom $</span>
+          <Input
+            type="number"
+            min={1}
+            max={1000}
+            step="1"
+            value={custom}
+            onChange={(e) => {
+              setCustom(e.target.value);
+              const n = Number(e.target.value);
+              if (!Number.isNaN(n)) setAmount(n);
+            }}
+            className="w-24"
+            placeholder="0"
+          />
+        </div>
+      </div>
+      {!valid ? (
+        <p className="text-xs text-muted-foreground">Enter a tip between $1 and $1,000 to continue.</p>
+      ) : (
+        <TaskTipCheckout
+          taskId={taskId}
+          amountCents={cents}
+          returnUrl={`${window.location.origin}/checkout/return?session_id={CHECKOUT_SESSION_ID}&mode=tip`}
+        />
+      )}
+    </div>
+  );
+}
+
+function InvestorTaskPanelInner({ task, onDone }: { task: Task; onDone: () => void }) {
   const qc = useQueryClient();
   const fetchDetail = useServerFn(getTaskDetail);
   const reviewFn = useServerFn(reviewSubmission);
@@ -389,7 +409,7 @@ function InvestorTaskPanel({ task, onDone }: { task: Task; onDone: () => void })
   );
 }
 
-function CreateTaskDialog({ triggerLabel = "New task" }: { triggerLabel?: string }) {
+function CreateTaskDialog() {
   const qc = useQueryClient();
   const createFn = useServerFn(createInvestorTask);
   const [open, setOpen] = useState(false);
@@ -404,22 +424,6 @@ function CreateTaskDialog({ triggerLabel = "New task" }: { triggerLabel?: string
   // unless the investor has explicitly toggled it.
   const autoInterior = defaultRequiresInteriorAccess(form.task_type);
   const effectiveRequiresInterior = interiorTouched ? requiresInterior : autoInterior;
-  const payoutValue = form.payout_amount ? Number(form.payout_amount) : null;
-  const invalidPayout = payoutValue != null && (!Number.isFinite(payoutValue) || payoutValue < 0);
-  const readyToPost = !!form.title && !!form.property_address && !!form.city && !!form.state && !invalidPayout;
-  const today = new Date().toISOString().slice(0, 10);
-
-  function applyPreset(preset: (typeof TASK_PRESETS)[number]) {
-    setForm((current) => ({
-      ...current,
-      title: preset.title,
-      task_type: preset.task_type,
-      payout_amount: preset.payout_amount,
-      description: preset.description,
-    }));
-    setInteriorTouched(true);
-    setRequiresInterior(preset.requires_interior_access);
-  }
 
   const create = useMutation({
     mutationFn: () => createFn({
@@ -451,35 +455,18 @@ function CreateTaskDialog({ triggerLabel = "New task" }: { triggerLabel?: string
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button className="bg-gradient-primary shadow-glow">
-          <Plus className="size-4 mr-1.5" /> {triggerLabel}
+          <Plus className="size-4 mr-1.5" /> New task
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-lg">
         <DialogHeader><DialogTitle>Post a new task</DialogTitle></DialogHeader>
         <div className="grid gap-3">
           <div>
-            <Label>Start with a preset</Label>
-            <div className="mt-2 grid grid-cols-2 gap-2">
-              {TASK_PRESETS.map((preset) => (
-                <Button
-                  key={preset.label}
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  className="h-auto justify-start whitespace-normal py-2 text-left"
-                  onClick={() => applyPreset(preset)}
-                >
-                  {preset.label}
-                </Button>
-              ))}
-            </div>
-          </div>
-          <div>
-            <Label>Title *</Label>
+            <Label>Title</Label>
             <Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="Drive-by photos at 123 Main St" />
           </div>
           <div>
-            <Label>Type *</Label>
+            <Label>Type</Label>
             <Select value={form.task_type} onValueChange={(v) => setForm({ ...form, task_type: v })}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
@@ -493,21 +480,17 @@ function CreateTaskDialog({ triggerLabel = "New task" }: { triggerLabel?: string
             </Select>
           </div>
           <div>
-            <Label>Address *</Label>
+            <Label>Address</Label>
             <Input value={form.property_address} onChange={(e) => setForm({ ...form, property_address: e.target.value })} />
           </div>
           <div className="grid grid-cols-3 gap-2">
-            <div><Label>City *</Label><Input value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} /></div>
-            <div><Label>State *</Label><Input value={form.state} onChange={(e) => setForm({ ...form, state: e.target.value.toUpperCase().slice(0, 2) })} placeholder="MI" maxLength={2} /></div>
+            <div><Label>City</Label><Input value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} /></div>
+            <div><Label>State</Label><Input value={form.state} onChange={(e) => setForm({ ...form, state: e.target.value })} /></div>
             <div><Label>ZIP</Label><Input value={form.zip_code} onChange={(e) => setForm({ ...form, zip_code: e.target.value })} /></div>
           </div>
           <div className="grid grid-cols-2 gap-2">
-            <div>
-              <Label>Payout ($)</Label>
-              <Input type="number" min="0" step="1" value={form.payout_amount} onChange={(e) => setForm({ ...form, payout_amount: e.target.value })} />
-              {invalidPayout && <p className="mt-1 text-xs text-destructive">Enter a valid payout amount.</p>}
-            </div>
-            <div><Label>Due date</Label><Input type="date" min={today} value={form.due_date} onChange={(e) => setForm({ ...form, due_date: e.target.value })} /></div>
+            <div><Label>Payout ($)</Label><Input type="number" value={form.payout_amount} onChange={(e) => setForm({ ...form, payout_amount: e.target.value })} /></div>
+            <div><Label>Due date</Label><Input type="date" value={form.due_date} onChange={(e) => setForm({ ...form, due_date: e.target.value })} /></div>
           </div>
           <div>
             <Label>Description</Label>
@@ -537,10 +520,7 @@ function CreateTaskDialog({ triggerLabel = "New task" }: { triggerLabel?: string
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={() => setOpen(false)} disabled={create.isPending}>
-            Cancel
-          </Button>
-          <Button onClick={() => create.mutate()} disabled={create.isPending || !readyToPost} className="bg-gradient-primary shadow-glow">
+          <Button onClick={() => create.mutate()} disabled={create.isPending || !form.title || !form.property_address || !form.city || !form.state} className="bg-gradient-primary shadow-glow">
             {create.isPending ? <Loader2 className="size-4 mr-2 animate-spin" /> : null}
             Post task
           </Button>

@@ -1,12 +1,10 @@
 import { useState, useId, useRef, useEffect, cloneElement, isValidElement } from "react";
 import { useServerFn } from "@tanstack/react-start";
+import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { precheckSignupAttempt } from "@/lib/spam-protection.functions";
-import {
-  createPasswordAccount,
-  getPasswordValidationError,
-} from "@/lib/signup-client";
+import { sendApplicantWelcomeEmail } from "@/lib/welcome-email.functions";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -68,22 +66,23 @@ function mapAuthError(code: string | undefined, message: string): string {
   }
 }
 
-async function requestMagicLinkSignup(opts: {
+async function requestPasswordSignup(opts: {
   email: string;
+  password: string;
   full_name: string;
   phone: string;
   role: "runner" | "investor";
   extra: RunnerMeta | InvestorMeta;
 }): Promise<{ debug: SignupDebug }> {
-  const redirectTo =
+  const emailRedirectTo =
     typeof window !== "undefined"
       ? `${window.location.origin}/dashboard`
       : undefined;
-  const { error } = await supabase.auth.signInWithOtp({
+  const { data, error } = await supabase.auth.signUp({
     email: opts.email,
+    password: opts.password,
     options: {
-      emailRedirectTo: redirectTo,
-      shouldCreateUser: true,
+      emailRedirectTo,
       data: {
         role: opts.role,
         full_name: opts.full_name,
@@ -97,11 +96,12 @@ async function requestMagicLinkSignup(opts: {
   }
   return {
     debug: {
-      authUserId: "pending-email-verification",
+      authUserId: data.user?.id ?? "pending",
       email: opts.email,
       role: opts.role,
-      profileStatus:
-        "Application captured. Profile will be created automatically when you click the verification link in your email.",
+      profileStatus: data.session
+        ? "Account created and signed in. Profile provisioned automatically."
+        : "Account created. Sign in to continue.",
     },
   };
 }
@@ -182,7 +182,7 @@ function HoneypotField() {
       <label aria-hidden="true">
         <input
           type="text"
-          name="website_url"
+          name="hp_extra_field"
           tabIndex={-1}
           autoComplete="off"
           aria-hidden="true"
@@ -225,7 +225,7 @@ function SuccessCard({
           <>Your account is set up. Redirecting you to your dashboard…</>
         )}
       </p>
-      {import.meta.env.DEV && debug && (
+      {debug && (
         <div className="mt-5 rounded-lg border border-border bg-muted/40 p-3 text-left text-xs text-muted-foreground">
           <div><strong className="text-foreground">Auth user id:</strong> {debug.authUserId}</div>
           <div><strong className="text-foreground">Email:</strong> {debug.email}</div>
@@ -242,6 +242,8 @@ function SuccessCard({
 
 export function FieldRunnerForm() {
   const precheck = useServerFn(precheckSignupAttempt);
+  const sendWelcome = useServerFn(sendApplicantWelcomeEmail);
+  const navigate = useNavigate();
   const formMountedAt = useRef<number>(Date.now());
   useEffect(() => {
     formMountedAt.current = Date.now();
@@ -283,10 +285,20 @@ export function FieldRunnerForm() {
     const phone = String(f.get("phone") || "").trim();
     const city = String(f.get("city") || "").trim();
     const state = String(f.get("state") || "").trim();
-    const honeypot = String(f.get("website_url") || "");
+    const password = String(f.get("password") || "");
+    const confirm_password = String(f.get("confirm_password") || "");
+    const honeypot = String(f.get("hp_extra_field") || "");
 
     if (!full_name || !email || !phone || !city || !state) {
       toast.error("Please complete all required fields.");
+      return;
+    }
+    if (password.length < 8) {
+      toast.error("Choose a password with at least 8 characters.");
+      return;
+    }
+    if (password !== confirm_password) {
+      toast.error("Passwords do not match.");
       return;
     }
     if (!serviceRadius || !transportation) {
@@ -310,8 +322,9 @@ export function FieldRunnerForm() {
         setSubmitting(false);
         return;
       }
-      const { debug } = await requestMagicLinkSignup({
+      const { debug } = await requestPasswordSignup({
         email,
+        password,
         full_name,
         phone,
         role: "runner",
@@ -325,9 +338,17 @@ export function FieldRunnerForm() {
       });
       setSubmittedEmail(email);
       setSignupDebug(debug);
+      // Fire-and-forget welcome / email-confirmation message
+      sendWelcome({ data: { email, fullName: full_name, role: "runner" } }).catch(() => {});
+      const { data: sessionData } = await supabase.auth.getSession();
+      if (sessionData.session) {
+        toast.success("Welcome aboard! Taking you to your dashboard…");
+        navigate({ to: "/dashboard" });
+        return;
+      }
       setNeedsEmailVerification(true);
       setDone(true);
-      toast.success("Application received — check your email to finish.");
+      toast.success("Account created — check your email to confirm.");
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Submission failed.";
       console.error("[signup:runner]", err);
@@ -389,8 +410,16 @@ export function FieldRunnerForm() {
         <TaskTypesGrid selected={taskTypes} onToggle={toggle} />
       </Field>
 
+      <div className="grid sm:grid-cols-2 gap-4">
+        <Field label="Create a password">
+          <Input name="password" type="password" required minLength={8} maxLength={72} autoComplete="new-password" />
+        </Field>
+        <Field label="Confirm password">
+          <Input name="confirm_password" type="password" required minLength={8} maxLength={72} autoComplete="new-password" />
+        </Field>
+      </div>
       <p className="text-xs text-muted-foreground">
-        No password needed yet. We'll email you a secure verification link to finish setting up your account.
+        Use at least 8 characters. You'll be signed in right away — we'll also send a confirmation email so you can verify your address whenever you have a moment.
       </p>
 
       <Button type="submit" size="lg" disabled={submitting} className="w-full bg-gradient-primary shadow-glow">
@@ -401,6 +430,13 @@ export function FieldRunnerForm() {
 }
 
 export function ProForm() {
+  const precheck = useServerFn(precheckSignupAttempt);
+  const sendWelcome = useServerFn(sendApplicantWelcomeEmail);
+  const navigate = useNavigate();
+  const formMountedAt = useRef<number>(Date.now());
+  useEffect(() => {
+    formMountedAt.current = Date.now();
+  }, []);
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
   const [needsEmailVerification, setNeedsEmailVerification] = useState(false);
@@ -431,34 +467,43 @@ export function ProForm() {
     const markets_served = String(f.get("markets_served") || "").trim();
     const password = String(f.get("password") || "");
     const confirm_password = String(f.get("confirm_password") || "");
+    const honeypot = String(f.get("hp_extra_field") || "");
 
-    if (!full_name || !email || !markets_served) {
+    if (!full_name || !email || !phone || !markets_served) {
       toast.error("Please complete all required fields.");
+      return;
+    }
+    if (password.length < 8) {
+      toast.error("Choose a password with at least 8 characters.");
+      return;
+    }
+    if (password !== confirm_password) {
+      toast.error("Passwords do not match.");
       return;
     }
     if (!dealVolume) {
       toast.error("Please select your monthly deal volume.");
       return;
     }
-    const passwordError = getPasswordValidationError(password, confirm_password);
-    if (passwordError) {
-      toast.error(passwordError);
-      return;
-    }
 
     setSubmitting(true);
     try {
-      const redirectTo =
-        typeof window !== "undefined"
-          ? `${window.location.origin}/dashboard/investor`
-          : undefined;
-      const result = await createPasswordAccount({
+      const elapsed_ms = Date.now() - formMountedAt.current;
+      const check = await precheck({
+        data: { email, role: "investor", honeypot, elapsed_ms },
+      });
+      if (!check.ok) {
+        setFormError(check.reason);
+        toast.error(check.reason);
+        setSubmitting(false);
+        return;
+      }
+      const { debug } = await requestPasswordSignup({
         email,
         password,
-        fullName: full_name,
+        full_name,
         phone,
         role: "investor",
-        redirectTo,
         extra: {
           company_name,
           markets_served,
@@ -466,22 +511,19 @@ export function ProForm() {
         },
       });
       setSubmittedEmail(email);
-      setSignupDebug({
-        authUserId: result.userId,
-        email: result.email,
-        role: "investor",
-        profileStatus: "Profile and investor role are created by the Supabase signup trigger.",
-      });
-      setNeedsEmailVerification(result.needsEmailVerification);
-      setDone(true);
-      if (result.needsEmailVerification) {
-        toast.success("Account created. Check your email to confirm.");
-      } else {
-        toast.success("Investor account created.");
-        window.setTimeout(() => window.location.assign("/dashboard/investor"), 500);
+      setSignupDebug(debug);
+      sendWelcome({ data: { email, fullName: full_name, role: "investor" } }).catch(() => {});
+      const { data: sessionData } = await supabase.auth.getSession();
+      if (sessionData.session) {
+        toast.success("Welcome aboard! Taking you to your dashboard…");
+        navigate({ to: "/dashboard" });
+        return;
       }
+      setNeedsEmailVerification(true);
+      setDone(true);
+      toast.success("Account created — check your email to confirm.");
     } catch (err) {
-      const msg = err instanceof Error ? err.message : "Sign-up failed.";
+      const msg = err instanceof Error ? err.message : "Submission failed.";
       console.error("[signup:investor]", err);
       setFormError(msg);
       toast.error(msg);
@@ -511,11 +553,9 @@ export function ProForm() {
         </Alert>
       )}
       <div className="grid sm:grid-cols-2 gap-4">
-        <Field label="Full Name"><Input name="full_name" required maxLength={100} autoComplete="name" /></Field>
-        <Field label="Email"><Input name="email" type="email" required maxLength={200} autoComplete="email" /></Field>
-        <Field label="Password"><Input name="password" type="password" required minLength={8} maxLength={100} autoComplete="new-password" /></Field>
-        <Field label="Confirm Password"><Input name="confirm_password" type="password" required minLength={8} maxLength={100} autoComplete="new-password" /></Field>
-        <Field label="Phone (optional)"><Input name="phone" maxLength={30} autoComplete="tel" /></Field>
+        <Field label="Full Name"><Input name="full_name" required maxLength={100} /></Field>
+        <Field label="Email"><Input name="email" type="email" required maxLength={200} /></Field>
+        <Field label="Phone"><Input name="phone" required maxLength={30} /></Field>
         <Field label="Company Name"><Input name="company_name" maxLength={150} /></Field>
         <Field label="Markets Served">
           <Input name="markets_served" required maxLength={300} placeholder="e.g. Atlanta GA, Charlotte NC" />
@@ -532,12 +572,20 @@ export function ProForm() {
         </Field>
       </div>
 
+      <div className="grid sm:grid-cols-2 gap-4">
+        <Field label="Create a password">
+          <Input name="password" type="password" required minLength={8} maxLength={72} autoComplete="new-password" />
+        </Field>
+        <Field label="Confirm password">
+          <Input name="confirm_password" type="password" required minLength={8} maxLength={72} autoComplete="new-password" />
+        </Field>
+      </div>
       <p className="text-xs text-muted-foreground">
-        Create your password now. If email verification is enabled, we will send one confirmation link before dashboard access.
+        Use at least 8 characters. You'll be signed in right away — we'll also send a confirmation email so you can verify your address whenever you have a moment.
       </p>
 
       <Button type="submit" size="lg" disabled={submitting} className="w-full bg-gradient-primary shadow-glow">
-        {submitting ? <><Loader2 className="size-4 mr-2 animate-spin" /> Creating...</> : "Create Investor Account"}
+        {submitting ? <><Loader2 className="size-4 mr-2 animate-spin" /> Submitting…</> : "Apply as an Investor"}
       </Button>
     </form>
   );

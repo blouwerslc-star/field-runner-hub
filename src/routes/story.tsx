@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { BrandLogo } from "@/components/brand/BrandLogo";
 import { Button } from "@/components/ui/button";
-import { SiteHeader } from "@/components/navigation/SiteHeader";
 import founderPhoto from "@/assets/founder-brian.jpg";
 import {
   ArrowRight,
@@ -56,7 +56,19 @@ const PILLARS = [
 function StoryPage() {
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <SiteHeader currentPath="/story" />
+      <header className="sticky top-0 z-40 backdrop-blur bg-background/70 border-b border-border/60">
+        <div className="mx-auto max-w-7xl px-5 h-16 flex items-center justify-between">
+          <Link to="/"><BrandLogo /></Link>
+          <nav className="hidden md:flex items-center gap-6 text-sm text-muted-foreground">
+            <Link to="/" className="hover:text-foreground">Home</Link>
+            <Link to="/pricing" className="hover:text-foreground">Pricing</Link>
+            <Link to="/trust" className="hover:text-foreground">Trust & Safety</Link>
+            <Link to="/story" className="text-foreground">Our Story</Link>
+            <Link to="/faq" className="hover:text-foreground">FAQ</Link>
+          </nav>
+          <Link to="/login" className="text-sm text-muted-foreground hover:text-foreground">Sign in</Link>
+        </div>
+      </header>
 
       {/* HERO */}
       <section className="relative border-b border-border/60">

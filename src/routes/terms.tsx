@@ -1,5 +1,4 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { SiteHeader } from "@/components/navigation/SiteHeader";
 
 export const Route = createFileRoute("/terms")({
   component: Terms,
@@ -18,7 +17,6 @@ export const Route = createFileRoute("/terms")({
 function Terms() {
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <SiteHeader currentPath="/terms" />
       <div className="mx-auto max-w-3xl px-5 py-20">
         <Link to="/" className="text-sm text-primary hover:underline">← Back to home</Link>
         <h1 className="mt-6 text-4xl md:text-5xl font-bold">Terms of Service</h1>

@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { getEmailMonitorData } from "@/lib/email-monitor.functions";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
+import { RouteErrorState } from "@/components/dashboard/UiStates";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Loader2, RefreshCcw, Mail, Clock, AlertTriangle, CheckCircle2, Inbox } from "lucide-react";
@@ -11,6 +12,7 @@ import { Loader2, RefreshCcw, Mail, Clock, AlertTriangle, CheckCircle2, Inbox } 
 export const Route = createFileRoute("/_authenticated/admin/email-monitor")({
   component: EmailMonitorPage,
   head: () => ({ meta: [{ title: "Email monitor — Admin" }] }),
+  errorComponent: ({ error, reset }) => <RouteErrorState error={error} reset={reset} />,
 });
 
 function fmtAge(sec: number | null) {

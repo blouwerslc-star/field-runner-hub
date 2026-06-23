@@ -59,8 +59,6 @@ import { getCoveragePoints } from "@/lib/public-stats.functions";
 import { MarketplaceMap, type MapPoint } from "@/components/maps/MarketplaceMap";
 import { TestimonialsSection } from "@/components/landing/TestimonialsSection";
 import { SampleDeliverablesSection } from "@/components/landing/SampleDeliverablesSection";
-import { supabase } from "@/integrations/supabase/client";
-import { readAuthHint, setAuthHint } from "@/lib/auth-hint";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -134,7 +132,7 @@ const MARKETS = [
 // Beta status items — no fabricated metrics. Replace with real DB-backed numbers when available.
 const BETA_STATUS = [
   { icon: Users, label: "Founding Runner Applications", value: "Open" },
-  { icon: Building2, label: "Investor Accounts", value: "Open" },
+  { icon: Building2, label: "Investor Applications", value: "Open" },
   { icon: MapPin, label: "Market Coverage", value: "Expanding" },
   { icon: Zap, label: "Marketplace", value: "Early Access" },
 ];
@@ -446,40 +444,9 @@ function Index() {
   const goHire = () => navigate({ to: "/investors" });
   const goBecome = () => navigate({ to: "/runners" });
   const goSignupRunner = () => navigate({ to: "/signup", search: { role: "runner", redirect: "/dashboard" } });
-  const goSignupInvestor = () => navigate({ to: "/signup", search: { role: "investor", redirect: "/dashboard/investor" } });
+  const goSignupInvestor = () => navigate({ to: "/signup", search: { role: "investor", redirect: "/dashboard" } });
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [showStickyCta, setShowStickyCta] = useState(false);
-  const [userId, setUserId] = useState<string | null>(() => (readAuthHint() ? "pending" : null));
-  const isAuthed = !!userId;
-
-  useEffect(() => {
-    let cancelled = false;
-    const applySession = (id: string | null) => {
-      setAuthHint(!!id);
-      if (!cancelled) setUserId(id);
-    };
-
-    supabase.auth
-      .getSession()
-      .then(({ data }) => applySession(data.session?.user.id ?? null))
-      .catch(() => applySession(null));
-
-    const { data } = supabase.auth.onAuthStateChange((_event, session) => {
-      applySession(session?.user.id ?? null);
-    });
-
-    return () => {
-      cancelled = true;
-      data.subscription.unsubscribe();
-    };
-  }, []);
-
-  async function signOut() {
-    setMobileNavOpen(false);
-    setAuthHint(false);
-    await supabase.auth.signOut();
-    navigate({ to: "/" });
-  }
 
   useEffect(() => {
     // Show sticky mobile CTA only after the hero is scrolled past
@@ -525,26 +492,13 @@ function Index() {
             <Link to="/faq" className="hover:text-foreground transition">FAQ</Link>
           </nav>
           <div className="flex items-center gap-2">
-            {isAuthed ? (
-              <>
-                <Button asChild size="sm" variant="outline" className="hidden sm:inline-flex">
-                  <Link to="/tasks">Marketplace</Link>
-                </Button>
-                <Button asChild size="sm" className="bg-gradient-primary shadow-glow">
-                  <Link to="/dashboard">Dashboard</Link>
-                </Button>
-              </>
-            ) : (
-              <>
-                <Link to="/login" className="hidden sm:inline text-sm text-muted-foreground hover:text-foreground transition">Sign in</Link>
-                <Button type="button" onClick={goBecome} size="sm" variant="outline" className="hidden sm:inline-flex">
-                  Become a Runner
-                </Button>
-                <Button type="button" onClick={goHire} size="sm" className="bg-gradient-primary shadow-glow">
-                  Hire a Runner
-                </Button>
-              </>
-            )}
+            <Link to="/login" className="hidden sm:inline text-sm text-muted-foreground hover:text-foreground transition">Sign in</Link>
+            <Button type="button" onClick={goBecome} size="sm" variant="outline" className="hidden sm:inline-flex">
+              Become a Runner
+            </Button>
+            <Button type="button" onClick={goHire} size="sm" className="bg-gradient-primary shadow-glow">
+              Hire a Runner
+            </Button>
             <Sheet open={mobileNavOpen} onOpenChange={setMobileNavOpen}>
               <SheetTrigger asChild>
                 <button
@@ -575,44 +529,24 @@ function Index() {
                   ))}
                 </nav>
                 <div className="border-t border-border/60 p-5 space-y-3">
-                  {isAuthed ? (
-                    <>
-                      <SheetClose asChild>
-                        <Button asChild className="w-full h-12 bg-gradient-primary shadow-glow text-base">
-                          <Link to="/dashboard">Dashboard</Link>
-                        </Button>
-                      </SheetClose>
-                      <SheetClose asChild>
-                        <Button asChild variant="outline" className="w-full h-12 text-base">
-                          <Link to="/tasks">Marketplace</Link>
-                        </Button>
-                      </SheetClose>
-                      <Button type="button" onClick={signOut} variant="ghost" className="w-full h-12 text-base">
-                        Sign out
-                      </Button>
-                    </>
-                  ) : (
-                    <>
-                      <SheetClose asChild>
-                        <Button type="button" onClick={goHire} className="w-full h-12 bg-gradient-primary shadow-glow text-base">
-                          Hire a Runner <ArrowRight className="size-4 ml-1" />
-                        </Button>
-                      </SheetClose>
-                      <SheetClose asChild>
-                        <Button type="button" onClick={goBecome} variant="outline" className="w-full h-12 text-base">
-                          Become a Runner
-                        </Button>
-                      </SheetClose>
-                      <SheetClose asChild>
-                        <Link
-                          to="/login"
-                          className="block w-full text-center h-12 leading-[3rem] rounded-md border border-border bg-card/60 text-sm font-medium text-foreground/90 hover:bg-card transition"
-                        >
-                          Sign in
-                        </Link>
-                      </SheetClose>
-                    </>
-                  )}
+                  <SheetClose asChild>
+                    <Button type="button" onClick={goHire} className="w-full h-12 bg-gradient-primary shadow-glow text-base">
+                      Hire a Runner <ArrowRight className="size-4 ml-1" />
+                    </Button>
+                  </SheetClose>
+                  <SheetClose asChild>
+                    <Button type="button" onClick={goBecome} variant="outline" className="w-full h-12 text-base">
+                      Become a Runner
+                    </Button>
+                  </SheetClose>
+                  <SheetClose asChild>
+                    <Link
+                      to="/login"
+                      className="block w-full text-center h-12 leading-[3rem] rounded-md border border-border bg-card/60 text-sm font-medium text-foreground/90 hover:bg-card transition"
+                    >
+                      Sign in
+                    </Link>
+                  </SheetClose>
                 </div>
               </SheetContent>
             </Sheet>
@@ -666,18 +600,18 @@ function Index() {
             <span className="text-gradient">for Real Estate Investors</span>
           </h1>
           <p className="mt-6 max-w-2xl mx-auto text-base md:text-lg text-muted-foreground animate-fade-up" style={{ animationDelay: "0.2s" }}>
-            REI Runner is the on-demand marketplace where investors hire local runners for property photos, walkthrough videos, drive-bys, occupancy checks, and other field tasks. Turnaround varies by market and runner availability.
+            REI Runner is the nationwide boots-on-the-ground network for real estate investors. Post a task, a vetted local runner gets eyes on the property, and funds only release when you approve the work.
           </p>
           <div className="mt-9 flex flex-col sm:flex-row gap-3 justify-center animate-fade-up" style={{ animationDelay: "0.3s" }}>
             <Button type="button" size="lg" onClick={goHire} className="bg-gradient-primary shadow-glow text-base h-14 px-8">
-              Hire a Runner <ArrowRight className="size-4 ml-1" />
+              Post Your First Task <ArrowRight className="size-4 ml-1" />
             </Button>
             <Button type="button" size="lg" variant="outline" onClick={goBecome} className="h-14 px-8 text-base bg-background/40 backdrop-blur">
-              Become a Runner
+              Apply as a Runner
             </Button>
           </div>
           <p className="mt-6 text-xs text-muted-foreground animate-fade-up" style={{ animationDelay: "0.4s" }}>
-            Applications reviewed weekly · Founding Runner spots limited during beta launch
+            Funds held until you approve · ID-verified runners · No platform fee on top of your task price
           </p>
         </div>
       </section>
@@ -857,7 +791,7 @@ function Index() {
             <h3 className="text-2xl font-bold">I'm an Investor</h3>
             <p className="mt-2 text-sm text-muted-foreground">Post property tasks and get boots-on-the-ground in any major US market — usually same-day.</p>
             <div className="mt-6 inline-flex items-center gap-2 text-primary font-medium">
-              Create Investor Account <ArrowRight className="size-4 group-hover:translate-x-1 transition-transform" />
+              Join Investor Early Access <ArrowRight className="size-4 group-hover:translate-x-1 transition-transform" />
             </div>
           </button>
         </div>
@@ -1072,7 +1006,7 @@ function Index() {
             to="/investors"
             className="inline-flex items-center gap-2 h-12 px-6 rounded-md bg-gradient-primary shadow-glow text-sm font-medium text-primary-foreground hover:opacity-90 transition"
           >
-            Create Investor Account <ArrowRight className="size-4" />
+            Apply as an Investor <ArrowRight className="size-4" />
           </Link>
         </div>
       </section>
@@ -1082,7 +1016,7 @@ function Index() {
         <SectionHeader
           eyebrow="Join the marketplace"
           title="Hire a Runner — or become one"
-          subtitle="Investor accounts are open now. Runner applications are reviewed weekly during beta launch."
+          subtitle="Limited spots during beta launch. Applications reviewed weekly."
         />
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
           <Button type="button" size="lg" onClick={goHire} className="bg-gradient-primary shadow-glow text-base h-14 px-8">
@@ -1187,40 +1121,29 @@ function Index() {
           showStickyCta ? "translate-y-0 opacity-100" : "translate-y-full opacity-0 pointer-events-none"
         }`}
       >
-        {isAuthed ? (
-          <div className="flex gap-2">
-            <Button asChild className="flex-1 h-12 bg-gradient-primary shadow-glow text-base active:scale-[0.98] transition-transform">
-              <Link to="/dashboard">Dashboard</Link>
-            </Button>
-            <Button asChild variant="outline" className="h-12 px-4 text-sm font-medium active:scale-[0.98] transition-transform">
-              <Link to="/tasks">Marketplace</Link>
-            </Button>
-          </div>
-        ) : (
-          <div className="flex gap-2">
-            <Button
-              type="button"
-              onClick={goHire}
-              className="flex-1 h-12 bg-gradient-primary shadow-glow text-base active:scale-[0.98] transition-transform"
-            >
-              Hire a Runner <ArrowRight className="size-4 ml-1" />
-            </Button>
-            <Button
-              type="button"
-              onClick={goBecome}
-              variant="outline"
-              className="h-12 px-4 text-sm font-medium active:scale-[0.98] transition-transform"
-            >
-              Become a Runner
-            </Button>
-            <Link
-              to="/login"
-              className="inline-flex items-center justify-center h-12 px-4 rounded-md border border-border bg-card/80 backdrop-blur text-sm font-medium text-foreground/90 active:scale-[0.98] transition-transform"
-            >
-              Sign in
-            </Link>
-          </div>
-        )}
+        <div className="flex gap-2">
+          <Button
+            type="button"
+            onClick={goHire}
+            className="flex-1 h-12 bg-gradient-primary shadow-glow text-base active:scale-[0.98] transition-transform"
+          >
+            Hire a Runner <ArrowRight className="size-4 ml-1" />
+          </Button>
+          <Button
+            type="button"
+            onClick={goBecome}
+            variant="outline"
+            className="h-12 px-4 text-sm font-medium active:scale-[0.98] transition-transform"
+          >
+            Become a Runner
+          </Button>
+          <Link
+            to="/login"
+            className="inline-flex items-center justify-center h-12 px-4 rounded-md border border-border bg-card/80 backdrop-blur text-sm font-medium text-foreground/90 active:scale-[0.98] transition-transform"
+          >
+            Sign in
+          </Link>
+        </div>
       </div>
       <div className="md:hidden h-24" aria-hidden />
     </div>

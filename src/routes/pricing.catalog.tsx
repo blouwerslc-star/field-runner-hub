@@ -1,11 +1,12 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { getPricingCatalog, PRICING_DISCLAIMER, type PricingAddon, type PricingTemplate } from "@/lib/pricing.functions";
-import { SiteHeader } from "@/components/navigation/SiteHeader";
+import { BrandLogo } from "@/components/brand/BrandLogo";
+import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, Clock, CheckCircle2, XCircle, Info } from "lucide-react";
+import { Loader2, Clock, DollarSign, CheckCircle2, XCircle, Info, ArrowRight } from "lucide-react";
 
 export const Route = createFileRoute("/pricing/catalog")({
   component: PricingCatalogPage,
@@ -69,7 +70,15 @@ function PricingCatalogPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <SiteHeader currentPath="/pricing" />
+      <header className="border-b border-border">
+        <div className="container mx-auto px-6 py-4 flex items-center justify-between">
+          <Link to="/"><BrandLogo /></Link>
+          <div className="flex gap-2">
+            <Link to="/pricing"><Button variant="ghost" size="sm">Overview</Button></Link>
+            <Link to="/tasks"><Button size="sm">Post a task <ArrowRight className="size-3.5 ml-1.5" /></Button></Link>
+          </div>
+        </div>
+      </header>
 
       <main className="container mx-auto px-6 py-12 max-w-6xl">
         <div className="mb-10">

@@ -1,50 +1,90 @@
-# Admin Ops Cockpit — Phased Plan
+## Goal
+Lift investor signups and funded tasks. Reinforce one message everywhere:
+**"REI Runner is the nationwide boots-on-the-ground network for real estate investors."**
 
-This is a very large request (12 priorities, dozens of pages). Shipping it all in one batch would be unsafe — too many simultaneous changes to admin queues, broadcasts, RLS-sensitive surfaces, and routing. I'll split into phases and confirm scope before starting.
+Keep the existing visual design language. Changes are copy, structure, metadata, and small UX additions only.
 
-## Phase 1 — Foundation (recommended first ship)
-The pieces that unblock everything else and fix the "blank dashboard" complaint.
+---
 
-1. **Role-based dashboard routing (P1)**
-   - `/dashboard` already routes by role, but admins fall through to runner — fix to send admins to `/admin`.
-   - `BrandLogo` link + mobile Home nav → role-aware destination (new `useRoleHome()` hook).
-2. **Admin nav entry (P2)**
-   - Add an "Admin" dropdown/section in `DashboardShell` (desktop + mobile sheet + bottom nav) visible only when `has_role(admin)`. Quick links to all 8 admin pages.
-3. **Upgraded `/admin` dashboard (P3)**
-   - New server fn `getAdminOverview` returning KPI counts + queue previews (pending approvals, verifications, BG checks, disputes, unassigned tasks, failed emails 24h).
-   - KPI grid, queue panels with "Review" deep-links, quick-action buttons, last-refreshed timestamp + manual refresh.
-4. **Useful empty states (P4)** on `/admin/verifications`, `/admin/runner-approvals`, `/admin/background-checks` — counts by status, last-checked time, next-action links.
-5. **Hide desktop Back button noise (P11)** on list/dashboard pages.
+## 1. Investor-first conversion funnel (highest leverage)
 
-## Phase 2 — Marketplace Health + Analytics depth (P5, P6)
-Expand `/admin/marketplace-health` with funnel / supply / demand / risk sections, and `/admin/analytics` with the requested funnels and trend charts + date range filters.
+**`src/routes/index.tsx` (home)**
+- Rewrite hero H1 + subhead around the positioning line above.
+- Make the primary CTA "Post Your First Task" (investor) and the secondary "Apply as a Runner". Currently they're balanced — investors should be the dominant path.
+- Add a trust strip directly under the hero: escrow-protected payments, ID-verified runners, nationwide coverage, no platform fee on top of task price.
+- Add a 3-step "How it works (for investors)" section before the runner pitch.
+- Add a results/proof section (live counts of runners, cities covered, tasks completed) pulled from `public-stats.functions.ts` if available; otherwise static placeholders flagged with a TODO.
 
-## Phase 3 — Queue page upgrades (P7)
-Search, status tabs w/ counts, sort, richer applicant context, confirmation modals on approve/reject/pass/fail.
+**`src/routes/investors.tsx`**
+- Tighten hero, add concrete sample tasks with price ranges, emphasize the 80/20 split from total (already correct backend-side).
+- Add an FAQ block (pulled from `/faq` content) addressing the top 5 investor objections: trust, payment safety, runner vetting, dispute process, coverage area.
+- End with a strong "Fund your first task" CTA.
 
-## Phase 4 — Broadcasts safety (P8)
-Email masking + reveal, dedupe, bounced/suppressed/unsubscribed filtering, test-send, recipient preview, bulk-send confirmation, audit log.
+**`src/routes/runners.tsx`**
+- Lighter touch — keep current structure, sharpen headline + benefits copy.
 
-## Phase 5 — Email Monitor + Messages polish (P9, P10)
+**`src/components/landing/ApplicationForms.tsx`**
+- Add a one-line "what happens next" reassurance below the submit button (account created, immediate dashboard access, confirmation email sent).
+- No structural changes to fields.
 
-## Phase 6 — Admin permissions + audit logs (P12)
-New `admin_audit_log` table, granular permission helpers (`has_admin_permission`), audit writes on PII reveal, broadcast send, decisions, payouts, role changes.
+---
+
+## 2. SEO + metadata sweep
+
+Audit every public route's `head()` and ensure each has unique title, description, og:title, og:description, og:url, canonical. Currently several routes share or omit these.
+
+Routes to update:
+- `/` (index), `/investors`, `/runners`, `/about`, `/trust`, `/faq`, `/pricing`, `/story`, `/apply`, `/login`, `/signup`, `/privacy`, `/terms`
+
+Add JSON-LD where applicable:
+- `__root.tsx` — Organization (already present? verify) + WebSite with SearchAction.
+- `/faq` — FAQPage schema generated from the actual FAQ items.
+- `/investors`, `/runners` — Service schema.
+- `/about` — already has AboutPage + BreadcrumbList (keep).
+
+Verify `public/robots.txt` allows crawl + references sitemap. Verify `src/routes/sitemap[.]xml.ts` includes all public routes (the index file shows it exists).
+
+Titles target investor-intent keywords: "boots on the ground real estate", "property inspection service", "real estate runner near me", "remote real estate investor tools".
+
+---
+
+## 3. Marketplace/browse UX (`/profiles`)
+
+Light touches — don't redesign:
+- Add a trust microcopy bar above the grid ("All runners ID-verified · Escrow-protected payments · Nationwide coverage").
+- Add an empty-state for filters that return 0 results with a "Clear filters" action.
+- Ensure mobile map+list collapse works (already changed recently).
+- Add count + "Showing X of Y runners nationwide" microcopy.
+
+---
+
+## 4. What I will NOT change
+
+- No visual redesign or new design tokens.
+- No backend logic, schema, or payment flow changes.
+- No new routes beyond what already exists.
+- No changes to authenticated dashboard surfaces.
+- No image generation unless a specific page is missing an og:image and would clearly benefit (will ask first).
 
 ---
 
 ## Technical notes
 
-- All new server fns go in `src/lib/admin.functions.ts` (or new `ops.functions.ts` additions) using `requireSupabaseAuth` + `has_role('admin')` check, never `supabaseAdmin` from client-reachable code.
-- Audit log table (Phase 6) needs a migration with GRANTs + RLS (admin-read only, service_role write).
-- No existing routes removed; no data migrations destructive.
-- Honest zero-states everywhere — no fabricated metrics.
+- TanStack Start route `head()` pattern; canonical only on leaves, og:url self-referencing each route.
+- JSON-LD via `scripts` array, stringified.
+- Stats pulled via existing `getPublicStats` server fn if it exists; otherwise hard-coded values with a comment so they're easy to wire later.
+- No new dependencies.
 
 ---
 
-## Question
+## Order of execution
 
-This is roughly 2–4 days of work end-to-end. **Which phase should I ship first?**
+1. SEO sweep across all listed public routes (mechanical, low risk).
+2. Home page rewrite (investor-first).
+3. Investors page tightening + FAQ block.
+4. Profiles page trust strip + empty-state.
+5. Runners page + ApplicationForms small polish.
 
-My recommendation: **Phase 1 only this turn** — it fixes the most visible problems (blank admin dashboard, missing admin nav, weak `/admin` page, noisy empty states) without touching broadcasts/RLS/audit surfaces where mistakes are costly. Then we iterate.
+Estimated files touched: ~12–15. No migrations.
 
-Reply with: "Phase 1", "Phases 1+2", "all of it", or specify which priorities matter most.
+Reply "go" to start, or tell me which sections to drop/add.

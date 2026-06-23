@@ -1,4 +1,4 @@
-import { createFileRoute, redirect } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { AlertCircle, CheckCircle2, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -8,14 +8,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 export const Route = createFileRoute("/auth-test")({
-  beforeLoad: () => {
-    if (!import.meta.env.DEV) throw redirect({ to: "/" });
-  },
   component: AuthTestPage,
   head: () => ({
     meta: [
       { title: "Supabase Auth Test" },
       { name: "description", content: "Temporary Supabase signup diagnostics page." },
+      { name: "robots", content: "noindex,nofollow" },
     ],
   }),
 });

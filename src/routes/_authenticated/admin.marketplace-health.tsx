@@ -3,11 +3,13 @@ import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { getMarketplaceHealth } from "@/lib/ops.functions";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
+import { RouteErrorState } from "@/components/dashboard/UiStates";
 import { Loader2, Users, ClipboardList, DollarSign, MapPin, TrendingUp, TrendingDown, Activity } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/admin/marketplace-health")({
   component: MarketplaceHealth,
   head: () => ({ meta: [{ title: "Marketplace health — REI Runner Admin" }] }),
+  errorComponent: ({ error, reset }) => <RouteErrorState error={error} reset={reset} />,
 });
 
 function fmtMoney(cents: number) {

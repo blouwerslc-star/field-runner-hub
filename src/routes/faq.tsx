@@ -5,7 +5,6 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { SiteHeader } from "@/components/navigation/SiteHeader";
 
 const FAQS = [
   { q: "What is REI Runner?", a: "REI Runner is a field acquisition and operations network connecting local people who spot distressed and off-market properties — and complete on-site investor tasks — with real estate investors actively looking to buy them. We're launching market-by-market across the U.S." },
@@ -57,7 +56,6 @@ export const Route = createFileRoute("/faq")({
 function FAQPage() {
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <SiteHeader currentPath="/faq" />
       <div className="mx-auto max-w-3xl px-5 py-20">
         <Link to="/" className="text-sm text-primary hover:underline">← Back to home</Link>
         <h1 className="mt-6 text-4xl md:text-5xl font-bold">Frequently Asked Questions</h1>

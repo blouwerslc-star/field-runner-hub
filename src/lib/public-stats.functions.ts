@@ -1,11 +1,14 @@
 import { createServerFn } from "@tanstack/react-start";
-import { supabaseAdmin } from "@/integrations/supabase/client.server";
+// supabaseAdmin (service role) is loaded lazily inside each handler.
+// Top-level imports of *.server.ts in a .functions.ts file ship server-only
+// modules into the client bundle via the route import graph.
 
 /**
  * Public, safe-to-display platform stats. No PII.
  * Returns honest live counts — even small numbers. No fabricated data.
  */
 export const getPublicStats = createServerFn({ method: "GET" }).handler(async () => {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const [investors, runners, tasksTotal, tasksCompleted, reviews, cities] = await Promise.all([
     supabaseAdmin.from("user_roles").select("user_id", { head: true, count: "exact" }).eq("role", "investor"),
     supabaseAdmin.from("user_roles").select("user_id", { head: true, count: "exact" }).eq("role", "runner"),
@@ -44,6 +47,7 @@ export const getPublicStats = createServerFn({ method: "GET" }).handler(async ()
  * Aggregates open tasks + active runners by city/state.
  */
 export const getCoveragePoints = createServerFn({ method: "GET" }).handler(async () => {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const [runners, tasks] = await Promise.all([
     supabaseAdmin
       .from("profiles")

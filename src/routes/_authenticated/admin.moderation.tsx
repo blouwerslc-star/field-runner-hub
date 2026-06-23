@@ -6,6 +6,7 @@ import {
   adminListReports, adminListDisputes, adminResolveReport, adminResolveDispute,
 } from "@/lib/safety.functions";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
+import { RouteErrorState } from "@/components/dashboard/UiStates";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -17,6 +18,7 @@ import { toast } from "sonner";
 export const Route = createFileRoute("/_authenticated/admin/moderation")({
   component: ModerationPage,
   head: () => ({ meta: [{ title: "Moderation — REI Runner Admin" }] }),
+  errorComponent: ({ error, reset }) => <RouteErrorState error={error} reset={reset} />,
 });
 
 function ModerationPage() {

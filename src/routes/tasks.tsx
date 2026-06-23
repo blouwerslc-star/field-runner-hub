@@ -6,7 +6,7 @@ import { listOpenTasks } from "@/lib/marketplace.functions";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
-import { SiteHeader } from "@/components/navigation/SiteHeader";
+import { BrandLogo } from "@/components/brand/BrandLogo";
 import { Loader2, MapPin, DollarSign, Calendar, Search, BadgeCheck, Camera, Video, ShieldCheck } from "lucide-react";
 import { MarketplaceMap, type MapPoint } from "@/components/maps/MarketplaceMap";
 
@@ -18,7 +18,9 @@ export const Route = createFileRoute("/tasks")({
       { name: "description", content: "Browse open real estate field service tasks across REI Runner's launching markets. Filter by city, payout, and task type." },
       { property: "og:title", content: "Open tasks — REI Runner Marketplace" },
       { property: "og:description", content: "Browse open property field tasks. REI Runner is launching market-by-market across the U.S." },
+      { property: "og:url", content: "https://reirunner.com/tasks" },
     ],
+    links: [{ rel: "canonical", href: "https://reirunner.com/tasks" }],
   }),
 });
 
@@ -87,7 +89,17 @@ function MarketplacePage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <SiteHeader currentPath="/tasks" />
+      <header className="sticky top-0 z-40 backdrop-blur bg-background/70 border-b border-border/60">
+        <div className="mx-auto max-w-6xl px-5 h-16 flex items-center justify-between">
+          <Link to="/" aria-label="REI Runner home"><BrandLogo /></Link>
+          <div className="flex items-center gap-3 text-sm">
+            <Link to="/profiles" className="text-muted-foreground hover:text-foreground">Browse runners</Link>
+            <Link to="/investors" className="text-muted-foreground hover:text-foreground">Hire a Runner</Link>
+            <Link to="/runners" className="text-muted-foreground hover:text-foreground">Become a Runner</Link>
+            <Link to="/login" className="text-muted-foreground hover:text-foreground">Sign in</Link>
+          </div>
+        </div>
+      </header>
       <main className="mx-auto max-w-6xl px-5 py-10">
         <div className="mb-8 flex flex-wrap items-end justify-between gap-6">
           <div>
@@ -220,6 +232,8 @@ function MarketplacePage() {
                 key={t.id}
                 to="/tasks/$taskId"
                 params={{ taskId: t.id }}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="rounded-2xl border border-border bg-card/50 p-5 hover:border-primary/40 transition-colors group"
               >
                 <div className="flex items-start justify-between gap-2">

@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Wallet, Clock, ShieldCheck, MapPin, BadgeCheck } from "lucide-react";
-import { SiteHeader } from "@/components/navigation/SiteHeader";
+import { ArrowLeft, Wallet, Clock, ShieldCheck, MapPin, BadgeCheck } from "lucide-react";
+import { BrandLogo } from "@/components/brand/BrandLogo";
 import { Toaster } from "@/components/ui/sonner";
 import { FieldRunnerForm } from "@/components/landing/ApplicationForms";
 
@@ -22,6 +22,22 @@ export const Route = createFileRoute("/runners")({
       { property: "og:url", content: "https://reirunner.com/runners" },
     ],
     links: [{ rel: "canonical", href: "https://reirunner.com/runners" }],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "JobPosting",
+          title: "Real Estate Field Runner (Independent Contractor)",
+          description: "Complete short, scheduled local real estate field tasks — drive-bys, property photos, walkthrough videos, occupancy checks, lockbox installs, and sign placements — on your own schedule.",
+          employmentType: "CONTRACTOR",
+          hiringOrganization: { "@type": "Organization", name: "REI Runner", sameAs: "https://reirunner.com" },
+          jobLocationType: "TELECOMMUTE",
+          applicantLocationRequirements: { "@type": "Country", name: "US" },
+          datePosted: new Date().toISOString().split("T")[0],
+        }),
+      },
+    ],
   }),
   component: RunnersPage,
 });
@@ -45,7 +61,14 @@ function RunnersPage() {
     <div className="min-h-screen bg-background text-foreground">
       <Toaster richColors closeButton position="top-center" theme="dark" />
 
-      <SiteHeader currentPath="/runners" />
+      <header className="sticky top-0 z-40 backdrop-blur bg-background/70 border-b border-border/60">
+        <div className="mx-auto max-w-7xl px-5 h-16 flex items-center justify-between">
+          <Link to="/" aria-label="REI Runner home"><BrandLogo /></Link>
+          <Link to="/" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition">
+            <ArrowLeft className="size-4" /> Back
+          </Link>
+        </div>
+      </header>
 
       <section className="mx-auto max-w-3xl px-5 py-14 md:py-20">
         <div className="text-center mb-10">

@@ -1,8 +1,8 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { Flag, ArrowLeft, Sparkles, Clock, ShieldCheck, Zap, Briefcase, Footprints, ArrowRight } from "lucide-react";
+import { BrandLogo } from "@/components/brand/BrandLogo";
 import { Toaster } from "@/components/ui/sonner";
 import { FieldRunnerForm, ProForm } from "@/components/landing/ApplicationForms";
-import { SiteHeader } from "@/components/navigation/SiteHeader";
 
 export const Route = createFileRoute("/apply")({
   validateSearch: (s: Record<string, unknown>) => ({
@@ -13,17 +13,17 @@ export const Route = createFileRoute("/apply")({
   }),
   head: () => ({
     meta: [
-      { title: "Join REI Runner" },
+      { title: "Apply — REI Runner" },
       {
         name: "description",
         content:
-          "Join REI Runner as a Field Runner or create an Investor account to post property tasks.",
+          "Apply to REI Runner as a Field Runner or as an Investor. Your application creates your account.",
       },
-      { property: "og:title", content: "Join REI Runner" },
+      { property: "og:title", content: "Apply — REI Runner" },
       {
         property: "og:description",
         content:
-          "Choose Runner or Investor and create your REI Runner account.",
+          "Choose Runner or Investor and apply. Your application creates your REI Runner account.",
       },
       { property: "og:url", content: "https://reirunner.com/apply" },
     ],
@@ -40,7 +40,14 @@ function ApplyPage() {
     return (
       <div className="min-h-screen bg-background text-foreground">
         <Toaster richColors closeButton position="top-center" theme="dark" />
-        <SiteHeader currentPath="/apply" />
+        <header className="sticky top-0 z-40 backdrop-blur bg-background/70 border-b border-border/60">
+          <div className="mx-auto max-w-7xl px-5 h-16 flex items-center justify-between">
+            <Link to="/" aria-label="REI Runner home"><BrandLogo /></Link>
+            <Link to="/" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition">
+              <ArrowLeft className="size-4" /> Back
+            </Link>
+          </div>
+        </header>
         <section className="mx-auto max-w-3xl px-5 py-14 md:py-20">
           <div className="text-center mb-10">
             <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-semibold tracking-widest text-primary uppercase">
@@ -48,7 +55,7 @@ function ApplyPage() {
             </div>
             <h1 className="mt-4 text-3xl md:text-5xl font-bold leading-tight">How do you want to join?</h1>
             <p className="mt-4 text-muted-foreground text-base md:text-lg">
-              Pick a path and create your REI Runner account.
+              Pick a path. Your application will also create your REI Runner account.
             </p>
           </div>
           <div className="grid sm:grid-cols-2 gap-4">
@@ -79,7 +86,7 @@ function ApplyPage() {
                 Post property tasks and hire vetted local runners in our active U.S. markets.
               </p>
               <span className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-primary">
-                Create Investor Account <ArrowRight className="size-4 group-hover:translate-x-1 transition-transform" />
+                Apply as an Investor <ArrowRight className="size-4 group-hover:translate-x-1 transition-transform" />
               </span>
             </button>
           </div>
@@ -96,41 +103,41 @@ function ApplyPage() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Toaster richColors closeButton position="top-center" theme="dark" />
-      <SiteHeader currentPath="/apply" />
+
+      <header className="sticky top-0 z-40 backdrop-blur bg-background/70 border-b border-border/60">
+        <div className="mx-auto max-w-7xl px-5 h-16 flex items-center justify-between">
+          <Link to="/" aria-label="REI Runner home">
+            <BrandLogo />
+          </Link>
+          <button
+            type="button"
+            onClick={() => navigate({ to: "/apply", search: {} })}
+            className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition"
+          >
+            <ArrowLeft className="size-4" /> Change path
+          </button>
+        </div>
+      </header>
 
       <section className="mx-auto max-w-3xl px-5 py-14 md:py-20">
-        <button
-          type="button"
-          onClick={() => navigate({ to: "/apply", search: {} })}
-          className="mb-8 inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition"
-        >
-          <ArrowLeft className="size-4" /> Change path
-        </button>
         <div className="text-center mb-10">
           <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-semibold tracking-widest text-primary uppercase">
-            <Sparkles className="size-3.5" /> {isRunner ? "Founding Runner Program" : "Investor Account Setup"}
+            <Sparkles className="size-3.5" /> {isRunner ? "Founding Runner Program" : "Investor Early Access"}
           </div>
           <h1 className="mt-4 text-3xl md:text-5xl font-bold leading-tight">
-            {isRunner ? "Become a Founding Runner" : "Create Your Investor Account"}
+            {isRunner ? "Become a Founding Runner" : "Apply as an Investor"}
           </h1>
           <p className="mt-4 text-muted-foreground text-base md:text-lg">
             {isRunner
               ? "Join the field operations network for real estate investors — launching market-by-market across the U.S."
-              : "Create your password and tell us the markets where you need field support."}
+              : "Post property tasks and hire vetted local runners in our active U.S. markets."}
           </p>
 
-          {isRunner ? (
-            <div className="mt-6 inline-flex items-center gap-2 rounded-full bg-amber-500/10 border border-amber-500/30 px-4 py-1.5 text-sm text-amber-300">
-              <Clock className="size-4" />
-              <span className="font-semibold">Limited beta spots</span>
-              <span className="text-amber-300/70">— applications reviewed weekly</span>
-            </div>
-          ) : (
-            <div className="mt-6 inline-flex items-center gap-2 rounded-full bg-primary/10 border border-primary/30 px-4 py-1.5 text-sm text-primary">
-              <ShieldCheck className="size-4" />
-              <span className="font-semibold">Password account setup</span>
-            </div>
-          )}
+          <div className="mt-6 inline-flex items-center gap-2 rounded-full bg-amber-500/10 border border-amber-500/30 px-4 py-1.5 text-sm text-amber-300">
+            <Clock className="size-4" />
+            <span className="font-semibold">Limited beta spots</span>
+            <span className="text-amber-300/70">— applications reviewed weekly</span>
+          </div>
         </div>
 
         {isRunner && (
@@ -154,9 +161,7 @@ function ApplyPage() {
         </div>
 
         <p className="mt-6 text-center text-xs text-muted-foreground">
-          {isRunner
-            ? "Submitting this application creates your REI Runner account."
-            : "Your investor account is created with the password on this form."}
+          Submitting this application creates your REI Runner account.
         </p>
       </section>
     </div>

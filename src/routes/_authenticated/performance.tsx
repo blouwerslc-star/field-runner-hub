@@ -3,12 +3,16 @@ import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { getInvestorPerformance } from "@/lib/ops.functions";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
-import { Loader2, Activity, CheckCircle2, Clock, DollarSign, TrendingUp } from "lucide-react";
+import { Activity, CheckCircle2, Clock, DollarSign, TrendingUp } from "lucide-react";
+import { DashboardLoadingSkeleton, EmptyState, RouteErrorState } from "@/components/dashboard/UiStates";
 import { Badge } from "@/components/ui/badge";
 
 export const Route = createFileRoute("/_authenticated/performance")({
   component: PerformancePage,
   head: () => ({ meta: [{ title: "Performance — REI Runner" }] }),
+  errorComponent: ({ error, reset }) => (
+    <RouteErrorState error={error} reset={reset} title="Couldn't load performance" />
+  ),
 });
 
 const fmt = (c: number) => `$${(c / 100).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -17,7 +21,7 @@ function PerformancePage() {
   const fn = useServerFn(getInvestorPerformance);
   const q = useQuery({ queryKey: ["investor-performance"], queryFn: () => fn() });
 
-  if (q.isLoading) return <DashboardShell title="Performance"><Loader2 className="size-5 animate-spin text-primary" /></DashboardShell>;
+  if (q.isLoading) return <DashboardShell title="Performance"><DashboardLoadingSkeleton tiles={5} rows={2} /></DashboardShell>;
   const d = q.data!;
   const maxSpend = Math.max(1, ...d.months.map((m) => m.spend));
 
@@ -48,7 +52,7 @@ function PerformancePage() {
       <section>
         <h2 className="font-semibold mb-3">Active tasks</h2>
         {d.recent_active.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-border bg-card/30 p-10 text-center text-sm text-muted-foreground">No active tasks.</div>
+          <EmptyState message="No active tasks yet." />
         ) : (
           <div className="rounded-2xl border border-border bg-card/40 overflow-hidden">
             <table className="w-full text-sm">

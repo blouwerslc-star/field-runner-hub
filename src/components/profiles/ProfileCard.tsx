@@ -42,20 +42,20 @@ export function ProfileCard({ p, viewerAuthenticated = true }: { p: PublicProfil
   const inner = (
     <>
       <div
-        className="h-24 w-full bg-gradient-to-br from-primary/20 to-purple-500/20"
+        className="h-14 w-full bg-gradient-to-br from-primary/20 to-purple-500/20"
         style={p.cover_photo_url ? { backgroundImage: `url(${p.cover_photo_url})`, backgroundSize: "cover", backgroundPosition: "center" } : undefined}
       />
-      <div className="-mt-8 px-4 pb-4 flex flex-col gap-2">
-        <div className="size-16 rounded-full border-4 border-card bg-muted overflow-hidden flex items-center justify-center text-lg font-semibold text-muted-foreground">
+      <div className="-mt-6 px-3 pb-3 flex flex-col gap-1.5">
+        <div className="size-12 rounded-full border-[3px] border-card bg-muted overflow-hidden flex items-center justify-center text-sm font-semibold text-muted-foreground">
           {p.profile_photo_url ? (
             <img src={p.profile_photo_url} alt={p.full_name ?? ""} loading="lazy" decoding="async" className="size-full object-cover" />
           ) : (
             initials(p.full_name)
           )}
         </div>
-        <div className="flex items-center justify-between gap-2">
-          <h3 className="font-semibold truncate group-hover:text-primary">{p.full_name ?? "Unnamed"}</h3>
-          <div className="flex items-center gap-1">
+        <div className="flex items-center justify-between gap-2 min-w-0">
+          <h3 className="text-sm font-semibold truncate group-hover:text-primary min-w-0">{p.full_name ?? "Unnamed"}</h3>
+          <div className="flex items-center gap-1 shrink-0">
             <RoleBadge roles={p.roles} />
             {p.verified_status && <VerifiedBadge />}
           </div>
@@ -71,28 +71,28 @@ export function ProfileCard({ p, viewerAuthenticated = true }: { p: PublicProfil
             </span>
           </div>
         )}
-        {p.headline && <p className="text-sm text-muted-foreground line-clamp-2">{p.headline}</p>}
-        <div className="flex items-center justify-between gap-2">
+        {p.headline && <p className="text-xs text-muted-foreground line-clamp-1">{p.headline}</p>}
+        <div className="flex items-center justify-between gap-2 text-xs">
           <StarRating rating={p.average_rating} count={p.review_count} />
           <LocationLine city={p.city} state={p.state} />
         </div>
         {(p.services_offered ?? []).length > 0 && (
           <div className="flex flex-wrap gap-1">
-            {(p.services_offered ?? []).slice(0, 3).map((s) => (
+            {(p.services_offered ?? []).slice(0, 2).map((s) => (
               <span key={s} className="rounded-full bg-muted px-2 py-0.5 text-[10px] text-muted-foreground">
                 {s}
               </span>
             ))}
           </div>
         )}
-        <div className="flex items-center justify-between pt-2 border-t border-border/60">
+        <div className="flex items-center justify-between pt-1.5 border-t border-border/60">
           <span className="text-xs text-muted-foreground">{p.completed_tasks_count} jobs</span>
           {!viewerAuthenticated ? (
             <span className="text-xs text-primary font-medium inline-flex items-center gap-1">
               <Lock className="size-3" /> Sign in to view
             </span>
           ) : p.task_rate ? (
-            <span className="text-sm">
+            <span className="text-xs">
               <span className="text-muted-foreground">from </span>
               <span className="font-semibold">${p.task_rate}</span>
             </span>

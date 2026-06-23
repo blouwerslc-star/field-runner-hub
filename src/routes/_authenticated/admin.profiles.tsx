@@ -3,6 +3,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { adminListProfiles, adminUpdateProfileFlags } from "@/lib/profiles.functions";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
+import { RouteErrorState } from "@/components/dashboard/UiStates";
 import { Switch } from "@/components/ui/switch";
 import { Loader2, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
@@ -10,6 +11,7 @@ import { toast } from "sonner";
 export const Route = createFileRoute("/_authenticated/admin/profiles")({
   component: AdminProfiles,
   head: () => ({ meta: [{ title: "Admin · Profiles — REI Runner" }] }),
+  errorComponent: ({ error, reset }) => <RouteErrorState error={error} reset={reset} />,
 });
 
 type Profile = {

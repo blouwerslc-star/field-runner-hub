@@ -19,7 +19,6 @@ import {
   logoutOneSignalUser,
 } from "@/lib/onesignal";
 import { supabase } from "@/integrations/supabase/client";
-import { setAuthHint } from "@/lib/auth-hint";
 
 function NotFoundComponent() {
   return (
@@ -88,13 +87,18 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "author", content: "REI Runner" },
       { property: "og:title", content: "REI Runner | Real Estate Field Services Marketplace" },
       { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary" },
+      { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "REI Runner | Real Estate Field Services Marketplace" },
       { name: "description", content: "REI Runner is a marketplace connecting real estate pros with local field runners for property tasks." },
       { property: "og:description", content: "REI Runner is a marketplace connecting real estate pros with local field runners for property tasks." },
       { name: "twitter:description", content: "REI Runner is a marketplace connecting real estate pros with local field runners for property tasks." },
-      { property: "og:image", content: "https://reirunner.com/rei-runner-logo.png" },
-      { name: "twitter:image", content: "https://reirunner.com/rei-runner-logo.png" },
+      { property: "og:image", content: "https://reirunner.com/og-image.jpg" },
+      { property: "og:image:width", content: "1200" },
+      { property: "og:image:height", content: "630" },
+      { property: "og:image:alt", content: "REI Runner — Real Estate Field Services Marketplace" },
+      { name: "twitter:image", content: "https://reirunner.com/og-image.jpg" },
+      { property: "og:site_name", content: "REI Runner" },
+      { property: "og:locale", content: "en_US" },
     ],
     links: [
       {
@@ -102,12 +106,40 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         href: appCss,
       },
       { rel: "icon", type: "image/x-icon", href: "/favicon.ico" },
-      { rel: "apple-touch-icon", href: "/rei-runner-logo.png" },
+      { rel: "apple-touch-icon", sizes: "180x180", href: "/apple-touch-icon.png" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
         rel: "stylesheet",
         href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap",
+      },
+    ],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@graph": [
+            {
+              "@type": "Organization",
+              "@id": "https://reirunner.com/#organization",
+              name: "REI Runner",
+              url: "https://reirunner.com",
+              logo: "https://reirunner.com/rei-runner-logo.png",
+              email: "support@reirunner.com",
+              telephone: "+1-517-774-9896",
+              sameAs: [],
+              parentOrganization: { "@type": "Organization", name: "B&K Investment Group LLC" },
+            },
+            {
+              "@type": "WebSite",
+              "@id": "https://reirunner.com/#website",
+              url: "https://reirunner.com",
+              name: "REI Runner",
+              publisher: { "@id": "https://reirunner.com/#organization" },
+            },
+          ],
+        }),
       },
     ],
   }),
@@ -198,31 +230,35 @@ function RootComponent() {
     };
 
     const { data } = supabase.auth.onAuthStateChange((event, session) => {
+      // Only react to identity transitions. Without this filter the listener
+      // also fires on TOKEN_REFRESHED (~hourly + tab focus) and INITIAL_SESSION
+      // (every mount), which thrashes the router and cache and causes auth
+      // flicker. Calling invalidateQueries on SIGNED_OUT also triggers a 401
+      // storm against the cleared session.
+      if (event !== "SIGNED_IN" && event !== "SIGNED_OUT" && event !== "USER_UPDATED") {
+        return;
+      }
       router.invalidate();
-      queryClient.invalidateQueries();
       if (event === "SIGNED_OUT" || !session?.user) {
-        setAuthHint(false);
         // Fire and forget — OneSignal must never break auth flows.
         logoutOneSignalUser().catch(() => {});
         unsubscribeProfile();
+        // Do NOT invalidateQueries here — protected queries would refetch
+        // against the cleared session and 401.
         return;
       }
-      if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED" || event === "USER_UPDATED") {
-        setAuthHint(true);
+      // SIGNED_IN or USER_UPDATED — refresh user-scoped data.
+      queryClient.invalidateQueries();
         syncOneSignalIdentity().catch(() => {});
         subscribeProfile(session.user.id);
-      }
     });
 
     // Initial hydration — session may already be restored before the
     // listener attaches.
     supabase.auth.getSession().then(({ data: s }) => {
       if (s.session?.user) {
-        setAuthHint(true);
         syncOneSignalIdentity().catch(() => {});
         subscribeProfile(s.session.user.id);
-      } else {
-        setAuthHint(false);
       }
     });
 

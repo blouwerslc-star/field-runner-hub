@@ -1,9 +1,8 @@
 import { createServerFn } from "@tanstack/react-start";
+import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { getRequest } from "@tanstack/react-start/server";
 import { createHash } from "crypto";
 import { z } from "zod";
-import { supabaseAdmin } from "@/integrations/supabase/client.server";
-
 const precheckSchema = z.object({
   email: z.string().trim().email().max(200),
   role: z.enum(["runner", "investor"]),
@@ -19,10 +18,6 @@ const MAX_ATTEMPTS_PER_IP_PER_HOUR = 6;
 const MAX_ATTEMPTS_PER_EMAIL_PER_DAY = 5;
 // Minimum human fill time. Lower than typical form completion.
 const MIN_ELAPSED_MS = 2000;
-
-function hasSupabaseAdminEnv(): boolean {
-  return Boolean(process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY);
-}
 
 function getClientIp(): string | null {
   try {
@@ -60,12 +55,7 @@ async function logAttempt(opts: {
   reason: string | null;
   userAgent: string | null;
 }) {
-  if (!hasSupabaseAdminEnv()) {
-    console.warn("[signup-spam] SUPABASE_SERVICE_ROLE_KEY missing; skipping signup_attempts log.");
-    return;
-  }
-
-  const { error } = await supabaseAdmin.from("signup_attempts").insert({
+  await supabaseAdmin.from("signup_attempts").insert({
     ip_hash: opts.ipHash,
     email: opts.email.toLowerCase(),
     role: opts.role,
@@ -73,10 +63,6 @@ async function logAttempt(opts: {
     reason: opts.reason,
     user_agent: opts.userAgent,
   });
-
-  if (error) {
-    console.warn("[signup-spam] Failed to log signup attempt:", error.message);
-  }
 }
 
 export type PrecheckResult =
@@ -126,17 +112,13 @@ export const precheckSignupAttempt = createServerFn({ method: "POST" })
     }
 
     // 3) Per-IP rate limit (last hour).
-    if (ipHash && hasSupabaseAdminEnv()) {
+    if (ipHash) {
       const sinceHour = new Date(Date.now() - 60 * 60 * 1000).toISOString();
-      const { count: ipCount, error: ipCountError } = await supabaseAdmin
+      const { count: ipCount } = await supabaseAdmin
         .from("signup_attempts")
         .select("id", { head: true, count: "exact" })
         .eq("ip_hash", ipHash)
         .gte("created_at", sinceHour);
-
-      if (ipCountError) {
-        console.warn("[signup-spam] Failed to read IP signup count:", ipCountError.message);
-      }
 
       if ((ipCount ?? 0) >= MAX_ATTEMPTS_PER_IP_PER_HOUR) {
         await logAttempt({
@@ -155,22 +137,12 @@ export const precheckSignupAttempt = createServerFn({ method: "POST" })
     }
 
     // 4) Per-email rate limit (last day).
-    const emailCount = hasSupabaseAdminEnv()
-      ? await (async () => {
-          const sinceDay = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-          const { count, error } = await supabaseAdmin
-            .from("signup_attempts")
-            .select("id", { head: true, count: "exact" })
-            .eq("email", email)
-            .gte("created_at", sinceDay);
-
-          if (error) {
-            console.warn("[signup-spam] Failed to read email signup count:", error.message);
-          }
-
-          return count;
-        })()
-      : 0;
+    const sinceDay = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    const { count: emailCount } = await supabaseAdmin
+      .from("signup_attempts")
+      .select("id", { head: true, count: "exact" })
+      .eq("email", email)
+      .gte("created_at", sinceDay);
 
     if ((emailCount ?? 0) >= MAX_ATTEMPTS_PER_EMAIL_PER_DAY) {
       await logAttempt({

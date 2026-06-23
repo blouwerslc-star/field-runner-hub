@@ -4,12 +4,12 @@ import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { listPublicProfiles } from "@/lib/profiles.functions";
 import { ProfileCard, type PublicProfile } from "@/components/profiles/ProfileCard";
-import { SiteHeader } from "@/components/navigation/SiteHeader";
+import { BrandLogo } from "@/components/brand/BrandLogo";
 import { MarketplaceMap, type MapPoint } from "@/components/maps/MarketplaceMap";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { Loader2, Search, BadgeCheck, Star, Trophy, Lock } from "lucide-react";
+import { Loader2, Search, BadgeCheck, Star, Trophy, Lock, ShieldCheck, MapPinned } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/profiles")({
@@ -84,7 +84,20 @@ function ProfilesDirectory() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <SiteHeader currentPath="/profiles" />
+      <header className="sticky top-0 z-40 backdrop-blur bg-background/70 border-b border-border/60">
+        <div className="mx-auto max-w-7xl px-5 h-16 flex items-center justify-between">
+          <Link to="/" aria-label="REI Runner home"><BrandLogo /></Link>
+          <div className="flex items-center gap-4 text-sm">
+            <Link to="/tasks" className="text-muted-foreground hover:text-foreground">Open tasks</Link>
+            <Link to="/runners" className="text-muted-foreground hover:text-foreground">Become a runner</Link>
+            {authed ? (
+              <Link to="/dashboard" className="text-muted-foreground hover:text-foreground">Dashboard</Link>
+            ) : (
+              <Link to="/login" className="text-muted-foreground hover:text-foreground">Sign in</Link>
+            )}
+          </div>
+        </div>
+      </header>
 
       <main className="mx-auto max-w-7xl px-5 py-10">
         {!authed && (
@@ -102,7 +115,12 @@ function ProfilesDirectory() {
         <div className="mb-8 flex flex-wrap items-end justify-between gap-6">
           <div>
             <h1 className="text-3xl md:text-4xl font-bold tracking-tight">Browse the marketplace</h1>
-            <p className="mt-2 text-muted-foreground">Find runners and investors active in your market.</p>
+            <p className="mt-2 text-muted-foreground">
+              The nationwide boots-on-the-ground network for real estate investors.
+              {!isLoading && profiles.length > 0 && (
+                <> Showing <span className="text-foreground font-medium">{profiles.length}</span> profile{profiles.length === 1 ? "" : "s"} across <span className="text-foreground font-medium">{uniqueMarkets || 1}</span> market{uniqueMarkets === 1 ? "" : "s"}.</>
+              )}
+            </p>
           </div>
           {!isLoading && profiles.length > 0 && (
             <dl className="grid grid-cols-4 gap-6 text-sm">
@@ -124,6 +142,14 @@ function ProfilesDirectory() {
               </div>
             </dl>
           )}
+        </div>
+
+        {/* TRUST STRIP */}
+        <div className="mb-6 rounded-xl border border-border bg-card/40 backdrop-blur px-4 py-3 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-muted-foreground">
+          <span className="inline-flex items-center gap-1.5"><BadgeCheck className="size-3.5 text-primary" /> ID-verified runners</span>
+          <span className="inline-flex items-center gap-1.5"><ShieldCheck className="size-3.5 text-primary" /> Escrow-protected payments</span>
+          <span className="inline-flex items-center gap-1.5"><MapPinned className="size-3.5 text-primary" /> Nationwide coverage</span>
+          <span className="inline-flex items-center gap-1.5"><Star className="size-3.5 text-primary" /> Rated after every task</span>
         </div>
 
         <div className="mb-6">
@@ -180,11 +206,28 @@ function ProfilesDirectory() {
         {isLoading ? (
           <Loader2 className="size-6 animate-spin text-primary" />
         ) : profiles.length === 0 ? (
-          <div className="rounded-lg border border-dashed border-border/60 p-12 text-center text-sm text-muted-foreground">
-            No profiles match your filters.
+          <div className="rounded-xl border border-dashed border-border/60 p-12 text-center">
+            <div className="text-sm text-muted-foreground">No profiles match your current filters.</div>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="mt-4"
+              onClick={() => {
+                setQ("");
+                setRole("all");
+                setCity("");
+                setState("");
+                setService("");
+                setAvailability("all");
+                setSort("featured");
+              }}
+            >
+              Clear filters
+            </Button>
           </div>
         ) : (
-          <div className="grid gap-5 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+          <div className="grid gap-3 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
             {profiles.map((p) => <ProfileCard key={p.user_id} p={p} viewerAuthenticated={authed} />)}
           </div>
         )}

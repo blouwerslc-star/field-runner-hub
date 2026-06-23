@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { SiteHeader } from "@/components/navigation/SiteHeader";
+import { BrandLogo } from "@/components/brand/BrandLogo";
 import { SampleDeliverablesSection } from "@/components/landing/SampleDeliverablesSection";
 import {
   Accordion,
@@ -41,6 +41,19 @@ export const Route = createFileRoute("/pricing")({
       { property: "og:url", content: "https://reirunner.com/pricing" },
     ],
     links: [{ rel: "canonical", href: "https://reirunner.com/pricing" }],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          itemListElement: [
+            { "@type": "ListItem", position: 1, name: "Home", item: "https://reirunner.com/" },
+            { "@type": "ListItem", position: 2, name: "Pricing", item: "https://reirunner.com/pricing" },
+          ],
+        }),
+      },
+    ],
   }),
 });
 
@@ -128,7 +141,19 @@ const FAQS = [
 function PricingPage() {
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <SiteHeader currentPath="/pricing" />
+      <header className="sticky top-0 z-40 backdrop-blur bg-background/70 border-b border-border/60">
+        <div className="mx-auto max-w-7xl px-5 h-16 flex items-center justify-between">
+          <Link to="/"><BrandLogo /></Link>
+          <nav className="hidden md:flex items-center gap-6 text-sm text-muted-foreground">
+            <Link to="/" className="hover:text-foreground">Home</Link>
+            <Link to="/pricing" className="text-foreground">Pricing</Link>
+            <Link to="/trust" className="hover:text-foreground">Trust & Safety</Link>
+            <Link to="/story" className="hover:text-foreground">Our Story</Link>
+            <Link to="/faq" className="hover:text-foreground">FAQ</Link>
+          </nav>
+          <Link to="/login" className="text-sm text-muted-foreground hover:text-foreground">Sign in</Link>
+        </div>
+      </header>
 
       {/* HERO */}
       <section className="relative border-b border-border/60">
@@ -279,7 +304,7 @@ function PricingPage() {
             <a href="mailto:support@reirunner.com" className="inline-flex items-center gap-2 h-12 px-6 rounded-md bg-gradient-primary shadow-glow text-sm font-medium text-primary-foreground">
               Contact Sales <ArrowRight className="size-4" />
             </a>
-            <Link to="/signup" search={{ role: "investor", redirect: "/dashboard/investor" }} className="inline-flex items-center h-12 px-6 rounded-md border border-border bg-card text-sm font-medium hover:bg-card/80 transition">
+            <Link to="/signup" search={{ role: "investor", redirect: "/dashboard" }} className="inline-flex items-center h-12 px-6 rounded-md border border-border bg-card text-sm font-medium hover:bg-card/80 transition">
               Post a Task
             </Link>
           </div>
@@ -299,7 +324,7 @@ function PricingPage() {
         </Accordion>
         <div className="mt-10 text-center">
           <Button asChild size="lg" className="bg-gradient-primary shadow-glow">
-            <Link to="/signup" search={{ role: "investor", redirect: "/dashboard/investor" }}>
+            <Link to="/signup" search={{ role: "investor", redirect: "/dashboard" }}>
               Get Started <ArrowRight className="size-4 ml-1" />
             </Link>
           </Button>

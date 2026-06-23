@@ -6,14 +6,37 @@ import { getPublicTaskDetail, applyToTask, toggleSaveTask, getMyApplicationForTa
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { SiteHeader } from "@/components/navigation/SiteHeader";
+import { BrandLogo } from "@/components/brand/BrandLogo";
 import { Loader2, MapPin, DollarSign, Calendar, BadgeCheck, Bookmark, BookmarkCheck, Star, ShieldCheck, Camera, Wallet, Clock } from "lucide-react";
 import { toast } from "sonner";
 import { Toaster } from "@/components/ui/sonner";
+import { RouteErrorState, EmptyState } from "@/components/dashboard/UiStates";
 
 export const Route = createFileRoute("/tasks/$taskId")({
   component: TaskDetailPage,
-  head: () => ({ meta: [{ title: "Task — REI Runner" }] }),
+  errorComponent: ({ error, reset }) => (
+    <div className="min-h-screen grid place-items-center p-6">
+      <RouteErrorState error={error} reset={reset} title="Couldn't load this task" />
+    </div>
+  ),
+  notFoundComponent: () => (
+    <div className="min-h-screen grid place-items-center p-6">
+      <EmptyState title="Task not found" message="This task may have been removed or is no longer available." ctaLabel="Browse open tasks" ctaTo="/tasks" />
+    </div>
+  ),
+  head: ({ params }) => ({
+    meta: [
+      { title: "Open task — REI Runner" },
+      { name: "description", content: "Review this open real estate field task on REI Runner and apply if you're a verified runner in the area." },
+      { property: "og:title", content: "Open task — REI Runner" },
+      { property: "og:description", content: "A real estate investor posted this field task. Vetted local runners can apply through REI Runner." },
+      { property: "og:url", content: `https://reirunner.com/tasks/${params.taskId}` },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "robots", content: "noindex,follow" },
+    ],
+    links: [{ rel: "canonical", href: `https://reirunner.com/tasks/${params.taskId}` }],
+  }),
 });
 
 function TaskDetailPage() {
@@ -70,7 +93,12 @@ function TaskDetailPage() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Toaster richColors closeButton position="top-center" theme="dark" />
-      <SiteHeader currentPath="/tasks" />
+      <header className="sticky top-0 z-40 backdrop-blur bg-background/70 border-b border-border/60">
+        <div className="mx-auto max-w-5xl px-5 h-16 flex items-center justify-between">
+          <Link to="/" aria-label="REI Runner home"><BrandLogo /></Link>
+          <Link to="/tasks" className="text-sm text-muted-foreground hover:text-foreground">Back to marketplace</Link>
+        </div>
+      </header>
       <main className="mx-auto max-w-5xl px-5 py-10 grid md:grid-cols-[2fr,1fr] gap-8">
         <div>
           <div className="flex items-center gap-2 flex-wrap mb-3">
@@ -140,16 +168,11 @@ function TaskDetailPage() {
             <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
               <Clock className="size-3" /> Typical response: under 24 hours
             </div>
-            {authed === null ? (
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Loader2 className="size-4 animate-spin text-primary" />
-                Checking account status...
-              </div>
-            ) : authed === false ? (
+            {authed === false ? (
               <>
                 <p className="text-sm text-muted-foreground">Sign in as a runner to apply for this task.</p>
-                <Button className="w-full" onClick={() => navigate({ to: "/login", search: { redirect: `/tasks/${taskId}`, role: "runner" } })}>Sign in</Button>
-                <Button variant="outline" className="w-full" onClick={() => navigate({ to: "/signup", search: { role: "runner", redirect: `/tasks/${taskId}` } })}>Create runner account</Button>
+                <Button className="w-full" onClick={() => navigate({ to: "/login" })}>Sign in</Button>
+                <Button variant="outline" className="w-full" onClick={() => navigate({ to: "/signup" })}>Create runner account</Button>
               </>
             ) : myApp?.application ? (
               <div className="space-y-2 text-sm">

@@ -7,6 +7,7 @@ import {
   adminSetBackgroundCheckStatus,
 } from "@/lib/verification.functions";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
+import { RouteErrorState } from "@/components/dashboard/UiStates";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -18,6 +19,7 @@ import { toast } from "sonner";
 export const Route = createFileRoute("/_authenticated/admin/background-checks")({
   component: AdminBackgroundChecksPage,
   head: () => ({ meta: [{ title: "Background Checks — Admin" }] }),
+  errorComponent: ({ error, reset }) => <RouteErrorState error={error} reset={reset} />,
 });
 
 type Tab = "pending" | "passed" | "failed" | "all";
