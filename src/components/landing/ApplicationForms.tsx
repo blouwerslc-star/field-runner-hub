@@ -87,6 +87,7 @@ async function requestPasswordSignup(opts: {
         role: opts.role,
         full_name: opts.full_name,
         phone: opts.phone,
+        referral_code: getPendingReferralCode() ?? undefined,
         ...opts.extra,
       },
     },
@@ -94,6 +95,7 @@ async function requestPasswordSignup(opts: {
   if (error) {
     throw new Error(mapAuthError((error as { code?: string }).code, error.message));
   }
+  clearPendingReferralCode();
   return {
     debug: {
       authUserId: data.user?.id ?? "pending",
