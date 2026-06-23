@@ -587,13 +587,13 @@ function Index() {
             <Button type="button" onClick={() => { setMobileNavOpen(false); setTimeout(goBecome, 80); }} variant="outline" className="w-full h-12 text-base">
               Become a Runner
             </Button>
-            <Link
-              to="/login"
-              onClick={() => setMobileNavOpen(false)}
+            <button
+              type="button"
+              onClick={() => { setMobileNavOpen(false); setTimeout(() => navigate({ to: "/login" }), 80); }}
               className="block w-full text-center h-12 leading-[3rem] rounded-md border border-border bg-card/60 text-sm font-medium text-foreground/90 hover:bg-card transition"
             >
               Sign in
-            </Link>
+            </button>
           </div>
       </MobileDrawer>
 
