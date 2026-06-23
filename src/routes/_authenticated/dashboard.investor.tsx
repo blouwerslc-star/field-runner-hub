@@ -34,6 +34,13 @@ import { TaskFundingCheckout } from "@/components/payments/TaskFundingCheckout";
 import { TaskTipCheckout } from "@/components/payments/TaskTipCheckout";
 import { PaymentTestModeBanner } from "@/components/payments/PaymentTestModeBanner";
 import { DashboardLoadingSkeleton, RouteErrorState } from "@/components/dashboard/UiStates";
+import { StatusTimeline } from "@/components/dashboard/investor/StatusTimeline";
+import { SLABadge } from "@/components/dashboard/investor/SLABadge";
+import { SpendAnalyticsCard } from "@/components/dashboard/investor/SpendAnalyticsCard";
+import { RunnerDiscoveryStrip } from "@/components/dashboard/investor/RunnerDiscoveryStrip";
+import { getMyProfile } from "@/lib/profiles.functions";
+import { Users } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_authenticated/dashboard/investor")({
   component: InvestorDashboard,
@@ -45,23 +52,18 @@ export const Route = createFileRoute("/_authenticated/dashboard/investor")({
   ),
 });
 
-function statusColor(status: string) {
-  switch (status) {
-    case "open": return "bg-yellow-500/15 text-yellow-300 border-yellow-500/30";
-    case "assigned": return "bg-blue-500/15 text-blue-300 border-blue-500/30";
-    case "in_progress": return "bg-purple-500/15 text-purple-300 border-purple-500/30";
-    case "submitted": return "bg-cyan-500/15 text-cyan-300 border-cyan-500/30";
-    case "approved": return "bg-emerald-500/15 text-emerald-300 border-emerald-500/30";
-    case "revision_requested": return "bg-red-500/15 text-red-300 border-red-500/30";
-    case "paid": return "bg-emerald-600/20 text-emerald-200 border-emerald-500/40";
-    default: return "bg-muted text-muted-foreground";
-  }
-}
-
 function InvestorDashboard() {
   const fetchTasks = useServerFn(listMyTasks);
   const { data, isLoading } = useQuery({ queryKey: ["my-tasks"], queryFn: () => fetchTasks() });
   const tasks = data?.tasks ?? [];
+  const fetchProfile = useServerFn(getMyProfile);
+  const { data: profileData } = useQuery({
+    queryKey: ["my-profile-investor-dashboard"],
+    queryFn: () => fetchProfile(),
+    staleTime: 5 * 60_000,
+  });
+  const myState = (profileData?.profile as { state?: string | null } | null)?.state ?? null;
+  const myCity = (profileData?.profile as { city?: string | null } | null)?.city ?? null;
 
   const buckets = {
     open: tasks.filter((t) => t.status === "open" || t.status === "assigned"),
@@ -70,23 +72,43 @@ function InvestorDashboard() {
     completed: tasks.filter((t) => t.status === "approved" || t.status === "paid"),
   };
 
-  const totalSpent = tasks
-    .filter((t) => t.status === "approved" || t.status === "paid")
-    .reduce((s, t) => s + Number(t.payout_amount ?? 0), 0);
-
   return (
     <DashboardShell title="Investor Dashboard" subtitle="Post tasks, review submissions, release payments.">
       <div className="-mx-6 mb-6"><PaymentTestModeBanner /></div>
       <ProfileCompletionBanner role="investor" />
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-        <StatTile label="Open" value={buckets.open.length.toString()} />
-        <StatTile label="In progress" value={buckets.in_progress.length.toString()} />
-        <StatTile label="To review" value={buckets.submitted.length.toString()} />
-        <StatTile label="Spent" value={`$${totalSpent.toFixed(0)}`} />
+
+      {/* Hero action row */}
+      <div className="mb-6 rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/10 via-card/60 to-card/30 backdrop-blur p-5 md:p-6">
+        <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_auto] md:items-center">
+          <div className="min-w-0">
+            <h2 className="text-lg md:text-xl font-bold">Need eyes on a property?</h2>
+            <p className="text-sm text-muted-foreground mt-1">
+              Post a task and get matched with a vetted local runner. Funds stay in escrow until you approve the work.
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center gap-2 md:justify-end">
+            <CreateTaskDialog />
+            <Button asChild variant="outline" size="sm">
+              <Link to="/profiles">
+                <Users className="size-4 mr-1.5" />
+                Browse runners
+              </Link>
+            </Button>
+          </div>
+        </div>
       </div>
 
-      <div className="flex justify-end mb-4">
-        <CreateTaskDialog />
+      {/* Pipeline stats */}
+      <div className="grid grid-cols-3 gap-3 mb-6">
+        <StatTile label="Active" value={(buckets.open.length + buckets.in_progress.length).toString()} accent={buckets.in_progress.length > 0 ? "primary" : undefined} />
+        <StatTile label="To review" value={buckets.submitted.length.toString()} accent={buckets.submitted.length > 0 ? "amber" : undefined} />
+        <StatTile label="Completed" value={buckets.completed.length.toString()} />
+      </div>
+
+      {/* Spend + Runner discovery */}
+      <div className="grid gap-4 lg:grid-cols-2 mb-6">
+        <SpendAnalyticsCard tasks={tasks as never} />
+        <RunnerDiscoveryStrip state={myState} city={myCity} />
       </div>
 
       {isLoading ? (
@@ -94,7 +116,7 @@ function InvestorDashboard() {
       ) : tasks.length === 0 ? (
         <EmptyState message="No tasks yet. Post your first task above to start getting bids from local runners." />
       ) : (
-        <Tabs defaultValue="review">
+        <Tabs defaultValue={buckets.submitted.length > 0 ? "review" : "active"}>
           <TabsList className="mb-6 w-full overflow-x-auto justify-start">
             <TabsTrigger value="review">To review ({buckets.submitted.length})</TabsTrigger>
             <TabsTrigger value="active">Active ({buckets.open.length + buckets.in_progress.length})</TabsTrigger>
@@ -118,11 +140,17 @@ function InvestorDashboard() {
   );
 }
 
-function StatTile({ label, value }: { label: string; value: string }) {
+function StatTile({ label, value, accent }: { label: string; value: string; accent?: "primary" | "amber" }) {
+  const ring =
+    accent === "primary" ? "ring-1 ring-primary/40" :
+    accent === "amber" ? "ring-1 ring-amber-500/40" : "";
+  const text =
+    accent === "primary" ? "text-primary" :
+    accent === "amber" ? "text-amber-300" : "";
   return (
-    <div className="rounded-2xl border border-border bg-card/60 backdrop-blur p-4">
+    <div className={`rounded-2xl border border-border bg-card/60 backdrop-blur p-4 ${ring}`}>
       <div className="text-xs text-muted-foreground uppercase tracking-wider mb-2">{label}</div>
-      <div className="text-2xl font-bold">{value}</div>
+      <div className={`text-2xl font-bold ${text}`}>{value}</div>
     </div>
   );
 }
@@ -162,9 +190,6 @@ function InvestorTaskCard({ task }: { task: Task }) {
         <div>
           <div className="flex items-center gap-2 flex-wrap">
             <h3 className="font-semibold">{task.title}</h3>
-            <Badge variant="outline" className={statusColor(task.status)}>
-              {task.status.replace("_", " ")}
-            </Badge>
             <Badge variant="outline" className="text-xs">{task.task_type}</Badge>
             {task.requires_interior_access && (
               <Badge variant="outline" className="text-xs border-primary/40 text-primary flex items-center gap-1">
@@ -176,6 +201,7 @@ function InvestorTaskCard({ task }: { task: Task }) {
             ) : needsFunding ? (
               <Badge variant="outline" className="text-xs border-amber-500/30 text-amber-300">Unfunded</Badge>
             ) : null}
+            <SLABadge dueDate={task.due_date} status={task.status} />
           </div>
           <p className="text-sm text-muted-foreground mt-1 flex items-center gap-1.5">
             <MapPin className="size-3.5" />
@@ -243,6 +269,9 @@ function InvestorTaskCard({ task }: { task: Task }) {
           </DialogContent>
           </Dialog>
         </div>
+      </div>
+      <div className="mt-4 pt-3 border-t border-border/60">
+        <StatusTimeline status={task.status} />
       </div>
     </div>
   );
