@@ -123,6 +123,95 @@ export const createInvestorTask = createServerFn({ method: "POST" })
     return { task: row };
   });
 
+const bulkCreateSchema = z.object({
+  title: z.string().min(2).max(200),
+  description: z.string().max(2000).optional().nullable(),
+  task_type: z.string().min(1).max(50),
+  payout_amount: z.number().nonnegative().max(100000).optional().nullable(),
+  due_date: z.string().max(20).optional().nullable(),
+  requires_interior_access: z.boolean().optional(),
+  preferred_runner_id: z.string().uuid().optional().nullable(),
+  properties: z
+    .array(
+      z.object({
+        property_address: z.string().min(2).max(200),
+        city: z.string().min(1).max(100),
+        state: z.string().min(2).max(50),
+        zip_code: z.string().max(20).optional().nullable(),
+      }),
+    )
+    .min(1)
+    .max(50),
+});
+
+export const bulkCreateInvestorTasks = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i: unknown) => bulkCreateSchema.parse(i))
+  .handler(async ({ context, data }) => {
+    const { supabase, userId } = context;
+    const requiresInterior =
+      typeof data.requires_interior_access === "boolean"
+        ? data.requires_interior_access
+        : defaultRequiresInteriorAccess(data.task_type);
+    const rows = data.properties.map((p) => ({
+      investor_id: userId,
+      title: data.title,
+      description: data.description ?? null,
+      task_type: data.task_type,
+      property_address: p.property_address,
+      city: p.city,
+      state: p.state,
+      zip_code: p.zip_code ?? null,
+      payout_amount: data.payout_amount ?? null,
+      due_date: data.due_date ?? null,
+      requires_interior_access: requiresInterior,
+      preferred_runner_id: data.preferred_runner_id ?? null,
+      status: "open" as const,
+    }));
+    const { data: inserted, error } = await supabase
+      .from("tasks")
+      .insert(rows)
+      .select("id");
+    if (error) throw new Error(error.message);
+    return { count: inserted?.length ?? 0 };
+  });
+
+export const duplicateTask = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i: unknown) => z.object({ taskId: z.string().uuid() }).parse(i))
+  .handler(async ({ context, data }) => {
+    const { supabase, userId } = context;
+    const { data: src, error: sErr } = await supabase
+      .from("tasks")
+      .select("*")
+      .eq("id", data.taskId)
+      .eq("investor_id", userId)
+      .maybeSingle();
+    if (sErr) throw new Error(sErr.message);
+    if (!src) throw new Error("Task not found");
+    const { data: row, error } = await supabase
+      .from("tasks")
+      .insert({
+        investor_id: userId,
+        title: src.title,
+        description: src.description,
+        task_type: src.task_type,
+        property_address: src.property_address,
+        city: src.city,
+        state: src.state,
+        zip_code: src.zip_code,
+        payout_amount: src.payout_amount,
+        due_date: null,
+        requires_interior_access: src.requires_interior_access,
+        preferred_runner_id: src.runner_id ?? src.preferred_runner_id ?? null,
+        status: "open",
+      })
+      .select("id")
+      .single();
+    if (error) throw new Error(error.message);
+    return { taskId: row.id };
+  });
+
 export const startTask = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: unknown) => z.object({ taskId: z.string().uuid() }).parse(i))
