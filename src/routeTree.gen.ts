@@ -103,6 +103,7 @@ import { Route as ApiPublicHooksRecurringTasksRouteImport } from './routes/api/p
 import { Route as ApiPublicHooksProfileCompletionRemindersRouteImport } from './routes/api/public/hooks/profile-completion-reminders'
 import { Route as ApiPublicHooksEmailNurtureRouteImport } from './routes/api/public/hooks/email-nurture'
 import { Route as ApiPublicHooksDispatchSmsRouteImport } from './routes/api/public/hooks/dispatch-sms'
+import { Route as AuthenticatedTasksTaskIdTrackingRouteImport } from './routes/_authenticated/tasks.$taskId.tracking'
 import { Route as AuthenticatedAcademyCourseSlugQuizRouteImport } from './routes/_authenticated/academy.$courseSlug.quiz'
 import { Route as AuthenticatedAcademyCourseSlugCertificateRouteImport } from './routes/_authenticated/academy.$courseSlug.certificate'
 import { Route as AuthenticatedAcademyCourseSlugLessonSlugRouteImport } from './routes/_authenticated/academy.$courseSlug.$lessonSlug'
@@ -628,6 +629,12 @@ const ApiPublicHooksDispatchSmsRoute =
     path: '/api/public/hooks/dispatch-sms',
     getParentRoute: () => rootRouteImport,
   } as any)
+const AuthenticatedTasksTaskIdTrackingRoute =
+  AuthenticatedTasksTaskIdTrackingRouteImport.update({
+    id: '/tasks/$taskId/tracking',
+    path: '/tasks/$taskId/tracking',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedAcademyCourseSlugQuizRoute =
   AuthenticatedAcademyCourseSlugQuizRouteImport.update({
     id: '/quiz',
@@ -733,6 +740,7 @@ export interface FileRoutesByFullPath {
   '/academy/$courseSlug/$lessonSlug': typeof AuthenticatedAcademyCourseSlugLessonSlugRoute
   '/academy/$courseSlug/certificate': typeof AuthenticatedAcademyCourseSlugCertificateRoute
   '/academy/$courseSlug/quiz': typeof AuthenticatedAcademyCourseSlugQuizRoute
+  '/tasks/$taskId/tracking': typeof AuthenticatedTasksTaskIdTrackingRoute
   '/api/public/hooks/dispatch-sms': typeof ApiPublicHooksDispatchSmsRoute
   '/api/public/hooks/email-nurture': typeof ApiPublicHooksEmailNurtureRoute
   '/api/public/hooks/profile-completion-reminders': typeof ApiPublicHooksProfileCompletionRemindersRoute
@@ -826,6 +834,7 @@ export interface FileRoutesByTo {
   '/academy/$courseSlug/$lessonSlug': typeof AuthenticatedAcademyCourseSlugLessonSlugRoute
   '/academy/$courseSlug/certificate': typeof AuthenticatedAcademyCourseSlugCertificateRoute
   '/academy/$courseSlug/quiz': typeof AuthenticatedAcademyCourseSlugQuizRoute
+  '/tasks/$taskId/tracking': typeof AuthenticatedTasksTaskIdTrackingRoute
   '/api/public/hooks/dispatch-sms': typeof ApiPublicHooksDispatchSmsRoute
   '/api/public/hooks/email-nurture': typeof ApiPublicHooksEmailNurtureRoute
   '/api/public/hooks/profile-completion-reminders': typeof ApiPublicHooksProfileCompletionRemindersRoute
@@ -926,6 +935,7 @@ export interface FileRoutesById {
   '/_authenticated/academy/$courseSlug/$lessonSlug': typeof AuthenticatedAcademyCourseSlugLessonSlugRoute
   '/_authenticated/academy/$courseSlug/certificate': typeof AuthenticatedAcademyCourseSlugCertificateRoute
   '/_authenticated/academy/$courseSlug/quiz': typeof AuthenticatedAcademyCourseSlugQuizRoute
+  '/_authenticated/tasks/$taskId/tracking': typeof AuthenticatedTasksTaskIdTrackingRoute
   '/api/public/hooks/dispatch-sms': typeof ApiPublicHooksDispatchSmsRoute
   '/api/public/hooks/email-nurture': typeof ApiPublicHooksEmailNurtureRoute
   '/api/public/hooks/profile-completion-reminders': typeof ApiPublicHooksProfileCompletionRemindersRoute
@@ -1026,6 +1036,7 @@ export interface FileRouteTypes {
     | '/academy/$courseSlug/$lessonSlug'
     | '/academy/$courseSlug/certificate'
     | '/academy/$courseSlug/quiz'
+    | '/tasks/$taskId/tracking'
     | '/api/public/hooks/dispatch-sms'
     | '/api/public/hooks/email-nurture'
     | '/api/public/hooks/profile-completion-reminders'
@@ -1119,6 +1130,7 @@ export interface FileRouteTypes {
     | '/academy/$courseSlug/$lessonSlug'
     | '/academy/$courseSlug/certificate'
     | '/academy/$courseSlug/quiz'
+    | '/tasks/$taskId/tracking'
     | '/api/public/hooks/dispatch-sms'
     | '/api/public/hooks/email-nurture'
     | '/api/public/hooks/profile-completion-reminders'
@@ -1218,6 +1230,7 @@ export interface FileRouteTypes {
     | '/_authenticated/academy/$courseSlug/$lessonSlug'
     | '/_authenticated/academy/$courseSlug/certificate'
     | '/_authenticated/academy/$courseSlug/quiz'
+    | '/_authenticated/tasks/$taskId/tracking'
     | '/api/public/hooks/dispatch-sms'
     | '/api/public/hooks/email-nurture'
     | '/api/public/hooks/profile-completion-reminders'
@@ -1931,6 +1944,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksDispatchSmsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/tasks/$taskId/tracking': {
+      id: '/_authenticated/tasks/$taskId/tracking'
+      path: '/tasks/$taskId/tracking'
+      fullPath: '/tasks/$taskId/tracking'
+      preLoaderRoute: typeof AuthenticatedTasksTaskIdTrackingRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/academy/$courseSlug/quiz': {
       id: '/_authenticated/academy/$courseSlug/quiz'
       path: '/quiz'
@@ -2108,6 +2128,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedProfileIdVerificationRoute: typeof AuthenticatedProfileIdVerificationRoute
   AuthenticatedProfileVerificationRoute: typeof AuthenticatedProfileVerificationRoute
   AuthenticatedDashboardIndexRoute: typeof AuthenticatedDashboardIndexRoute
+  AuthenticatedTasksTaskIdTrackingRoute: typeof AuthenticatedTasksTaskIdTrackingRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
@@ -2139,6 +2160,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
     AuthenticatedProfileIdVerificationRoute,
   AuthenticatedProfileVerificationRoute: AuthenticatedProfileVerificationRoute,
   AuthenticatedDashboardIndexRoute: AuthenticatedDashboardIndexRoute,
+  AuthenticatedTasksTaskIdTrackingRoute: AuthenticatedTasksTaskIdTrackingRoute,
 }
 
 const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
