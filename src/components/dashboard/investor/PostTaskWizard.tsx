@@ -79,6 +79,8 @@ const EMPTY: FormState = {
   payout_amount: "", due_date: "",
 };
 
+type Recurrence = "" | "weekly" | "biweekly" | "monthly";
+
 export function PostTaskWizard({
   controlledOpen,
   onControlledOpenChange,
@@ -108,6 +110,7 @@ export function PostTaskWizard({
   const [requiresInterior, setRequiresInterior] = useState(false);
   const [bulkMode, setBulkMode] = useState(false);
   const [bulkText, setBulkText] = useState("");
+  const [recurrence, setRecurrence] = useState<Recurrence>("");
 
   const { data: pricingData } = useQuery({
     queryKey: ["pricing-catalog-investor-wizard"],
@@ -148,6 +151,7 @@ export function PostTaskWizard({
     setRequiresInterior(false);
     setBulkMode(false);
     setBulkText("");
+    setRecurrence("");
   };
 
   const parsedBulk = useMemo(() => {
@@ -192,6 +196,7 @@ export function PostTaskWizard({
           description: form.description || null,
           requires_interior_access: effectiveRequiresInterior,
           preferred_runner_id: preferredRunner?.id ?? null,
+          recurrence_rule: recurrence || null,
         },
       });
     },
