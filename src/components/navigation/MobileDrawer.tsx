@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
 type MobileDrawerProps = {
@@ -6,7 +6,7 @@ type MobileDrawerProps = {
   onClose: () => void;
   id: string;
   label: string;
-  children: React.ReactNode;
+  children: ReactNode;
   hiddenAt?: "md" | "xl";
   className?: string;
 };
