@@ -86,6 +86,7 @@ function SignupPage() {
       });
       if (error) throw error;
       if (!data.user) throw new Error("Sign-up didn't return a user. Please try again.");
+      clearPendingReferralCode();
       let profileStatus = "Created by database trigger; sign in after email verification to confirm profile access.";
       if (data.session) {
         const result = await finalizeProfile({
