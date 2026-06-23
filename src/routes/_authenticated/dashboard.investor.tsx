@@ -223,6 +223,11 @@ function InvestorTaskCard({ task }: { task: Task }) {
               <Badge variant="outline" className="text-xs border-amber-500/30 text-amber-300">Unfunded</Badge>
             ) : null}
             <SLABadge dueDate={task.due_date} status={task.status} />
+            {recRule && (
+              <Badge variant="outline" className={`text-xs flex items-center gap-1 ${recActive ? "border-primary/40 text-primary" : "border-muted-foreground/40 text-muted-foreground"}`}>
+                <Repeat className="size-3" /> {recRule}{!recActive ? " · paused" : ""}
+              </Badge>
+            )}
           </div>
           <p className="text-sm text-muted-foreground mt-1 flex items-center gap-1.5">
             <MapPin className="size-3.5" />
