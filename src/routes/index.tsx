@@ -4,14 +4,6 @@ import founderPhoto from "@/assets/founder-brian.jpg";
 import { Toaster } from "@/components/ui/sonner";
 import { Button } from "@/components/ui/button";
 import {
-  Sheet,
-  SheetContent,
-  SheetTrigger,
-  SheetHeader,
-  SheetTitle,
-  SheetClose,
-} from "@/components/ui/sheet";
-import {
   Accordion,
   AccordionContent,
   AccordionItem,
@@ -47,6 +39,7 @@ import {
   HelpCircle,
   Quote,
   Menu,
+  X,
 } from "lucide-react";
 import { useNavigate } from "@tanstack/react-router";
 import { BrandLogo } from "@/components/brand/BrandLogo";
@@ -456,6 +449,16 @@ function Index() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  // Lock body scroll while the mobile drawer is open.
+  useEffect(() => {
+    if (!mobileNavOpen) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [mobileNavOpen]);
+
   const closeNavThen = (fn: () => void) => () => {
     setMobileNavOpen(false);
     setTimeout(fn, 80);
@@ -500,60 +503,125 @@ function Index() {
             <Button type="button" onClick={goHire} size="sm" className="bg-gradient-primary shadow-glow">
               Hire a Runner
             </Button>
-            <Sheet open={mobileNavOpen} onOpenChange={setMobileNavOpen}>
-              <SheetTrigger asChild>
-                <button
-                  type="button"
-                  aria-label="Open menu"
-                  className="md:hidden inline-flex items-center justify-center size-10 -mr-2 rounded-md text-foreground/80 hover:text-foreground hover:bg-card/60 active:scale-95 transition"
-                >
-                  <Menu className="size-5" />
-                </button>
-              </SheetTrigger>
-              <SheetContent side="right" className="w-[85vw] sm:max-w-sm bg-background/95 backdrop-blur-xl border-l border-border/60 p-0 flex flex-col">
-                <SheetHeader className="px-6 pt-6 pb-4 border-b border-border/60 text-left">
-                  <SheetTitle>
-                    <BrandLogo />
-                  </SheetTitle>
-                </SheetHeader>
-                <nav className="flex-1 overflow-y-auto px-3 py-4">
-                  {mobileNavLinks.map((l) => (
-                    <button
-                      type="button"
-                      key={l.id}
-                      onClick={closeNavThen(() => scrollToId(l.id))}
-                      className="w-full text-left flex items-center justify-between px-3 py-4 rounded-lg text-base text-foreground/90 hover:bg-card/60 active:bg-card transition"
-                    >
-                      <span>{l.label}</span>
-                      <ArrowRight className="size-4 text-muted-foreground" />
-                    </button>
-                  ))}
-                </nav>
-                <div className="border-t border-border/60 p-5 space-y-3">
-                  <SheetClose asChild>
-                    <Button type="button" onClick={goHire} className="w-full h-12 bg-gradient-primary shadow-glow text-base">
-                      Hire a Runner <ArrowRight className="size-4 ml-1" />
-                    </Button>
-                  </SheetClose>
-                  <SheetClose asChild>
-                    <Button type="button" onClick={goBecome} variant="outline" className="w-full h-12 text-base">
-                      Become a Runner
-                    </Button>
-                  </SheetClose>
-                  <SheetClose asChild>
-                    <Link
-                      to="/login"
-                      className="block w-full text-center h-12 leading-[3rem] rounded-md border border-border bg-card/60 text-sm font-medium text-foreground/90 hover:bg-card transition"
-                    >
-                      Sign in
-                    </Link>
-                  </SheetClose>
-                </div>
-              </SheetContent>
-            </Sheet>
+            <button
+              type="button"
+              aria-label="Open menu"
+              aria-expanded={mobileNavOpen}
+              aria-controls="landing-mobile-drawer"
+              onClick={() => setMobileNavOpen(true)}
+              className="md:hidden inline-flex items-center justify-center size-10 -mr-2 rounded-md text-foreground/80 hover:text-foreground hover:bg-card/60 active:scale-95 transition"
+            >
+              <Menu className="size-5" />
+            </button>
           </div>
         </div>
       </header>
+
+      {/* Mobile drawer — plain fixed elements (no Radix portal) for reliable
+          rendering inside the Android Capacitor WebView. */}
+      <div
+        aria-hidden={!mobileNavOpen}
+        className={`md:hidden fixed inset-0 z-[60] transition-opacity duration-200 ${
+          mobileNavOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+        }`}
+      >
+        <button
+          type="button"
+          aria-label="Close menu"
+          tabIndex={mobileNavOpen ? 0 : -1}
+          onClick={() => setMobileNavOpen(false)}
+          className="absolute inset-0 bg-black/70"
+        />
+        <aside
+          id="landing-mobile-drawer"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Menu"
+          className={`absolute top-0 right-0 h-full w-[85vw] sm:max-w-sm bg-background border-l border-border/60 shadow-2xl flex flex-col transition-transform duration-300 ease-out pt-safe ${
+            mobileNavOpen ? "translate-x-0" : "translate-x-full"
+          }`}
+        >
+          <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-border/60">
+            <BrandLogo />
+            <button
+              type="button"
+              aria-label="Close menu"
+              onClick={() => setMobileNavOpen(false)}
+              className="p-2 -mr-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/60"
+            >
+              <X className="size-5" />
+            </button>
+          </div>
+          <nav className="flex-1 overflow-y-auto px-3 py-4">
+            {mobileNavLinks.map((l) => (
+              <button
+                type="button"
+                key={l.id}
+                onClick={closeNavThen(() => scrollToId(l.id))}
+                className="w-full text-left flex items-center justify-between px-3 py-4 rounded-lg text-base text-foreground/90 hover:bg-card/60 active:bg-card transition"
+              >
+                <span>{l.label}</span>
+                <ArrowRight className="size-4 text-muted-foreground" />
+              </button>
+            ))}
+            <Link
+              to="/pricing"
+              onClick={() => setMobileNavOpen(false)}
+              className="w-full text-left flex items-center justify-between px-3 py-4 rounded-lg text-base text-foreground/90 hover:bg-card/60 active:bg-card transition"
+            >
+              <span>Pricing</span>
+              <ArrowRight className="size-4 text-muted-foreground" />
+            </Link>
+            <Link
+              to="/trust"
+              onClick={() => setMobileNavOpen(false)}
+              className="w-full text-left flex items-center justify-between px-3 py-4 rounded-lg text-base text-foreground/90 hover:bg-card/60 active:bg-card transition"
+            >
+              <span>Trust & Safety</span>
+              <ArrowRight className="size-4 text-muted-foreground" />
+            </Link>
+            <Link
+              to="/coverage"
+              onClick={() => setMobileNavOpen(false)}
+              className="w-full text-left flex items-center justify-between px-3 py-4 rounded-lg text-base text-foreground/90 hover:bg-card/60 active:bg-card transition"
+            >
+              <span>Coverage</span>
+              <ArrowRight className="size-4 text-muted-foreground" />
+            </Link>
+            <Link
+              to="/runners"
+              onClick={() => setMobileNavOpen(false)}
+              className="w-full text-left flex items-center justify-between px-3 py-4 rounded-lg text-base text-foreground/90 hover:bg-card/60 active:bg-card transition"
+            >
+              <span>For Runners</span>
+              <ArrowRight className="size-4 text-muted-foreground" />
+            </Link>
+            <Link
+              to="/investors"
+              onClick={() => setMobileNavOpen(false)}
+              className="w-full text-left flex items-center justify-between px-3 py-4 rounded-lg text-base text-foreground/90 hover:bg-card/60 active:bg-card transition"
+            >
+              <span>For Investors</span>
+              <ArrowRight className="size-4 text-muted-foreground" />
+            </Link>
+          </nav>
+          <div className="border-t border-border/60 p-5 space-y-3 pb-safe">
+            <Button type="button" onClick={() => { setMobileNavOpen(false); setTimeout(goHire, 80); }} className="w-full h-12 bg-gradient-primary shadow-glow text-base">
+              Hire a Runner <ArrowRight className="size-4 ml-1" />
+            </Button>
+            <Button type="button" onClick={() => { setMobileNavOpen(false); setTimeout(goBecome, 80); }} variant="outline" className="w-full h-12 text-base">
+              Become a Runner
+            </Button>
+            <Link
+              to="/login"
+              onClick={() => setMobileNavOpen(false)}
+              className="block w-full text-center h-12 leading-[3rem] rounded-md border border-border bg-card/60 text-sm font-medium text-foreground/90 hover:bg-card transition"
+            >
+              Sign in
+            </Link>
+          </div>
+        </aside>
+      </div>
 
       {/* HERO */}
       <section id="top" className="relative isolate overflow-hidden">
