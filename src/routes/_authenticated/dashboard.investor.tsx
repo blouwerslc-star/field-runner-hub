@@ -34,6 +34,7 @@ import { PostTaskWizard } from "@/components/dashboard/investor/PostTaskWizard";
 import { SavedRunnersStrip } from "@/components/dashboard/investor/SavedRunnersStrip";
 import { DeliverableReviewWorkspace, buildReshootReason, type FeedbackState } from "@/components/dashboard/investor/DeliverableReviewWorkspace";
 import { TaskMessageThread } from "@/components/dashboard/investor/TaskMessageThread";
+import { TaskTimeline } from "@/components/tasks/TaskTimeline";
 import { getMyProfile } from "@/lib/profiles.functions";
 import { Users } from "lucide-react";
 import { Link } from "@tanstack/react-router";
@@ -442,6 +443,7 @@ function InvestorTaskPanelInner({ task, onDone }: { task: Task; onDone: () => vo
       )}
 
       <TaskMessageThread taskId={task.id} hasRunner={!!task.runner_id} />
+      <TaskTimeline taskId={task.id} />
 
       <div>
         <Label>Deliverables ({files.length})</Label>
