@@ -76,7 +76,7 @@ export function TaskMessageThread({
     <div className="rounded-xl border border-border bg-card/40 overflow-hidden">
       <div className="px-4 py-2.5 border-b border-border flex items-center justify-between bg-muted/20">
         <div className="flex items-center gap-2 text-sm font-medium">
-          <MessageSquare className="size-4 text-primary" /> Messages with your runner
+          <MessageSquare className="size-4 text-primary" /> Task messages
         </div>
         {conversationId && (
           <Link
@@ -91,7 +91,7 @@ export function TaskMessageThread({
       <div ref={scrollRef} className="max-h-72 overflow-y-auto px-4 py-3 space-y-2">
         {messages.length === 0 ? (
           <p className="text-xs text-muted-foreground py-6 text-center">
-            No messages yet. Say hi to your runner.
+            No messages yet. Send the first one.
           </p>
         ) : (
           messages.map((m: any) => {
@@ -116,7 +116,7 @@ export function TaskMessageThread({
           rows={2}
           value={body}
           onChange={(e) => setBody(e.target.value)}
-          placeholder="Send your runner a quick note…"
+          placeholder="Send a quick note…"
           className="flex-1 resize-none"
           onKeyDown={(e) => {
             if (e.key === "Enter" && (e.metaKey || e.ctrlKey) && body.trim()) {

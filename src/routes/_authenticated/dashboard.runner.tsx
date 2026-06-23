@@ -23,6 +23,7 @@ import { createUploadUrl, recordTaskFile } from "@/lib/storage.functions";
 import { RunnerVerificationCard } from "@/components/dashboard/RunnerVerificationCard";
 import { ProfileCompletionBanner } from "@/components/dashboard/ProfileCompletionBanner";
 import { DashboardLoadingSkeleton, RouteErrorState } from "@/components/dashboard/UiStates";
+import { TaskMessageThread } from "@/components/dashboard/investor/TaskMessageThread";
 
 export const Route = createFileRoute("/_authenticated/dashboard/runner")({
   component: RunnerDashboard,
@@ -298,6 +299,8 @@ function TaskWorkPanel({ task, onDone }: { task: Task; onDone: () => void }) {
           <div className="text-muted-foreground mt-1">{lastSub?.rejection_reason || "Please revise and resubmit."}</div>
         </div>
       )}
+
+      <TaskMessageThread taskId={task.id} hasRunner={true} />
 
       <div>
         <Label>Photos / video</Label>
