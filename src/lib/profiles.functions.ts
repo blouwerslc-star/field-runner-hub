@@ -205,6 +205,7 @@ const listSchema = z.object({
   sort: z.enum(["rating", "completed", "newest", "featured"]).default("featured"),
   limit: z.number().int().min(1).max(200).default(120),
   viewerLoggedIn: z.boolean().optional().default(false),
+  certifications: z.array(z.string().min(1).max(80)).max(20).optional(),
 });
 
 function maskName(full: string | null | undefined): string | null {
@@ -318,6 +319,7 @@ export const listPublicProfiles = createServerFn({ method: "POST" })
     const userIds = filtered.map((r) => (r as { user_id: string }).user_id);
     const rolesByUser = new Map<string, string[]>();
     const certByUser = new Map<string, { level: string | null; status: string | null }>();
+    const academyCertsByUser = new Map<string, string[]>();
     if (userIds.length) {
       const { data: roleRows } = await supabaseAdmin
         .from("user_roles")
@@ -338,7 +340,29 @@ export const listPublicProfiles = createServerFn({ method: "POST" })
           status: (r as any).certification_status ?? null,
         });
       }
+      // Per-course academy certifications, joined to academy_courses for slug
+      const { data: acRows } = await supabaseAdmin
+        .from("academy_certifications")
+        .select("user_id, course_id, academy_courses!inner(slug)")
+        .in("user_id", userIds);
+      for (const r of (acRows ?? []) as any[]) {
+        const slug = r.academy_courses?.slug;
+        if (!slug) continue;
+        const list = academyCertsByUser.get(r.user_id) ?? [];
+        if (!list.includes(slug)) list.push(slug);
+        academyCertsByUser.set(r.user_id, list);
+      }
     }
+
+    // Filter by required certifications (all must be held)
+    if (data.certifications && data.certifications.length > 0) {
+      const required = data.certifications;
+      filtered = filtered.filter((r) => {
+        const held = academyCertsByUser.get((r as any).user_id) ?? [];
+        return required.every((c) => held.includes(c));
+      });
+    }
+
     return {
        profiles: filtered.map((p): any => {
         const row = p as Record<string, unknown>;
@@ -346,6 +370,7 @@ export const listPublicProfiles = createServerFn({ method: "POST" })
           ...row,
           roles: rolesByUser.get((p as { user_id: string }).user_id) ?? [],
           academy_certification: certByUser.get((p as { user_id: string }).user_id) ?? null,
+          academy_certifications: academyCertsByUser.get((p as { user_id: string }).user_id) ?? [],
         };
         if (data.viewerLoggedIn) return base;
         // Public (logged-out) view: mask name, strip slug + free-text PII fields
@@ -373,6 +398,16 @@ async function assertAdmin(supabase: import("@supabase/supabase-js").SupabaseCli
     .maybeSingle();
   if (!data) throw new Error("Admin only");
 }
+
+// Public list of available academy certification courses, used for filter chips.
+export const listAcademyCertOptions = createServerFn({ method: "GET" }).handler(async () => {
+  const { data, error } = await supabaseAdmin
+    .from("academy_courses")
+    .select("slug, title, category, sort_order")
+    .order("sort_order", { ascending: true });
+  if (error) throw new Error(error.message);
+  return { courses: (data ?? []) as Array<{ slug: string; title: string; category: string | null; sort_order: number }> };
+});
 
 export const adminListProfiles = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
