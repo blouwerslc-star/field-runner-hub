@@ -271,6 +271,7 @@ function ProfilesDirectory() {
                 setService("");
                 setAvailability("all");
                 setSort("featured");
+                setCerts([]);
               }}
             >
               Clear filters
