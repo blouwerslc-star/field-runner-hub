@@ -11,13 +11,6 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
   Dialog,
   DialogContent,
   DialogFooter,
@@ -25,10 +18,9 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Loader2, Plus, MapPin, Calendar, DollarSign, CheckCircle2, XCircle, FileImage, ShieldCheck, Heart } from "lucide-react";
+import { Loader2, MapPin, Calendar, DollarSign, CheckCircle2, XCircle, FileImage, ShieldCheck, Heart } from "lucide-react";
 import { toast } from "sonner";
-import { listMyTasks, getTaskDetail, createInvestorTask, reviewSubmission, defaultRequiresInteriorAccess } from "@/lib/tasks.functions";
-import { Checkbox } from "@/components/ui/checkbox";
+import { listMyTasks, getTaskDetail, reviewSubmission } from "@/lib/tasks.functions";
 import { getSignedDownloadUrl } from "@/lib/storage.functions";
 import { TaskFundingCheckout } from "@/components/payments/TaskFundingCheckout";
 import { TaskTipCheckout } from "@/components/payments/TaskTipCheckout";
@@ -38,6 +30,7 @@ import { StatusTimeline } from "@/components/dashboard/investor/StatusTimeline";
 import { SLABadge } from "@/components/dashboard/investor/SLABadge";
 import { SpendAnalyticsCard } from "@/components/dashboard/investor/SpendAnalyticsCard";
 import { RunnerDiscoveryStrip } from "@/components/dashboard/investor/RunnerDiscoveryStrip";
+import { PostTaskWizard } from "@/components/dashboard/investor/PostTaskWizard";
 import { getMyProfile } from "@/lib/profiles.functions";
 import { Users } from "lucide-react";
 import { Link } from "@tanstack/react-router";
@@ -87,7 +80,7 @@ function InvestorDashboard() {
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2 md:justify-end">
-            <CreateTaskDialog />
+            <PostTaskWizard />
             <Button asChild variant="outline" size="sm">
               <Link to="/profiles">
                 <Users className="size-4 mr-1.5" />
@@ -438,123 +431,3 @@ function InvestorTaskPanelInner({ task, onDone }: { task: Task; onDone: () => vo
   );
 }
 
-function CreateTaskDialog() {
-  const qc = useQueryClient();
-  const createFn = useServerFn(createInvestorTask);
-  const [open, setOpen] = useState(false);
-  const [form, setForm] = useState({
-    title: "", task_type: "photos", property_address: "",
-    city: "", state: "", zip_code: "", payout_amount: "",
-    due_date: "", description: "",
-  });
-  const [interiorTouched, setInteriorTouched] = useState(false);
-  const [requiresInterior, setRequiresInterior] = useState(false);
-  // Auto-default the interior-access checkbox from the selected task type,
-  // unless the investor has explicitly toggled it.
-  const autoInterior = defaultRequiresInteriorAccess(form.task_type);
-  const effectiveRequiresInterior = interiorTouched ? requiresInterior : autoInterior;
-
-  const create = useMutation({
-    mutationFn: () => createFn({
-      data: {
-        title: form.title,
-        task_type: form.task_type,
-        property_address: form.property_address,
-        city: form.city,
-        state: form.state,
-        zip_code: form.zip_code || null,
-        payout_amount: form.payout_amount ? Number(form.payout_amount) : null,
-        due_date: form.due_date || null,
-        description: form.description || null,
-        requires_interior_access: effectiveRequiresInterior,
-      },
-    }),
-    onSuccess: () => {
-      toast.success("Task posted. An admin will assign a runner.");
-      qc.invalidateQueries({ queryKey: ["my-tasks"] });
-      setOpen(false);
-      setForm({ title: "", task_type: "photos", property_address: "", city: "", state: "", zip_code: "", payout_amount: "", due_date: "", description: "" });
-      setInteriorTouched(false);
-      setRequiresInterior(false);
-    },
-    onError: (e: Error) => toast.error(e.message),
-  });
-
-  return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button className="bg-gradient-primary shadow-glow">
-          <Plus className="size-4 mr-1.5" /> New task
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="max-w-lg">
-        <DialogHeader><DialogTitle>Post a new task</DialogTitle></DialogHeader>
-        <div className="grid gap-3">
-          <div>
-            <Label>Title</Label>
-            <Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="Drive-by photos at 123 Main St" />
-          </div>
-          <div>
-            <Label>Type</Label>
-            <Select value={form.task_type} onValueChange={(v) => setForm({ ...form, task_type: v })}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="photos">Photos</SelectItem>
-                <SelectItem value="video">Video walkthrough</SelectItem>
-                <SelectItem value="occupancy">Occupancy check</SelectItem>
-                <SelectItem value="drive_by">Drive-by</SelectItem>
-                <SelectItem value="lockbox">Lockbox / sign</SelectItem>
-                <SelectItem value="other">Other</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div>
-            <Label>Address</Label>
-            <Input value={form.property_address} onChange={(e) => setForm({ ...form, property_address: e.target.value })} />
-          </div>
-          <div className="grid grid-cols-3 gap-2">
-            <div><Label>City</Label><Input value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} /></div>
-            <div><Label>State</Label><Input value={form.state} onChange={(e) => setForm({ ...form, state: e.target.value })} /></div>
-            <div><Label>ZIP</Label><Input value={form.zip_code} onChange={(e) => setForm({ ...form, zip_code: e.target.value })} /></div>
-          </div>
-          <div className="grid grid-cols-2 gap-2">
-            <div><Label>Payout ($)</Label><Input type="number" value={form.payout_amount} onChange={(e) => setForm({ ...form, payout_amount: e.target.value })} /></div>
-            <div><Label>Due date</Label><Input type="date" value={form.due_date} onChange={(e) => setForm({ ...form, due_date: e.target.value })} /></div>
-          </div>
-          <div>
-            <Label>Description</Label>
-            <Textarea rows={3} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="Any specifics the runner should know…" />
-          </div>
-          <div className="rounded-xl border border-border bg-muted/20 p-3 flex items-start gap-3">
-            <Checkbox
-              id="requires-interior"
-              checked={effectiveRequiresInterior}
-              onCheckedChange={(v) => {
-                setInteriorTouched(true);
-                setRequiresInterior(v === true);
-              }}
-              className="mt-0.5"
-            />
-            <div className="flex-1">
-              <Label htmlFor="requires-interior" className="flex items-center gap-1.5 cursor-pointer">
-                <ShieldCheck className="size-3.5 text-primary" />
-                Runner will enter inside the property
-              </Label>
-              <p className="text-xs text-muted-foreground mt-1">
-                {autoInterior && !interiorTouched
-                  ? "Auto-enabled for this task type. Only runners with a verified background check will be able to apply."
-                  : "Check if this involves lockbox entry, interior walkthrough, or any access inside. Only background-check-verified runners can apply."}
-              </p>
-            </div>
-          </div>
-        </div>
-        <DialogFooter>
-          <Button onClick={() => create.mutate()} disabled={create.isPending || !form.title || !form.property_address || !form.city || !form.state} className="bg-gradient-primary shadow-glow">
-            {create.isPending ? <Loader2 className="size-4 mr-2 animate-spin" /> : null}
-            Post task
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
-}
