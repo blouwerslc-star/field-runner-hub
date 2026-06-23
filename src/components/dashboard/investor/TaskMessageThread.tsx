@@ -38,7 +38,6 @@ export function TaskMessageThread({
     enabled: !!conversationId,
   });
 
-  // Realtime: refetch the thread whenever a new message lands in this conversation.
   useEffect(() => {
     if (!conversationId) return;
     const channel = supabase
@@ -49,6 +48,18 @@ export function TaskMessageThread({
           event: "INSERT",
           schema: "public",
           table: "messages",
+          filter: `conversation_id=eq.${conversationId}`,
+        },
+        () => {
+          qc.invalidateQueries({ queryKey: ["task-conv-thread", conversationId] });
+        },
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "conversation_participants",
           filter: `conversation_id=eq.${conversationId}`,
         },
         () => {
@@ -93,7 +104,23 @@ export function TaskMessageThread({
   }
 
   const messages = thread?.messages ?? [];
-  const meSenderId = messages.find(() => true)?.sender_id; // placeholder; we just compare via class below
+  const meId = (thread as any)?.currentUserId as string | undefined;
+  const participants = ((thread as any)?.participants ?? []) as Array<{
+    user_id: string;
+    last_read_at: string | null;
+  }>;
+  // Earliest "last_read_at" among the OTHER participants determines what they've all seen.
+  const otherReads = participants
+    .filter((p) => p.user_id !== meId)
+    .map((p) => (p.last_read_at ? new Date(p.last_read_at).getTime() : 0));
+  const othersLastReadMs = otherReads.length ? Math.min(...otherReads) : 0;
+  // Find the latest of my messages that's been seen — we only render the receipt under that one.
+  let lastSeenMineId: string | null = null;
+  for (const m of messages) {
+    if (m.sender_id === meId && new Date(m.created_at).getTime() <= othersLastReadMs) {
+      lastSeenMineId = m.id;
+    }
+  }
 
   return (
     <div className="rounded-xl border border-border bg-card/40 overflow-hidden">
@@ -118,17 +145,24 @@ export function TaskMessageThread({
           </p>
         ) : (
           messages.map((m: any) => {
-            const mine = m.sender_id === (thread as any)?.conversation?.created_by
-              ? false
-              : undefined;
-            // visual differentiation by sender id
+            const mine = meId ? m.sender_id === meId : false;
             const senderName = m.sender?.full_name ?? m.sender?.email ?? "User";
+            const showSeen = mine && m.id === lastSeenMineId;
             return (
-              <div key={m.id} className="text-sm">
+              <div key={m.id} className={`text-sm flex flex-col ${mine ? "items-end" : "items-start"}`}>
                 <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-0.5">
                   {senderName} · {new Date(m.created_at).toLocaleString()}
                 </div>
-                <div className="rounded-lg bg-muted/30 px-3 py-2 whitespace-pre-wrap">{m.body}</div>
+                <div
+                  className={`rounded-lg px-3 py-2 whitespace-pre-wrap max-w-[85%] ${
+                    mine ? "bg-primary/15 text-foreground" : "bg-muted/30"
+                  }`}
+                >
+                  {m.body}
+                </div>
+                {showSeen && (
+                  <div className="text-[10px] text-muted-foreground mt-0.5">Seen</div>
+                )}
               </div>
             );
           })
