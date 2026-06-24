@@ -77,15 +77,23 @@ export function DashboardShell({
 
   const navItems = isAdmin ? [ADMIN_NAV_ITEM, ...NAV_ITEMS] : NAV_ITEMS;
 
-  async function signOut() {
-    setOpen(false);
+  function clearLocalAuthStorage() {
     try {
-      await queryClient.cancelQueries();
-      queryClient.clear();
-      await supabase.auth.signOut({ scope: "local" });
-    } finally {
-      window.location.replace("/login");
+      Object.keys(window.localStorage)
+        .filter((key) => key.startsWith("sb-") && key.endsWith("-auth-token"))
+        .forEach((key) => window.localStorage.removeItem(key));
+    } catch {
+      // Storage can be unavailable in some mobile browser modes.
     }
+  }
+
+  function signOut() {
+    setOpen(false);
+    queryClient.clear();
+    clearLocalAuthStorage();
+    void queryClient.cancelQueries();
+    void supabase.auth.signOut({ scope: "local" }).catch(() => {});
+    window.location.replace("/login?forceLogout=1");
   }
 
   return (
