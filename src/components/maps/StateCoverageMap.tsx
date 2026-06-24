@@ -126,14 +126,54 @@ export function StateCoverageMap({
               <>
                 <Users className="inline size-3 mr-1 -mt-0.5" />
                 {totalRunners} runner{totalRunners === 1 ? "" : "s"} across {statesCovered} state
-                {statesCovered === 1 ? "" : "s"}. Hover for a preview, click a state to filter the list below.
+                {statesCovered === 1 ? "" : "s"}. Tap a state to filter the list below.
               </>
             )}
           </p>
         </div>
       </div>
 
-      <div className="relative grid lg:grid-cols-[1fr_280px] gap-4 p-4" style={{ minHeight: height }}>
+      {/* Mobile: chip list, sorted by runner count. The grid map is unreadable below ~md. */}
+      <div className="md:hidden p-3">
+        {isLoading ? (
+          <div className="py-10 grid place-items-center text-xs text-muted-foreground">
+            <Loader2 className="size-4 animate-spin" />
+          </div>
+        ) : (
+          <div className="flex flex-wrap gap-2">
+            {(coverageData?.states ?? [])
+              .slice()
+              .sort((a, b) => b.count - a.count)
+              .map((row) => {
+                const abbr = row.state.toUpperCase();
+                const tile = STATE_TILES.find((t) => t.abbr === abbr);
+                const selected = selectedState?.toUpperCase() === abbr;
+                return (
+                  <button
+                    key={abbr}
+                    type="button"
+                    onClick={() => onStateClick?.(abbr)}
+                    className={[
+                      "inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs transition active:scale-95",
+                      selected
+                        ? "border-primary bg-primary/25 text-foreground"
+                        : "border-primary/40 bg-primary/10 text-foreground hover:bg-primary/20",
+                    ].join(" ")}
+                    aria-label={`${tile?.name ?? abbr}: ${row.count} runners`}
+                  >
+                    <span className="font-semibold">{abbr}</span>
+                    <span className="tabular-nums text-muted-foreground">{row.count}</span>
+                  </button>
+                );
+              })}
+            {(coverageData?.states?.length ?? 0) === 0 && (
+              <div className="py-6 text-xs text-muted-foreground">No coverage yet.</div>
+            )}
+          </div>
+        )}
+      </div>
+
+      <div className="relative hidden md:grid lg:grid-cols-[1fr_280px] gap-4 p-4" style={{ minHeight: height }}>
         <div className="overflow-x-auto rounded-xl border border-border/50 bg-background/35 p-4">
           <div
             className="grid gap-1.5 min-w-[720px]"
