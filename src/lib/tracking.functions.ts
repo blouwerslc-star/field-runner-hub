@@ -180,7 +180,19 @@ export const submitPing = createServerFn({ method: "POST" })
       runner_state: task.runner_state,
     });
     if (insErr) throw new Error(insErr.message);
-    return { ok: true };
+    // Re-read the task to return the trigger-computed geofence state so the
+    // client can auto-advance to "arrived" without a second round trip.
+    const { data: after } = await supabase
+      .from("tasks")
+      .select("runner_state, last_ping_within_geofence, last_ping_distance_ft")
+      .eq("id", data.taskId)
+      .maybeSingle();
+    return {
+      ok: true,
+      inside: after?.last_ping_within_geofence ?? null,
+      runner_state: (after?.runner_state ?? task.runner_state) as RunnerState | null,
+      distance_ft: after?.last_ping_distance_ft ?? null,
+    };
   });
 
 /** Runner manually stops tracking (e.g. cancel mid-task). */
