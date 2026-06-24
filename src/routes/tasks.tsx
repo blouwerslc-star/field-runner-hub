@@ -166,10 +166,10 @@ function MarketplacePage() {
             </dl>
           </div>
         )}
-        <div className="mb-8 flex flex-wrap items-end justify-between gap-6">
+        <div className="mb-6 sm:mb-8 flex flex-wrap items-end justify-between gap-4 sm:gap-6">
           <div>
-            <h1 className="text-3xl md:text-4xl font-bold tracking-tight">Open tasks</h1>
-            <p className="mt-2 text-muted-foreground">Real-time marketplace of property visits, photos, occupancy checks, and more.</p>
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight">Open tasks</h1>
+            <p className="mt-2 text-sm sm:text-base text-muted-foreground">Real-time marketplace of property visits, photos, occupancy checks, and more.</p>
           </div>
           {!isLoading && tasks.length > 0 && (
             <dl className="grid grid-cols-4 gap-6 text-sm">
