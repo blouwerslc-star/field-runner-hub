@@ -1,8 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { listOpenTasks } from "@/lib/marketplace.functions";
+import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
@@ -32,6 +33,17 @@ const SAMPLE_TASKS = [
 
 function MarketplacePage() {
   const [q, setQ] = useState("");
+  const [signedIn, setSignedIn] = useState<boolean | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    supabase.auth.getSession().then(({ data }) => {
+      if (!cancelled) setSignedIn(!!data.session);
+    });
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
+      setSignedIn(!!session);
+    });
+    return () => { cancelled = true; sub.subscription.unsubscribe(); };
+  }, []);
   const [city, setCity] = useState("");
   const [state, setState] = useState("");
   const [taskType, setTaskType] = useState<string>("all");
@@ -96,7 +108,11 @@ function MarketplacePage() {
             <Link to="/profiles" className="text-muted-foreground hover:text-foreground">Browse runners</Link>
             <Link to="/investors" className="text-muted-foreground hover:text-foreground">Hire a Runner</Link>
             <Link to="/runners" className="text-muted-foreground hover:text-foreground">Become a Runner</Link>
-            <Link to="/login" className="text-muted-foreground hover:text-foreground">Sign in</Link>
+            {signedIn ? (
+              <Link to="/dashboard" className="text-muted-foreground hover:text-foreground">Dashboard</Link>
+            ) : (
+              <Link to="/login" className="text-muted-foreground hover:text-foreground">Sign in</Link>
+            )}
           </div>
         </div>
       </header>
