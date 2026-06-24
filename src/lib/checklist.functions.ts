@@ -39,9 +39,9 @@ export const getTaskChecklist = createServerFn({ method: "POST" })
     if (tErr) throw new Error(tErr.message);
     if (!task) throw new Error("Task not found");
 
-    let steps: unknown[] = [];
+    let steps: RunnerStep[] = [];
     let introNotes: string | null = null;
-    let requiredFields: unknown[] = [];
+    let requiredFields: TemplateField[] = [];
     if (task.template_id) {
       const { data: tpl, error: tplErr } = await supabase
         .from("task_templates")
@@ -50,9 +50,9 @@ export const getTaskChecklist = createServerFn({ method: "POST" })
         .maybeSingle();
       if (tplErr) throw new Error(tplErr.message);
       if (tpl) {
-        steps = (tpl.runner_steps as unknown[]) ?? [];
+        steps = JSON.parse(JSON.stringify(tpl.runner_steps ?? [])) as RunnerStep[];
         introNotes = (tpl.intro_notes as string | null) ?? null;
-        requiredFields = (tpl.required_fields as unknown[]) ?? [];
+        requiredFields = JSON.parse(JSON.stringify(tpl.required_fields ?? [])) as TemplateField[];
       }
     }
 
@@ -63,11 +63,11 @@ export const getTaskChecklist = createServerFn({ method: "POST" })
     if (pErr) throw new Error(pErr.message);
 
     return {
-      task,
+      task: JSON.parse(JSON.stringify(task)) as TaskHeader,
       steps,
       introNotes,
       requiredFields,
-      progress: (progressRows ?? []) as unknown[],
+      progress: JSON.parse(JSON.stringify(progressRows ?? [])) as StepProgress[],
       viewerRole:
         task.runner_id === userId ? "runner" : task.investor_id === userId ? "investor" : "other",
     };
@@ -101,7 +101,7 @@ export const updateChecklistStep = createServerFn({ method: "POST" })
       .select("*")
       .single();
     if (error) throw new Error(error.message);
-    return { progress: row as unknown };
+    return { progress: JSON.parse(JSON.stringify(row)) as StepProgress };
   });
 
 export const completeChecklistTask = createServerFn({ method: "POST" })
