@@ -1,34 +1,68 @@
-## Tighten pacing — remove silence gaps between scenes
+## Goal
 
-The current `reirunner-explainer.mp4` has noticeable dead air between scenes because each scene's duration was padded around the raw VO MP3, which includes leading/trailing silence plus a fixed buffer. We'll measure and trim that silence, then re-render.
+Make GPS verification rock-solid on both the website and the iOS/Android app, with background tracking on native so a runner's drive to the property is captured even when the phone is locked. Auto-mark the runner as "Arrived" the moment they cross into the geofence.
 
-### Steps
+## What already works (keep)
 
-1. **Detect actual speech bounds per VO clip**
-   - For each `remotion/public/audio/voScene{1..6}.mp3`, run `ffmpeg -af silencedetect=noise=-35dB:d=0.15` to find `silence_start` / `silence_end` near the head and tail.
-   - Compute trimmed start/end offsets per clip (effective speech window).
+- Server-side ping intake (`submitPing`), distance + inside/outside computation (DB trigger), audit log of permission outcomes, geofence enforcement on "Complete," investor-visible map and trail, "Tracking active" top-of-screen banner, admin override + flagged-tasks view, stale-tracking sweep.
+- Web foreground tracking via `useTaskTracking` (`navigator.geolocation.watchPosition`).
 
-2. **Re-encode trimmed VO files**
-   - Write `voScene{N}.trimmed.mp3` for each scene with leading/trailing silence stripped via ffmpeg `atrim` + `asetpts` (or `-ss`/`-to`). Keep originals as reference.
+## What's missing
 
-3. **Recompute scene durations in `remotion/src/captions/script.ts`**
-   - For each scene set `durationInFrames = ceil((trimmedAudioSeconds + 0.25s tail pad) * 30)`.
-   - The 0.25s tail pad gives the last word room to land before the next scene's VO starts — much tighter than the current ~1s+ gaps.
-   - Update total composition `durationInFrames` in `MainVideo.tsx`/`Root.tsx` accordingly.
+1. The Capacitor wrapper never calls the native Geolocation plugin, so on iOS/Android we're using the WebView's `navigator.geolocation`. That stops the moment the screen locks or the runner switches apps — exactly when we most need to prove they drove to the property.
+2. No background-location permission strings in `Info.plist` / `AndroidManifest.xml`.
+3. No automatic state transition when the runner enters the geofence — they have to remember to tap "I've Arrived."
+4. No clear in-app diagnostic when permission is blocked at the OS level (only at the browser API level).
 
-4. **Point scene audio to trimmed files**
-   - Update the audio `src` in each scene (or in `script.ts` if centralized) to reference the new `*.trimmed.mp3`.
-   - Re-sync caption timing arrays inside each scene to the new trimmed timeline (shift cue start frames by the removed leading silence).
+## Changes
 
-5. **Re-render**
-   - `cd remotion && node scripts/render-remotion.mjs` → outputs to `/mnt/documents/reirunner-explainer.mp4` (overwrite).
-   - Spot-check with `ffprobe` for new total duration (~26–28s expected, down from 34.7s).
+### 1. Native background-capable GPS
 
-6. **No frontend changes**
-   - The inline `<video>` on the landing page references the CDN asset by `asset_id`. Since the asset is immutable, we'll re-upload the new MP4 with `lovable-assets create` and overwrite `src/assets/reirunner-explainer.mp4.asset.json` with the new pointer. The landing page picks it up automatically.
-   - Delete the old CDN asset via `assets--delete_asset` only after confirming the new one renders on the page.
+- Install `@capacitor/geolocation` (foreground permission flow on both platforms) and `@capacitor-community/background-geolocation` (keeps pinging when the app is backgrounded or screen is off).
+- Rewrite `src/hooks/useTaskTracking.ts` into a thin dispatcher:
+  - **Web:** existing `navigator.geolocation.watchPosition` path, unchanged.
+  - **Native:** request `Geolocation.requestPermissions({ permissions: ['location'] })` on consent; then start a `BackgroundGeolocation.addWatcher` with `requestPermissions: true`, `stale: false`, `distanceFilter: 30` (meters), and a foreground notification ("REI Runner is verifying you're on-site"). Pipe each fix into the same `submitPing` server fn.
+  - Keep the same buffer-and-flush behavior (offline retry, throttle to one ping per 20s or 30m of movement).
+- Stop the watcher when `active` goes false, on task complete, on `stopTracking`.
 
-### Notes / scope
-- Trimming silence only — script, voice, visuals, captions wording all unchanged.
-- Silence threshold `-35dB` / 150ms is conservative; if it clips speech we'll loosen to `-40dB` / 100ms.
-- Tail pad is 0.25s per scene (was effectively 1s+); transition cross-fade frames stay as-is so cuts remain smooth.
+### 2. Permission strings (one-time native shell edits)
+
+Update `docs/MOBILE_BUILD.md` instructions and the actual `Info.plist` / `AndroidManifest.xml` (committed under `ios/` and `android/` once those folders are scaffolded). The keys we'll add:
+
+- iOS: keep `NSLocationWhenInUseUsageDescription`; add `NSLocationAlwaysAndWhenInUseUsageDescription` and `UIBackgroundModes` → `location`.
+- Android: add `ACCESS_BACKGROUND_LOCATION` and `FOREGROUND_SERVICE_LOCATION` (Android 14+), plus the `FOREGROUND_SERVICE` permission the background plugin needs.
+
+### 3. Auto-arrive on geofence entry
+
+- In `useTaskTracking`, after each successful ping, if the response says the runner is now inside the geofence and `runner_state === 'en_route'`, call `transitionRunnerState({ to: 'arrived' })` once. Guard with a local "already auto-arrived for this task" flag so it doesn't fire repeatedly.
+- Server side: extend `submitPing` to return `{ ok, inside, runner_state }` so the client can react without an extra round trip.
+- Investor still gets the existing notification path because the transition writes a timeline event.
+
+### 4. Diagnostics
+
+- On the runner's task tracking panel, surface OS-level permission state for native (using `Geolocation.checkPermissions()`), so a runner who denied at install time sees a clear "Open settings to enable location" link instead of a generic "denied" error.
+- Add a small "Test location" button in `/settings` that asks for a single fix and reports lat/lng + accuracy. Useful for support.
+
+## Technical details
+
+- `useTaskTracking` becomes a `switch (Capacitor.getPlatform())` at the top of the effect, importing the native plugins dynamically (so the web bundle stays clean).
+- Background plugin's `addWatcher` callback runs in a special JS context — the existing `useServerFn(submitPing)` won't work there directly. We'll call the server fn through a tiny module-level adapter that takes `(taskId, position)` and uses the bare `submitPing` import, which is fine since server fns are also callable without `useServerFn`.
+- Auto-arrive guard lives in a `useRef<Set<string>>()` keyed by `taskId` so re-renders don't double-fire.
+- No DB migrations needed — schema already has `tracking_active`, `runner_state`, `last_ping_within_geofence`, geofence radius, and audit tables.
+- Mapbox token already comes from `getMapboxToken`; no new secrets.
+
+## Verification
+
+- Web: open `/tasks/$taskId/tracking`, start tracking, watch pings land in `task_location_pings` with the right `within_geofence` flag.
+- Native simulator (iOS + Android): use the simulator's location-spoof tool to drive a route into the geofence; confirm:
+  1. Permission prompt appears.
+  2. Pings continue after locking the screen / sending the app to background.
+  3. State auto-flips to "Arrived" when crossing the radius.
+  4. Foreground service notification is visible on Android.
+- Confirm `last_ping_at` keeps advancing every ~20s and `sweep_stale_tracking` doesn't kill it mid-drive.
+
+## Out of scope
+
+- Web background tracking (browsers don't support it reliably; foreground-only on web is intentional).
+- Anti-spoofing detection beyond what we already have (accuracy + speed are stored on each ping; flagging logic can come later).
+- Pre-task "find runners near me" geolocation (separate marketplace feature, not verification).

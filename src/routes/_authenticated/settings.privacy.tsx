@@ -8,6 +8,14 @@ import { getMySettings, updatePrivacyPrefs } from "@/lib/settings.functions";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { SettingsCard, SettingsHeader, ToggleRow } from "@/components/settings/SettingsSection";
+import {
+  checkLocationPermission,
+  getCurrentLocation,
+  openLocationSettings,
+  requestLocationPermission,
+} from "@/lib/location-tracker";
+import { Capacitor } from "@capacitor/core";
+import { MapPin } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/settings/privacy")({
   component: PrivacySettings,
@@ -93,6 +101,66 @@ function PrivacySettings() {
           Your email, full address, and payment details are never shown publicly.
         </p>
       </SettingsCard>
+      <LocationDiagnostics />
     </div>
+  );
+}
+
+function LocationDiagnostics() {
+  const [perm, setPerm] = useState<"granted" | "denied" | "prompt" | "unknown">("unknown");
+  const [result, setResult] = useState<string | null>(null);
+  const [testing, setTesting] = useState(false);
+
+  useEffect(() => {
+    checkLocationPermission().then(setPerm).catch(() => setPerm("unknown"));
+  }, []);
+
+  const runTest = async () => {
+    setTesting(true);
+    setResult(null);
+    try {
+      if (perm === "prompt" || perm === "unknown") {
+        const next = await requestLocationPermission();
+        setPerm(next === "granted" ? "granted" : next === "denied" ? "denied" : "prompt");
+      }
+      const fix = await getCurrentLocation();
+      setResult(
+        `Got fix at ${fix.lat.toFixed(5)}, ${fix.lng.toFixed(5)}` +
+          (fix.accuracy ? ` (±${Math.round(fix.accuracy)}m)` : ""),
+      );
+    } catch (e) {
+      setResult(`Failed: ${(e as Error).message}`);
+    } finally {
+      setTesting(false);
+    }
+  };
+
+  return (
+    <SettingsCard
+      title="Location services"
+      footer={
+        <div className="flex flex-wrap gap-2">
+          <Button onClick={runTest} disabled={testing}>
+            {testing && <Loader2 className="size-3.5 mr-1.5 animate-spin" />}
+            <MapPin className="mr-1.5 size-4" /> Test location
+          </Button>
+          {Capacitor.isNativePlatform() && perm === "denied" && (
+            <Button variant="outline" onClick={() => void openLocationSettings()}>
+              Open settings
+            </Button>
+          )}
+        </div>
+      }
+    >
+      <p className="text-sm text-muted-foreground">
+        Runners must allow location access so REI Runner can verify they reached
+        the property. On the iOS/Android app, choose <strong>Always</strong> to
+        keep verification working when your phone is locked or in your pocket.
+      </p>
+      <p className="text-xs text-muted-foreground">
+        Current permission: <strong className="text-foreground">{perm}</strong>
+      </p>
+      {result && <p className="text-xs text-foreground">{result}</p>}
+    </SettingsCard>
   );
 }
