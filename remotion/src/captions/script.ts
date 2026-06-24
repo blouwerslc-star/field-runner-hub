@@ -5,7 +5,7 @@ export type CaptionLine = { text: string; from: number; to: number };
 
 export const SCENES = {
   hook: {
-    durationFrames: 135, // 4.5s (VO 2.93s + pad)
+    durationFrames: 85, // ~2.83s — VO speech ends 2.61s + 0.2s pad
     voFile: "audio/voScene1.mp3",
     captions: [
       { text: "Real estate moves fast.", from: 0.1, to: 1.5 },
@@ -13,7 +13,7 @@ export const SCENES = {
     ] as CaptionLine[],
   },
   problem: {
-    durationFrames: 210, // 7s (VO 6.13s + pad)
+    durationFrames: 172, // ~5.73s — VO speech ends 5.53s + 0.2s pad
     voFile: "audio/voScene2.mp3",
     captions: [
       { text: "Photos. Vacancy checks.", from: 0.1, to: 2.4 },
@@ -22,7 +22,7 @@ export const SCENES = {
     ] as CaptionLine[],
   },
   solution: {
-    durationFrames: 180, // 6s (VO 5.2s + pad)
+    durationFrames: 145, // ~4.83s — VO speech ends 4.61s + 0.22s pad
     voFile: "audio/voScene3.mp3",
     captions: [
       { text: "An on-demand network", from: 0.1, to: 2.0 },
@@ -31,7 +31,7 @@ export const SCENES = {
     ] as CaptionLine[],
   },
   how: {
-    durationFrames: 200, // 6.67s (VO 5.76s + pad)
+    durationFrames: 166, // ~5.53s — VO speech ends 5.32s + 0.21s pad
     voFile: "audio/voScene4.mp3",
     captions: [
       { text: "Post a task.", from: 0.1, to: 1.4 },
@@ -40,7 +40,7 @@ export const SCENES = {
     ] as CaptionLine[],
   },
   marketplace: {
-    durationFrames: 210, // 7s (VO 6.22s + pad)
+    durationFrames: 171, // ~5.7s — VO speech ends 5.48s + 0.22s pad
     voFile: "audio/voScene5.mp3",
     captions: [
       { text: "Investors get eyes on the ground.", from: 0.1, to: 2.9 },
@@ -48,7 +48,7 @@ export const SCENES = {
     ] as CaptionLine[],
   },
   close: {
-    durationFrames: 105, // 3.5s (VO 2.93s + pad)
+    durationFrames: 95, // ~3.17s — VO speech ends 2.62s + 0.55s for outro
     voFile: "audio/voScene6.mp3",
     captions: [
       { text: "Boots on the ground, nationwide.", from: 0.1, to: 3.0 },

@@ -1,27 +1,34 @@
-## Embed explainer video at top of landing page
+## Tighten pacing — remove silence gaps between scenes
 
-Replace the popup modal with an inline autoplaying hero video embedded directly into the landing page — first thing visitors see, no modal to dismiss.
+The current `reirunner-explainer.mp4` has noticeable dead air between scenes because each scene's duration was padded around the raw VO MP3, which includes leading/trailing silence plus a fixed buffer. We'll measure and trim that silence, then re-render.
 
 ### Steps
 
-1. **Remove popup modal wiring in `src/routes/index.tsx`**
-   - Delete the `showIntro` state, the `useEffect` that reads `sessionStorage`, and the `<ExplainerVideoModal />` render.
-   - Delete the import of `ExplainerVideoModal`.
-   - Delete the file `src/components/landing/ExplainerVideoModal.tsx` (no longer used).
+1. **Detect actual speech bounds per VO clip**
+   - For each `remotion/public/audio/voScene{1..6}.mp3`, run `ffmpeg -af silencedetect=noise=-35dB:d=0.15` to find `silence_start` / `silence_end` near the head and tail.
+   - Compute trimmed start/end offsets per clip (effective speech window).
 
-2. **Add inline video hero section at the very top of `<main>` (above the existing hero)**
-   - New full-width section directly under the sticky `<header>` nav, before the current hero block.
-   - Contains a centered `<video>` element:
-     - `src` = the uploaded CDN asset (`reirunner-explainer.mp4.asset.json`)
-     - `autoPlay muted playsInline loop preload="auto" controls`
-     - Responsive: `max-w-5xl mx-auto`, `aspect-video`, rounded corners, subtle border + glow matching existing card styling.
-   - Small "Tap for sound" unmute button overlaid bottom-right (browsers block unmuted autoplay).
-   - Section keeps the dark grid/orb background treatment used elsewhere so it blends as part of the page, not a popup.
+2. **Re-encode trimmed VO files**
+   - Write `voScene{N}.trimmed.mp3` for each scene with leading/trailing silence stripped via ffmpeg `atrim` + `asetpts` (or `-ss`/`-to`). Keep originals as reference.
 
-3. **Replace the lower "Watch — What Is REI Runner?" placeholder tile (lines ~872–885)**
-   - Since the video now lives at the top, remove that lower placeholder section entirely to avoid duplication. (Or, alternative: keep it but make it scroll back to the top video. Default = remove.)
+3. **Recompute scene durations in `remotion/src/captions/script.ts`**
+   - For each scene set `durationInFrames = ceil((trimmedAudioSeconds + 0.25s tail pad) * 30)`.
+   - The 0.25s tail pad gives the last word room to land before the next scene's VO starts — much tighter than the current ~1s+ gaps.
+   - Update total composition `durationInFrames` in `MainVideo.tsx`/`Root.tsx` accordingly.
+
+4. **Point scene audio to trimmed files**
+   - Update the audio `src` in each scene (or in `script.ts` if centralized) to reference the new `*.trimmed.mp3`.
+   - Re-sync caption timing arrays inside each scene to the new trimmed timeline (shift cue start frames by the removed leading silence).
+
+5. **Re-render**
+   - `cd remotion && node scripts/render-remotion.mjs` → outputs to `/mnt/documents/reirunner-explainer.mp4` (overwrite).
+   - Spot-check with `ffprobe` for new total duration (~26–28s expected, down from 34.7s).
+
+6. **No frontend changes**
+   - The inline `<video>` on the landing page references the CDN asset by `asset_id`. Since the asset is immutable, we'll re-upload the new MP4 with `lovable-assets create` and overwrite `src/assets/reirunner-explainer.mp4.asset.json` with the new pointer. The landing page picks it up automatically.
+   - Delete the old CDN asset via `assets--delete_asset` only after confirming the new one renders on the page.
 
 ### Notes / scope
-- Muted autoplay only (browser policy). Captions are burned into the MP4 so the message lands silently.
-- No modal, no skip button, no sessionStorage — purely inline content.
-- Only `src/routes/index.tsx` is edited; `ExplainerVideoModal.tsx` is deleted. No other routes, no SEO/metadata changes.
+- Trimming silence only — script, voice, visuals, captions wording all unchanged.
+- Silence threshold `-35dB` / 150ms is conservative; if it clips speech we'll loosen to `-40dB` / 100ms.
+- Tail pad is 0.25s per scene (was effectively 1s+); transition cross-fade frames stay as-is so cuts remain smooth.
