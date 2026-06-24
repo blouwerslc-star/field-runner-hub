@@ -276,25 +276,19 @@ function AdminDashboard() {
                     <th className="px-4 py-3">Name</th>
                     <th className="px-4 py-3">Contact</th>
                     <th className="px-4 py-3">Market</th>
-                    <th className="px-4 py-3">Role</th>
-                    <th className="px-4 py-3">Needs</th>
-                    <th className="px-4 py-3">Applied</th>
+                    <th className="px-4 py-3">Joined</th>
                   </tr>
                 </thead>
                 <tbody>
                   {investors.map((i) => (
                     <tr key={i.id} className="border-t border-border/60">
-                      <td className="px-4 py-3 font-medium">{i.full_name}</td>
+                      <td className="px-4 py-3 font-medium">{i.full_name ?? "—"}</td>
                       <td className="px-4 py-3 text-muted-foreground">
                         <div>{i.email}</div>
                         <div className="text-xs">{i.phone}</div>
                       </td>
                       <td className="px-4 py-3 text-muted-foreground">
-                        {i.market_city}, {i.market_state}
-                      </td>
-                      <td className="px-4 py-3 text-xs text-muted-foreground">{i.role}</td>
-                      <td className="px-4 py-3 text-xs text-muted-foreground">
-                        {(i.services_needed ?? []).join(", ") || "—"}
+                        {i.city ?? "—"}{i.state ? `, ${i.state}` : ""}
                       </td>
                       <td className="px-4 py-3 text-xs text-muted-foreground">
                         {new Date(i.created_at).toLocaleDateString()}
