@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { listOpenTasks } from "@/lib/marketplace.functions";
+import { getPublicStats } from "@/lib/public-stats.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -52,6 +53,7 @@ function MarketplacePage() {
   const [beforeDue, setBeforeDue] = useState<string>("");
   const [sort, setSort] = useState<"newest" | "payout" | "due">("newest");
   const fn = useServerFn(listOpenTasks);
+  const statsFn = useServerFn(getPublicStats);
   const { data, isLoading, refetch, isFetching } = useQuery({
     queryKey: ["open-tasks", { q, city, state, taskType, minPayout, maxPayout, beforeDue, sort }],
     queryFn: () => fn({
@@ -66,7 +68,32 @@ function MarketplacePage() {
         sort,
       },
     }),
+    refetchInterval: 30_000,
   });
+  const { data: stats, refetch: refetchStats } = useQuery({
+    queryKey: ["public-stats"],
+    queryFn: () => statsFn(),
+    refetchInterval: 30_000,
+  });
+
+  // Realtime: refresh tasks list + stats when anyone adds/changes a task.
+  useEffect(() => {
+    const channel = supabase
+      .channel("marketplace-tasks-live")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "tasks" },
+        () => {
+          refetch();
+          refetchStats();
+        },
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [refetch, refetchStats]);
+
   const tasks = data?.tasks ?? [];
 
   const mapPoints: MapPoint[] = (tasks as any[]).map((t) => ({
@@ -117,6 +144,45 @@ function MarketplacePage() {
         </div>
       </header>
       <main className="mx-auto max-w-6xl px-5 py-10">
+        {stats && (
+          <div className="mb-8 rounded-2xl border border-border/60 bg-card/40 p-4">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2 text-xs uppercase tracking-wider text-muted-foreground">
+                <span className="inline-block size-2 rounded-full bg-emerald-400 animate-pulse" />
+                Live platform activity
+              </div>
+              <span className="text-[10px] text-muted-foreground">Updates in real time</span>
+            </div>
+            <dl className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 text-sm">
+              <div>
+                <dt className="text-muted-foreground text-xs uppercase tracking-wide">Runners</dt>
+                <dd className="text-2xl font-bold tabular-nums">{stats.runners}</dd>
+              </div>
+              <div>
+                <dt className="text-muted-foreground text-xs uppercase tracking-wide">Investors</dt>
+                <dd className="text-2xl font-bold tabular-nums">{stats.investors}</dd>
+              </div>
+              <div>
+                <dt className="text-muted-foreground text-xs uppercase tracking-wide">Tasks posted</dt>
+                <dd className="text-2xl font-bold tabular-nums">{stats.tasks_total}</dd>
+              </div>
+              <div>
+                <dt className="text-muted-foreground text-xs uppercase tracking-wide">Completed</dt>
+                <dd className="text-2xl font-bold tabular-nums">{stats.tasks_completed}</dd>
+              </div>
+              <div>
+                <dt className="text-muted-foreground text-xs uppercase tracking-wide">Markets</dt>
+                <dd className="text-2xl font-bold tabular-nums">{stats.cities_active}</dd>
+              </div>
+              <div>
+                <dt className="text-muted-foreground text-xs uppercase tracking-wide">Avg rating</dt>
+                <dd className="text-2xl font-bold tabular-nums">
+                  {stats.reviews_count > 0 ? stats.avg_rating.toFixed(1) : "—"}
+                </dd>
+              </div>
+            </dl>
+          </div>
+        )}
         <div className="mb-8 flex flex-wrap items-end justify-between gap-6">
           <div>
             <h1 className="text-3xl md:text-4xl font-bold tracking-tight">Open tasks</h1>
