@@ -908,7 +908,7 @@ function Index() {
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {SERVICES.map((s) => (
             <ServiceExamplePopover key={s.title} title={s.title} example={LANDING_SERVICE_EXAMPLES[s.title]}>
-              <div className="h-full rounded-2xl border border-border bg-card/60 backdrop-blur p-6 shadow-card hover:border-primary/40 hover:-translate-y-1 transition-all duration-300">
+              <div className="h-full rounded-2xl border border-border bg-card/60 backdrop-blur p-6 shadow-card hover:border-primary/40 transition-colors duration-300">
                 <div className="size-11 rounded-xl bg-primary/10 grid place-items-center mb-4">
                   <s.icon className="size-5 text-primary" />
                 </div>
