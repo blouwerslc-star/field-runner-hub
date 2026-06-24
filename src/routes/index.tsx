@@ -51,8 +51,14 @@ import { getPublicStats } from "@/lib/public-stats.functions";
 import { StateCoverageMap } from "@/components/maps/StateCoverageMap";
 import { TestimonialsSection } from "@/components/landing/TestimonialsSection";
 import { SampleDeliverablesSection } from "@/components/landing/SampleDeliverablesSection";
-import { ServiceExamplePopover } from "@/components/landing/ServiceExamplePopover";
+import { ServiceExamplePopover, LandingExamplePopover } from "@/components/landing/ServiceExamplePopover";
 import { LANDING_SERVICE_EXAMPLES } from "@/lib/landing-service-examples";
+import {
+  HOW_IT_WORKS_EXAMPLES,
+  PAYMENT_FLOW_EXAMPLES,
+  TRUST_BADGE_EXAMPLES,
+  VETTING_STEP_EXAMPLES,
+} from "@/lib/landing-section-examples";
 import { MobileDrawer } from "@/components/navigation/MobileDrawer";
 import explainerVideo from "@/assets/reirunner-explainer.mp4.asset.json";
 import explainerVideoVertical from "@/assets/reirunner-explainer-9x16.mp4.asset.json";
