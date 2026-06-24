@@ -53,6 +53,8 @@ import { TestimonialsSection } from "@/components/landing/TestimonialsSection";
 import { SampleDeliverablesSection } from "@/components/landing/SampleDeliverablesSection";
 import { MobileDrawer } from "@/components/navigation/MobileDrawer";
 import explainerVideo from "@/assets/reirunner-explainer.mp4.asset.json";
+import explainerVideoVertical from "@/assets/reirunner-explainer-9x16.mp4.asset.json";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { Volume2, VolumeX } from "lucide-react";
 
 export const Route = createFileRoute("/")({
