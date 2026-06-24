@@ -52,7 +52,8 @@ import { StateCoverageMap } from "@/components/maps/StateCoverageMap";
 import { TestimonialsSection } from "@/components/landing/TestimonialsSection";
 import { SampleDeliverablesSection } from "@/components/landing/SampleDeliverablesSection";
 import { MobileDrawer } from "@/components/navigation/MobileDrawer";
-import { ExplainerVideoModal } from "@/components/landing/ExplainerVideoModal";
+import explainerVideo from "@/assets/reirunner-explainer.mp4.asset.json";
+import { Volume2, VolumeX } from "lucide-react";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -403,19 +404,14 @@ function Index() {
   const goSignupInvestor = () => navigate({ to: "/signup", search: { role: "investor", redirect: "/dashboard" } });
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [showStickyCta, setShowStickyCta] = useState(false);
-  const [showIntro, setShowIntro] = useState(false);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    try {
-      if (!sessionStorage.getItem("reirunner_explainer_seen")) {
-        setShowIntro(true);
-        sessionStorage.setItem("reirunner_explainer_seen", "1");
-      }
-    } catch {
-      setShowIntro(true);
-    }
-  }, []);
+  const [videoMuted, setVideoMuted] = useState(true);
+  const heroVideoRef = useRef<HTMLVideoElement>(null);
+  const toggleHeroVideoMute = () => {
+    const v = heroVideoRef.current;
+    if (!v) return;
+    v.muted = !v.muted;
+    setVideoMuted(v.muted);
+  };
 
   useEffect(() => {
     // Show sticky mobile CTA only after the hero is scrolled past
@@ -443,7 +439,6 @@ function Index() {
 
   return (
     <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
-      {showIntro && <ExplainerVideoModal onClose={() => setShowIntro(false)} />}
       <Toaster richColors closeButton position="top-center" theme="dark" />
 
       {/* NAV */}
