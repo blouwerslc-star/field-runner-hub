@@ -8,8 +8,27 @@ import { getStateCoverage } from "@/lib/public-stats.functions";
 import { MapPin, Loader2, Users } from "lucide-react";
 
 // Public US states GeoJSON. Properties: name (full state name).
-const US_STATES_GEOJSON =
-  "https://raw.githubusercontent.com/PublicaMundi/MappingAPI/master/data/geojson/us-states.json";
+// Use jsDelivr (CORS-friendly, CDN-cached) with a couple of fallbacks.
+const US_STATES_GEOJSON_SOURCES = [
+  "https://cdn.jsdelivr.net/gh/PublicaMundi/MappingAPI@master/data/geojson/us-states.json",
+  "https://raw.githubusercontent.com/PublicaMundi/MappingAPI/master/data/geojson/us-states.json",
+  "https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json",
+];
+
+async function fetchStatesGeoJson(): Promise<any | null> {
+  for (const url of US_STATES_GEOJSON_SOURCES) {
+    try {
+      const res = await fetch(url);
+      if (!res.ok) continue;
+      const json = await res.json();
+      if (json?.features?.length) return json;
+    } catch {
+      /* try next */
+    }
+  }
+  console.warn("[StateCoverageMap] Failed to load US states GeoJSON");
+  return null;
+}
 
 // Full name → USPS abbreviation
 const STATE_ABBR: Record<string, string> = {
@@ -99,6 +118,7 @@ export function StateCoverageMap({
       zoom: 3.2,
       attributionControl: false,
       interactive: true,
+      projection: { name: "mercator" },
     });
     map.addControl(new mapboxgl.NavigationControl({ showCompass: false }), "top-right");
     mapRef.current = map;
@@ -121,13 +141,8 @@ export function StateCoverageMap({
       const apply = async () => {
         if (cancelled) return;
         if (!map.getSource("us-states")) {
-          let geo: any;
-          try {
-            const res = await fetch(US_STATES_GEOJSON);
-            geo = await res.json();
-          } catch {
-            return;
-          }
+          const geo = await fetchStatesGeoJson();
+          if (!geo || cancelled) return;
           // Attach feature-state-ready ids and coverage data into properties.
           geo.features.forEach((f: any, i: number) => {
             f.id = i;
@@ -253,9 +268,8 @@ export function StateCoverageMap({
           // Update existing source data when coverage refreshes.
           const src = map.getSource("us-states") as mapboxgl.GeoJSONSource | undefined;
           if (src) {
-            try {
-              const res = await fetch(US_STATES_GEOJSON);
-              const geo = await res.json();
+            const geo = await fetchStatesGeoJson();
+            if (geo) {
               geo.features.forEach((f: any, i: number) => {
                 f.id = i;
                 const abbr = STATE_ABBR[f.properties?.name] ?? null;
@@ -264,8 +278,6 @@ export function StateCoverageMap({
                 f.properties.runners = row?.count ?? 0;
               });
               src.setData(geo);
-            } catch {
-              /* ignore */
             }
           }
         }
