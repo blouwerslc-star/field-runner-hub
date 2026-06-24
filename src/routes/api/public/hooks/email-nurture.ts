@@ -9,14 +9,21 @@ export const Route = createFileRoute("/api/public/hooks/email-nurture")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const expectedKey = process.env.SUPABASE_PUBLISHABLE_KEY;
-        const apikey = request.headers.get("apikey") ?? request.headers.get("x-api-key");
+        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+        const { sendTransactionalEmail } = await import("@/lib/email-sender.server");
+
+        // Authenticate caller against the server-only hook secret stored in app_settings.
+        // (The legacy check used SUPABASE_PUBLISHABLE_KEY which is embedded in the JS bundle.)
+        const apikey = request.headers.get("apikey") ?? request.headers.get("x-api-key") ?? "";
+        const { data: secretRow } = await supabaseAdmin
+          .from("app_settings")
+          .select("value")
+          .eq("key", "hook_secret")
+          .maybeSingle();
+        const expectedKey = (secretRow as { value?: string } | null)?.value ?? "";
         if (!expectedKey || apikey !== expectedKey) {
           return new Response("Unauthorized", { status: 401 });
         }
-
-        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-        const { sendTransactionalEmail } = await import("@/lib/email-sender.server");
 
         // Per-run caps so a single sweep can never exceed what the queue
         // can drain inside the TTL window (~600/min × 180min ≈ 100k cap,
