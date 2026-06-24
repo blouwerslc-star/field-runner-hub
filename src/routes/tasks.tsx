@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { BrandLogo } from "@/components/brand/BrandLogo";
 import { Loader2, MapPin, DollarSign, Calendar, Search, BadgeCheck, Camera, Video, ShieldCheck } from "lucide-react";
-import { MarketplaceMap, type MapPoint } from "@/components/maps/MarketplaceMap";
+import { StateCoverageMap } from "@/components/maps/StateCoverageMap";
 
 export const Route = createFileRoute("/tasks")({
   component: MarketplacePage,
@@ -47,6 +47,7 @@ function MarketplacePage() {
   }, []);
   const [city, setCity] = useState("");
   const [state, setState] = useState("");
+  const [zip, setZip] = useState("");
   const [taskType, setTaskType] = useState<string>("all");
   const [minPayout, setMinPayout] = useState<string>("");
   const [maxPayout, setMaxPayout] = useState<string>("");
@@ -55,12 +56,13 @@ function MarketplacePage() {
   const fn = useServerFn(listOpenTasks);
   const statsFn = useServerFn(getPublicStats);
   const { data, isLoading, refetch, isFetching } = useQuery({
-    queryKey: ["open-tasks", { q, city, state, taskType, minPayout, maxPayout, beforeDue, sort }],
+    queryKey: ["open-tasks", { q, city, state, zip, taskType, minPayout, maxPayout, beforeDue, sort }],
     queryFn: () => fn({
       data: {
         q: q || undefined,
         city: city || undefined,
         state: state || undefined,
+        zip: zip || undefined,
         task_type: taskType !== "all" ? taskType : undefined,
         min_payout: minPayout ? Number(minPayout) : undefined,
         max_payout: maxPayout ? Number(maxPayout) : undefined,
@@ -96,19 +98,6 @@ function MarketplacePage() {
 
   const tasks = data?.tasks ?? [];
 
-  const mapPoints: MapPoint[] = (tasks as any[]).map((t) => ({
-    id: t.id,
-    kind: "task",
-    title: t.title ?? "Open task",
-    subtitle: [t.city, t.state].filter(Boolean).join(", ") || null,
-    href: `/tasks/${t.id}`,
-    lat: t.lat ?? null,
-    lng: t.lng ?? null,
-    city: t.city,
-    state: t.state,
-    badge: t.payout_amount != null ? `$${Number(t.payout_amount).toFixed(0)}` : t.task_type ?? null,
-  }));
-
   const payouts = (tasks as any[])
     .map((t) => (t.payout_amount != null ? Number(t.payout_amount) : null))
     .filter((n): n is number => n != null && !Number.isNaN(n));
@@ -122,7 +111,7 @@ function MarketplacePage() {
   const verifiedCount = (tasks as any[]).filter((t) => t.investor?.verified).length;
 
   function reset() {
-    setQ(""); setCity(""); setState(""); setTaskType("all");
+    setQ(""); setCity(""); setState(""); setZip(""); setTaskType("all");
     setMinPayout(""); setMaxPayout(""); setBeforeDue(""); setSort("newest");
   }
 
@@ -211,24 +200,32 @@ function MarketplacePage() {
         </div>
 
         <div className="mb-6">
-          <MarketplaceMap
-            points={mapPoints}
-            title="Open tasks on the map"
-            emptyMessage="No task locations available for these filters."
+          <StateCoverageMap
+            selectedState={state}
+            onStateClick={(abbr) => {
+              setState(abbr);
+              setCity("");
+              setZip("");
+              requestAnimationFrame(() => {
+                document.getElementById("tasks-search")?.scrollIntoView({ behavior: "smooth", block: "start" });
+              });
+            }}
           />
         </div>
 
         <form
+          id="tasks-search"
           onSubmit={(e) => { e.preventDefault(); refetch(); }}
           className="mb-8 rounded-2xl border border-border/60 bg-card/40 p-3 space-y-2"
         >
-          <div className="grid md:grid-cols-[1fr_160px_120px_180px_auto] gap-2">
+          <div className="grid md:grid-cols-[1fr_160px_120px_110px_180px_auto] gap-2">
             <div className="relative">
               <Search className="size-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
               <Input aria-label="Search tasks by title or description" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search title or description" className="pl-9" />
             </div>
             <Input aria-label="Filter tasks by city" value={city} onChange={(e) => setCity(e.target.value)} placeholder="City" />
             <Input aria-label="Filter tasks by state" value={state} onChange={(e) => setState(e.target.value)} placeholder="State" />
+            <Input aria-label="Filter tasks by ZIP" inputMode="numeric" maxLength={5} value={zip} onChange={(e) => setZip(e.target.value.replace(/[^0-9]/g, ""))} placeholder="ZIP" />
             <Select value={sort} onValueChange={(v) => setSort(v as any)}>
               <SelectTrigger aria-label="Sort tasks"><SelectValue /></SelectTrigger>
               <SelectContent>

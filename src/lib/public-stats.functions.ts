@@ -309,3 +309,69 @@ export const getCoverageDashboard = createServerFn({ method: "GET" }).handler(as
     recent_signups: recent,
   };
 });
+
+/**
+ * Per-state runner coverage with a small public preview list per state.
+ * Used by the marketplace coverage map. No PII — first name + last initial,
+ * city + state, profile slug only.
+ */
+export const getStateCoverage = createServerFn({ method: "GET" }).handler(async () => {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const [runnerRoles, profiles] = await Promise.all([
+    supabaseAdmin.from("user_roles").select("user_id").eq("role", "runner"),
+    supabaseAdmin
+      .from("profiles")
+      .select(
+        "user_id, full_name, first_name, profile_slug, city, state, profile_photo_url, average_rating, top_runner, verified_status, public_profile_enabled, suspended",
+      )
+      .not("state", "is", null),
+  ]);
+
+  const runnerIds = new Set((runnerRoles.data ?? []).map((r: any) => r.user_id));
+
+  function maskName(full: string | null, first: string | null): string {
+    const f = (first || "").trim();
+    if (f) return f;
+    const parts = (full || "").trim().split(/\s+/).filter(Boolean);
+    if (!parts.length) return "Runner";
+    const fn = parts[0];
+    const li = parts.length > 1 ? `${parts[parts.length - 1][0]?.toUpperCase() ?? ""}.` : "";
+    return li ? `${fn} ${li}` : fn;
+  }
+
+  type Preview = {
+    name: string;
+    city: string | null;
+    photo: string | null;
+    rating: number | null;
+    top: boolean;
+    verified: boolean;
+    slug: string | null;
+  };
+  type State = { state: string; count: number; preview: Preview[] };
+
+  const byState = new Map<string, State>();
+  for (const p of profiles.data ?? []) {
+    const raw = (p as any).state?.trim?.();
+    if (!raw) continue;
+    if (!runnerIds.has((p as any).user_id)) continue;
+    if ((p as any).suspended) continue;
+    const code = raw.toUpperCase();
+    const bucket: State = byState.get(code) ?? { state: code, count: 0, preview: [] };
+    bucket.count += 1;
+    if (bucket.preview.length < 5 && (p as any).public_profile_enabled !== false) {
+      bucket.preview.push({
+        name: maskName((p as any).full_name ?? null, (p as any).first_name ?? null),
+        city: (p as any).city ?? null,
+        photo: (p as any).profile_photo_url ?? null,
+        rating: (p as any).average_rating ?? null,
+        top: !!(p as any).top_runner,
+        verified: !!(p as any).verified_status,
+        slug: (p as any).profile_slug ?? null,
+      });
+    }
+    byState.set(code, bucket);
+  }
+
+  return { states: Array.from(byState.values()) };
+});

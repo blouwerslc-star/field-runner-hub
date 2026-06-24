@@ -4,6 +4,31 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 const ATTACHMENT_BUCKET = "message-attachments";
 
+/**
+ * Redact phone numbers, email addresses, and external URLs from message
+ * bodies so users cannot route conversations off-platform. Keeps reirunner
+ * domains visible and replaces other contact info with [removed].
+ */
+function scrubContactInfo(input: string): string {
+  if (!input) return input;
+  let s = input;
+  // Emails
+  s = s.replace(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi, "[contact info removed]");
+  // Phone numbers — 7+ digits with optional formatting / country code
+  s = s.replace(
+    /(?<!\w)(?:\+?1[\s.-]?)?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}(?!\w)/g,
+    "[phone removed]",
+  );
+  // Bare 10-digit runs
+  s = s.replace(/(?<!\d)\d{10,}(?!\d)/g, "[number removed]");
+  // External URLs (allow reirunner.com)
+  s = s.replace(/\b((?:https?:\/\/)?(?:[a-z0-9-]+\.)+[a-z]{2,}(?:\/[^\s]*)?)/gi, (m) => {
+    if (/(^|\.)reirunner\.com\b/i.test(m)) return m;
+    return "[link removed]";
+  });
+  return s;
+}
+
 export const listConversations = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
@@ -208,7 +233,7 @@ export const startConversation = createServerFn({ method: "POST" })
 
     const { error: mErr } = await supabase
       .from("messages")
-      .insert({ conversation_id: conv.id, sender_id: userId, body: data.body });
+      .insert({ conversation_id: conv.id, sender_id: userId, body: scrubContactInfo(data.body) });
     if (mErr) throw new Error(mErr.message);
 
     return { conversationId: conv.id };
@@ -242,7 +267,7 @@ export const sendMessage = createServerFn({ method: "POST" })
       .insert({
         conversation_id: data.conversationId,
         sender_id: userId,
-        body: data.body,
+        body: scrubContactInfo(data.body),
       })
       .select("id")
       .single();
@@ -286,7 +311,7 @@ export const sendMessage = createServerFn({ method: "POST" })
           notifyUserByEmail({
             userId: uid,
             title: `New message from ${senderName}`,
-            body: data.body.slice(0, 200),
+            body: scrubContactInfo(data.body).slice(0, 200),
             link: `/messages/${data.conversationId}`,
             ctaLabel: "View message",
           }),

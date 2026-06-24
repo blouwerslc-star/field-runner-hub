@@ -12,6 +12,7 @@ const filterSchema = z.object({
   q: z.string().max(120).optional(),
   city: z.string().max(80).optional(),
   state: z.string().max(80).optional(),
+  zip: z.string().trim().regex(/^\d{3,5}$/).optional(),
   task_type: z.string().max(60).optional(),
   min_payout: z.number().min(0).max(100000).optional(),
   max_payout: z.number().min(0).max(100000).optional(),
@@ -24,6 +25,15 @@ export const listOpenTasks = createServerFn({ method: "POST" })
   .inputValidator((i: unknown) => filterSchema.parse(i ?? {}))
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    let effectiveCity = data.city;
+    let effectiveState = data.state;
+    let effectiveZip = data.zip;
+    if (data.zip && !effectiveState) {
+      const { lookupZip } = await import("@/lib/geocoding.server");
+      const r = await lookupZip(data.zip);
+      if (r?.state) effectiveState = r.state;
+      if (r?.city && !effectiveCity) effectiveCity = r.city;
+    }
     let q = supabaseAdmin
       .from("tasks")
       .select(PUBLIC_TASK_COLS)
@@ -32,8 +42,9 @@ export const listOpenTasks = createServerFn({ method: "POST" })
       .limit(data.limit);
 
     if (data.q) q = q.or(`title.ilike.%${data.q}%,description.ilike.%${data.q}%`);
-    if (data.city) q = q.ilike("city", `%${data.city}%`);
-    if (data.state) q = q.ilike("state", `%${data.state}%`);
+    if (effectiveCity) q = q.ilike("city", `%${effectiveCity}%`);
+    if (effectiveState) q = q.ilike("state", `%${effectiveState}%`);
+    if (effectiveZip) q = q.ilike("zip_code", `${effectiveZip}%`);
     if (data.task_type) q = q.eq("task_type", data.task_type);
     if (data.min_payout != null) q = q.gte("payout_amount", data.min_payout);
     if (data.max_payout != null) q = q.lte("payout_amount", data.max_payout);
