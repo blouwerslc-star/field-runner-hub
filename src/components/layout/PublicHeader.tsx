@@ -39,12 +39,12 @@ export function PublicHeader({
           <Link to="/" aria-label="REI Runner home" className="inline-flex items-center min-w-0 shrink-0">
             <BrandLogo />
           </Link>
-          <nav className="hidden md:flex items-center gap-4 text-sm">
+          <nav className="hidden md:flex items-center gap-5 text-sm">
             {allLinks.map((l) => (
               <Link
                 key={`${l.to}-${l.label}`}
                 to={l.to}
-                className="text-muted-foreground hover:text-foreground transition whitespace-nowrap"
+                className="text-foreground/80 hover:text-foreground transition whitespace-nowrap min-h-11 inline-flex items-center"
               >
                 {l.label}
               </Link>
@@ -56,9 +56,9 @@ export function PublicHeader({
             aria-expanded={open}
             aria-controls="public-header-drawer"
             onClick={() => setOpen(true)}
-            className="md:hidden inline-flex items-center justify-center size-10 -mr-2 rounded-md text-foreground/80 hover:text-foreground hover:bg-card/60 active:scale-95 transition shrink-0"
+            className="md:hidden inline-flex items-center justify-center size-11 -mr-2 rounded-md text-foreground hover:bg-card/60 active:scale-95 transition shrink-0"
           >
-            <Menu className="size-5" />
+            <Menu className="size-6" />
           </button>
         </div>
       </header>
@@ -88,10 +88,10 @@ export function PublicHeader({
               key={`drawer-${l.to}-${l.label}`}
               to={l.to}
               onClick={() => setOpen(false)}
-              className="w-full text-left flex items-center justify-between px-3 py-4 rounded-lg text-base text-foreground/90 hover:bg-card/60 active:bg-card transition"
+              className="w-full text-left flex items-center justify-between px-4 py-4 min-h-12 rounded-lg text-base font-medium text-foreground hover:bg-card/60 active:bg-card transition"
             >
               <span>{l.label}</span>
-              <ArrowRight className="size-4 text-muted-foreground" />
+              <ArrowRight className="size-5 text-foreground/70" />
             </Link>
           ))}
         </nav>
