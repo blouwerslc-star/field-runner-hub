@@ -408,6 +408,8 @@ function Index() {
   const [showStickyCta, setShowStickyCta] = useState(false);
   const [videoMuted, setVideoMuted] = useState(true);
   const heroVideoRef = useRef<HTMLVideoElement>(null);
+  const isMobile = useIsMobile();
+  const activeVideo = isMobile ? explainerVideoVertical : explainerVideo;
   const toggleHeroVideoMute = () => {
     const v = heroVideoRef.current;
     if (!v) return;
@@ -578,13 +580,14 @@ function Index() {
           <div className="relative rounded-2xl border border-border bg-card/40 backdrop-blur overflow-hidden shadow-card">
             <video
               ref={heroVideoRef}
-              src={explainerVideo.url}
+              key={activeVideo.url}
+              src={activeVideo.url}
               autoPlay
               muted
               playsInline
               controls
               preload="auto"
-              className="w-full aspect-video bg-black"
+              className={`w-full bg-black ${isMobile ? "aspect-[9/16] max-h-[80vh] object-contain mx-auto" : "aspect-video"}`}
             />
             <button
               type="button"
