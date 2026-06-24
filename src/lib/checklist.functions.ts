@@ -24,6 +24,43 @@ export type RunnerStep = {
   geofence_required?: boolean;
 };
 
+export type TemplateField = {
+  key: string;
+  label: string;
+  type: "text" | "number" | "textarea" | "address" | "phone" | "list" | "file";
+  required?: boolean;
+  help?: string;
+};
+
+export type TaskHeader = {
+  id: string;
+  title: string;
+  task_type: string;
+  runner_id: string | null;
+  investor_id: string | null;
+  runner_state: string | null;
+  status: string;
+  template_id: string | null;
+  template_inputs: Record<string, unknown> | null;
+  last_ping_within_geofence: boolean | null;
+  geofence_radius_ft: number;
+  property_address: string;
+  city: string;
+  state: string;
+  zip_code: string | null;
+};
+
+export type StepProgress = {
+  id: string;
+  task_id: string;
+  step_key: string;
+  status: "pending" | "skipped" | "done";
+  data: Record<string, unknown>;
+  file_ids: string[];
+  completed_at: string | null;
+  completed_by: string | null;
+};
+
 export const getTaskChecklist = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: unknown) => z.object({ taskId: z.string().uuid() }).parse(i))
