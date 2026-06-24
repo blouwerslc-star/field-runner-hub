@@ -768,11 +768,8 @@ function Index() {
       {/* LIVE ACTIVITY TICKER */}
       <MarketplaceUpdatesTicker />
 
-      {/* BETA STATUS BOARD */}
-      <BetaStatusBoard />
-
-      {/* LIVE PLATFORM STATS */}
-      <PlatformStatsStrip />
+      {/* WHERE WE ARE TODAY — live stats + active states */}
+      <WhereWeAreToday />
 
       {/* MARKET COVERAGE MAP */}
       <CoverageMapSection />
