@@ -909,21 +909,6 @@ function Index() {
         </p>
       </Section>
 
-      {/* VIDEO */}
-      <Section>
-        <SectionHeader eyebrow="Watch" title="What Is REI Runner?" subtitle="A 60-second look at how we're building the modern real estate field network." />
-        <div className="max-w-4xl mx-auto rounded-2xl border border-border bg-card/60 backdrop-blur overflow-hidden shadow-card aspect-video grid place-items-center relative group">
-          <div aria-hidden className="absolute inset-0 bg-hero opacity-60" />
-          <div aria-hidden className="absolute inset-0 grid-bg opacity-50" />
-          <button type="button" onClick={() => setShowIntro(true)} className="relative z-10 flex flex-col items-center gap-3 text-foreground">
-            <span className="size-20 rounded-full bg-gradient-primary grid place-items-center shadow-glow group-hover:scale-110 transition-transform">
-              <PlayCircle className="size-10 text-primary-foreground" />
-            </span>
-            <span className="text-sm text-muted-foreground">Play 30-second explainer</span>
-          </button>
-        </div>
-      </Section>
-
       {/* ABOUT */}
       <Section>
         <div className="relative rounded-3xl border border-border bg-card/60 backdrop-blur p-8 md:p-14 overflow-hidden shadow-card">
