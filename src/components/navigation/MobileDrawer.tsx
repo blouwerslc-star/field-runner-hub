@@ -12,12 +12,12 @@ type MobileDrawerProps = {
 };
 
 /**
- * Shared mobile drawer used by both marketing and authenticated app shells.
+ * Shared mobile menu used by both marketing and authenticated app shells.
  *
- * This intentionally does not use a portal or Radix Dialog/Sheet. Android
- * Chrome/WebView was rendering only the scrim layer for those menu surfaces,
- * which made the menu look like an empty dark screen. Fixed layers + explicit
- * z-indexes + inline transform avoid that compositor bug consistently.
+ * Keep this intentionally plain. Some Android Chrome/WebView builds fail to
+ * paint children inside animated fixed/translated drawers, which shows users a
+ * blank dark screen. A single fixed full-screen surface with no transform is the
+ * most reliable rendering path across browser and downloaded-app contexts.
  */
 export function MobileDrawer({
   open,
@@ -36,7 +36,7 @@ export function MobileDrawer({
       return;
     }
 
-    const timeout = window.setTimeout(() => setMounted(false), 220);
+    const timeout = window.setTimeout(() => setMounted(false), 120);
     return () => window.clearTimeout(timeout);
   }, [open]);
 
@@ -70,43 +70,21 @@ export function MobileDrawer({
     <div
       data-mobile-drawer-root="true"
       data-state={state}
-      aria-hidden={!open}
-      className={cn(responsiveClass, "fixed inset-0 z-[80]")}
-      style={{ pointerEvents: open ? "auto" : "none" }}
+      className={cn(responsiveClass, "fixed inset-0 z-[90] bg-background text-foreground")}
+      style={{
+        height: "100dvh",
+        minHeight: "100vh",
+        opacity: open ? 1 : 0,
+        pointerEvents: open ? "auto" : "none",
+      }}
     >
-      <div
-        aria-hidden="true"
-        onClick={onClose}
-        className="fixed inset-0 z-[80] bg-background/80 backdrop-blur-sm"
-        style={{
-          opacity: open ? 1 : 0,
-          transition: "opacity 180ms ease-out",
-        }}
-      />
       <aside
         id={id}
         data-state={state}
         role="dialog"
         aria-modal="true"
         aria-label={label}
-        className={cn(
-          "fixed right-0 top-0 bottom-0 z-[81] flex w-[min(22rem,88vw)] max-w-[88vw] flex-col border-l border-border/60 bg-card text-card-foreground shadow-2xl pt-safe",
-          className,
-        )}
-        style={{
-          height: "100dvh",
-          maxHeight: "100dvh",
-          transform: open ? "translate3d(0, 0, 0)" : "translate3d(100%, 0, 0)",
-          transition: "transform 220ms cubic-bezier(0.16, 1, 0.3, 1)",
-          willChange: "transform",
-          // NOTE: do NOT add `contain: paint/layout` or `backface-visibility`
-          // here. Several Android Chrome / WebView builds skip painting the
-          // drawer's children (leaving an empty dark panel) when those props
-          // combine with `position: fixed` + `transform`. Plain transform is
-          // safe everywhere.
-          isolation: "isolate",
-          opacity: 1,
-        }}
+        className={cn("flex h-full min-h-0 flex-col overflow-hidden bg-background text-foreground pt-safe", className)}
       >
         {children}
       </aside>
