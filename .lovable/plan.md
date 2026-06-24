@@ -1,57 +1,77 @@
-## What's wrong
+# Landing Page Cleanup + Progress & Markets Update
 
-Two complaints, both valid, both covered by this re-do (no extra charge — this is finishing the work already paid for):
+## Goals
+1. Show real progress and the markets we're actually live in (driven by live data, not a hardcoded list).
+2. Fix the hover/tap preview popovers that still don't trigger on several cards.
+3. Consolidate the homepage so it isn't a wall of overlapping strips.
 
-1. **Hovering the service cards does nothing.** The current implementation uses Radix `HoverCard` wrapped around a `<div>` with a `hover:-translate-y-1` transform. The combination of `asChild` + a transforming child + `openDelay: 120` is unreliable — many users see no popup at all, and there's no click fallback on desktop, so the card looks broken.
-2. **Other landing-page sections still have no preview popups.** Only the 6 service cards got wired up last turn. How It Works, Payment Flow, Trust Badges, Sample Deliverables, Vetting Steps, and Stats tiles are still bare.
+---
 
-## Fix
+## 1. Fix broken hover previews
 
-### 1. Replace `HoverCard` with a hover-OR-click `Popover` (`src/components/landing/ServiceExamplePopover.tsx`)
+Audit of `src/routes/index.tsx` shows several card grids are NOT wrapped in a popover, which is why "hover does nothing" on parts of the page:
 
-Rebuild the component on top of shadcn `Popover` (already in the project) with controlled `open` state:
+- **Example Field Tasks** (`EXAMPLE_TASKS`, the Property Photo Set / Walkthrough Video / etc. cards) — no popover at all.
+- **Why Runners Join** (`BENEFITS`) — no popover.
+- **Operational Standards** (`TASK_STANDARDS`) — no popover.
+- **Two-Path CTA** ("I'm a Runner" / "I'm an Investor") — fine as buttons, leave alone.
 
-- **Desktop**: opens on `onMouseEnter` / `onFocus` AND on click. Closes on `onMouseLeave` after a short delay (so the user can move into the popover content). Clicking the card toggles it so touch-screen laptops and keyboard users always have a way in.
-- **Mobile** (`useIsMobile`): tap opens the existing bottom `Sheet`. Unchanged.
-- Drop the transforming wrapper — the trigger becomes a `<button>`-styled `<div role="button">` and the hover-lift `hover:-translate-y-1` moves to an inner element so it never breaks pointer hit-testing on the trigger.
-- Keep keyboard support: `Enter` / `Space` toggles; `Esc` closes.
+Fixes:
+- Wrap each `EXAMPLE_TASKS` card and each `BENEFITS` card with `LandingExamplePopover`, feeding from a new `EXAMPLE_TASK_EXAMPLES` and `BENEFIT_EXAMPLES` map appended to `src/lib/landing-section-examples.ts`.
+- Remove `hover:-translate-y-1` from those cards (the translate fights the popover's hover hit-testing on the trailing edge — the same root cause as the earlier round of fixes on Services / How It Works).
+- In `ServiceExamplePopover.tsx`, add `onPointerEnter`/`onPointerLeave` as fallbacks alongside `onMouseEnter`/`onMouseLeave` so trackpad + touch laptops fire reliably, and bump the close delay to `180ms` so brief gaps between trigger and content don't auto-close.
 
-### 2. Extend the same popover pattern to every other section that lists items
+## 2. Real progress + markets
 
-Add a small, content-typed wrapper for each section so each item shows a relevant example on hover/tap. Same `Popover` + `Sheet` UX as services.
+Replace the static `MARKETS` array and the four-card "Beta Status" board with data already exposed by `getPublicStats` and `getStateCoverage` (both already in `src/lib/public-stats.functions.ts`).
 
-New data file: **`src/lib/landing-section-examples.ts`** — one typed map per section, keyed by the section's item title/step. Hand-written, ~2 sentences + 2-3 bullets each. No business logic.
+New combined section **"Where we are today"** (replaces both the Beta Status block and the static Markets chip list):
+- Left: live stats grid (investors, runners, tasks posted, tasks completed, active cities, avg rating) — moved from the separate `PlatformStatsStrip` so it lives inside this section.
+- Right: live state list from `getStateCoverage` (state + runner count + "View runners" link to `/coverage`). If a state has 0 runners we omit it; if the list is empty we show "We're onboarding our first runners — apply to be founding in your city."
+- Below: small milestone timeline (founded, beta opened, first task posted, first market w/ ≥3 runners) — sourced from `getPublicStats` totals with honest copy ("Marketplace open — beta", "X tasks posted to date", "Active in N states"). No fabricated numbers.
 
-Sections to wire (in `src/routes/index.tsx`):
+The existing `CoverageMapSection` stays directly under this block as the visual companion.
 
-| Section | What pops up |
-|---|---|
-| How It Works steps | What happens at that step, with a 2–3 bullet example |
-| Payment Flow (4 steps) | Concrete dollar/timing example for that step |
-| Trust Badges | One-paragraph plain-English explanation of the badge |
-| Vetting Steps | What the team actually checks at that stage |
-| Sample Deliverables thumbnails | Larger preview caption + context (handled inside `SampleDeliverablesSection.tsx`) |
-| Stats tiles (if present) | How the number is calculated / what it means |
+## 3. Consolidation pass
 
-Component reuse: introduce one generic `<LandingExamplePopover title body bullets>` in `src/components/landing/ServiceExamplePopover.tsx` (export alongside the service-specific one) so each section uses the same hover/click/sheet UX without 6 near-duplicate components.
+Current homepage stacks: hero → video → ticker → beta board → stats strip → coverage map → trust badges → standards → example tasks → payments → vetting → testimonials → deliverables → two-path CTA → how it works → why join → services → markets → about → founder → safety → contact → faq → footer.
 
-### 3. Visual affordance
+That's too many strips and several duplicate each other. New order:
 
-Every wrapped item gets a small "Preview →" hint in the bottom-right corner (already present on service cards). Consistent cue so users know hover/tap reveals more.
+1. Hero
+2. Explainer video
+3. Live ticker
+4. **"Where we are today"** (new: stats + live state list + milestones) — replaces Beta Status + Platform Stats + Markets
+5. Coverage map
+6. How It Works (4 steps, with previews)
+7. Services (with previews)
+8. Example Field Tasks (with previews — newly wired)
+9. How Payments Work (with previews)
+10. How We Vet Runners + Trust Badges row merged into one **Trust & Safety** section (badges become a sub-row under the vetting steps; removes the standalone Trust Badges strip and the Operational Standards strip — standards become 5 small chips inside this section)
+11. Why Runners Join (with previews — newly wired)
+12. Sample Deliverables
+13. Testimonials
+14. Two-path CTA
+15. About + Founder (merged into one section, founder block on the right)
+16. Safety scope (kept)
+17. FAQ
+18. Contact + footer
 
-## Files
+Net effect: ~6 fewer top-level sections, no duplicate "stats" or "markets" blocks, every card grid has working hover/tap previews.
 
-- **edit** `src/components/landing/ServiceExamplePopover.tsx` — rewrite on `Popover`; add hover+click+focus open logic; export a generic `LandingExamplePopover` for non-service sections.
-- **new** `src/lib/landing-section-examples.ts` — example content for How It Works, Payment Flow, Trust Badges, Vetting Steps, Stats.
-- **edit** `src/routes/index.tsx` — wrap How It Works, Payment Flow, Trust Badges, Vetting Steps, and Stats items with `LandingExamplePopover`.
-- **edit** `src/components/landing/SampleDeliverablesSection.tsx` — wrap each thumbnail in `LandingExamplePopover` showing a larger preview + caption.
+## Technical details
+
+Files touched:
+- `src/routes/index.tsx` — reorder sections per #3, wrap `EXAMPLE_TASKS` + `BENEFITS` in `LandingExamplePopover`, delete standalone `BetaStatusBoard`, `PlatformStatsStrip`, `TASK_STANDARDS` section, and the static `MARKETS` chip section; add new `WhereWeAreToday` component.
+- `src/lib/landing-section-examples.ts` — add `EXAMPLE_TASK_EXAMPLES` and `BENEFIT_EXAMPLES` maps.
+- `src/components/landing/ServiceExamplePopover.tsx` — add `onPointerEnter`/`onPointerLeave` handlers, bump close delay to 180ms.
+- `src/lib/public-stats.functions.ts` — no schema change, but the new section will call `getPublicStats` and `getStateCoverage` together (both already exist).
+
+No DB migrations. No new dependencies. No changes to auth, routing, or any other page.
 
 ## Verification
 
-- Desktop (1332px, the user's current viewport): hover any service card, How It Works step, Payment Flow step, Trust Badge, Vetting Step, Stat tile, or Sample Deliverable → popover appears within ~100ms. Clicking also opens it. Tab key cycles through and opens via Enter/Space.
-- Mobile (375px): tap each → bottom sheet slides up. No accidental hover-opens.
-- No console errors. Existing `/tasks` dialog popups remain untouched.
-
-## Not in scope
-
-Testimonials, FAQ, and the coverage map already have native expand/click behavior — leaving them alone to avoid double-popup noise.
+- Desktop (1332px): hover any card in Example Field Tasks, Why Runners Join, Services, How It Works, Payments, Vetting, Trust Badges → preview appears within ~120ms, stays open while mouse traverses into the popover, closes on leave.
+- Mobile (375px): tap each → bottom sheet opens.
+- "Where we are today" renders honest live numbers; if all counts are 0 the section still reads sensibly ("Marketplace open — beta. Apply to be founding in your city.").
+- No console errors, no layout shift, no duplicate sections.
