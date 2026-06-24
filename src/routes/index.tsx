@@ -796,25 +796,6 @@ function Index() {
         </div>
       </section>
 
-      {/* SERVICE QUALITY STANDARDS */}
-      <Section id="standards">
-        <SectionHeader
-          eyebrow="Every Task Includes"
-          title="Operational Standards on Every Job"
-          subtitle="REI Runner tasks follow a consistent structure so investors know exactly what they are getting."
-        />
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-          {TASK_STANDARDS.map((s) => (
-            <div key={s.title} className="rounded-2xl border border-border bg-card/60 backdrop-blur p-5 text-center">
-              <div className="size-10 rounded-xl bg-primary/10 grid place-items-center mx-auto mb-3">
-                <s.icon className="size-5 text-primary" />
-              </div>
-              <div className="text-sm font-medium">{s.title}</div>
-            </div>
-          ))}
-        </div>
-      </Section>
-
       {/* EXAMPLE FIELD TASKS */}
       <Section id="example-tasks">
         <SectionHeader
@@ -824,40 +805,43 @@ function Index() {
         />
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {EXAMPLE_TASKS.map((t) => (
-            <div
+            <LandingExamplePopover
               key={t.title}
-              className="relative rounded-2xl border border-border bg-card/60 backdrop-blur p-6 shadow-card hover:border-primary/50 hover:-translate-y-1 transition-all duration-300 flex flex-col"
+              example={EXAMPLE_TASK_EXAMPLES[t.title] ?? { title: t.title, body: t.deliverables.join(" · ") }}
             >
-              {t.tag && (
-                <span className="absolute top-4 right-4 text-[10px] font-mono uppercase tracking-widest px-2 py-1 rounded-full border border-primary/40 bg-primary/10 text-primary">
-                  {t.tag}
-                </span>
-              )}
-              <div className="size-11 rounded-xl bg-primary/10 grid place-items-center mb-4">
-                <t.icon className="size-5 text-primary" />
-              </div>
-              <h3 className="text-lg font-semibold">{t.title}</h3>
-              <div className="mt-3 flex items-center gap-4 text-sm">
-                <div className="inline-flex items-center gap-1.5 text-foreground">
-                  <DollarSign className="size-4 text-primary" />
-                  <span className="font-semibold tabular-nums">{t.payout}</span>
+              <div className="relative h-full rounded-2xl border border-border bg-card/60 backdrop-blur p-6 shadow-card hover:border-primary/50 transition-colors duration-300 flex flex-col">
+                {t.tag && (
+                  <span className="absolute top-4 right-4 text-[10px] font-mono uppercase tracking-widest px-2 py-1 rounded-full border border-primary/40 bg-primary/10 text-primary">
+                    {t.tag}
+                  </span>
+                )}
+                <div className="size-11 rounded-xl bg-primary/10 grid place-items-center mb-4">
+                  <t.icon className="size-5 text-primary" />
                 </div>
-                <div className="inline-flex items-center gap-1.5 text-muted-foreground">
-                  <Clock className="size-4" />
-                  <span>{t.eta}</span>
+                <h3 className="text-lg font-semibold">{t.title}</h3>
+                <div className="mt-3 flex items-center gap-4 text-sm">
+                  <div className="inline-flex items-center gap-1.5 text-foreground">
+                    <DollarSign className="size-4 text-primary" />
+                    <span className="font-semibold tabular-nums">{t.payout}</span>
+                  </div>
+                  <div className="inline-flex items-center gap-1.5 text-muted-foreground">
+                    <Clock className="size-4" />
+                    <span>{t.eta}</span>
+                  </div>
                 </div>
+                <div className="my-4 h-px bg-border/70" />
+                <div className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground mb-2">Deliverables</div>
+                <ul className="space-y-1.5 text-sm text-muted-foreground">
+                  {t.deliverables.map((d) => (
+                    <li key={d} className="flex items-start gap-2">
+                      <CheckCircle2 className="size-4 text-primary mt-0.5 shrink-0" />
+                      <span>{d}</span>
+                    </li>
+                  ))}
+                </ul>
+                <p className="mt-3 text-xs font-medium text-primary/80">Preview example →</p>
               </div>
-              <div className="my-4 h-px bg-border/70" />
-              <div className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground mb-2">Deliverables</div>
-              <ul className="space-y-1.5 text-sm text-muted-foreground">
-                {t.deliverables.map((d) => (
-                  <li key={d} className="flex items-start gap-2">
-                    <CheckCircle2 className="size-4 text-primary mt-0.5 shrink-0" />
-                    <span>{d}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
+            </LandingExamplePopover>
           ))}
         </div>
         <p className="text-center text-xs text-muted-foreground mt-8">
