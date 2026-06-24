@@ -9,7 +9,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
-import { BrandLogo } from "@/components/brand/BrandLogo";
 import { Loader2, MapPin, DollarSign, Calendar, Search, BadgeCheck, Camera, Video, ShieldCheck } from "lucide-react";
 import { StateCoverageMap } from "@/components/maps/StateCoverageMap";
 
