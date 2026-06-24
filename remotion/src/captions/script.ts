@@ -5,53 +5,53 @@ export type CaptionLine = { text: string; from: number; to: number };
 
 export const SCENES = {
   hook: {
-    durationFrames: 120, // 4s
+    durationFrames: 135, // 4.5s (VO 2.93s + pad)
     voFile: "audio/voScene1.mp3",
     captions: [
-      { text: "Real estate moves fast.", from: 0.2, to: 2.0 },
-      { text: "You can't be in every city.", from: 2.1, to: 3.9 },
+      { text: "Real estate moves fast.", from: 0.1, to: 1.5 },
+      { text: "You can't be in every city.", from: 1.55, to: 3.1 },
     ] as CaptionLine[],
   },
   problem: {
-    durationFrames: 150, // 5s
+    durationFrames: 210, // 7s (VO 6.13s + pad)
     voFile: "audio/voScene2.mp3",
     captions: [
-      { text: "Photos. Vacancy checks.", from: 0.2, to: 2.2 },
-      { text: "Lockboxes. Contractor meetups.", from: 2.3, to: 4.0 },
-      { text: "The deal won't wait.", from: 4.1, to: 4.95 },
+      { text: "Photos. Vacancy checks.", from: 0.1, to: 2.4 },
+      { text: "Lockboxes. Contractor meetups.", from: 2.5, to: 5.0 },
+      { text: "The deal won't wait.", from: 5.05, to: 6.4 },
     ] as CaptionLine[],
   },
   solution: {
-    durationFrames: 180, // 6s
+    durationFrames: 180, // 6s (VO 5.2s + pad)
     voFile: "audio/voScene3.mp3",
     captions: [
-      { text: "REI Runner is the on-demand network", from: 0.3, to: 2.8 },
-      { text: "of vetted local runners —", from: 2.9, to: 4.4 },
-      { text: "anywhere in the U.S.", from: 4.5, to: 5.95 },
+      { text: "An on-demand network", from: 0.1, to: 2.0 },
+      { text: "of vetted local runners —", from: 2.05, to: 3.6 },
+      { text: "anywhere in the U.S.", from: 3.65, to: 5.5 },
     ] as CaptionLine[],
   },
   how: {
-    durationFrames: 210, // 7s
+    durationFrames: 200, // 6.67s (VO 5.76s + pad)
     voFile: "audio/voScene4.mp3",
     captions: [
-      { text: "Post a task.", from: 0.2, to: 1.7 },
-      { text: "A nearby runner claims it.", from: 1.8, to: 3.8 },
-      { text: "Geo-tagged proof in hours.", from: 3.9, to: 6.9 },
+      { text: "Post a task.", from: 0.1, to: 1.4 },
+      { text: "A nearby runner claims it.", from: 1.45, to: 3.4 },
+      { text: "Geo-tagged proof in hours.", from: 3.45, to: 6.2 },
     ] as CaptionLine[],
   },
   marketplace: {
-    durationFrames: 180, // 6s
+    durationFrames: 210, // 7s (VO 6.22s + pad)
     voFile: "audio/voScene5.mp3",
     captions: [
-      { text: "Investors get eyes on the ground.", from: 0.2, to: 2.8 },
-      { text: "Runners get flexible, well-paid work.", from: 2.9, to: 5.95 },
+      { text: "Investors get eyes on the ground.", from: 0.1, to: 2.9 },
+      { text: "Runners get flexible, well-paid work.", from: 2.95, to: 6.5 },
     ] as CaptionLine[],
   },
   close: {
-    durationFrames: 60, // 2s
+    durationFrames: 105, // 3.5s (VO 2.93s + pad)
     voFile: "audio/voScene6.mp3",
     captions: [
-      { text: "Boots on the ground, nationwide.", from: 0.1, to: 1.95 },
+      { text: "Boots on the ground, nationwide.", from: 0.1, to: 3.0 },
     ] as CaptionLine[],
   },
 };
