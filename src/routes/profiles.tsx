@@ -267,6 +267,7 @@ function ProfilesDirectory() {
                 setRole("all");
                 setCity("");
                 setState("");
+                setZip("");
                 setService("");
                 setAvailability("all");
                 setSort("featured");
