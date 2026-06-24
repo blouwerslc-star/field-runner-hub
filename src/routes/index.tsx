@@ -51,8 +51,14 @@ import { getPublicStats } from "@/lib/public-stats.functions";
 import { StateCoverageMap } from "@/components/maps/StateCoverageMap";
 import { TestimonialsSection } from "@/components/landing/TestimonialsSection";
 import { SampleDeliverablesSection } from "@/components/landing/SampleDeliverablesSection";
-import { ServiceExamplePopover } from "@/components/landing/ServiceExamplePopover";
+import { ServiceExamplePopover, LandingExamplePopover } from "@/components/landing/ServiceExamplePopover";
 import { LANDING_SERVICE_EXAMPLES } from "@/lib/landing-service-examples";
+import {
+  HOW_IT_WORKS_EXAMPLES,
+  PAYMENT_FLOW_EXAMPLES,
+  TRUST_BADGE_EXAMPLES,
+  VETTING_STEP_EXAMPLES,
+} from "@/lib/landing-section-examples";
 import { MobileDrawer } from "@/components/navigation/MobileDrawer";
 import explainerVideo from "@/assets/reirunner-explainer.mp4.asset.json";
 import explainerVideoVertical from "@/assets/reirunner-explainer-9x16.mp4.asset.json";
@@ -684,15 +690,18 @@ function Index() {
         <div className="rounded-2xl border border-border bg-card/40 backdrop-blur p-5 md:p-6">
           <div className="grid grid-cols-2 md:grid-cols-5 gap-5">
             {TRUST_BADGES.map((b) => (
-              <div key={b.label} className="flex items-start gap-3">
-                <div className="size-9 rounded-lg bg-primary/10 grid place-items-center shrink-0">
-                  <b.icon className="size-4 text-primary" />
+              <LandingExamplePopover key={b.label} example={TRUST_BADGE_EXAMPLES[b.label] ?? { title: b.label, body: b.detail }}>
+                <div className="flex items-start gap-3 hover:opacity-90 transition">
+                  <div className="size-9 rounded-lg bg-primary/10 grid place-items-center shrink-0">
+                    <b.icon className="size-4 text-primary" />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="text-sm font-semibold leading-tight">{b.label}</div>
+                    <div className="mt-1 text-[11px] text-muted-foreground leading-snug">{b.detail}</div>
+                    <div className="mt-1 text-[10px] font-medium text-primary/80">Preview →</div>
+                  </div>
                 </div>
-                <div className="min-w-0">
-                  <div className="text-sm font-semibold leading-tight">{b.label}</div>
-                  <div className="mt-1 text-[11px] text-muted-foreground leading-snug">{b.detail}</div>
-                </div>
-              </div>
+              </LandingExamplePopover>
             ))}
           </div>
         </div>
@@ -776,17 +785,20 @@ function Index() {
         />
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
           {PAYMENT_FLOW.map((p, i) => (
-            <div key={p.step} className="relative rounded-2xl border border-border bg-card/60 backdrop-blur p-6 shadow-card">
-              <div className="text-xs font-mono text-primary mb-3">STEP {p.step}</div>
-              <div className="size-11 rounded-xl bg-primary/10 grid place-items-center mb-4">
-                <p.icon className="size-5 text-primary" />
+            <LandingExamplePopover key={p.step} example={PAYMENT_FLOW_EXAMPLES[p.step] ?? { title: p.title, body: p.body }}>
+              <div className="relative rounded-2xl border border-border bg-card/60 backdrop-blur p-6 shadow-card hover:border-primary/40 transition-colors">
+                <div className="text-xs font-mono text-primary mb-3">STEP {p.step}</div>
+                <div className="size-11 rounded-xl bg-primary/10 grid place-items-center mb-4">
+                  <p.icon className="size-5 text-primary" />
+                </div>
+                <h3 className="text-lg font-semibold mb-1">{p.title}</h3>
+                <p className="text-sm text-muted-foreground">{p.body}</p>
+                <p className="mt-3 text-xs font-medium text-primary/80">Preview example →</p>
+                {i < PAYMENT_FLOW.length - 1 && (
+                  <ArrowRight className="hidden lg:block absolute -right-4 top-1/2 -translate-y-1/2 size-4 text-primary/60" />
+                )}
               </div>
-              <h3 className="text-lg font-semibold mb-1">{p.title}</h3>
-              <p className="text-sm text-muted-foreground">{p.body}</p>
-              {i < PAYMENT_FLOW.length - 1 && (
-                <ArrowRight className="hidden lg:block absolute -right-4 top-1/2 -translate-y-1/2 size-4 text-primary/60" />
-              )}
-            </div>
+            </LandingExamplePopover>
           ))}
         </div>
         <div className="mt-8 max-w-3xl mx-auto rounded-xl border border-border bg-muted/30 p-5 text-xs md:text-sm text-muted-foreground leading-relaxed text-center">
@@ -804,13 +816,16 @@ function Index() {
         />
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
           {VETTING_STEPS.map((v) => (
-            <div key={v.title} className="rounded-2xl border border-border bg-card/60 backdrop-blur p-6 shadow-card hover:border-primary/40 transition">
-              <div className="size-11 rounded-xl bg-primary/10 grid place-items-center mb-4">
-                <v.icon className="size-5 text-primary" />
+            <LandingExamplePopover key={v.title} example={VETTING_STEP_EXAMPLES[v.title] ?? { title: v.title, body: v.body }}>
+              <div className="rounded-2xl border border-border bg-card/60 backdrop-blur p-6 shadow-card hover:border-primary/40 transition">
+                <div className="size-11 rounded-xl bg-primary/10 grid place-items-center mb-4">
+                  <v.icon className="size-5 text-primary" />
+                </div>
+                <h3 className="text-lg font-semibold mb-1">{v.title}</h3>
+                <p className="text-sm text-muted-foreground">{v.body}</p>
+                <p className="mt-3 text-xs font-medium text-primary/80">Preview example →</p>
               </div>
-              <h3 className="text-lg font-semibold mb-1">{v.title}</h3>
-              <p className="text-sm text-muted-foreground">{v.body}</p>
-            </div>
+            </LandingExamplePopover>
           ))}
         </div>
       </Section>
@@ -853,17 +868,20 @@ function Index() {
         <SectionHeader eyebrow="How It Works" title="On-Demand Field Work in 4 Steps" subtitle="Investors post a task. A local runner accepts, completes it, and gets paid." />
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
           {STEPS.map((s, i) => (
-            <div key={s.n} className="relative rounded-2xl border border-border bg-card/60 backdrop-blur p-6 shadow-card hover:border-primary/40 hover:-translate-y-1 transition-all duration-300 group">
-              <div className="text-xs font-mono text-primary mb-3">STEP {s.n}</div>
-              <div className="size-12 rounded-xl bg-primary/10 grid place-items-center mb-4 group-hover:bg-primary/20 transition">
-                <s.icon className="size-6 text-primary" />
+            <LandingExamplePopover key={s.n} example={HOW_IT_WORKS_EXAMPLES[s.n] ?? { title: s.title, body: s.body }}>
+              <div className="relative rounded-2xl border border-border bg-card/60 backdrop-blur p-6 shadow-card hover:border-primary/40 transition-colors duration-300 group">
+                <div className="text-xs font-mono text-primary mb-3">STEP {s.n}</div>
+                <div className="size-12 rounded-xl bg-primary/10 grid place-items-center mb-4 group-hover:bg-primary/20 transition">
+                  <s.icon className="size-6 text-primary" />
+                </div>
+                <h3 className="text-lg font-semibold mb-1">{s.title}</h3>
+                <p className="text-sm text-muted-foreground">{s.body}</p>
+                <p className="mt-3 text-xs font-medium text-primary/80">Preview example →</p>
+                {i < STEPS.length - 1 && (
+                  <ArrowRight className="hidden lg:block absolute -right-4 top-1/2 -translate-y-1/2 size-4 text-primary/60" />
+                )}
               </div>
-              <h3 className="text-lg font-semibold mb-1">{s.title}</h3>
-              <p className="text-sm text-muted-foreground">{s.body}</p>
-              {i < STEPS.length - 1 && (
-                <ArrowRight className="hidden lg:block absolute -right-4 top-1/2 -translate-y-1/2 size-4 text-primary/60" />
-              )}
-            </div>
+            </LandingExamplePopover>
           ))}
         </div>
       </Section>
@@ -890,7 +908,7 @@ function Index() {
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {SERVICES.map((s) => (
             <ServiceExamplePopover key={s.title} title={s.title} example={LANDING_SERVICE_EXAMPLES[s.title]}>
-              <div className="h-full rounded-2xl border border-border bg-card/60 backdrop-blur p-6 shadow-card hover:border-primary/40 hover:-translate-y-1 transition-all duration-300">
+              <div className="h-full rounded-2xl border border-border bg-card/60 backdrop-blur p-6 shadow-card hover:border-primary/40 transition-colors duration-300">
                 <div className="size-11 rounded-xl bg-primary/10 grid place-items-center mb-4">
                   <s.icon className="size-5 text-primary" />
                 </div>
