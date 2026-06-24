@@ -23,7 +23,7 @@ function useHoverClickPopover() {
   };
   const scheduleClose = () => {
     clearClose();
-    closeTimer.current = setTimeout(() => setOpen(false), 120);
+    closeTimer.current = setTimeout(() => setOpen(false), 180);
   };
 
   return {
@@ -35,6 +35,15 @@ function useHoverClickPopover() {
         setOpen(true);
       },
       onMouseLeave: scheduleClose,
+      onPointerEnter: (e: React.PointerEvent) => {
+        if (e.pointerType === "mouse") {
+          clearClose();
+          setOpen(true);
+        }
+      },
+      onPointerLeave: (e: React.PointerEvent) => {
+        if (e.pointerType === "mouse") scheduleClose();
+      },
       onFocus: () => {
         clearClose();
         setOpen(true);
@@ -56,6 +65,8 @@ function useHoverClickPopover() {
     contentHandlers: {
       onMouseEnter: clearClose,
       onMouseLeave: scheduleClose,
+      onPointerEnter: clearClose,
+      onPointerLeave: scheduleClose,
     },
   };
 }
