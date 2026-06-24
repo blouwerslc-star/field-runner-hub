@@ -568,6 +568,36 @@ function Index() {
           </div>
       </MobileDrawer>
 
+      {/* EXPLAINER VIDEO (inline hero) */}
+      <section className="relative isolate overflow-hidden border-b border-border/60">
+        <div aria-hidden className="absolute inset-0 -z-10 bg-hero opacity-60" />
+        <div aria-hidden className="absolute inset-0 -z-10 grid-bg opacity-40" />
+        <div className="mx-auto max-w-6xl px-5 pt-8 pb-10 md:pt-12 md:pb-14">
+          <div className="relative rounded-2xl border border-border bg-card/40 backdrop-blur overflow-hidden shadow-card">
+            <video
+              ref={heroVideoRef}
+              src={explainerVideo.url}
+              autoPlay
+              muted
+              playsInline
+              loop
+              controls
+              preload="auto"
+              className="w-full aspect-video bg-black"
+            />
+            <button
+              type="button"
+              onClick={toggleHeroVideoMute}
+              aria-label={videoMuted ? "Unmute video" : "Mute video"}
+              className="absolute top-3 right-3 md:top-4 md:right-4 inline-flex items-center gap-2 px-3 py-2 rounded-full bg-primary text-primary-foreground text-xs md:text-sm font-medium shadow-glow hover:scale-105 transition"
+            >
+              {videoMuted ? <VolumeX className="size-4" /> : <Volume2 className="size-4" />}
+              {videoMuted ? "Tap for sound" : "Sound on"}
+            </button>
+          </div>
+        </div>
+      </section>
+
       {/* HERO */}
       <section id="top" className="relative isolate overflow-hidden">
         <div aria-hidden className="absolute inset-0 -z-10 bg-hero" />
