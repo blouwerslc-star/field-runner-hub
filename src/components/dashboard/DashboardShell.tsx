@@ -79,9 +79,11 @@ export function DashboardShell({
 
   function clearLocalAuthStorage() {
     try {
-      Object.keys(window.localStorage)
-        .filter((key) => key.startsWith("sb-") && key.endsWith("-auth-token"))
-        .forEach((key) => window.localStorage.removeItem(key));
+      [window.localStorage, window.sessionStorage].forEach((storage) => {
+        Object.keys(storage)
+          .filter((key) => key.startsWith("sb-") && key.endsWith("-auth-token"))
+          .forEach((key) => storage.removeItem(key));
+      });
     } catch {
       // Storage can be unavailable in some mobile browser modes.
     }

@@ -21,9 +21,11 @@ export const Route = createFileRoute("/login")({
     if (typeof window === "undefined") return;
     if ((search as { forceLogout?: string }).forceLogout === "1") {
       try {
-        Object.keys(window.localStorage)
-          .filter((key) => key.startsWith("sb-") && key.endsWith("-auth-token"))
-          .forEach((key) => window.localStorage.removeItem(key));
+        [window.localStorage, window.sessionStorage].forEach((storage) => {
+          Object.keys(storage)
+            .filter((key) => key.startsWith("sb-") && key.endsWith("-auth-token"))
+            .forEach((key) => storage.removeItem(key));
+        });
       } catch {
         // Storage can be unavailable in some mobile browser modes.
       }
