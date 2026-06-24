@@ -964,13 +964,19 @@ function Index() {
         <SectionHeader eyebrow="Why Runners Join" title="Flexible Field Work, Per-Task Pay" subtitle="Built for independent contractors who want to earn on their own schedule." />
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {BENEFITS.map((b) => (
-            <div key={b.title} className="rounded-2xl border border-border bg-card/60 backdrop-blur p-6 shadow-card hover:border-primary/40 hover:-translate-y-1 transition-all duration-300">
-              <div className="size-11 rounded-xl bg-primary/10 grid place-items-center mb-4">
-                <b.icon className="size-5 text-primary" />
+            <LandingExamplePopover
+              key={b.title}
+              example={BENEFIT_EXAMPLES[b.title] ?? { title: b.title, body: b.body }}
+            >
+              <div className="h-full rounded-2xl border border-border bg-card/60 backdrop-blur p-6 shadow-card hover:border-primary/40 transition-colors duration-300">
+                <div className="size-11 rounded-xl bg-primary/10 grid place-items-center mb-4">
+                  <b.icon className="size-5 text-primary" />
+                </div>
+                <h3 className="text-lg font-semibold mb-1">{b.title}</h3>
+                <p className="text-sm text-muted-foreground">{b.body}</p>
+                <p className="mt-3 text-xs font-medium text-primary/80">Preview example →</p>
               </div>
-              <h3 className="text-lg font-semibold mb-1">{b.title}</h3>
-              <p className="text-sm text-muted-foreground">{b.body}</p>
-            </div>
+            </LandingExamplePopover>
           ))}
         </div>
       </Section>
@@ -992,22 +998,6 @@ function Index() {
             </ServiceExamplePopover>
           ))}
         </div>
-      </Section>
-
-      {/* MARKETS */}
-      <Section id="markets">
-        <SectionHeader eyebrow="Expanding Coverage" title="Launching Market-by-Market" subtitle="Starting in 8 priority investor markets and building local coverage city-by-city. Don't see your city? Apply anyway — new markets open as runner coverage grows." />
-        <div className="flex flex-wrap justify-center gap-3 max-w-3xl mx-auto">
-          {MARKETS.map((m) => (
-            <div key={m} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-border bg-card/60 backdrop-blur text-sm hover:border-primary/60 hover:shadow-glow transition">
-              <MapPin className="size-3.5 text-primary" />
-              {m}
-            </div>
-          ))}
-        </div>
-        <p className="mt-6 text-center text-xs text-muted-foreground max-w-2xl mx-auto">
-          Coverage depends on approved runner availability in each market.
-        </p>
       </Section>
 
       {/* ABOUT */}
