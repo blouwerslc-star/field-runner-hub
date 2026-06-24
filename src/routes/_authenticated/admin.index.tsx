@@ -47,14 +47,12 @@ type FieldRunner = AdminRunner;
 
 type Investor = {
   id: string;
-  full_name: string;
-  email: string;
-  phone: string;
-  market_city: string;
-  market_state: string;
-  role: string;
-  services_needed: string[];
-  user_id: string | null;
+  user_id: string;
+  full_name: string | null;
+  email: string | null;
+  phone: string | null;
+  city: string | null;
+  state: string | null;
   created_at: string;
 };
 
@@ -110,26 +108,40 @@ function AdminDashboard() {
 
   async function loadAll() {
     setLoading(true);
-    const [r, i, t] = await Promise.all([
+    const [r, invRoles, t] = await Promise.all([
       fetchRunners().catch((e) => {
         toast.error(e?.message ?? "Failed to load runners");
         return { runners: [] as AdminRunner[] };
       }),
       supabase
-        .from("real_estate_pro_applications")
-        .select("id, full_name, email, phone, market_city, market_state, role, services_needed, user_id, created_at")
-        .order("created_at", { ascending: false }),
+        .from("user_roles")
+        .select("user_id")
+        .eq("role", "investor"),
       supabase
         .from("tasks")
         .select("*")
         .order("created_at", { ascending: false }),
     ]);
-    if (i.error) toast.error("Failed to load investors");
+    let investorRows: Investor[] = [];
+    if (invRoles.error) {
+      toast.error("Failed to load investors");
+    } else {
+      const ids = Array.from(new Set((invRoles.data ?? []).map((r: any) => r.user_id)));
+      if (ids.length > 0) {
+        const { data: profs } = await supabase
+          .from("profiles")
+          .select("id, user_id, full_name, email, phone, city, state, created_at")
+          .in("user_id", ids)
+          .order("created_at", { ascending: false });
+        investorRows = (profs ?? []) as Investor[];
+      }
+    }
     if (t.error) toast.error("Failed to load tasks");
     setRunners(r.runners ?? []);
-    setInvestors((i.data ?? []) as Investor[]);
+    setInvestors(investorRows);
     setTasks((t.data ?? []) as Task[]);
     setLoading(false);
+    overview.refetch();
   }
 
   useEffect(() => {
@@ -152,27 +164,6 @@ function AdminDashboard() {
         isFetching={overview.isFetching}
         onRefresh={() => overview.refetch()}
       />
-      <div className="grid grid-cols-2 sm:grid-cols-6 gap-2 mb-6">
-        <Button asChild variant="outline" size="sm" className="justify-start"><Link to="/admin/marketplace-health"><Activity className="size-4 mr-2" /> Health</Link></Button>
-        <Button asChild variant="outline" size="sm" className="justify-start"><Link to="/admin/runner-approvals"><ShieldCheck className="size-4 mr-2" /> Approvals</Link></Button>
-        <Button asChild variant="outline" size="sm" className="justify-start"><Link to="/admin/verifications"><BadgeCheck className="size-4 mr-2" /> Verifications</Link></Button>
-        <Button asChild variant="outline" size="sm" className="justify-start"><Link to="/admin/background-checks"><ShieldCheck className="size-4 mr-2" /> Background</Link></Button>
-        <Button asChild variant="outline" size="sm" className="justify-start"><Link to="/admin/dispatch"><Send className="size-4 mr-2" /> Dispatch</Link></Button>
-        <Button asChild variant="outline" size="sm" className="justify-start"><Link to="/admin/analytics"><BarChart3 className="size-4 mr-2" /> Analytics</Link></Button>
-        <Button asChild variant="outline" size="sm" className="justify-start"><Link to="/admin/broadcasts"><Send className="size-4 mr-2" /> Broadcasts</Link></Button>
-        <Button asChild variant="outline" size="sm" className="justify-start"><Link to="/admin/email-monitor"><Mail className="size-4 mr-2" /> Email monitor</Link></Button>
-        <Button asChild variant="outline" size="sm" className="justify-start"><Link to="/admin/tracking"><MapPin className="size-4 mr-2" /> GPS Tracking</Link></Button>
-      </div>
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
-        <StatTile icon={Users} label="Runners" value={runners.length} />
-        <StatTile icon={UserCog} label="Investors" value={investors.length} />
-        <StatTile icon={ClipboardList} label="Tasks" value={tasks.length} />
-        <StatTile
-          icon={ClipboardList}
-          label="Open"
-          value={tasks.filter((t) => t.status === "open").length}
-        />
-      </div>
 
       <Tabs defaultValue="tasks">
         <TabsList className="mb-6">
@@ -286,25 +277,19 @@ function AdminDashboard() {
                     <th className="px-4 py-3">Name</th>
                     <th className="px-4 py-3">Contact</th>
                     <th className="px-4 py-3">Market</th>
-                    <th className="px-4 py-3">Role</th>
-                    <th className="px-4 py-3">Needs</th>
-                    <th className="px-4 py-3">Applied</th>
+                    <th className="px-4 py-3">Joined</th>
                   </tr>
                 </thead>
                 <tbody>
                   {investors.map((i) => (
                     <tr key={i.id} className="border-t border-border/60">
-                      <td className="px-4 py-3 font-medium">{i.full_name}</td>
+                      <td className="px-4 py-3 font-medium">{i.full_name ?? "—"}</td>
                       <td className="px-4 py-3 text-muted-foreground">
                         <div>{i.email}</div>
                         <div className="text-xs">{i.phone}</div>
                       </td>
                       <td className="px-4 py-3 text-muted-foreground">
-                        {i.market_city}, {i.market_state}
-                      </td>
-                      <td className="px-4 py-3 text-xs text-muted-foreground">{i.role}</td>
-                      <td className="px-4 py-3 text-xs text-muted-foreground">
-                        {(i.services_needed ?? []).join(", ") || "—"}
+                        {i.city ?? "—"}{i.state ? `, ${i.state}` : ""}
                       </td>
                       <td className="px-4 py-3 text-xs text-muted-foreground">
                         {new Date(i.created_at).toLocaleDateString()}
@@ -461,7 +446,7 @@ function AdminOverviewSection({
 
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
         <KPI icon={Users} label="Users" value={k.total_users} />
-        <KPI icon={ShieldCheck} label="Approved runners" value={k.approved_runners} to="/admin/runner-approvals" />
+        <KPI icon={ShieldCheck} label="Runners" value={k.approved_runners} to="/admin/runner-approvals" />
         <KPI icon={UserCog} label="Investors" value={k.registered_investors} />
         <KPI icon={ClipboardList} label="Open tasks" value={k.open_tasks} />
         <KPI icon={ClipboardList} label="Completed" value={k.completed_tasks} tone="success" />
@@ -487,7 +472,6 @@ function AdminOverviewSection({
           tone={k.pending_background_checks > 0 ? "warning" : "default"}
           to="/admin/background-checks"
         />
-        <KPI icon={ClipboardList} label="Total tasks" value={k.total_tasks} />
         <KPI
           icon={AlertTriangle}
           label="Email fails 24h"
@@ -495,7 +479,6 @@ function AdminOverviewSection({
           tone={k.failed_emails_24h > 0 ? "danger" : "default"}
           to="/admin/email-monitor"
         />
-        <KPI icon={Activity} label="Marketplace" value="Health" to="/admin/marketplace-health" />
       </div>
 
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
