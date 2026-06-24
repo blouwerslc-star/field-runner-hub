@@ -15,9 +15,21 @@ import { BrandLogo } from "@/components/brand/BrandLogo";
 export const Route = createFileRoute("/login")({
   validateSearch: (s: Record<string, unknown>) => ({
     redirect: typeof s.redirect === "string" ? s.redirect : "/dashboard",
+    forceLogout: typeof s.forceLogout === "string" ? s.forceLogout : undefined,
   }),
   beforeLoad: async ({ search }) => {
     if (typeof window === "undefined") return;
+    if ((search as { forceLogout?: string }).forceLogout === "1") {
+      try {
+        Object.keys(window.localStorage)
+          .filter((key) => key.startsWith("sb-") && key.endsWith("-auth-token"))
+          .forEach((key) => window.localStorage.removeItem(key));
+      } catch {
+        // Storage can be unavailable in some mobile browser modes.
+      }
+      void supabase.auth.signOut({ scope: "local" }).catch(() => {});
+      return;
+    }
     const { data } = await supabase.auth.getSession();
     if (data.session?.user) {
       throw routerRedirect({ to: (search as { redirect?: string }).redirect || "/dashboard" });
