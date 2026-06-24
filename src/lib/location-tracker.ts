@@ -3,6 +3,12 @@
 // Native (iOS/Android): @capacitor-community/background-geolocation, which
 // keeps emitting fixes when the app is backgrounded or the screen is locked.
 import { Capacitor } from "@capacitor/core";
+import { registerPlugin } from "@capacitor/core";
+import type {
+  BackgroundGeolocationPlugin,
+  Location as BgLocation,
+  CallbackError,
+} from "@capacitor-community/background-geolocation";
 
 export type Fix = {
   lat: number;
@@ -108,7 +114,9 @@ export async function getCurrentLocation(): Promise<Fix> {
 /** Start a continuous tracker. Web = foreground only; native = background-capable. */
 export async function startTracker(opts: StartOptions): Promise<Tracker> {
   if (isNative()) {
-    const { BackgroundGeolocation } = await import("@capacitor-community/background-geolocation");
+    const BackgroundGeolocation = registerPlugin<BackgroundGeolocationPlugin>(
+      "BackgroundGeolocation",
+    );
     const watcherId = await BackgroundGeolocation.addWatcher(
       {
         backgroundMessage: "REI Runner is verifying you're on-site for this task.",
@@ -117,7 +125,7 @@ export async function startTracker(opts: StartOptions): Promise<Tracker> {
         stale: false,
         distanceFilter: 30,
       },
-      (location, error) => {
+      (location: BgLocation | undefined, error: CallbackError | undefined) => {
         if (error) {
           const code = (error.code as string) || "";
           if (code === "NOT_AUTHORIZED" || code === "PERMISSION_DENIED") {
