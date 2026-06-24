@@ -816,13 +816,16 @@ function Index() {
         />
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
           {VETTING_STEPS.map((v) => (
-            <div key={v.title} className="rounded-2xl border border-border bg-card/60 backdrop-blur p-6 shadow-card hover:border-primary/40 transition">
-              <div className="size-11 rounded-xl bg-primary/10 grid place-items-center mb-4">
-                <v.icon className="size-5 text-primary" />
+            <LandingExamplePopover key={v.title} example={VETTING_STEP_EXAMPLES[v.title] ?? { title: v.title, body: v.body }}>
+              <div className="rounded-2xl border border-border bg-card/60 backdrop-blur p-6 shadow-card hover:border-primary/40 transition">
+                <div className="size-11 rounded-xl bg-primary/10 grid place-items-center mb-4">
+                  <v.icon className="size-5 text-primary" />
+                </div>
+                <h3 className="text-lg font-semibold mb-1">{v.title}</h3>
+                <p className="text-sm text-muted-foreground">{v.body}</p>
+                <p className="mt-3 text-xs font-medium text-primary/80">Preview example →</p>
               </div>
-              <h3 className="text-lg font-semibold mb-1">{v.title}</h3>
-              <p className="text-sm text-muted-foreground">{v.body}</p>
-            </div>
+            </LandingExamplePopover>
           ))}
         </div>
       </Section>
