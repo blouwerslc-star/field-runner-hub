@@ -48,6 +48,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { listActivity } from "@/lib/activity.functions";
 import { getPublicStats } from "@/lib/public-stats.functions";
+import { getStateCoverage } from "@/lib/public-stats.functions";
 import { StateCoverageMap } from "@/components/maps/StateCoverageMap";
 import { TestimonialsSection } from "@/components/landing/TestimonialsSection";
 import { SampleDeliverablesSection } from "@/components/landing/SampleDeliverablesSection";
@@ -58,6 +59,8 @@ import {
   PAYMENT_FLOW_EXAMPLES,
   TRUST_BADGE_EXAMPLES,
   VETTING_STEP_EXAMPLES,
+  EXAMPLE_TASK_EXAMPLES,
+  BENEFIT_EXAMPLES,
 } from "@/lib/landing-section-examples";
 import { MobileDrawer } from "@/components/navigation/MobileDrawer";
 import explainerVideo from "@/assets/reirunner-explainer.mp4.asset.json";
