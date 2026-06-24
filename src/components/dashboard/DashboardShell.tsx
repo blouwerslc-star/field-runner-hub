@@ -79,10 +79,14 @@ export function DashboardShell({
   const navItems = isAdmin ? [ADMIN_NAV_ITEM, ...NAV_ITEMS] : NAV_ITEMS;
 
   async function signOut() {
-    await queryClient.cancelQueries();
-    queryClient.clear();
-    await supabase.auth.signOut();
-    navigate({ to: "/", replace: true });
+    setOpen(false);
+    try {
+      await queryClient.cancelQueries();
+      queryClient.clear();
+      await supabase.auth.signOut({ scope: "local" });
+    } finally {
+      window.location.replace("/login");
+    }
   }
 
   return (
@@ -141,7 +145,7 @@ export function DashboardShell({
       </header>
 
       <MobileDrawer open={open} onClose={() => setOpen(false)} id="mobile-drawer" label="Menu">
-          <div className="flex items-center justify-between p-5 border-b border-border/60">
+          <div className="flex shrink-0 items-center justify-between p-5 border-b border-border/60 bg-background">
             <span className="text-lg font-semibold">Menu</span>
             <button
               type="button"
@@ -152,11 +156,11 @@ export function DashboardShell({
               <X className="size-5" />
             </button>
           </div>
-          <nav className="flex-1 overflow-y-auto p-3 space-y-1">
+          <nav className="flex-1 min-h-0 overflow-y-auto p-3 space-y-1 bg-background">
             {navItems.map((item) => (
-              <Link
+              <a
                 key={item.to}
-                to={item.to}
+                href={item.to}
                 onClick={() => setOpen(false)}
                 className="flex items-center gap-3 rounded-md px-3 py-3 text-sm hover:bg-muted/60 transition-colors"
               >
@@ -167,10 +171,10 @@ export function DashboardShell({
                     {unreadTotal > 9 ? "9+" : unreadTotal}
                   </span>
                 )}
-              </Link>
+              </a>
             ))}
           </nav>
-          <div className="p-3 border-t border-border/60 pb-safe">
+          <div className="shrink-0 p-3 border-t border-border/60 bg-background pb-safe">
             <Button variant="ghost" size="sm" className="w-full justify-start" onClick={() => { setOpen(false); signOut(); }}>
               <LogOut className="size-4 mr-2" /> Sign out
             </Button>
