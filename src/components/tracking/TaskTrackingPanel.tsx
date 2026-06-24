@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import {
@@ -14,6 +14,11 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { MapPin, Navigation, CheckCircle2, AlertTriangle, Loader2, ShieldCheck, XCircle } from "lucide-react";
 import { toast } from "sonner";
+import {
+  checkLocationPermission,
+  requestLocationPermission,
+} from "@/lib/location-tracker";
+import { Capacitor } from "@capacitor/core";
 
 const LABEL: Record<RunnerState, string> = {
   accepted: "Accepted",
@@ -41,7 +46,18 @@ export function TaskTrackingPanel({ taskId }: { taskId: string }) {
   const trackingActive = task?.tracking_active === true;
 
   const [consentOpen, setConsentOpen] = useState(false);
-  const tracking = useTaskTracking({ taskId, active: trackingActive });
+  const [permState, setPermState] = useState<
+    "granted" | "denied" | "prompt" | "unknown"
+  >("unknown");
+  const tracking = useTaskTracking({
+    taskId,
+    active: trackingActive,
+    taskTitle: (task as { title?: string } | undefined)?.title ?? "Active task",
+  });
+
+  useEffect(() => {
+    checkLocationPermission().then(setPermState).catch(() => setPermState("unknown"));
+  }, [trackingActive, tracking.status]);
 
   const invalidate = () => qc.invalidateQueries({ queryKey: ["task-tracking", taskId] });
 
@@ -106,10 +122,40 @@ export function TaskTrackingPanel({ taskId }: { taskId: string }) {
       {trackingActive && (
         <div className="rounded-lg bg-muted/40 p-3 text-xs text-muted-foreground">
           {tracking.status === "denied" && (
-            <p className="text-destructive">Location permission denied. Enable location for this site to continue.</p>
+            <div className="space-y-1">
+              <p className="text-destructive">
+                Location permission denied.{" "}
+                {Capacitor.isNativePlatform()
+                  ? "Open Settings → REI Runner → Location → Always to continue."
+                  : "Enable location for this site in your browser settings to continue."}
+              </p>
+              {Capacitor.isNativePlatform() && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={async () => {
+                    try {
+                      const { BackgroundGeolocation } = await import(
+                        "@capacitor-community/background-geolocation"
+                      ).then((m) => ({
+                        BackgroundGeolocation: (m as unknown as { default: { openSettings: () => Promise<void> } }).default,
+                      }));
+                      await BackgroundGeolocation.openSettings();
+                    } catch {
+                      toast.error("Could not open settings");
+                    }
+                  }}
+                >
+                  Open settings
+                </Button>
+              )}
+            </div>
           )}
           {tracking.status === "unavailable" && (
             <p className="text-destructive">Location unavailable on this device.</p>
+          )}
+          {permState === "prompt" && tracking.status !== "denied" && (
+            <p>Location permission not yet granted — you'll be prompted when tracking starts.</p>
           )}
           {tracking.last && (
             <p>
@@ -127,7 +173,18 @@ export function TaskTrackingPanel({ taskId }: { taskId: string }) {
 
       <div className="flex flex-wrap gap-2">
         {state === "accepted" && (
-          <Button onClick={() => setConsentOpen(true)} disabled={startMut.isPending}>
+          <Button
+            onClick={async () => {
+              // Pre-request permission on native so the OS prompt appears
+              // before our consent sheet, not after they've already agreed.
+              if (Capacitor.isNativePlatform()) {
+                const res = await requestLocationPermission().catch(() => "prompt" as const);
+                setPermState(res === "granted" ? "granted" : res === "denied" ? "denied" : "prompt");
+              }
+              setConsentOpen(true);
+            }}
+            disabled={startMut.isPending}
+          >
             <Navigation className="mr-2 h-4 w-4" /> Start Navigation
           </Button>
         )}
