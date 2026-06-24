@@ -17,6 +17,7 @@ import { toast } from "sonner";
 import {
   checkLocationPermission,
   requestLocationPermission,
+  openLocationSettings,
 } from "@/lib/location-tracker";
 import { Capacitor } from "@capacitor/core";
 
@@ -130,22 +131,7 @@ export function TaskTrackingPanel({ taskId }: { taskId: string }) {
                   : "Enable location for this site in your browser settings to continue."}
               </p>
               {Capacitor.isNativePlatform() && (
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={async () => {
-                    try {
-                      const { BackgroundGeolocation } = await import(
-                        "@capacitor-community/background-geolocation"
-                      ).then((m) => ({
-                        BackgroundGeolocation: (m as unknown as { default: { openSettings: () => Promise<void> } }).default,
-                      }));
-                      await BackgroundGeolocation.openSettings();
-                    } catch {
-                      toast.error("Could not open settings");
-                    }
-                  }}
-                >
+                <Button size="sm" variant="outline" onClick={() => void openLocationSettings()}>
                   Open settings
                 </Button>
               )}
