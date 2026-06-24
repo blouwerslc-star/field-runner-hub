@@ -2,36 +2,26 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
+export type RunnerStepType =
+  | "photo"
+  | "video"
+  | "upload"
+  | "scan"
+  | "item_list"
+  | "checkbox"
+  | "signature"
+  | "note"
+  | "geofence_arrive";
+
 export type RunnerStep = {
   key: string;
   title: string;
   instructions?: string;
-  type:
-    | "photo"
-    | "video"
-    | "upload"
-    | "scan"
-    | "item_list"
-    | "checkbox"
-    | "signature"
-    | "note"
-    | "geofence_arrive";
+  type: RunnerStepType;
   required?: boolean;
   min_count?: number;
   accept_mime?: string;
   geofence_required?: boolean;
-  data_schema?: Record<string, unknown>;
-};
-
-export type StepProgress = {
-  id: string;
-  task_id: string;
-  step_key: string;
-  status: "pending" | "skipped" | "done";
-  data: Record<string, unknown>;
-  file_ids: string[];
-  completed_at: string | null;
-  completed_by: string | null;
 };
 
 export const getTaskChecklist = createServerFn({ method: "POST" })
@@ -49,7 +39,7 @@ export const getTaskChecklist = createServerFn({ method: "POST" })
     if (tErr) throw new Error(tErr.message);
     if (!task) throw new Error("Task not found");
 
-    let steps: RunnerStep[] = [];
+    let steps: unknown[] = [];
     let introNotes: string | null = null;
     let requiredFields: unknown[] = [];
     if (task.template_id) {
@@ -60,7 +50,7 @@ export const getTaskChecklist = createServerFn({ method: "POST" })
         .maybeSingle();
       if (tplErr) throw new Error(tplErr.message);
       if (tpl) {
-        steps = (tpl.runner_steps as RunnerStep[]) ?? [];
+        steps = (tpl.runner_steps as unknown[]) ?? [];
         introNotes = (tpl.intro_notes as string | null) ?? null;
         requiredFields = (tpl.required_fields as unknown[]) ?? [];
       }
@@ -77,8 +67,9 @@ export const getTaskChecklist = createServerFn({ method: "POST" })
       steps,
       introNotes,
       requiredFields,
-      progress: (progressRows ?? []) as StepProgress[],
-      viewerRole: task.runner_id === userId ? "runner" : task.investor_id === userId ? "investor" : "other",
+      progress: (progressRows ?? []) as unknown[],
+      viewerRole:
+        task.runner_id === userId ? "runner" : task.investor_id === userId ? "investor" : "other",
     };
   });
 
@@ -99,8 +90,8 @@ export const updateChecklistStep = createServerFn({ method: "POST" })
       task_id: data.taskId,
       step_key: data.step_key,
       status: data.status,
-      data: data.data ?? {},
-      file_ids: [] as string[], // stored as uuid[]; non-uuid paths go inside data.files
+      data: (data.data ?? {}) as never,
+      file_ids: [] as string[],
       completed_by: data.status === "done" ? userId : null,
       completed_at: data.status === "done" ? new Date().toISOString() : null,
     };
@@ -110,7 +101,7 @@ export const updateChecklistStep = createServerFn({ method: "POST" })
       .select("*")
       .single();
     if (error) throw new Error(error.message);
-    return { progress: row };
+    return { progress: row as unknown };
   });
 
 export const completeChecklistTask = createServerFn({ method: "POST" })
@@ -134,7 +125,9 @@ export const completeChecklistTask = createServerFn({ method: "POST" })
       .select("runner_steps")
       .eq("id", task.template_id)
       .maybeSingle();
-    const steps = ((tpl?.runner_steps ?? []) as RunnerStep[]).filter((s) => s.required !== false);
+    const steps = ((tpl?.runner_steps ?? []) as RunnerStep[]).filter(
+      (s) => s.required !== false,
+    );
 
     const { data: progressRows } = await supabase
       .from("task_checklist_progress")
