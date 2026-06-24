@@ -1,6 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { submitPing, logPermissionEvent } from "@/lib/tracking.functions";
+import {
+  submitPing,
+  logPermissionEvent,
+  transitionRunnerState,
+} from "@/lib/tracking.functions";
+import { startTracker, type Fix, type Tracker } from "@/lib/location-tracker";
+import { Capacitor } from "@capacitor/core";
 
 const PING_INTERVAL_MS = 20_000;
 const MIN_MOVE_METERS = 30;
@@ -25,43 +31,37 @@ export type TrackingStatus =
   | "unavailable"
   | "error";
 
-export type LiveLocation = {
-  lat: number;
-  lng: number;
-  accuracy: number | null;
-  speed: number | null;
-  heading: number | null;
-  ts: number;
-};
+export type LiveLocation = Fix;
 
-/** Owns navigator.geolocation.watchPosition for one active task. */
-export function useTaskTracking(opts: { taskId: string; active: boolean }) {
-  const { taskId, active } = opts;
+/**
+ * Owns the location watcher for one active task.
+ * Uses the native background plugin on iOS/Android, plain
+ * navigator.geolocation on the web.
+ */
+export function useTaskTracking(opts: { taskId: string; active: boolean; taskTitle?: string }) {
+  const { taskId, active, taskTitle = "Active task" } = opts;
   const [status, setStatus] = useState<TrackingStatus>("idle");
   const [last, setLast] = useState<LiveLocation | null>(null);
-  const watchIdRef = useRef<number | null>(null);
+  const trackerRef = useRef<Tracker | null>(null);
   const lastSentRef = useRef<LiveLocation | null>(null);
   const bufferRef = useRef<LiveLocation[]>([]);
   const flushTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const autoArrivedRef = useRef<Set<string>>(new Set());
   const ping = useServerFn(submitPing);
   const logPerm = useServerFn(logPermissionEvent);
+  const transition = useServerFn(transitionRunnerState);
 
   useEffect(() => {
-    if (!active || typeof navigator === "undefined" || !navigator.geolocation) {
-      if (!active) setStatus("idle");
-      else {
-        setStatus("unavailable");
-        logPerm({ data: { taskId, outcome: "unavailable", user_agent: navigator.userAgent } }).catch(() => {});
-      }
+    if (!active) {
+      setStatus("idle");
       return;
     }
-
     setStatus("starting");
     let cancelled = false;
 
     const sendPing = async (loc: LiveLocation) => {
       try {
-        await ping({
+        const res = await ping({
           data: {
             taskId,
             latitude: loc.lat,
@@ -72,6 +72,18 @@ export function useTaskTracking(opts: { taskId: string; active: boolean }) {
           },
         });
         lastSentRef.current = loc;
+        // Auto-advance to "arrived" the first time we cross into the geofence.
+        if (
+          res?.inside === true &&
+          res?.runner_state === "en_route" &&
+          !autoArrivedRef.current.has(taskId)
+        ) {
+          autoArrivedRef.current.add(taskId);
+          transition({ data: { taskId, to: "arrived" } }).catch(() => {
+            // server may already have advanced; ignore
+            autoArrivedRef.current.delete(taskId);
+          });
+        }
       } catch {
         // buffer for retry
         if (bufferRef.current.length < BUFFER_MAX) bufferRef.current.push(loc);
@@ -79,7 +91,7 @@ export function useTaskTracking(opts: { taskId: string; active: boolean }) {
     };
 
     const flushBuffer = async () => {
-      if (!navigator.onLine) return;
+      if (typeof navigator !== "undefined" && !navigator.onLine) return;
       const items = bufferRef.current.splice(0, bufferRef.current.length);
       for (const it of items) {
         await sendPing(it);
@@ -96,68 +108,56 @@ export function useTaskTracking(opts: { taskId: string; active: boolean }) {
       }
     };
 
-    const onSuccess: PositionCallback = (pos) => {
-      if (cancelled) return;
-      const loc: LiveLocation = {
-        lat: pos.coords.latitude,
-        lng: pos.coords.longitude,
-        accuracy: pos.coords.accuracy ?? null,
-        speed: pos.coords.speed ?? null,
-        heading: pos.coords.heading ?? null,
-        ts: pos.timestamp || Date.now(),
-      };
-      setLast(loc);
-      if (status !== "active") setStatus("active");
-      maybeSend(loc);
-    };
-
-    const onError: PositionErrorCallback = (err) => {
-      if (cancelled) return;
-      const map: Record<number, TrackingStatus> = { 1: "denied", 2: "unavailable", 3: "error" };
-      const outcomeMap: Record<number, "denied" | "unavailable" | "timeout"> = {
-        1: "denied",
-        2: "unavailable",
-        3: "timeout",
-      };
-      setStatus(map[err.code] ?? "error");
-      logPerm({
-        data: {
-          taskId,
-          outcome: outcomeMap[err.code] ?? "error",
-          error_message: err.message,
-          user_agent: navigator.userAgent,
-        },
-      }).catch(() => {});
-    };
-
-    try {
-      watchIdRef.current = navigator.geolocation.watchPosition(onSuccess, onError, {
-        enableHighAccuracy: true,
-        maximumAge: 5000,
-        timeout: 20000,
+    const ua = typeof navigator !== "undefined" ? navigator.userAgent : Capacitor.getPlatform();
+    startTracker({
+      taskTitle,
+      onFix: (loc) => {
+        if (cancelled) return;
+        setLast(loc);
+        setStatus("active");
+        maybeSend(loc);
+      },
+      onError: (code, message) => {
+        if (cancelled) return;
+        const map: Record<typeof code, TrackingStatus> = {
+          denied: "denied",
+          unavailable: "unavailable",
+          timeout: "error",
+          error: "error",
+        };
+        setStatus(map[code] ?? "error");
+        logPerm({
+          data: { taskId, outcome: code, error_message: message, user_agent: ua },
+        }).catch(() => {});
+      },
+    })
+      .then((t) => {
+        if (cancelled) {
+          void t.stop();
+          return;
+        }
+        trackerRef.current = t;
+        logPerm({ data: { taskId, outcome: "granted", user_agent: ua } }).catch(() => {});
+      })
+      .catch((e: Error) => {
+        setStatus("error");
+        logPerm({ data: { taskId, outcome: "error", error_message: e.message, user_agent: ua } }).catch(() => {});
       });
-      logPerm({ data: { taskId, outcome: "granted", user_agent: navigator.userAgent } }).catch(() => {});
-    } catch (e) {
-      setStatus("error");
-      logPerm({
-        data: { taskId, outcome: "error", error_message: (e as Error).message },
-      }).catch(() => {});
-    }
 
     flushTimerRef.current = setInterval(() => {
       void flushBuffer();
     }, PING_INTERVAL_MS);
     const onOnline = () => void flushBuffer();
-    window.addEventListener("online", onOnline);
+    if (typeof window !== "undefined") window.addEventListener("online", onOnline);
 
     return () => {
       cancelled = true;
-      if (watchIdRef.current !== null) {
-        navigator.geolocation.clearWatch(watchIdRef.current);
-        watchIdRef.current = null;
+      if (trackerRef.current) {
+        void trackerRef.current.stop();
+        trackerRef.current = null;
       }
       if (flushTimerRef.current) clearInterval(flushTimerRef.current);
-      window.removeEventListener("online", onOnline);
+      if (typeof window !== "undefined") window.removeEventListener("online", onOnline);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [taskId, active]);
