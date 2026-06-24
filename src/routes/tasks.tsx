@@ -117,22 +117,16 @@ function MarketplacePage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <header className="sticky top-0 z-40 backdrop-blur bg-background/70 border-b border-border/60">
-        <div className="mx-auto max-w-6xl px-5 h-16 flex items-center justify-between">
-          <Link to="/" aria-label="REI Runner home"><BrandLogo /></Link>
-          <div className="flex items-center gap-3 text-sm">
-            <Link to="/profiles" className="text-muted-foreground hover:text-foreground">Browse runners</Link>
-            <Link to="/investors" className="text-muted-foreground hover:text-foreground">Hire a Runner</Link>
-            <Link to="/runners" className="text-muted-foreground hover:text-foreground">Become a Runner</Link>
-            {signedIn ? (
-              <Link to="/dashboard" className="text-muted-foreground hover:text-foreground">Dashboard</Link>
-            ) : (
-              <Link to="/login" className="text-muted-foreground hover:text-foreground">Sign in</Link>
-            )}
-          </div>
-        </div>
-      </header>
-      <main className="mx-auto max-w-6xl px-5 py-10">
+      <PublicHeader
+        maxWidth="max-w-6xl"
+        signedIn={signedIn}
+        links={[
+          { to: "/profiles", label: "Browse runners" },
+          { to: "/investors", label: "Hire a Runner" },
+          { to: "/runners", label: "Become a Runner" },
+        ]}
+      />
+      <main className="mx-auto max-w-6xl px-4 sm:px-5 py-6 sm:py-10">
         {stats && (
           <div className="mb-8 rounded-2xl border border-border/60 bg-card/40 p-4">
             <div className="flex items-center justify-between mb-3">
