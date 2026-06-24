@@ -322,16 +322,14 @@ export const getStateCoverage = createServerFn({ method: "GET" }).handler(async 
     supabaseAdmin
       .from("profiles")
       .select(
-        "user_id, full_name, first_name, profile_slug, city, state, profile_photo_url, average_rating, top_runner, verified_status, public_profile_enabled, suspended",
+        "user_id, full_name, profile_slug, city, state, profile_photo_url, average_rating, top_runner, verified_status, public_profile_enabled, suspended",
       )
       .not("state", "is", null),
   ]);
 
   const runnerIds = new Set((runnerRoles.data ?? []).map((r: any) => r.user_id));
 
-  function maskName(full: string | null, first: string | null): string {
-    const f = (first || "").trim();
-    if (f) return f;
+  function maskName(full: string | null): string {
     const parts = (full || "").trim().split(/\s+/).filter(Boolean);
     if (!parts.length) return "Runner";
     const fn = parts[0];
@@ -361,7 +359,7 @@ export const getStateCoverage = createServerFn({ method: "GET" }).handler(async 
     bucket.count += 1;
     if (bucket.preview.length < 5 && (p as any).public_profile_enabled !== false) {
       bucket.preview.push({
-        name: maskName((p as any).full_name ?? null, (p as any).first_name ?? null),
+        name: maskName((p as any).full_name ?? null),
         city: (p as any).city ?? null,
         photo: (p as any).profile_photo_url ?? null,
         rating: (p as any).average_rating ?? null,
