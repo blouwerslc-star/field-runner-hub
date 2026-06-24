@@ -572,6 +572,8 @@ function Index() {
           </div>
       </MobileDrawer>
 
+      {/* Wrap hero + explainer so we can reorder them on mobile via flex order. */}
+      <div className="flex flex-col">
       {/* EXPLAINER VIDEO (inline hero) — visually after hero on mobile, before on desktop */}
       <section className="relative isolate overflow-hidden border-b border-border/60 order-2 md:order-1">
         <div aria-hidden className="absolute inset-0 -z-10 bg-hero opacity-60" />
