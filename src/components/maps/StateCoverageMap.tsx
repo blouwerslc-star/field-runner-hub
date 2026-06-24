@@ -253,10 +253,6 @@ export function StateCoverageMap({
           // Update existing source data when coverage refreshes.
           const src = map.getSource("us-states") as mapboxgl.GeoJSONSource | undefined;
           if (src) {
-            const current = (map.queryRenderedFeatures(undefined, {
-              layers: ["state-fill"],
-            }) as any[]) ?? [];
-            // Easiest: refetch GeoJSON and reset (network cached after first hit)
             try {
               const res = await fetch(US_STATES_GEOJSON);
               const geo = await res.json();
@@ -270,7 +266,6 @@ export function StateCoverageMap({
               src.setData(geo);
             } catch {
               /* ignore */
-              void current;
             }
           }
         }
