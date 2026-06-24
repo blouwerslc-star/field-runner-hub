@@ -132,19 +132,6 @@ export const Route = createFileRoute("/")({
   }),
 });
 
-const MARKETS = [
-  "Detroit", "Atlanta", "Dallas", "Phoenix",
-  "Tampa", "Indianapolis", "Cleveland", "Chicago",
-];
-
-// Beta status items — no fabricated metrics. Replace with real DB-backed numbers when available.
-const BETA_STATUS = [
-  { icon: Users, label: "Founding Runner Applications", value: "Open" },
-  { icon: Building2, label: "Investor Applications", value: "Open" },
-  { icon: MapPin, label: "Market Coverage", value: "Expanding" },
-  { icon: Zap, label: "Marketplace", value: "Early Access" },
-];
-
 // Example field-task catalog with payouts, turnaround, and deliverables
 const EXAMPLE_TASKS = [
   {
