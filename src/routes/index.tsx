@@ -572,6 +572,7 @@ function Index() {
           </div>
       </MobileDrawer>
 
+      <main id="main-content">
       {/* HERO — headline first so mobile users see value prop above the fold */}
       <section id="top" className="relative isolate overflow-hidden">
         <div aria-hidden className="absolute inset-0 -z-10 bg-hero" />
