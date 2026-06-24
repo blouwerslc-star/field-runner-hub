@@ -572,40 +572,8 @@ function Index() {
           </div>
       </MobileDrawer>
 
-      {/* Wrap hero + explainer so we can reorder them on mobile via flex order. */}
-      <div className="flex flex-col">
-      {/* EXPLAINER VIDEO (inline hero) — visually after hero on mobile, before on desktop */}
-      <section className="relative isolate overflow-hidden border-b border-border/60 order-2 md:order-1">
-        <div aria-hidden className="absolute inset-0 -z-10 bg-hero opacity-60" />
-        <div aria-hidden className="absolute inset-0 -z-10 grid-bg opacity-40" />
-        <div className="mx-auto max-w-6xl px-4 sm:px-5 pt-4 pb-6 md:pt-12 md:pb-14">
-          <div className="relative rounded-2xl border border-border bg-card/40 backdrop-blur overflow-hidden shadow-card">
-            <video
-              ref={heroVideoRef}
-              key={activeVideo.url}
-              src={activeVideo.url}
-              autoPlay
-              muted
-              playsInline
-              controls
-              preload="auto"
-              className={`w-full bg-black ${isMobile ? "aspect-video max-h-[42svh] object-contain mx-auto" : "aspect-video"}`}
-            />
-            <button
-              type="button"
-              onClick={toggleHeroVideoMute}
-              aria-label={videoMuted ? "Unmute video" : "Mute video"}
-              className="absolute top-3 right-3 md:top-4 md:right-4 inline-flex items-center gap-2 px-3 py-2 rounded-full bg-primary text-primary-foreground text-xs md:text-sm font-medium shadow-glow hover:scale-105 transition"
-            >
-              {videoMuted ? <VolumeX className="size-4" /> : <Volume2 className="size-4" />}
-              {videoMuted ? "Tap for sound" : "Sound on"}
-            </button>
-          </div>
-        </div>
-      </section>
-
-      {/* HERO */}
-      <section id="top" className="relative isolate overflow-hidden order-1 md:order-2">
+      {/* HERO — headline first so mobile users see value prop above the fold */}
+      <section id="top" className="relative isolate overflow-hidden">
         <div aria-hidden className="absolute inset-0 -z-10 bg-hero" />
         <img
           src={heroBg}
@@ -666,7 +634,35 @@ function Index() {
         </div>
       </section>
 
-      </div>
+      {/* EXPLAINER VIDEO (inline hero) — below the headline */}
+      <section className="relative isolate overflow-hidden border-b border-border/60">
+        <div aria-hidden className="absolute inset-0 -z-10 bg-hero opacity-60" />
+        <div aria-hidden className="absolute inset-0 -z-10 grid-bg opacity-40" />
+        <div className="mx-auto max-w-6xl px-4 sm:px-5 pt-4 pb-6 md:pt-12 md:pb-14">
+          <div className="relative rounded-2xl border border-border bg-card/40 backdrop-blur overflow-hidden shadow-card">
+            <video
+              ref={heroVideoRef}
+              key={activeVideo.url}
+              src={activeVideo.url}
+              autoPlay
+              muted
+              playsInline
+              controls
+              preload="auto"
+              className={`w-full bg-black ${isMobile ? "aspect-video max-h-[50svh] object-contain mx-auto" : "aspect-video"}`}
+            />
+            <button
+              type="button"
+              onClick={toggleHeroVideoMute}
+              aria-label={videoMuted ? "Unmute video" : "Mute video"}
+              className="absolute top-3 right-3 md:top-4 md:right-4 inline-flex items-center gap-2 px-3 py-2 rounded-full bg-primary text-primary-foreground text-xs md:text-sm font-medium shadow-glow hover:scale-105 transition"
+            >
+              {videoMuted ? <VolumeX className="size-4" /> : <Volume2 className="size-4" />}
+              {videoMuted ? "Tap for sound" : "Sound on"}
+            </button>
+          </div>
+        </div>
+      </section>
 
       {/* LIVE ACTIVITY TICKER */}
       <MarketplaceUpdatesTicker />
