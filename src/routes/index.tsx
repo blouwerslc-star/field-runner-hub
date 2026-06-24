@@ -572,11 +572,11 @@ function Index() {
           </div>
       </MobileDrawer>
 
-      {/* EXPLAINER VIDEO (inline hero) */}
-      <section className="relative isolate overflow-hidden border-b border-border/60">
+      {/* EXPLAINER VIDEO (inline hero) — visually after hero on mobile, before on desktop */}
+      <section className="relative isolate overflow-hidden border-b border-border/60 order-2 md:order-1">
         <div aria-hidden className="absolute inset-0 -z-10 bg-hero opacity-60" />
         <div aria-hidden className="absolute inset-0 -z-10 grid-bg opacity-40" />
-        <div className="mx-auto max-w-6xl px-5 pt-8 pb-10 md:pt-12 md:pb-14">
+        <div className="mx-auto max-w-6xl px-4 sm:px-5 pt-4 pb-6 md:pt-12 md:pb-14">
           <div className="relative rounded-2xl border border-border bg-card/40 backdrop-blur overflow-hidden shadow-card">
             <video
               ref={heroVideoRef}
@@ -587,7 +587,7 @@ function Index() {
               playsInline
               controls
               preload="auto"
-              className={`w-full bg-black ${isMobile ? "aspect-[9/16] max-h-[80vh] object-contain mx-auto" : "aspect-video"}`}
+              className={`w-full bg-black ${isMobile ? "aspect-video max-h-[42svh] object-contain mx-auto" : "aspect-video"}`}
             />
             <button
               type="button"
@@ -603,7 +603,7 @@ function Index() {
       </section>
 
       {/* HERO */}
-      <section id="top" className="relative isolate overflow-hidden">
+      <section id="top" className="relative isolate overflow-hidden order-1 md:order-2">
         <div aria-hidden className="absolute inset-0 -z-10 bg-hero" />
         <img
           src={heroBg}
@@ -637,12 +637,12 @@ function Index() {
           ))}
         </div>
 
-        <div className="mx-auto max-w-7xl px-5 pt-20 pb-24 md:pt-28 md:pb-32 text-center">
+        <div className="mx-auto max-w-7xl px-4 sm:px-5 pt-10 pb-14 md:pt-28 md:pb-32 text-center">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-border bg-card/60 backdrop-blur text-xs text-muted-foreground animate-fade-up">
             <span className="size-1.5 rounded-full bg-primary animate-pulse" />
             Founding Runner Beta · Now accepting applications
           </div>
-          <h1 className="mt-6 text-4xl sm:text-6xl md:text-7xl font-bold leading-[1.05] animate-fade-up" style={{ animationDelay: "0.1s" }}>
+          <h1 className="mt-5 text-3xl sm:text-5xl md:text-7xl font-bold leading-[1.05] animate-fade-up" style={{ animationDelay: "0.1s" }}>
             Boots on the Ground
             <br />
             <span className="text-gradient">for Real Estate Investors</span>
