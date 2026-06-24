@@ -11,7 +11,7 @@ import { TaskMap } from "@/components/tracking/TaskMap";
 import { TaskTrackingPanel } from "@/components/tracking/TaskTrackingPanel";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, MapPin, CheckCircle2, ShieldCheck } from "lucide-react";
+import { ArrowLeft, MapPin, CheckCircle2, ShieldCheck, ListChecks } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -134,6 +134,15 @@ function TrackingPage() {
       />
 
       {isRunner && <TaskTrackingPanel taskId={taskId} />}
+
+      {(isRunner || isInvestor) && (
+        <Button asChild variant="outline" className="w-full">
+          <Link to="/tasks/$taskId/run" params={{ taskId }}>
+            <ListChecks className="mr-2 h-4 w-4" />
+            {isRunner ? "Open guided checklist" : "View runner checklist progress"}
+          </Link>
+        </Button>
+      )}
 
       <div className="rounded-xl border border-border bg-card p-4">
         <h2 className="mb-3 text-sm font-semibold">Status timeline</h2>

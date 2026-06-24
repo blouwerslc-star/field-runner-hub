@@ -2176,6 +2176,53 @@ export type Database = {
           },
         ]
       }
+      task_checklist_progress: {
+        Row: {
+          completed_at: string | null
+          completed_by: string | null
+          created_at: string
+          data: Json
+          file_ids: string[]
+          id: string
+          status: string
+          step_key: string
+          task_id: string
+          updated_at: string
+        }
+        Insert: {
+          completed_at?: string | null
+          completed_by?: string | null
+          created_at?: string
+          data?: Json
+          file_ids?: string[]
+          id?: string
+          status?: string
+          step_key: string
+          task_id: string
+          updated_at?: string
+        }
+        Update: {
+          completed_at?: string | null
+          completed_by?: string | null
+          created_at?: string
+          data?: Json
+          file_ids?: string[]
+          id?: string
+          status?: string
+          step_key?: string
+          task_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "task_checklist_progress_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       task_files: {
         Row: {
           bucket: string
@@ -2428,12 +2475,15 @@ export type Database = {
           excludes_notes: string | null
           id: string
           includes_notes: string | null
+          intro_notes: string | null
           investor_price: number | null
           is_system: boolean
           name: string
           owner_id: string | null
           platform_fee: number | null
+          required_fields: Json
           runner_payout: number | null
+          runner_steps: Json
           sort_order: number
           task_type: string
           title: string
@@ -2451,12 +2501,15 @@ export type Database = {
           excludes_notes?: string | null
           id?: string
           includes_notes?: string | null
+          intro_notes?: string | null
           investor_price?: number | null
           is_system?: boolean
           name: string
           owner_id?: string | null
           platform_fee?: number | null
+          required_fields?: Json
           runner_payout?: number | null
+          runner_steps?: Json
           sort_order?: number
           task_type: string
           title: string
@@ -2474,18 +2527,83 @@ export type Database = {
           excludes_notes?: string | null
           id?: string
           includes_notes?: string | null
+          intro_notes?: string | null
           investor_price?: number | null
           is_system?: boolean
           name?: string
           owner_id?: string | null
           platform_fee?: number | null
+          required_fields?: Json
           runner_payout?: number | null
+          runner_steps?: Json
           sort_order?: number
           task_type?: string
           title?: string
           updated_at?: string
         }
         Relationships: []
+      }
+      task_type_requests: {
+        Row: {
+          admin_notes: string | null
+          created_at: string
+          created_template_id: string | null
+          deliverables: string[]
+          description: string
+          example_inputs: Json
+          id: string
+          proposed_name: string
+          requester_id: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          suggested_payout: number | null
+          task_type_slug: string | null
+          updated_at: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          created_at?: string
+          created_template_id?: string | null
+          deliverables?: string[]
+          description: string
+          example_inputs?: Json
+          id?: string
+          proposed_name: string
+          requester_id: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          suggested_payout?: number | null
+          task_type_slug?: string | null
+          updated_at?: string
+        }
+        Update: {
+          admin_notes?: string | null
+          created_at?: string
+          created_template_id?: string | null
+          deliverables?: string[]
+          description?: string
+          example_inputs?: Json
+          id?: string
+          proposed_name?: string
+          requester_id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          suggested_payout?: number | null
+          task_type_slug?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "task_type_requests_created_template_id_fkey"
+            columns: ["created_template_id"]
+            isOneToOne: false
+            referencedRelation: "task_templates"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       tasks: {
         Row: {
@@ -2525,6 +2643,8 @@ export type Database = {
           state: string
           status: string
           task_type: string
+          template_id: string | null
+          template_inputs: Json
           title: string
           tracking_active: boolean
           updated_at: string
@@ -2568,6 +2688,8 @@ export type Database = {
           state: string
           status?: string
           task_type: string
+          template_id?: string | null
+          template_inputs?: Json
           title: string
           tracking_active?: boolean
           updated_at?: string
@@ -2611,6 +2733,8 @@ export type Database = {
           state?: string
           status?: string
           task_type?: string
+          template_id?: string | null
+          template_inputs?: Json
           title?: string
           tracking_active?: boolean
           updated_at?: string
@@ -2623,6 +2747,13 @@ export type Database = {
             columns: ["recurrence_parent_id"]
             isOneToOne: false
             referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "task_templates"
             referencedColumns: ["id"]
           },
         ]

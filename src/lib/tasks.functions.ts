@@ -90,6 +90,8 @@ const createTaskSchema = z.object({
   requires_interior_access: z.boolean().optional(),
   preferred_runner_id: z.string().uuid().optional().nullable(),
   recurrence_rule: z.enum(["weekly", "biweekly", "monthly"]).optional().nullable(),
+  template_id: z.string().uuid().optional().nullable(),
+  template_inputs: z.record(z.unknown()).optional().nullable(),
 });
 
 function computeNextRunAt(rule: string | null | undefined, from: Date = new Date()): string | null {
@@ -139,6 +141,8 @@ export const createInvestorTask = createServerFn({ method: "POST" })
         status: "open",
         property_lat: geo?.lat ?? null,
         property_lng: geo?.lng ?? null,
+        template_id: data.template_id ?? null,
+        template_inputs: (data.template_inputs ?? {}) as never,
       })
       .select("*")
       .single();

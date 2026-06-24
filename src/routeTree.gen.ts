@@ -81,6 +81,7 @@ import { Route as AuthenticatedDashboardFavoritesRouteImport } from './routes/_a
 import { Route as AuthenticatedDashboardAnalyticsRouteImport } from './routes/_authenticated/dashboard.analytics'
 import { Route as AuthenticatedAdminVerificationsRouteImport } from './routes/_authenticated/admin.verifications'
 import { Route as AuthenticatedAdminTrackingRouteImport } from './routes/_authenticated/admin.tracking'
+import { Route as AuthenticatedAdminTaskTypeRequestsRouteImport } from './routes/_authenticated/admin.task-type-requests'
 import { Route as AuthenticatedAdminSignupFailuresRouteImport } from './routes/_authenticated/admin.signup-failures'
 import { Route as AuthenticatedAdminRunnerApprovalsRouteImport } from './routes/_authenticated/admin.runner-approvals'
 import { Route as AuthenticatedAdminPushTestRouteImport } from './routes/_authenticated/admin.push-test'
@@ -107,6 +108,7 @@ import { Route as ApiPublicHooksProfileCompletionRemindersRouteImport } from './
 import { Route as ApiPublicHooksEmailNurtureRouteImport } from './routes/api/public/hooks/email-nurture'
 import { Route as ApiPublicHooksDispatchSmsRouteImport } from './routes/api/public/hooks/dispatch-sms'
 import { Route as AuthenticatedTasksTaskIdTrackingRouteImport } from './routes/_authenticated/tasks.$taskId.tracking'
+import { Route as AuthenticatedTasksTaskIdRunRouteImport } from './routes/_authenticated/tasks.$taskId.run'
 import { Route as AuthenticatedAcademyCourseSlugQuizRouteImport } from './routes/_authenticated/academy.$courseSlug.quiz'
 import { Route as AuthenticatedAcademyCourseSlugCertificateRouteImport } from './routes/_authenticated/academy.$courseSlug.certificate'
 import { Route as AuthenticatedAcademyCourseSlugLessonSlugRouteImport } from './routes/_authenticated/academy.$courseSlug.$lessonSlug'
@@ -502,6 +504,12 @@ const AuthenticatedAdminTrackingRoute =
     path: '/tracking',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminTaskTypeRequestsRoute =
+  AuthenticatedAdminTaskTypeRequestsRouteImport.update({
+    id: '/task-type-requests',
+    path: '/task-type-requests',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminSignupFailuresRoute =
   AuthenticatedAdminSignupFailuresRouteImport.update({
     id: '/signup-failures',
@@ -656,6 +664,12 @@ const AuthenticatedTasksTaskIdTrackingRoute =
     path: '/tasks/$taskId/tracking',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const AuthenticatedTasksTaskIdRunRoute =
+  AuthenticatedTasksTaskIdRunRouteImport.update({
+    id: '/tasks/$taskId/run',
+    path: '/tasks/$taskId/run',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedAcademyCourseSlugQuizRoute =
   AuthenticatedAcademyCourseSlugQuizRouteImport.update({
     id: '/quiz',
@@ -732,6 +746,7 @@ export interface FileRoutesByFullPath {
   '/admin/push-test': typeof AuthenticatedAdminPushTestRoute
   '/admin/runner-approvals': typeof AuthenticatedAdminRunnerApprovalsRoute
   '/admin/signup-failures': typeof AuthenticatedAdminSignupFailuresRoute
+  '/admin/task-type-requests': typeof AuthenticatedAdminTaskTypeRequestsRoute
   '/admin/tracking': typeof AuthenticatedAdminTrackingRoute
   '/admin/verifications': typeof AuthenticatedAdminVerificationsRoute
   '/dashboard/analytics': typeof AuthenticatedDashboardAnalyticsRoute
@@ -763,6 +778,7 @@ export interface FileRoutesByFullPath {
   '/academy/$courseSlug/$lessonSlug': typeof AuthenticatedAcademyCourseSlugLessonSlugRoute
   '/academy/$courseSlug/certificate': typeof AuthenticatedAcademyCourseSlugCertificateRoute
   '/academy/$courseSlug/quiz': typeof AuthenticatedAcademyCourseSlugQuizRoute
+  '/tasks/$taskId/run': typeof AuthenticatedTasksTaskIdRunRoute
   '/tasks/$taskId/tracking': typeof AuthenticatedTasksTaskIdTrackingRoute
   '/api/public/hooks/dispatch-sms': typeof ApiPublicHooksDispatchSmsRoute
   '/api/public/hooks/email-nurture': typeof ApiPublicHooksEmailNurtureRoute
@@ -829,6 +845,7 @@ export interface FileRoutesByTo {
   '/admin/push-test': typeof AuthenticatedAdminPushTestRoute
   '/admin/runner-approvals': typeof AuthenticatedAdminRunnerApprovalsRoute
   '/admin/signup-failures': typeof AuthenticatedAdminSignupFailuresRoute
+  '/admin/task-type-requests': typeof AuthenticatedAdminTaskTypeRequestsRoute
   '/admin/tracking': typeof AuthenticatedAdminTrackingRoute
   '/admin/verifications': typeof AuthenticatedAdminVerificationsRoute
   '/dashboard/analytics': typeof AuthenticatedDashboardAnalyticsRoute
@@ -860,6 +877,7 @@ export interface FileRoutesByTo {
   '/academy/$courseSlug/$lessonSlug': typeof AuthenticatedAcademyCourseSlugLessonSlugRoute
   '/academy/$courseSlug/certificate': typeof AuthenticatedAcademyCourseSlugCertificateRoute
   '/academy/$courseSlug/quiz': typeof AuthenticatedAcademyCourseSlugQuizRoute
+  '/tasks/$taskId/run': typeof AuthenticatedTasksTaskIdRunRoute
   '/tasks/$taskId/tracking': typeof AuthenticatedTasksTaskIdTrackingRoute
   '/api/public/hooks/dispatch-sms': typeof ApiPublicHooksDispatchSmsRoute
   '/api/public/hooks/email-nurture': typeof ApiPublicHooksEmailNurtureRoute
@@ -933,6 +951,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/push-test': typeof AuthenticatedAdminPushTestRoute
   '/_authenticated/admin/runner-approvals': typeof AuthenticatedAdminRunnerApprovalsRoute
   '/_authenticated/admin/signup-failures': typeof AuthenticatedAdminSignupFailuresRoute
+  '/_authenticated/admin/task-type-requests': typeof AuthenticatedAdminTaskTypeRequestsRoute
   '/_authenticated/admin/tracking': typeof AuthenticatedAdminTrackingRoute
   '/_authenticated/admin/verifications': typeof AuthenticatedAdminVerificationsRoute
   '/_authenticated/dashboard/analytics': typeof AuthenticatedDashboardAnalyticsRoute
@@ -964,6 +983,7 @@ export interface FileRoutesById {
   '/_authenticated/academy/$courseSlug/$lessonSlug': typeof AuthenticatedAcademyCourseSlugLessonSlugRoute
   '/_authenticated/academy/$courseSlug/certificate': typeof AuthenticatedAcademyCourseSlugCertificateRoute
   '/_authenticated/academy/$courseSlug/quiz': typeof AuthenticatedAcademyCourseSlugQuizRoute
+  '/_authenticated/tasks/$taskId/run': typeof AuthenticatedTasksTaskIdRunRoute
   '/_authenticated/tasks/$taskId/tracking': typeof AuthenticatedTasksTaskIdTrackingRoute
   '/api/public/hooks/dispatch-sms': typeof ApiPublicHooksDispatchSmsRoute
   '/api/public/hooks/email-nurture': typeof ApiPublicHooksEmailNurtureRoute
@@ -1037,6 +1057,7 @@ export interface FileRouteTypes {
     | '/admin/push-test'
     | '/admin/runner-approvals'
     | '/admin/signup-failures'
+    | '/admin/task-type-requests'
     | '/admin/tracking'
     | '/admin/verifications'
     | '/dashboard/analytics'
@@ -1068,6 +1089,7 @@ export interface FileRouteTypes {
     | '/academy/$courseSlug/$lessonSlug'
     | '/academy/$courseSlug/certificate'
     | '/academy/$courseSlug/quiz'
+    | '/tasks/$taskId/run'
     | '/tasks/$taskId/tracking'
     | '/api/public/hooks/dispatch-sms'
     | '/api/public/hooks/email-nurture'
@@ -1134,6 +1156,7 @@ export interface FileRouteTypes {
     | '/admin/push-test'
     | '/admin/runner-approvals'
     | '/admin/signup-failures'
+    | '/admin/task-type-requests'
     | '/admin/tracking'
     | '/admin/verifications'
     | '/dashboard/analytics'
@@ -1165,6 +1188,7 @@ export interface FileRouteTypes {
     | '/academy/$courseSlug/$lessonSlug'
     | '/academy/$courseSlug/certificate'
     | '/academy/$courseSlug/quiz'
+    | '/tasks/$taskId/run'
     | '/tasks/$taskId/tracking'
     | '/api/public/hooks/dispatch-sms'
     | '/api/public/hooks/email-nurture'
@@ -1237,6 +1261,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/push-test'
     | '/_authenticated/admin/runner-approvals'
     | '/_authenticated/admin/signup-failures'
+    | '/_authenticated/admin/task-type-requests'
     | '/_authenticated/admin/tracking'
     | '/_authenticated/admin/verifications'
     | '/_authenticated/dashboard/analytics'
@@ -1268,6 +1293,7 @@ export interface FileRouteTypes {
     | '/_authenticated/academy/$courseSlug/$lessonSlug'
     | '/_authenticated/academy/$courseSlug/certificate'
     | '/_authenticated/academy/$courseSlug/quiz'
+    | '/_authenticated/tasks/$taskId/run'
     | '/_authenticated/tasks/$taskId/tracking'
     | '/api/public/hooks/dispatch-sms'
     | '/api/public/hooks/email-nurture'
@@ -1830,6 +1856,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminTrackingRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/task-type-requests': {
+      id: '/_authenticated/admin/task-type-requests'
+      path: '/task-type-requests'
+      fullPath: '/admin/task-type-requests'
+      preLoaderRoute: typeof AuthenticatedAdminTaskTypeRequestsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/signup-failures': {
       id: '/_authenticated/admin/signup-failures'
       path: '/signup-failures'
@@ -2012,6 +2045,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedTasksTaskIdTrackingRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/tasks/$taskId/run': {
+      id: '/_authenticated/tasks/$taskId/run'
+      path: '/tasks/$taskId/run'
+      fullPath: '/tasks/$taskId/run'
+      preLoaderRoute: typeof AuthenticatedTasksTaskIdRunRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/academy/$courseSlug/quiz': {
       id: '/_authenticated/academy/$courseSlug/quiz'
       path: '/quiz'
@@ -2087,6 +2127,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminPushTestRoute: typeof AuthenticatedAdminPushTestRoute
   AuthenticatedAdminRunnerApprovalsRoute: typeof AuthenticatedAdminRunnerApprovalsRoute
   AuthenticatedAdminSignupFailuresRoute: typeof AuthenticatedAdminSignupFailuresRoute
+  AuthenticatedAdminTaskTypeRequestsRoute: typeof AuthenticatedAdminTaskTypeRequestsRoute
   AuthenticatedAdminTrackingRoute: typeof AuthenticatedAdminTrackingRoute
   AuthenticatedAdminVerificationsRoute: typeof AuthenticatedAdminVerificationsRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
@@ -2108,6 +2149,8 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminRunnerApprovalsRoute:
     AuthenticatedAdminRunnerApprovalsRoute,
   AuthenticatedAdminSignupFailuresRoute: AuthenticatedAdminSignupFailuresRoute,
+  AuthenticatedAdminTaskTypeRequestsRoute:
+    AuthenticatedAdminTaskTypeRequestsRoute,
   AuthenticatedAdminTrackingRoute: AuthenticatedAdminTrackingRoute,
   AuthenticatedAdminVerificationsRoute: AuthenticatedAdminVerificationsRoute,
   AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
@@ -2193,6 +2236,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedProfileIdVerificationRoute: typeof AuthenticatedProfileIdVerificationRoute
   AuthenticatedProfileVerificationRoute: typeof AuthenticatedProfileVerificationRoute
   AuthenticatedDashboardIndexRoute: typeof AuthenticatedDashboardIndexRoute
+  AuthenticatedTasksTaskIdRunRoute: typeof AuthenticatedTasksTaskIdRunRoute
   AuthenticatedTasksTaskIdTrackingRoute: typeof AuthenticatedTasksTaskIdTrackingRoute
 }
 
@@ -2225,6 +2269,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
     AuthenticatedProfileIdVerificationRoute,
   AuthenticatedProfileVerificationRoute: AuthenticatedProfileVerificationRoute,
   AuthenticatedDashboardIndexRoute: AuthenticatedDashboardIndexRoute,
+  AuthenticatedTasksTaskIdRunRoute: AuthenticatedTasksTaskIdRunRoute,
   AuthenticatedTasksTaskIdTrackingRoute: AuthenticatedTasksTaskIdTrackingRoute,
 }
 

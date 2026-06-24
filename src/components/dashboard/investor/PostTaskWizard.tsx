@@ -43,6 +43,7 @@ import {
 } from "@/lib/tasks.functions";
 import { listTaskTemplates, upsertTaskTemplate } from "@/lib/templates.functions";
 import { getPricingCatalog, type PricingTemplate } from "@/lib/pricing.functions";
+import { RequestTaskTypeDialog } from "@/components/dashboard/investor/RequestTaskTypeDialog";
 import { cn } from "@/lib/utils";
 
 type TaskTypeOption = {
@@ -356,6 +357,12 @@ export function PostTaskWizard({
                 onChange={(e) => setForm({ ...form, description: e.target.value })}
                 placeholder="Access details, what to focus on, anything specific to capture…"
               />
+            </div>
+            <div className="flex items-center justify-between rounded-lg border border-dashed border-border bg-muted/10 px-3 py-2">
+              <p className="text-xs text-muted-foreground">
+                Don't see a task type that fits what you need?
+              </p>
+              <RequestTaskTypeDialog />
             </div>
           </div>
         )}
