@@ -51,6 +51,8 @@ import { getPublicStats } from "@/lib/public-stats.functions";
 import { StateCoverageMap } from "@/components/maps/StateCoverageMap";
 import { TestimonialsSection } from "@/components/landing/TestimonialsSection";
 import { SampleDeliverablesSection } from "@/components/landing/SampleDeliverablesSection";
+import { ServiceExamplePopover } from "@/components/landing/ServiceExamplePopover";
+import { LANDING_SERVICE_EXAMPLES } from "@/lib/landing-service-examples";
 import { MobileDrawer } from "@/components/navigation/MobileDrawer";
 import explainerVideo from "@/assets/reirunner-explainer.mp4.asset.json";
 import explainerVideoVertical from "@/assets/reirunner-explainer-9x16.mp4.asset.json";
@@ -887,13 +889,16 @@ function Index() {
         <SectionHeader eyebrow="What Runners Do" title="Tasks You Can Get Paid For" subtitle="Every task on REI Runner is a simple, non-licensed field job." />
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {SERVICES.map((s) => (
-            <div key={s.title} className="rounded-2xl border border-border bg-card/60 backdrop-blur p-6 shadow-card hover:border-primary/40 hover:-translate-y-1 transition-all duration-300">
-              <div className="size-11 rounded-xl bg-primary/10 grid place-items-center mb-4">
-                <s.icon className="size-5 text-primary" />
+            <ServiceExamplePopover key={s.title} title={s.title} example={LANDING_SERVICE_EXAMPLES[s.title]}>
+              <div className="h-full rounded-2xl border border-border bg-card/60 backdrop-blur p-6 shadow-card hover:border-primary/40 hover:-translate-y-1 transition-all duration-300">
+                <div className="size-11 rounded-xl bg-primary/10 grid place-items-center mb-4">
+                  <s.icon className="size-5 text-primary" />
+                </div>
+                <h3 className="text-lg font-semibold mb-1">{s.title}</h3>
+                <p className="text-sm text-muted-foreground">{s.body}</p>
+                <p className="mt-3 text-xs font-medium text-primary/80">Preview example →</p>
               </div>
-              <h3 className="text-lg font-semibold mb-1">{s.title}</h3>
-              <p className="text-sm text-muted-foreground">{s.body}</p>
-            </div>
+            </ServiceExamplePopover>
           ))}
         </div>
       </Section>
