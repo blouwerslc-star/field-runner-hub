@@ -315,6 +315,35 @@ export const getCoverageDashboard = createServerFn({ method: "GET" }).handler(as
  * Used by the marketplace coverage map. No PII — first name + last initial,
  * city + state, profile slug only.
  */
+// Normalize free-text state values (e.g. "Ohio", "ohio", "OH") to USPS code.
+const STATE_NAME_TO_ABBR: Record<string, string> = {
+  alabama: "AL", alaska: "AK", arizona: "AZ", arkansas: "AR", california: "CA", colorado: "CO",
+  connecticut: "CT", delaware: "DE", "district of columbia": "DC", florida: "FL", georgia: "GA",
+  hawaii: "HI", idaho: "ID", illinois: "IL", indiana: "IN", iowa: "IA", kansas: "KS", kentucky: "KY",
+  louisiana: "LA", maine: "ME", maryland: "MD", massachusetts: "MA", michigan: "MI", minnesota: "MN",
+  mississippi: "MS", missouri: "MO", montana: "MT", nebraska: "NE", nevada: "NV", "new hampshire": "NH",
+  "new jersey": "NJ", "new mexico": "NM", "new york": "NY", "north carolina": "NC", "north dakota": "ND",
+  ohio: "OH", oklahoma: "OK", oregon: "OR", pennsylvania: "PA", "rhode island": "RI", "south carolina": "SC",
+  "south dakota": "SD", tennessee: "TN", texas: "TX", utah: "UT", vermont: "VT", virginia: "VA",
+  washington: "WA", "west virginia": "WV", wisconsin: "WI", wyoming: "WY", "puerto rico": "PR",
+};
+const VALID_ABBR = new Set(Object.values(STATE_NAME_TO_ABBR));
+function toAbbr(raw: string): string | null {
+  const t = raw.trim();
+  if (!t) return null;
+  const upper = t.toUpperCase();
+  if (t.length <= 3 && VALID_ABBR.has(upper)) return upper;
+  return STATE_NAME_TO_ABBR[t.toLowerCase()] ?? null;
+}
+
+function maskName(full: string | null): string {
+  const parts = (full || "").trim().split(/\s+/).filter(Boolean);
+  if (!parts.length) return "Runner";
+  const fn = parts[0];
+  const li = parts.length > 1 ? `${parts[parts.length - 1][0]?.toUpperCase() ?? ""}.` : "";
+  return li ? `${fn} ${li}` : fn;
+}
+
 export const getStateCoverage = createServerFn({ method: "GET" }).handler(async () => {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const [runnerRoles, profiles] = await Promise.all([
@@ -328,35 +357,6 @@ export const getStateCoverage = createServerFn({ method: "GET" }).handler(async 
   ]);
 
   const runnerIds = new Set((runnerRoles.data ?? []).map((r: any) => r.user_id));
-
-  // Normalize free-text state values (e.g. "Ohio", "ohio", "OH") to USPS code.
-  const STATE_NAME_TO_ABBR: Record<string, string> = {
-    alabama:"AL",alaska:"AK",arizona:"AZ",arkansas:"AR",california:"CA",colorado:"CO",
-    connecticut:"CT",delaware:"DE","district of columbia":"DC",florida:"FL",georgia:"GA",
-    hawaii:"HI",idaho:"ID",illinois:"IL",indiana:"IN",iowa:"IA",kansas:"KS",kentucky:"KY",
-    louisiana:"LA",maine:"ME",maryland:"MD",massachusetts:"MA",michigan:"MI",minnesota:"MN",
-    mississippi:"MS",missouri:"MO",montana:"MT",nebraska:"NE",nevada:"NV","new hampshire":"NH",
-    "new jersey":"NJ","new mexico":"NM","new york":"NY","north carolina":"NC","north dakota":"ND",
-    ohio:"OH",oklahoma:"OK",oregon:"OR",pennsylvania:"PA","rhode island":"RI","south carolina":"SC",
-    "south dakota":"SD",tennessee:"TN",texas:"TX",utah:"UT",vermont:"VT",virginia:"VA",
-    washington:"WA","west virginia":"WV",wisconsin:"WI",wyoming:"WY","puerto rico":"PR",
-  };
-  const VALID_ABBR = new Set(Object.values(STATE_NAME_TO_ABBR));
-  function toAbbr(raw: string): string | null {
-    const t = raw.trim();
-    if (!t) return null;
-    const upper = t.toUpperCase();
-    if (t.length <= 3 && VALID_ABBR.has(upper)) return upper;
-    return STATE_NAME_TO_ABBR[t.toLowerCase()] ?? null;
-  }
-
-  function maskName(full: string | null): string {
-    const parts = (full || "").trim().split(/\s+/).filter(Boolean);
-    if (!parts.length) return "Runner";
-    const fn = parts[0];
-    const li = parts.length > 1 ? `${parts[parts.length - 1][0]?.toUpperCase() ?? ""}.` : "";
-    return li ? `${fn} ${li}` : fn;
-  }
 
   type Preview = {
     name: string;
