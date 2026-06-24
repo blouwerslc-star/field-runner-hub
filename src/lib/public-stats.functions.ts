@@ -329,6 +329,27 @@ export const getStateCoverage = createServerFn({ method: "GET" }).handler(async 
 
   const runnerIds = new Set((runnerRoles.data ?? []).map((r: any) => r.user_id));
 
+  // Normalize free-text state values (e.g. "Ohio", "ohio", "OH") to USPS code.
+  const STATE_NAME_TO_ABBR: Record<string, string> = {
+    alabama:"AL",alaska:"AK",arizona:"AZ",arkansas:"AR",california:"CA",colorado:"CO",
+    connecticut:"CT",delaware:"DE","district of columbia":"DC",florida:"FL",georgia:"GA",
+    hawaii:"HI",idaho:"ID",illinois:"IL",indiana:"IN",iowa:"IA",kansas:"KS",kentucky:"KY",
+    louisiana:"LA",maine:"ME",maryland:"MD",massachusetts:"MA",michigan:"MI",minnesota:"MN",
+    mississippi:"MS",missouri:"MO",montana:"MT",nebraska:"NE",nevada:"NV","new hampshire":"NH",
+    "new jersey":"NJ","new mexico":"NM","new york":"NY","north carolina":"NC","north dakota":"ND",
+    ohio:"OH",oklahoma:"OK",oregon:"OR",pennsylvania:"PA","rhode island":"RI","south carolina":"SC",
+    "south dakota":"SD",tennessee:"TN",texas:"TX",utah:"UT",vermont:"VT",virginia:"VA",
+    washington:"WA","west virginia":"WV",wisconsin:"WI",wyoming:"WY","puerto rico":"PR",
+  };
+  const VALID_ABBR = new Set(Object.values(STATE_NAME_TO_ABBR));
+  function toAbbr(raw: string): string | null {
+    const t = raw.trim();
+    if (!t) return null;
+    const upper = t.toUpperCase();
+    if (t.length <= 3 && VALID_ABBR.has(upper)) return upper;
+    return STATE_NAME_TO_ABBR[t.toLowerCase()] ?? null;
+  }
+
   function maskName(full: string | null): string {
     const parts = (full || "").trim().split(/\s+/).filter(Boolean);
     if (!parts.length) return "Runner";
@@ -354,7 +375,8 @@ export const getStateCoverage = createServerFn({ method: "GET" }).handler(async 
     if (!raw) continue;
     if (!runnerIds.has((p as any).user_id)) continue;
     if ((p as any).suspended) continue;
-    const code = raw.toUpperCase();
+    const code = toAbbr(raw);
+    if (!code) continue;
     const bucket: State = byState.get(code) ?? { state: code, count: 0, preview: [] };
     bucket.count += 1;
     if (bucket.preview.length < 5 && (p as any).public_profile_enabled !== false) {
