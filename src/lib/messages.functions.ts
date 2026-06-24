@@ -233,7 +233,7 @@ export const startConversation = createServerFn({ method: "POST" })
 
     const { error: mErr } = await supabase
       .from("messages")
-      .insert({ conversation_id: conv.id, sender_id: userId, body: data.body });
+      .insert({ conversation_id: conv.id, sender_id: userId, body: scrubContactInfo(data.body) });
     if (mErr) throw new Error(mErr.message);
 
     return { conversationId: conv.id };
@@ -267,7 +267,7 @@ export const sendMessage = createServerFn({ method: "POST" })
       .insert({
         conversation_id: data.conversationId,
         sender_id: userId,
-        body: data.body,
+        body: scrubContactInfo(data.body),
       })
       .select("id")
       .single();
