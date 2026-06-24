@@ -1,7 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   Building2,
-  ArrowLeft,
   Camera,
   MapPinned,
   ShieldCheck,
