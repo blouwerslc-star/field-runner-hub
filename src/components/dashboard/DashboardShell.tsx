@@ -89,13 +89,18 @@ export function DashboardShell({
     }
   }
 
-  function signOut() {
+  async function signOut() {
     setOpen(false);
-    queryClient.clear();
-    clearLocalAuthStorage();
-    void queryClient.cancelQueries();
-    void supabase.auth.signOut({ scope: "local" }).catch(() => {});
-    window.location.replace("/login?forceLogout=1");
+    try {
+      await queryClient.cancelQueries();
+      queryClient.clear();
+      await supabase.auth.signOut({ scope: "local" });
+    } catch {
+      // Even if signOut throws, clear local tokens so the user lands signed out.
+    } finally {
+      clearLocalAuthStorage();
+      window.location.replace("/login");
+    }
   }
 
   return (
@@ -167,9 +172,9 @@ export function DashboardShell({
           </div>
           <nav className="flex-1 min-h-0 overflow-y-auto p-3 space-y-1 bg-background">
             {navItems.map((item) => (
-              <a
+              <Link
                 key={item.to}
-                href={item.to}
+                to={item.to}
                 onClick={() => setOpen(false)}
                 className="flex items-center gap-3 rounded-md px-3 py-3 text-sm hover:bg-muted/60 transition-colors"
               >
@@ -180,7 +185,7 @@ export function DashboardShell({
                     {unreadTotal > 9 ? "9+" : unreadTotal}
                   </span>
                 )}
-              </a>
+              </Link>
             ))}
           </nav>
           <div className="shrink-0 p-3 border-t border-border/60 bg-background pb-safe">
