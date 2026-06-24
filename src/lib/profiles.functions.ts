@@ -200,6 +200,7 @@ const listSchema = z.object({
   role: z.enum(["runner", "investor"]).optional(),
   city: z.string().max(80).optional(),
   state: z.string().max(80).optional(),
+  zip: z.string().trim().regex(/^\d{3,5}$/).optional(),
   service: z.string().max(60).optional(),
   availability: z.enum(["available", "busy", "unavailable"]).optional(),
   sort: z.enum(["rating", "completed", "newest", "featured"]).default("featured"),
