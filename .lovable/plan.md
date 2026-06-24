@@ -1,118 +1,81 @@
-## Phase 9 — Task-Only GPS Tracking
+## REI Runner Explainer Video — 30s, Tech Product aesthetic, AI VO + captions
 
-A privacy-respecting GPS layer that only runs while a runner is actively working an assigned task. Built on the existing tasks/notifications stack, Mapbox (token already configured), and Supabase Realtime.
+A code-rendered MP4 built with Remotion. Frame-based motion, ElevenLabs voiceover, on-screen captions, persistent brand background. Final output saved to `/mnt/documents/reirunner-explainer.mp4` and surfaced via `<presentation-artifact>` for download.
 
-### 1. Database (one migration)
+### Creative direction
 
-**Add columns to `tasks`:**
-- `property_lat numeric(9,6)`, `property_lng numeric(9,6)` — geocoded once on task post/update
-- `geofence_radius_ft integer default 250`
-- `runner_state text` — one of `accepted | en_route | arrived | in_progress | completed | verified` (parallel to existing `status`; existing flows untouched)
-- `runner_state_at timestamptz` columns per transition (`accepted_at`, `en_route_at`, `arrived_at`, `started_at`, `completed_at`, `verified_at`)
-- `tracking_active boolean default false`
-- `last_ping_at timestamptz`, `last_ping_within_geofence boolean`
+- **Aesthetic**: Tech Product — clean geometric sans, dark UI, crisp snappy motion, subtle grid background, single brand accent. Editorial pacing but punchy.
+- **Palette**:
+  - bg `#0A0A0B` (near-black)
+  - surface `#14141A`
+  - text `#FAFAFA`
+  - muted `#6B7280`
+  - accent `#F97316` (REI Runner orange, matches brand)
+  - accent-2 `#22C55E` (proof / success states)
+- **Type**: Inter Tight (display, 700/900) + Inter (body, 400/500), both via `@remotion/google-fonts`.
+- **Motion system**: spring-in with `{damping: 22, stiffness: 180}` as default; accent hero springs `{damping: 14}`. Scene cuts use `wipe` / `slide` from `@remotion/transitions` (30-frame springs). Persistent grid + drifting accent orb across the full 30s.
+- **Composition**: 1920x1080, 30fps, ~900 frames (30s).
 
-**New table `task_location_pings`:**
-- `id uuid pk`, `task_id uuid fk`, `runner_id uuid`, `investor_id uuid`
-- `latitude numeric(9,6)`, `longitude numeric(9,6)`, `accuracy_m numeric`, `speed_mps numeric`, `heading_deg numeric`
-- `runner_state text`, `within_geofence boolean`, `distance_ft numeric`
-- `created_at timestamptz default now()`
-- Indexes: `(task_id, created_at desc)`, `(runner_id, created_at desc)`
+### Script (VO + captions, ~30s)
 
-**New table `task_permission_events`** — logs permission grants/denials/failures for admin audit.
+1. **0–4s — Hook**: "Real estate moves fast. You can't be in every city."
+2. **4–9s — Problem**: "Photos. Vacancy checks. Lockboxes. Contractor meetups. The deal won't wait."
+3. **9–15s — Solution**: "REI Runner is the on-demand network of vetted local runners — anywhere in the U.S."
+4. **15–22s — How it works**: "Post a task. A nearby runner claims it. Get geo-tagged proof in hours, not days."
+5. **22–28s — Marketplace dual-side**: "Investors get eyes on the ground. Runners get flexible, well-paid local work."
+6. **28–30s — Close**: "REI Runner. Boots on the ground, nationwide."
 
-**Realtime:** add both tables to `supabase_realtime` publication.
+### Scenes
 
-**RLS (strict):**
-- Pings: runner can INSERT only when `runner_id = auth.uid()` AND assigned to that task AND `tracking_active = true`. SELECT visible only to assigned runner, assigned investor, and admin. No anon.
-- Tasks geofence columns: read via existing tasks RLS; investor sees `property_lat/lng` only for tasks they own; runner sees only for their assigned tasks. Implemented via a security-definer `get_task_geofence(task_id)` returning the safe subset.
-- Admin override RPC: `admin_override_task_completion(task_id, reason)` — admin-only via `has_role`.
+1. **Hook** (0–4s) — Massive kinetic type "REAL ESTATE / MOVES FAST" with character stagger over animated US map dot grid.
+2. **Problem** (4–9s) — Four task chips (Photos / Vacancy / Lockbox / Meetup) stagger in around a ticking clock motif.
+3. **Solution** (9–15s) — Logo lockup reveal + animated map of US with runner pins lighting up coast-to-coast.
+4. **How It Works** (15–22s) — 3 numbered steps (Post → Claim → Proof) sliding horizontally with iconography; geo-tag pin lands with spring.
+5. **Two-Sided Marketplace** (22–28s) — Split-screen Investor / Runner panels with mini stat cards.
+6. **Close** (28–30s) — Brand wordmark with subtle scale + tagline "Boots on the ground, nationwide."
 
-**Geofence helper:** SQL function `haversine_ft(lat1, lng1, lat2, lng2)` for distance computation; trigger on ping insert auto-fills `within_geofence` and `distance_ft` and updates `tasks.last_ping_*`.
+Persistent layers across all scenes: faint dot grid, drifting orange accent orb, subtle vignette.
 
-**Auto-stop trigger:** when `tasks.runner_state` becomes `completed`/`verified` or `tasks.status` becomes `cancelled`, set `tracking_active = false`.
+### Voiceover & captions
 
-### 2. Server logic (`createServerFn`)
+- ElevenLabs TTS via the standard connector. Voice: **Brian (nPczCjzI2devNBz1zQrb)** — matches the founder name and project tone; confident, mid-pitched. Model `eleven_turbo_v2_5`, MP3 44.1k.
+- Generate one MP3 per scene (request stitching with previous/next text) → write to `remotion/public/audio/voSceneN.mp3` → mount via `<Audio>` in each scene.
+- Captions: hand-authored caption tracks per scene (word-level chunks driven by frame math) rendered bottom-center in Inter 500, with a subtle backdrop bar. No automated transcription needed since copy is authored.
 
-`src/lib/tracking.functions.ts`:
-- `startTracking({ taskId })` — verifies caller is assigned runner; sets `runner_state='en_route'`, `tracking_active=true`, stamps `en_route_at`.
-- `transitionRunnerState({ taskId, state })` — validates transition (accepted→en_route→arrived→in_progress→completed); stamps the matching timestamp; on `completed` also flips `tracking_active=false`.
-- `submitPing({ taskId, lat, lng, accuracy, speed, heading })` — inserts into `task_location_pings`. Server validates assignment + `tracking_active=true`.
-- `stopTracking({ taskId, reason })` — runner can stop manually; flips flag, logs reason.
-- `logPermissionEvent({ taskId, outcome, error })` — records denied/unavailable.
+### Technical approach
 
-`src/lib/tracking-admin.functions.ts`:
-- `getTaskTrail({ taskId })` — admin/investor/runner-scoped; returns ordered pings.
-- `flagSuspiciousTasks()` — admin list: tasks completed with last ping outside geofence.
-- `adminOverrideCompletion({ taskId, reason })` — admin-only.
+- Scaffold `remotion/` per the video-creator skill (bun init, install remotion + transitions + google-fonts + compositor binary fix, ffmpeg symlinks).
+- File layout:
+  ```
+  remotion/
+    src/
+      index.ts
+      Root.tsx
+      MainVideo.tsx
+      scenes/{Hook,Problem,Solution,HowItWorks,Marketplace,Close}.tsx
+      components/{PersistentGrid,AccentOrb,Caption,TaskChip,MapDots,StepCard}.tsx
+      captions/script.ts
+    public/audio/voScene{1..6}.mp3
+    scripts/render-remotion.mjs
+    scripts/generate-vo.mjs   # calls ElevenLabs, writes MP3s to public/audio
+  ```
+- ElevenLabs key sourced from the standard connector (`ELEVENLABS_API_KEY`). If not already linked, link it before generating VO. Script reads from env at run time only — no key in source.
+- Render via the programmatic script (`chromeMode: "chrome-for-testing"`, `muted: false` since we need audio, concurrency 1, no `backdropFilter`).
+- Output: `/mnt/documents/reirunner-explainer.mp4`, then post `<presentation-artifact>` for download.
 
-`src/lib/geocoding.server.ts`:
-- `geocodeAddress(address, city, state, zip)` via Mapbox forward geocoding using `MAPBOX_PUBLIC_TOKEN`.
-- Called from existing task create/update server fns to fill `property_lat/lng` (one-shot, cached).
+### Build steps
 
-### 3. Runner UX (mobile-first)
+1. Connect ElevenLabs (if not already) via `standard_connectors--connect`.
+2. Scaffold `remotion/` directory, install deps, fix compositor + ffmpeg.
+3. Write `scripts/generate-vo.mjs`, run it to produce 6 MP3s under `public/audio/`.
+4. Build scene components, persistent layers, MainVideo composition (900 frames @ 30fps, 1920x1080).
+5. Spot-check key frames with `bunx remotion still` (frames 30, 150, 360, 600, 800).
+6. Render full MP4 to `/mnt/documents/reirunner-explainer.mp4`.
+7. Verify file exists, post artifact tag.
 
-`src/components/tracking/TaskTrackingPanel.tsx` (rendered inside the existing task detail / runner dashboard):
-- **Status pill** showing current `runner_state` with action button:
-  - Accepted → **Start Navigation** (consent sheet → permission → state=en_route → `watchPosition` starts)
-  - En Route → **I've Arrived** (only enabled when geofence-inside)
-  - Arrived → **Start Task**
-  - In Progress → **Complete Task** (warns + requires confirmation if outside geofence)
-- **Consent sheet** (`TrackingConsentSheet.tsx`) — explains exactly what's tracked, when it stops, who sees it. Required before first start.
-- **TrackingActiveBanner** — persistent top bar while `tracking_active=true`: pulsing dot + "Tracking active for [task title] · Stop".
-- **useTaskTracking() hook** — owns `navigator.geolocation.watchPosition`; throttles to one ping per 20 s OR ≥30 m movement (Haversine). Pings the server fn. Auto-stops on unmount, on `visibilitychange` to hidden for >5 min, on task state transition, and when the page unloads. Backoff and retry on transient network failures; buffers up to 20 pings while offline (already cached by PWA SW) and flushes on reconnect.
-- Permission denial / position-unavailable → fallback UI, logs permission event, surfaces "Enable location to continue this task" with retry.
+### Out of scope
 
-### 4. Investor UX
-
-`src/routes/_authenticated/tasks.$taskId.tracking.tsx`:
-- **Map** (Mapbox GL) showing property marker, geofence circle, runner's latest ping with timestamp + accuracy.
-- **Status timeline** — accepted → en route → arrived → in progress → completed → verified with timestamps.
-- **Inside radius?** badge — green/red.
-- Realtime channel subscribed to `task_location_pings` filtered by `task_id` for live updates.
-- Submission view augmented: completion photos + GPS verification stamp side-by-side.
-
-### 5. Admin UX
-
-`src/routes/_authenticated/admin/tracking.tsx`:
-- Tab: **Flagged tasks** — list of completed tasks where last ping was outside geofence or no pings exist.
-- Detail drill-in: full ping trail rendered as polyline on Mapbox, ping list with timestamps/accuracy/distance, permission event log, "Verify" and "Override completion" buttons.
-
-### 6. Privacy guarantees enforced
-
-- Server fn refuses pings when `tasks.runner_state ∈ {completed, verified, cancelled}` or `tracking_active=false`.
-- Auto-stop trigger on terminal states.
-- `last_active_at` heartbeat on the runner page; if no ping/heartbeat for 10 min, server fn `sweepStaleTracking` (cron, daily-but-can-be-frequent) flips `tracking_active=false` and inserts a `task_status_events` "tracking_auto_stopped" entry.
-- RLS scopes pings to (runner, investor, admin) only.
-- Runner-visible "Stop tracking" button always available.
-- No tracking outside an active task window — there is no `users.location` table at all.
-
-### 7. Geocoding lifecycle
-
-- On task create/update of address fields, call `geocodeAddress` → fill `property_lat/lng`. If geocoding fails, task still posts but tracking marks `geofence_unknown` and skips the inside-radius check (admin gets a "missing coordinates" flag).
-
-### Files to create
-- `supabase/migrations/<ts>_task_gps_tracking.sql`
-- `src/lib/tracking.functions.ts`
-- `src/lib/tracking-admin.functions.ts`
-- `src/lib/geocoding.server.ts`
-- `src/hooks/useTaskTracking.ts`
-- `src/components/tracking/TaskTrackingPanel.tsx`
-- `src/components/tracking/TrackingConsentSheet.tsx`
-- `src/components/tracking/TrackingActiveBanner.tsx`
-- `src/components/tracking/TaskMap.tsx` (Mapbox wrapper — geofence circle + markers + trail polyline)
-- `src/routes/_authenticated/tasks.$taskId.tracking.tsx`
-- `src/routes/_authenticated/admin/tracking.tsx`
-
-### Files to edit
-- `src/lib/tasks.functions.ts` — call geocoder on create/update; expose `runner_state` transitions
-- Runner dashboard / task detail — mount `TaskTrackingPanel`
-- Investor dashboard / task detail — add "Track runner" link
-- Admin nav — add Tracking entry
-- `src/routes/__root.tsx` — mount `TrackingActiveBanner` so it persists across routes
-- `src/integrations/supabase/types.ts` (regen)
-
-### Out of scope (call out, don't build)
-- Background tracking when the PWA tab is fully closed — browsers don't allow it. Tracking pauses when the tab is backgrounded by the OS; we surface this clearly in the consent sheet ("keep this screen open while on the way"). Native background tracking would require Capacitor `@capacitor/geolocation` + a foreground service, which we can add later if needed.
-
-Reply **go** to build, or tell me what to change.
+- No interactive UI, CTAs, or web embed component (this is a downloadable MP4).
+- No background music track (VO + designed silence). Can add later if requested.
+- No multi-language captions.
+- Won't modify any app routes or business logic.
