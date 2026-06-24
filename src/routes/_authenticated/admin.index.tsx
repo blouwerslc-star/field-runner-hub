@@ -141,6 +141,7 @@ function AdminDashboard() {
     setInvestors(investorRows);
     setTasks((t.data ?? []) as Task[]);
     setLoading(false);
+    overview.refetch();
   }
 
   useEffect(() => {
