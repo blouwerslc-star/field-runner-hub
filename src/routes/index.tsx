@@ -666,6 +666,8 @@ function Index() {
         </div>
       </section>
 
+      </div>
+
       {/* LIVE ACTIVITY TICKER */}
       <MarketplaceUpdatesTicker />
 
