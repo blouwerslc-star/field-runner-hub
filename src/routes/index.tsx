@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import founderPhoto from "@/assets/founder-brian.jpg";
 import { Toaster } from "@/components/ui/sonner";
 import { Button } from "@/components/ui/button";
@@ -52,7 +52,8 @@ import { StateCoverageMap } from "@/components/maps/StateCoverageMap";
 import { TestimonialsSection } from "@/components/landing/TestimonialsSection";
 import { SampleDeliverablesSection } from "@/components/landing/SampleDeliverablesSection";
 import { MobileDrawer } from "@/components/navigation/MobileDrawer";
-import { ExplainerVideoModal } from "@/components/landing/ExplainerVideoModal";
+import explainerVideo from "@/assets/reirunner-explainer.mp4.asset.json";
+import { Volume2, VolumeX } from "lucide-react";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -403,19 +404,14 @@ function Index() {
   const goSignupInvestor = () => navigate({ to: "/signup", search: { role: "investor", redirect: "/dashboard" } });
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [showStickyCta, setShowStickyCta] = useState(false);
-  const [showIntro, setShowIntro] = useState(false);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    try {
-      if (!sessionStorage.getItem("reirunner_explainer_seen")) {
-        setShowIntro(true);
-        sessionStorage.setItem("reirunner_explainer_seen", "1");
-      }
-    } catch {
-      setShowIntro(true);
-    }
-  }, []);
+  const [videoMuted, setVideoMuted] = useState(true);
+  const heroVideoRef = useRef<HTMLVideoElement>(null);
+  const toggleHeroVideoMute = () => {
+    const v = heroVideoRef.current;
+    if (!v) return;
+    v.muted = !v.muted;
+    setVideoMuted(v.muted);
+  };
 
   useEffect(() => {
     // Show sticky mobile CTA only after the hero is scrolled past
@@ -443,7 +439,6 @@ function Index() {
 
   return (
     <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
-      {showIntro && <ExplainerVideoModal onClose={() => setShowIntro(false)} />}
       <Toaster richColors closeButton position="top-center" theme="dark" />
 
       {/* NAV */}
@@ -572,6 +567,36 @@ function Index() {
             </a>
           </div>
       </MobileDrawer>
+
+      {/* EXPLAINER VIDEO (inline hero) */}
+      <section className="relative isolate overflow-hidden border-b border-border/60">
+        <div aria-hidden className="absolute inset-0 -z-10 bg-hero opacity-60" />
+        <div aria-hidden className="absolute inset-0 -z-10 grid-bg opacity-40" />
+        <div className="mx-auto max-w-6xl px-5 pt-8 pb-10 md:pt-12 md:pb-14">
+          <div className="relative rounded-2xl border border-border bg-card/40 backdrop-blur overflow-hidden shadow-card">
+            <video
+              ref={heroVideoRef}
+              src={explainerVideo.url}
+              autoPlay
+              muted
+              playsInline
+              loop
+              controls
+              preload="auto"
+              className="w-full aspect-video bg-black"
+            />
+            <button
+              type="button"
+              onClick={toggleHeroVideoMute}
+              aria-label={videoMuted ? "Unmute video" : "Mute video"}
+              className="absolute top-3 right-3 md:top-4 md:right-4 inline-flex items-center gap-2 px-3 py-2 rounded-full bg-primary text-primary-foreground text-xs md:text-sm font-medium shadow-glow hover:scale-105 transition"
+            >
+              {videoMuted ? <VolumeX className="size-4" /> : <Volume2 className="size-4" />}
+              {videoMuted ? "Tap for sound" : "Sound on"}
+            </button>
+          </div>
+        </div>
+      </section>
 
       {/* HERO */}
       <section id="top" className="relative isolate overflow-hidden">
@@ -882,21 +907,6 @@ function Index() {
         <p className="mt-6 text-center text-xs text-muted-foreground max-w-2xl mx-auto">
           Coverage depends on approved runner availability in each market.
         </p>
-      </Section>
-
-      {/* VIDEO */}
-      <Section>
-        <SectionHeader eyebrow="Watch" title="What Is REI Runner?" subtitle="A 60-second look at how we're building the modern real estate field network." />
-        <div className="max-w-4xl mx-auto rounded-2xl border border-border bg-card/60 backdrop-blur overflow-hidden shadow-card aspect-video grid place-items-center relative group">
-          <div aria-hidden className="absolute inset-0 bg-hero opacity-60" />
-          <div aria-hidden className="absolute inset-0 grid-bg opacity-50" />
-          <button type="button" onClick={() => setShowIntro(true)} className="relative z-10 flex flex-col items-center gap-3 text-foreground">
-            <span className="size-20 rounded-full bg-gradient-primary grid place-items-center shadow-glow group-hover:scale-110 transition-transform">
-              <PlayCircle className="size-10 text-primary-foreground" />
-            </span>
-            <span className="text-sm text-muted-foreground">Play 30-second explainer</span>
-          </button>
-        </div>
       </Section>
 
       {/* ABOUT */}
