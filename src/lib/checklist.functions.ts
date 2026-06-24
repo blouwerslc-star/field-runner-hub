@@ -2,6 +2,9 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
+type JsonValue = string | number | boolean | null | JsonValue[] | { [key: string]: JsonValue };
+type JsonObject = { [key: string]: JsonValue };
+
 export type RunnerStepType =
   | "photo"
   | "video"
@@ -41,7 +44,7 @@ export type TaskHeader = {
   runner_state: string | null;
   status: string;
   template_id: string | null;
-  template_inputs: Record<string, unknown> | null;
+  template_inputs: JsonObject | null;
   last_ping_within_geofence: boolean | null;
   geofence_radius_ft: number;
   property_address: string;
@@ -55,7 +58,7 @@ export type StepProgress = {
   task_id: string;
   step_key: string;
   status: "pending" | "skipped" | "done";
-  data: Record<string, unknown>;
+  data: JsonObject;
   file_ids: string[];
   completed_at: string | null;
   completed_by: string | null;
