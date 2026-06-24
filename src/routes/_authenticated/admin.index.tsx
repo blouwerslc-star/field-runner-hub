@@ -445,7 +445,7 @@ function AdminOverviewSection({
 
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
         <KPI icon={Users} label="Users" value={k.total_users} />
-        <KPI icon={ShieldCheck} label="Approved runners" value={k.approved_runners} to="/admin/runner-approvals" />
+        <KPI icon={ShieldCheck} label="Runners" value={k.approved_runners} to="/admin/runner-approvals" />
         <KPI icon={UserCog} label="Investors" value={k.registered_investors} />
         <KPI icon={ClipboardList} label="Open tasks" value={k.open_tasks} />
         <KPI icon={ClipboardList} label="Completed" value={k.completed_tasks} tone="success" />
@@ -471,7 +471,6 @@ function AdminOverviewSection({
           tone={k.pending_background_checks > 0 ? "warning" : "default"}
           to="/admin/background-checks"
         />
-        <KPI icon={ClipboardList} label="Total tasks" value={k.total_tasks} />
         <KPI
           icon={AlertTriangle}
           label="Email fails 24h"
@@ -479,7 +478,6 @@ function AdminOverviewSection({
           tone={k.failed_emails_24h > 0 ? "danger" : "default"}
           to="/admin/email-monitor"
         />
-        <KPI icon={Activity} label="Marketplace" value="Health" to="/admin/marketplace-health" />
       </div>
 
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
