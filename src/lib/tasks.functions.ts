@@ -147,6 +147,12 @@ export const createInvestorTask = createServerFn({ method: "POST" })
       .select("*")
       .single();
     if (error) throw new Error(error.message);
+    try {
+      const { notifyRunnersOfNewTask } = await import("./notify-new-task.server");
+      void notifyRunnersOfNewTask(row);
+    } catch (e) {
+      console.error("[createInvestorTask] notify failed", e);
+    }
     return { task: row };
   });
 
@@ -227,8 +233,14 @@ export const bulkCreateInvestorTasks = createServerFn({ method: "POST" })
     const { data: inserted, error } = await supabase
       .from("tasks")
       .insert(rows)
-      .select("id");
+      .select("*");
     if (error) throw new Error(error.message);
+    try {
+      const { notifyRunnersOfNewTask } = await import("./notify-new-task.server");
+      for (const r of inserted ?? []) void notifyRunnersOfNewTask(r);
+    } catch (e) {
+      console.error("[bulkCreateInvestorTasks] notify failed", e);
+    }
     return { count: inserted?.length ?? 0 };
   });
 
