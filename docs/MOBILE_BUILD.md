@@ -36,6 +36,14 @@ After the first `cap:add:ios`, open `ios/App/App/Info.plist` and add:
 <string>REI Runner can save task deliverables back to your photo library.</string>
 <key>NSLocationWhenInUseUsageDescription</key>
 <string>REI Runner uses your location to show nearby tasks and verify on-site presence at properties.</string>
+<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+<string>REI Runner verifies you reached the property even when the app is in the background or your phone is locked. Tracking only runs while a task is active.</string>
+<key>NSLocationAlwaysUsageDescription</key>
+<string>REI Runner verifies you reached the property while the app is in the background. Tracking only runs while a task is active.</string>
+<key>UIBackgroundModes</key>
+<array>
+  <string>location</string>
+</array>
 <key>NSMicrophoneUsageDescription</key>
 <string>REI Runner records audio with property walkthrough videos.</string>
 ```
@@ -49,6 +57,9 @@ and add inside `<manifest>` (before `<application>`):
 <uses-permission android:name="android.permission.RECORD_AUDIO" />
 <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+<uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
+<uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+<uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
 <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
 <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
 <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
