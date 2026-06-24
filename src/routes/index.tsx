@@ -868,17 +868,20 @@ function Index() {
         <SectionHeader eyebrow="How It Works" title="On-Demand Field Work in 4 Steps" subtitle="Investors post a task. A local runner accepts, completes it, and gets paid." />
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
           {STEPS.map((s, i) => (
-            <div key={s.n} className="relative rounded-2xl border border-border bg-card/60 backdrop-blur p-6 shadow-card hover:border-primary/40 hover:-translate-y-1 transition-all duration-300 group">
-              <div className="text-xs font-mono text-primary mb-3">STEP {s.n}</div>
-              <div className="size-12 rounded-xl bg-primary/10 grid place-items-center mb-4 group-hover:bg-primary/20 transition">
-                <s.icon className="size-6 text-primary" />
+            <LandingExamplePopover key={s.n} example={HOW_IT_WORKS_EXAMPLES[s.n] ?? { title: s.title, body: s.body }}>
+              <div className="relative rounded-2xl border border-border bg-card/60 backdrop-blur p-6 shadow-card hover:border-primary/40 transition-colors duration-300 group">
+                <div className="text-xs font-mono text-primary mb-3">STEP {s.n}</div>
+                <div className="size-12 rounded-xl bg-primary/10 grid place-items-center mb-4 group-hover:bg-primary/20 transition">
+                  <s.icon className="size-6 text-primary" />
+                </div>
+                <h3 className="text-lg font-semibold mb-1">{s.title}</h3>
+                <p className="text-sm text-muted-foreground">{s.body}</p>
+                <p className="mt-3 text-xs font-medium text-primary/80">Preview example →</p>
+                {i < STEPS.length - 1 && (
+                  <ArrowRight className="hidden lg:block absolute -right-4 top-1/2 -translate-y-1/2 size-4 text-primary/60" />
+                )}
               </div>
-              <h3 className="text-lg font-semibold mb-1">{s.title}</h3>
-              <p className="text-sm text-muted-foreground">{s.body}</p>
-              {i < STEPS.length - 1 && (
-                <ArrowRight className="hidden lg:block absolute -right-4 top-1/2 -translate-y-1/2 size-4 text-primary/60" />
-              )}
-            </div>
+            </LandingExamplePopover>
           ))}
         </div>
       </Section>
