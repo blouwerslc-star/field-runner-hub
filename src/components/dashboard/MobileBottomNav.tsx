@@ -48,7 +48,7 @@ export function MobileBottomNav({
   return (
     <nav
       aria-label="Primary mobile navigation"
-      className="xl:hidden fixed bottom-0 inset-x-0 z-40 border-t border-border/60 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 pb-[env(safe-area-inset-bottom)]"
+      className="xl:hidden fixed bottom-0 inset-x-0 z-40 border-t border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/85 pb-[env(safe-area-inset-bottom)]"
     >
       <ul className="mx-auto max-w-md grid grid-cols-5">
         {ITEMS.map((item) => {
@@ -59,14 +59,14 @@ export function MobileBottomNav({
               <Link
                 to={item.to}
                 className={cn(
-                  "relative flex flex-col items-center justify-center gap-0.5 min-h-14 py-2 text-[10px] font-medium transition-colors",
-                  active ? "text-primary" : "text-muted-foreground hover:text-foreground",
+                  "relative flex flex-col items-center justify-center gap-1 min-h-14 py-2 text-[11px] font-medium transition-colors",
+                  active ? "text-primary" : "text-foreground/80 hover:text-foreground",
                 )}
               >
-                <item.icon className="size-5" aria-hidden />
+                <item.icon className="size-6" aria-hidden />
                 <span className="leading-none">{item.label}</span>
                 {isMessages && unreadTotal > 0 && (
-                  <span className="absolute top-1.5 right-[28%] size-4 rounded-full bg-primary text-[9px] font-bold text-primary-foreground grid place-items-center">
+                  <span className="absolute top-1 right-[24%] min-w-[18px] h-[18px] px-1 rounded-full bg-primary text-[10px] font-bold text-primary-foreground grid place-items-center">
                     {unreadTotal > 9 ? "9+" : unreadTotal}
                   </span>
                 )}
@@ -85,9 +85,9 @@ export function MobileBottomNav({
             type="button"
             onClick={onOpenMenu}
             aria-label="Open full menu"
-            className="flex flex-col items-center justify-center gap-0.5 min-h-14 py-2 text-[10px] font-medium text-muted-foreground hover:text-foreground transition-colors"
+            className="flex flex-col items-center justify-center gap-1 min-h-14 py-2 text-[11px] font-medium text-foreground/80 hover:text-foreground transition-colors"
           >
-            <Menu className="size-5" aria-hidden />
+            <Menu className="size-6" aria-hidden />
             <span className="leading-none">More Options</span>
           </button>
         </li>
