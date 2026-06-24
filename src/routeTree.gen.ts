@@ -81,6 +81,7 @@ import { Route as AuthenticatedDashboardFavoritesRouteImport } from './routes/_a
 import { Route as AuthenticatedDashboardAnalyticsRouteImport } from './routes/_authenticated/dashboard.analytics'
 import { Route as AuthenticatedAdminVerificationsRouteImport } from './routes/_authenticated/admin.verifications'
 import { Route as AuthenticatedAdminTrackingRouteImport } from './routes/_authenticated/admin.tracking'
+import { Route as AuthenticatedAdminTaskTypeRequestsRouteImport } from './routes/_authenticated/admin.task-type-requests'
 import { Route as AuthenticatedAdminSignupFailuresRouteImport } from './routes/_authenticated/admin.signup-failures'
 import { Route as AuthenticatedAdminRunnerApprovalsRouteImport } from './routes/_authenticated/admin.runner-approvals'
 import { Route as AuthenticatedAdminPushTestRouteImport } from './routes/_authenticated/admin.push-test'
@@ -503,6 +504,12 @@ const AuthenticatedAdminTrackingRoute =
     path: '/tracking',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminTaskTypeRequestsRoute =
+  AuthenticatedAdminTaskTypeRequestsRouteImport.update({
+    id: '/task-type-requests',
+    path: '/task-type-requests',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminSignupFailuresRoute =
   AuthenticatedAdminSignupFailuresRouteImport.update({
     id: '/signup-failures',
@@ -739,6 +746,7 @@ export interface FileRoutesByFullPath {
   '/admin/push-test': typeof AuthenticatedAdminPushTestRoute
   '/admin/runner-approvals': typeof AuthenticatedAdminRunnerApprovalsRoute
   '/admin/signup-failures': typeof AuthenticatedAdminSignupFailuresRoute
+  '/admin/task-type-requests': typeof AuthenticatedAdminTaskTypeRequestsRoute
   '/admin/tracking': typeof AuthenticatedAdminTrackingRoute
   '/admin/verifications': typeof AuthenticatedAdminVerificationsRoute
   '/dashboard/analytics': typeof AuthenticatedDashboardAnalyticsRoute
@@ -837,6 +845,7 @@ export interface FileRoutesByTo {
   '/admin/push-test': typeof AuthenticatedAdminPushTestRoute
   '/admin/runner-approvals': typeof AuthenticatedAdminRunnerApprovalsRoute
   '/admin/signup-failures': typeof AuthenticatedAdminSignupFailuresRoute
+  '/admin/task-type-requests': typeof AuthenticatedAdminTaskTypeRequestsRoute
   '/admin/tracking': typeof AuthenticatedAdminTrackingRoute
   '/admin/verifications': typeof AuthenticatedAdminVerificationsRoute
   '/dashboard/analytics': typeof AuthenticatedDashboardAnalyticsRoute
@@ -942,6 +951,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/push-test': typeof AuthenticatedAdminPushTestRoute
   '/_authenticated/admin/runner-approvals': typeof AuthenticatedAdminRunnerApprovalsRoute
   '/_authenticated/admin/signup-failures': typeof AuthenticatedAdminSignupFailuresRoute
+  '/_authenticated/admin/task-type-requests': typeof AuthenticatedAdminTaskTypeRequestsRoute
   '/_authenticated/admin/tracking': typeof AuthenticatedAdminTrackingRoute
   '/_authenticated/admin/verifications': typeof AuthenticatedAdminVerificationsRoute
   '/_authenticated/dashboard/analytics': typeof AuthenticatedDashboardAnalyticsRoute
@@ -1047,6 +1057,7 @@ export interface FileRouteTypes {
     | '/admin/push-test'
     | '/admin/runner-approvals'
     | '/admin/signup-failures'
+    | '/admin/task-type-requests'
     | '/admin/tracking'
     | '/admin/verifications'
     | '/dashboard/analytics'
@@ -1145,6 +1156,7 @@ export interface FileRouteTypes {
     | '/admin/push-test'
     | '/admin/runner-approvals'
     | '/admin/signup-failures'
+    | '/admin/task-type-requests'
     | '/admin/tracking'
     | '/admin/verifications'
     | '/dashboard/analytics'
@@ -1249,6 +1261,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/push-test'
     | '/_authenticated/admin/runner-approvals'
     | '/_authenticated/admin/signup-failures'
+    | '/_authenticated/admin/task-type-requests'
     | '/_authenticated/admin/tracking'
     | '/_authenticated/admin/verifications'
     | '/_authenticated/dashboard/analytics'
@@ -1843,6 +1856,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminTrackingRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/task-type-requests': {
+      id: '/_authenticated/admin/task-type-requests'
+      path: '/task-type-requests'
+      fullPath: '/admin/task-type-requests'
+      preLoaderRoute: typeof AuthenticatedAdminTaskTypeRequestsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/signup-failures': {
       id: '/_authenticated/admin/signup-failures'
       path: '/signup-failures'
@@ -2107,6 +2127,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminPushTestRoute: typeof AuthenticatedAdminPushTestRoute
   AuthenticatedAdminRunnerApprovalsRoute: typeof AuthenticatedAdminRunnerApprovalsRoute
   AuthenticatedAdminSignupFailuresRoute: typeof AuthenticatedAdminSignupFailuresRoute
+  AuthenticatedAdminTaskTypeRequestsRoute: typeof AuthenticatedAdminTaskTypeRequestsRoute
   AuthenticatedAdminTrackingRoute: typeof AuthenticatedAdminTrackingRoute
   AuthenticatedAdminVerificationsRoute: typeof AuthenticatedAdminVerificationsRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
@@ -2128,6 +2149,8 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminRunnerApprovalsRoute:
     AuthenticatedAdminRunnerApprovalsRoute,
   AuthenticatedAdminSignupFailuresRoute: AuthenticatedAdminSignupFailuresRoute,
+  AuthenticatedAdminTaskTypeRequestsRoute:
+    AuthenticatedAdminTaskTypeRequestsRoute,
   AuthenticatedAdminTrackingRoute: AuthenticatedAdminTrackingRoute,
   AuthenticatedAdminVerificationsRoute: AuthenticatedAdminVerificationsRoute,
   AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
