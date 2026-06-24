@@ -357,7 +357,7 @@ export const getStateCoverage = createServerFn({ method: "GET" }).handler(async 
     if (!runnerIds.has((p as any).user_id)) continue;
     if ((p as any).suspended) continue;
     const code = raw.toUpperCase();
-    const bucket = byState.get(code) ?? { state: code, count: 0, preview: [] };
+    const bucket: State = byState.get(code) ?? { state: code, count: 0, preview: [] };
     bucket.count += 1;
     if (bucket.preview.length < 5 && (p as any).public_profile_enabled !== false) {
       bucket.preview.push({
