@@ -43,6 +43,7 @@ import {
 } from "@/lib/tasks.functions";
 import { listTaskTemplates, upsertTaskTemplate } from "@/lib/templates.functions";
 import { getPricingCatalog, type PricingTemplate } from "@/lib/pricing.functions";
+import { RequestTaskTypeDialog } from "@/components/dashboard/investor/RequestTaskTypeDialog";
 import { cn } from "@/lib/utils";
 
 type TaskTypeOption = {
