@@ -2,8 +2,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { BrandLogo } from "@/components/brand/BrandLogo";
-import { MarketplaceMap, type MapPoint } from "@/components/maps/MarketplaceMap";
-import { getCoverageDashboard, getCoveragePoints } from "@/lib/public-stats.functions";
+import { StateCoverageMap } from "@/components/maps/StateCoverageMap";
+import { getCoverageDashboard } from "@/lib/public-stats.functions";
 import {
   ArrowRight,
   MapPin,
@@ -55,44 +55,11 @@ function timeAgo(iso?: string | null): string {
 
 function CoveragePage() {
   const dashFn = useServerFn(getCoverageDashboard);
-  const pointsFn = useServerFn(getCoveragePoints);
 
   const { data, isLoading } = useQuery({
     queryKey: ["coverage-dashboard"],
     queryFn: () => dashFn(),
     staleTime: 5 * 60_000,
-  });
-  const { data: pointsData } = useQuery({
-    queryKey: ["coverage-points"],
-    queryFn: () => pointsFn(),
-    staleTime: 5 * 60_000,
-  });
-
-  const points: MapPoint[] = (pointsData?.points ?? []).flatMap((p) => {
-    const items: MapPoint[] = [];
-    if (p.runners > 0) {
-      items.push({
-        id: `r-${p.id}`,
-        kind: "runner",
-        title: `${p.city}, ${p.state}`,
-        subtitle: `${p.runners} runner${p.runners === 1 ? "" : "s"} active`,
-        city: p.city,
-        state: p.state,
-        badge: "Coverage",
-      });
-    }
-    if (p.tasks > 0) {
-      items.push({
-        id: `t-${p.id}`,
-        kind: "task",
-        title: `${p.city}, ${p.state}`,
-        subtitle: `${p.tasks} open task${p.tasks === 1 ? "" : "s"}`,
-        city: p.city,
-        state: p.state,
-        badge: "Demand",
-      });
-    }
-    return items;
   });
 
   const totals = data?.totals;
@@ -170,14 +137,9 @@ function CoveragePage() {
 
       {/* Map */}
       <section className="mx-auto max-w-6xl px-5 py-10">
-        <MarketplaceMap
-          points={points}
-          title="Coverage map"
-          height={480}
-          emptyMessage="Coverage data is loading — check back as runners join your market."
-        />
+        <StateCoverageMap height={480} />
         <div className="mt-3 text-xs text-muted-foreground">
-          Green pins show runner coverage. Blue pins show open investor demand. City-level only —
+          State counts show registered runner coverage. City-level demand is summarized below —
           we never expose precise addresses.
         </div>
       </section>
