@@ -1,57 +1,51 @@
-# Notify runners when a new task is posted
+# Clean up mobile
 
-When an investor posts a task (single or bulk), email every eligible runner so they can pick it up quickly. SMS is intentionally out of scope for this change.
+Based on captures of the home page and `/tasks` on a 390px viewport, plus a sweep of the public route headers, the "crowded" feeling on mobile comes from a few specific places. Plan is to fix the responsive issues, not redesign — same look on desktop, cleaner stack on mobile.
 
-## Eligibility
+## What's actually broken on mobile
 
-A runner gets the email only if all are true:
-- `profile.role = 'runner'` and account is active (not banned/suspended)
-- `notification_prefs.email_enabled` is not `false`
-- `notification_prefs.new_task_alerts` is not `false`
-- Runner is in the same `state` as the task (simple geo filter to avoid spamming the whole country — investor's `state` field). If their state is empty, they're excluded.
-- Runner email is not in `suppressed_emails` (already enforced by `sendTransactionalEmail`)
+1. **Public page headers don't collapse.** `tasks.tsx`, `profiles.tsx`, `investors.tsx`, `runners.tsx`, and `story.tsx` each render their nav links (`Browse runners / Hire a Runner / Become a Runner / Sign in`) in a flex row with no `md:hidden`. On 390px they overlap the logo and crash into each other. Only `index.tsx` has a hamburger + MobileDrawer.
+2. **Landing hero is just a giant video on mobile.** Above-the-fold on a phone shows a black video block with a "Tap for sound" pill — no headline, no value prop, no CTA visible. The "Hire a Runner" button in the header is the only signal.
+3. **`/tasks` activity card is dense.** Six stat tiles in a 2-col grid plus a big "Open tasks" headline push the actual listings far below the fold.
+4. **State coverage map is unusable on phones.** The US grid renders tiny squares scattered across the width with most cells blank — no meaningful interaction at this size.
+5. **No spacing for the safe-area / iOS notch on the bottom nav routes** is OK already; the dashboard shell handles it. Public pages have no bottom nav, which is fine — they just need the headers fixed.
 
-If the task has a `preferred_runner_id`, only that runner is emailed (it's effectively a direct assignment, not a marketplace alert).
+## Changes
 
-## New email template
+### 1. Shared public header (new)
+Extract a `PublicHeader` component (`src/components/layout/PublicHeader.tsx`) that:
+- Shows logo + primary CTA(s) on every breakpoint.
+- Hides the inline nav links at `<md` and shows a hamburger that opens the existing `MobileDrawer`.
+- Accepts a `links` prop so each route can pass its own set.
+- Replace the inline headers in `tasks.tsx`, `profiles.tsx`, `investors.tsx`, `runners.tsx`, `story.tsx` with `<PublicHeader />`. Keep `index.tsx`'s existing custom header (it already works) or migrate it too in the same pass for consistency.
 
-Add `src/lib/email-templates/new-task-available.tsx` (registered in `registry.ts`) using the existing brand wrapper:
-- Subject: `New {task_type} task in {city}, {state} — ${payout}`
-- Preview: task title + city
-- Body: title, type, city/state, payout, due date, short description, "View task" CTA → `https://reirunner.com/tasks/{id}`
-- Props: `{ title, taskType, city, state, payoutAmount, dueDate, description, taskUrl, runnerFirstName }`
+### 2. Landing hero mobile order
+In `src/routes/index.tsx`, on mobile only:
+- Render the headline + subhead + primary CTAs **above** the hero video.
+- Cap the video to ~60svh on mobile (it currently consumes the full viewport).
+- Keep desktop layout unchanged.
 
-## Server wiring
+### 3. `/tasks` activity card tighten
+- Drop from 6 tiles to the 3 most relevant on mobile (Runners, Tasks Posted, Markets) with the others behind a "More stats" expand, OR a single horizontal scroller of stat chips.
+- Reduce vertical padding and font sizes one step on `<sm`.
+- Reduce the page top padding `py-10` → `py-6 sm:py-10`.
 
-New helper in `src/lib/tasks.functions.ts` (private, not exported as a server fn):
+### 4. Coverage map mobile fallback
+- At `<md`, hide the grid map and render a compact alternative: a searchable list / chip cloud of states sorted by runner count, with the same click-to-filter behavior. Keep the existing grid for `md+`.
 
-```
-async function notifyRunnersOfNewTask(task)
-```
-
-- Loads eligible runner emails via `supabaseAdmin` with the filters above.
-- Calls `sendTransactionalEmail` per runner (one recipient per send, per email rules), in a `Promise.allSettled` loop, swallowing individual failures.
-- Logs counts; never blocks task creation if email fails.
-
-Call sites:
-- `createInvestorTask` — fire-and-forget after the insert returns the row (skip if `preferred_runner_id` is set → email only that runner).
-- `bulkCreateInvestorTasks` — same, called once per created task.
-
-Because runners are emailed individually, this stays inside the transactional-email rules (one trigger → one recipient).
-
-## Settings UI
-
-No changes needed — `new_task_alerts` and `email_enabled` toggles already exist on `/settings/notifications`. Runners who disable either won't receive the email.
+### 5. Small global mobile polish
+- Header height `h-16` is fine; tighten container padding `px-5` → `px-4 sm:px-5` on the public pages so cards have a bit more breathing room on a 390px screen.
+- Audit any `flex` row that mixes text + fixed-size widgets and apply the responsive-row pattern (`grid-cols-[minmax(0,1fr)_auto]`, `min-w-0`, `shrink-0`, `truncate`) so text never overlaps icons.
 
 ## Out of scope
 
-- SMS notifications (planned for later, separate change).
-- Push notifications / OneSignal fan-out (already handled elsewhere if at all; not touched here).
-- Skill/radius matching beyond same-state filter — can add later if volume justifies.
-- Digest/batching — every new task triggers an immediate email.
+- Visual redesign / new color palette / new typography.
+- Authenticated dashboard layout — `DashboardShell` already has bottom nav + drawer and looked fine on review (will spot-check after the public-header fix and only adjust if a specific page is crowded).
+- Building a true interactive state map for mobile (replaced by a list/chip fallback instead).
 
 ## Files touched
 
-- `src/lib/email-templates/new-task-available.tsx` (new)
-- `src/lib/email-templates/registry.ts` (register template)
-- `src/lib/tasks.functions.ts` (add `notifyRunnersOfNewTask`, call from both create paths)
+- new `src/components/layout/PublicHeader.tsx`
+- `src/routes/tasks.tsx`, `src/routes/profiles.tsx`, `src/routes/investors.tsx`, `src/routes/runners.tsx`, `src/routes/story.tsx` — swap inline header, tighten padding (tasks)
+- `src/routes/index.tsx` — mobile hero order + video height
+- whichever component renders the coverage map under `/tasks` — add `<md` list fallback

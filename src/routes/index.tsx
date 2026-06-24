@@ -572,37 +572,7 @@ function Index() {
           </div>
       </MobileDrawer>
 
-      {/* EXPLAINER VIDEO (inline hero) */}
-      <section className="relative isolate overflow-hidden border-b border-border/60">
-        <div aria-hidden className="absolute inset-0 -z-10 bg-hero opacity-60" />
-        <div aria-hidden className="absolute inset-0 -z-10 grid-bg opacity-40" />
-        <div className="mx-auto max-w-6xl px-5 pt-8 pb-10 md:pt-12 md:pb-14">
-          <div className="relative rounded-2xl border border-border bg-card/40 backdrop-blur overflow-hidden shadow-card">
-            <video
-              ref={heroVideoRef}
-              key={activeVideo.url}
-              src={activeVideo.url}
-              autoPlay
-              muted
-              playsInline
-              controls
-              preload="auto"
-              className={`w-full bg-black ${isMobile ? "aspect-[9/16] max-h-[80vh] object-contain mx-auto" : "aspect-video"}`}
-            />
-            <button
-              type="button"
-              onClick={toggleHeroVideoMute}
-              aria-label={videoMuted ? "Unmute video" : "Mute video"}
-              className="absolute top-3 right-3 md:top-4 md:right-4 inline-flex items-center gap-2 px-3 py-2 rounded-full bg-primary text-primary-foreground text-xs md:text-sm font-medium shadow-glow hover:scale-105 transition"
-            >
-              {videoMuted ? <VolumeX className="size-4" /> : <Volume2 className="size-4" />}
-              {videoMuted ? "Tap for sound" : "Sound on"}
-            </button>
-          </div>
-        </div>
-      </section>
-
-      {/* HERO */}
+      {/* HERO — headline first so mobile users see value prop above the fold */}
       <section id="top" className="relative isolate overflow-hidden">
         <div aria-hidden className="absolute inset-0 -z-10 bg-hero" />
         <img
@@ -637,12 +607,12 @@ function Index() {
           ))}
         </div>
 
-        <div className="mx-auto max-w-7xl px-5 pt-20 pb-24 md:pt-28 md:pb-32 text-center">
+        <div className="mx-auto max-w-7xl px-4 sm:px-5 pt-10 pb-14 md:pt-28 md:pb-32 text-center">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-border bg-card/60 backdrop-blur text-xs text-muted-foreground animate-fade-up">
             <span className="size-1.5 rounded-full bg-primary animate-pulse" />
             Founding Runner Beta · Now accepting applications
           </div>
-          <h1 className="mt-6 text-4xl sm:text-6xl md:text-7xl font-bold leading-[1.05] animate-fade-up" style={{ animationDelay: "0.1s" }}>
+          <h1 className="mt-5 text-3xl sm:text-5xl md:text-7xl font-bold leading-[1.05] animate-fade-up" style={{ animationDelay: "0.1s" }}>
             Boots on the Ground
             <br />
             <span className="text-gradient">for Real Estate Investors</span>
@@ -661,6 +631,36 @@ function Index() {
           <p className="mt-6 text-xs text-muted-foreground animate-fade-up" style={{ animationDelay: "0.4s" }}>
             Funds held until you approve · ID-verified runners · No platform fee on top of your task price
           </p>
+        </div>
+      </section>
+
+      {/* EXPLAINER VIDEO (inline hero) — below the headline */}
+      <section className="relative isolate overflow-hidden border-b border-border/60">
+        <div aria-hidden className="absolute inset-0 -z-10 bg-hero opacity-60" />
+        <div aria-hidden className="absolute inset-0 -z-10 grid-bg opacity-40" />
+        <div className="mx-auto max-w-6xl px-4 sm:px-5 pt-4 pb-6 md:pt-12 md:pb-14">
+          <div className="relative rounded-2xl border border-border bg-card/40 backdrop-blur overflow-hidden shadow-card">
+            <video
+              ref={heroVideoRef}
+              key={activeVideo.url}
+              src={activeVideo.url}
+              autoPlay
+              muted
+              playsInline
+              controls
+              preload="auto"
+              className={`w-full bg-black ${isMobile ? "aspect-video max-h-[50svh] object-contain mx-auto" : "aspect-video"}`}
+            />
+            <button
+              type="button"
+              onClick={toggleHeroVideoMute}
+              aria-label={videoMuted ? "Unmute video" : "Mute video"}
+              className="absolute top-3 right-3 md:top-4 md:right-4 inline-flex items-center gap-2 px-3 py-2 rounded-full bg-primary text-primary-foreground text-xs md:text-sm font-medium shadow-glow hover:scale-105 transition"
+            >
+              {videoMuted ? <VolumeX className="size-4" /> : <Volume2 className="size-4" />}
+              {videoMuted ? "Tap for sound" : "Sound on"}
+            </button>
+          </div>
         </div>
       </section>
 

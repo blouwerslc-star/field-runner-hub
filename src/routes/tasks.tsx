@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { PublicHeader } from "@/components/layout/PublicHeader";
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
@@ -8,7 +9,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
-import { BrandLogo } from "@/components/brand/BrandLogo";
 import { Loader2, MapPin, DollarSign, Calendar, Search, BadgeCheck, Camera, Video, ShieldCheck } from "lucide-react";
 import { StateCoverageMap } from "@/components/maps/StateCoverageMap";
 
@@ -117,65 +117,59 @@ function MarketplacePage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <header className="sticky top-0 z-40 backdrop-blur bg-background/70 border-b border-border/60">
-        <div className="mx-auto max-w-6xl px-5 h-16 flex items-center justify-between">
-          <Link to="/" aria-label="REI Runner home"><BrandLogo /></Link>
-          <div className="flex items-center gap-3 text-sm">
-            <Link to="/profiles" className="text-muted-foreground hover:text-foreground">Browse runners</Link>
-            <Link to="/investors" className="text-muted-foreground hover:text-foreground">Hire a Runner</Link>
-            <Link to="/runners" className="text-muted-foreground hover:text-foreground">Become a Runner</Link>
-            {signedIn ? (
-              <Link to="/dashboard" className="text-muted-foreground hover:text-foreground">Dashboard</Link>
-            ) : (
-              <Link to="/login" className="text-muted-foreground hover:text-foreground">Sign in</Link>
-            )}
-          </div>
-        </div>
-      </header>
-      <main className="mx-auto max-w-6xl px-5 py-10">
+      <PublicHeader
+        maxWidth="max-w-6xl"
+        signedIn={!!signedIn}
+        links={[
+          { to: "/profiles", label: "Browse runners" },
+          { to: "/investors", label: "Hire a Runner" },
+          { to: "/runners", label: "Become a Runner" },
+        ]}
+      />
+      <main className="mx-auto max-w-6xl px-4 sm:px-5 py-6 sm:py-10">
         {stats && (
-          <div className="mb-8 rounded-2xl border border-border/60 bg-card/40 p-4">
+          <div className="mb-6 sm:mb-8 rounded-2xl border border-border/60 bg-card/40 p-3 sm:p-4">
             <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2 text-xs uppercase tracking-wider text-muted-foreground">
+              <div className="flex items-center gap-2 text-[11px] sm:text-xs uppercase tracking-wider text-muted-foreground">
                 <span className="inline-block size-2 rounded-full bg-emerald-400 animate-pulse" />
                 Live platform activity
               </div>
-              <span className="text-[10px] text-muted-foreground">Updates in real time</span>
+              <span className="hidden sm:inline text-[10px] text-muted-foreground">Updates in real time</span>
             </div>
-            <dl className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 text-sm">
+            <dl className="grid grid-cols-3 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4 text-sm">
               <div>
-                <dt className="text-muted-foreground text-xs uppercase tracking-wide">Runners</dt>
-                <dd className="text-2xl font-bold tabular-nums">{stats.runners}</dd>
+                <dt className="text-muted-foreground text-[10px] sm:text-xs uppercase tracking-wide">Runners</dt>
+                <dd className="text-xl sm:text-2xl font-bold tabular-nums">{stats.runners}</dd>
+              </div>
+              <div className="hidden sm:block">
+                <dt className="text-muted-foreground text-[10px] sm:text-xs uppercase tracking-wide">Investors</dt>
+                <dd className="text-xl sm:text-2xl font-bold tabular-nums">{stats.investors}</dd>
               </div>
               <div>
-                <dt className="text-muted-foreground text-xs uppercase tracking-wide">Investors</dt>
-                <dd className="text-2xl font-bold tabular-nums">{stats.investors}</dd>
+                <dt className="text-muted-foreground text-[10px] sm:text-xs uppercase tracking-wide">Tasks</dt>
+                <dd className="text-xl sm:text-2xl font-bold tabular-nums">{stats.tasks_total}</dd>
+              </div>
+              <div className="hidden sm:block">
+                <dt className="text-muted-foreground text-[10px] sm:text-xs uppercase tracking-wide">Completed</dt>
+                <dd className="text-xl sm:text-2xl font-bold tabular-nums">{stats.tasks_completed}</dd>
               </div>
               <div>
-                <dt className="text-muted-foreground text-xs uppercase tracking-wide">Tasks posted</dt>
-                <dd className="text-2xl font-bold tabular-nums">{stats.tasks_total}</dd>
+                <dt className="text-muted-foreground text-[10px] sm:text-xs uppercase tracking-wide">Markets</dt>
+                <dd className="text-xl sm:text-2xl font-bold tabular-nums">{stats.cities_active}</dd>
               </div>
-              <div>
-                <dt className="text-muted-foreground text-xs uppercase tracking-wide">Completed</dt>
-                <dd className="text-2xl font-bold tabular-nums">{stats.tasks_completed}</dd>
-              </div>
-              <div>
-                <dt className="text-muted-foreground text-xs uppercase tracking-wide">Markets</dt>
-                <dd className="text-2xl font-bold tabular-nums">{stats.cities_active}</dd>
-              </div>
-              <div>
-                <dt className="text-muted-foreground text-xs uppercase tracking-wide">Avg rating</dt>
-                <dd className="text-2xl font-bold tabular-nums">
+              <div className="hidden sm:block">
+                <dt className="text-muted-foreground text-[10px] sm:text-xs uppercase tracking-wide">Avg rating</dt>
+                <dd className="text-xl sm:text-2xl font-bold tabular-nums">
                   {stats.reviews_count > 0 ? stats.avg_rating.toFixed(1) : "—"}
                 </dd>
               </div>
             </dl>
           </div>
         )}
-        <div className="mb-8 flex flex-wrap items-end justify-between gap-6">
+        <div className="mb-6 sm:mb-8 flex flex-wrap items-end justify-between gap-4 sm:gap-6">
           <div>
-            <h1 className="text-3xl md:text-4xl font-bold tracking-tight">Open tasks</h1>
-            <p className="mt-2 text-muted-foreground">Real-time marketplace of property visits, photos, occupancy checks, and more.</p>
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight">Open tasks</h1>
+            <p className="mt-2 text-sm sm:text-base text-muted-foreground">Real-time marketplace of property visits, photos, occupancy checks, and more.</p>
           </div>
           {!isLoading && tasks.length > 0 && (
             <dl className="grid grid-cols-4 gap-6 text-sm">
