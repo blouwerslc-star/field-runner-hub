@@ -1,46 +1,43 @@
 ## Goal
 
-On the `/tasks` page, when example task cards are shown (empty marketplace state), tapping a card opens a popup that previews the template for that task type — split into an **Investor brief** (what they post / pay for) and a **Runner checklist** (what they execute on-site).
+On the landing page (`/`), the **"Tasks You Can Get Paid For"** service cards currently have no preview affordance. Add a popup example for each of the 6 service types showing what an investor posts and what a runner does — hover-card on desktop, bottom sheet on tap for mobile.
+
+Out of scope this turn (per your answers): How It Works steps, deliverables, stats, map, testimonials, FAQ. We can wire those next once this pattern is approved.
 
 ## UX
 
-- Trigger: tap/click the card (and Enter/Space for keyboard). Hover on desktop adds a subtle "Preview template →" affordance, but does not open the dialog (avoids accidental opens, works the same on touch).
-- Surface: `shadcn` `Dialog` on desktop, `Sheet` (bottom) on mobile via existing `useIsMobile`. Closable via X, esc, backdrop.
-- Header: task type chip + title + city/state + payout.
-- Body: two-column on desktop (`Investor` | `Runner`), stacked on mobile, each in its own labeled card with an icon.
-- Footer: "Become a Runner" + "Post a Task" CTAs (same as empty-state buttons), plus a small "Example only — not a live task" disclaimer.
+- **Desktop**: hover (or keyboard focus) opens a Radix `HoverCard` anchored to the card. Opens ~150ms in, closes when the pointer leaves. Card stays fully clickable as a link to `/tasks`.
+- **Mobile** (`useIsMobile`): tap opens a bottom `Sheet`. Hover-card is disabled on touch — no accidental opens.
+- **Affordance**: tiny "Preview example →" hint appears at the bottom of each card so users know there's more.
 
-## Template content
+## Popup content (per service)
 
-Define a per-`task_type` template map in a new `src/lib/sample-task-templates.ts`:
+Each popup shows two compact sections in one panel (not a giant dialog):
 
-```ts
-type SampleTemplate = {
-  investor: {
-    summary: string;           // 1-line what this gets you
-    fields: string[];          // what the investor fills in when posting
-    deliverables: string[];    // what they receive back
-    typicalPayout: string;     // e.g. "$45–85"
-  };
-  runner: {
-    summary: string;           // 1-line what the runner does
-    checklist: string[];       // ordered steps shown as numbered list
-    photoRequirements: string[]; // required shots
-    estTime: string;           // e.g. "20–30 min on-site"
-  };
-};
-```
+- **Investor posts** — 1-line summary, 3 bullet fields they fill in, typical payout chip.
+- **Runner does** — 1-line summary, 3-step checklist, estimated time chip.
 
-Three entries matching current SAMPLE_TASKS: `property_photos`, `occupancy_check`, `walkthrough_video`. Content is hand-written, realistic, and matches how the real `tasks.$taskId.run.tsx` checklist runner already structures steps (arrive → photos → notes → submit).
+Content is hand-written per service type to match the real task experience (mirrors the structure already in `src/lib/sample-task-templates.ts`).
 
 ## Files
 
-- **new** `src/lib/sample-task-templates.ts` — the template map + types
-- **new** `src/components/tasks/SampleTaskTemplateDialog.tsx` — dialog/sheet that takes `{ open, onOpenChange, sample, template }` and renders the two-pane preview
-- **edit** `src/routes/tasks.tsx` — convert each example card `<div>` into a `<button>` that sets `selectedSampleId`; render `<SampleTaskTemplateDialog>` once below the grid. Add a small "Tap to preview template" hint badge to the card on `<sm` so the affordance is obvious on touch.
+- **new** `src/lib/landing-service-examples.ts` — typed map keyed by service title with the 6 entries (Property Photos, Walkthrough Videos, Drive-By Reports, Occupancy Checks, Sign & Lockbox Placement, Custom Field Tasks). Reuses the lighter `{ investor, runner }` shape; not the full `SampleTemplate` because hover-cards need less density.
+- **new** `src/components/landing/ServiceExamplePopover.tsx` — a single component that wraps its `children` (the service card) and renders either a `HoverCard` (desktop) or a `Sheet` (mobile) with the example content. Uses existing `useIsMobile`. Keyboard accessible (focus opens hover-card; sheet opens on click).
+- **edit** `src/routes/index.tsx` — wrap each `SERVICES.map(...)` card in `<ServiceExamplePopover example={...}>`; add the "Preview example →" hint inside the card.
 
-## Out of scope
+## Technical notes (for devs)
 
-- Loading real `task_templates` from the DB for these previews — these are static marketing examples.
-- Adding previews to real (non-sample) task cards in the live marketplace.
-- Editing the on-site runner checklist engine.
+- Reuses shadcn `HoverCard` (already present at `src/components/ui/hover-card.tsx`) and `Sheet`. No new deps.
+- HoverCard content is `w-80` with the two-column investor/runner block, icons from existing lucide-react imports.
+- Card itself remains a `<div>` (not a button) so we don't break the visual — the popover handles `onClick` for mobile and `onFocus`/`onMouseEnter` for desktop via Radix primitives.
+- No business logic, no data fetching, no route changes.
+
+## Verification
+
+- Desktop: hover each of the 6 cards → popover appears with investor + runner content; tab key also opens it.
+- Mobile preview (375px): tap each card → bottom sheet slides up; close via X / backdrop.
+- No console errors; existing `/tasks` page popup still works (untouched).
+
+## Next (not this plan)
+
+Once approved, follow-ups can extend the same `ServiceExamplePopover` pattern to: How It Works steps, Payment Flow steps, Trust Badges, and Sample Deliverables thumbnails.
