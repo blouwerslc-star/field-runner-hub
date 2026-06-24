@@ -279,6 +279,15 @@ function maskCity(city: string | null | undefined): string | null {
 export const listPublicProfiles = createServerFn({ method: "POST" })
   .inputValidator((i: unknown) => listSchema.parse(i ?? {}))
   .handler(async ({ data }) => {
+    // Resolve ZIP → city/state when caller provides a zip but no explicit city/state.
+    let effectiveCity = data.city;
+    let effectiveState = data.state;
+    if (data.zip && !effectiveState) {
+      const { lookupZip } = await import("@/lib/geocoding.server");
+      const r = await lookupZip(data.zip);
+      if (r?.state) effectiveState = r.state;
+      if (r?.city && !effectiveCity) effectiveCity = r.city;
+    }
     let q = supabaseAdmin
       .from("profiles")
       .select(PUBLIC_COLUMNS)
@@ -287,8 +296,8 @@ export const listPublicProfiles = createServerFn({ method: "POST" })
       .limit(data.limit);
 
     if (data.q) q = q.or(`full_name.ilike.%${data.q}%,headline.ilike.%${data.q}%,company_name.ilike.%${data.q}%`);
-    if (data.city) q = q.ilike("city", `%${data.city}%`);
-    if (data.state) q = q.ilike("state", `%${data.state}%`);
+    if (effectiveCity) q = q.ilike("city", `%${effectiveCity}%`);
+    if (effectiveState) q = q.ilike("state", `%${effectiveState}%`);
     if (data.service) q = q.contains("services_offered", [data.service]);
     if (data.availability) q = q.eq("availability_status", data.availability);
 
