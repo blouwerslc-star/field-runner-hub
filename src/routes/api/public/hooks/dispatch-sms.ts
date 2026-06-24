@@ -8,11 +8,6 @@ export const Route = createFileRoute("/api/public/hooks/dispatch-sms")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const expectedKey = process.env.HOOK_SECRET;
-        const apikey = request.headers.get("apikey") ?? request.headers.get("x-api-key");
-        if (!expectedKey || apikey !== expectedKey) {
-          return new Response("Unauthorized", { status: 401 });
-        }
         let body: Body = {};
         try { body = (await request.json()) as Body; } catch { /* ignore */ }
         const notificationId = body.notification_id;
@@ -20,6 +15,18 @@ export const Route = createFileRoute("/api/public/hooks/dispatch-sms")({
 
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
         const { sendSms } = await import("@/lib/sms.server");
+
+        // Authenticate caller against the server-only hook secret stored in app_settings.
+        const apikey = request.headers.get("apikey") ?? request.headers.get("x-api-key") ?? "";
+        const { data: secretRow } = await supabaseAdmin
+          .from("app_settings")
+          .select("value")
+          .eq("key", "hook_secret")
+          .maybeSingle();
+        const expectedKey = (secretRow as { value?: string } | null)?.value ?? "";
+        if (!expectedKey || apikey !== expectedKey) {
+          return new Response("Unauthorized", { status: 401 });
+        }
 
         const { data: notif, error: nErr } = await supabaseAdmin
           .from("notifications")
