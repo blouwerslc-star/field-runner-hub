@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { listOpenTasks } from "@/lib/marketplace.functions";
+import { getPublicStats } from "@/lib/public-stats.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -52,6 +53,7 @@ function MarketplacePage() {
   const [beforeDue, setBeforeDue] = useState<string>("");
   const [sort, setSort] = useState<"newest" | "payout" | "due">("newest");
   const fn = useServerFn(listOpenTasks);
+  const statsFn = useServerFn(getPublicStats);
   const { data, isLoading, refetch, isFetching } = useQuery({
     queryKey: ["open-tasks", { q, city, state, taskType, minPayout, maxPayout, beforeDue, sort }],
     queryFn: () => fn({
@@ -66,7 +68,32 @@ function MarketplacePage() {
         sort,
       },
     }),
+    refetchInterval: 30_000,
   });
+  const { data: stats, refetch: refetchStats } = useQuery({
+    queryKey: ["public-stats"],
+    queryFn: () => statsFn(),
+    refetchInterval: 30_000,
+  });
+
+  // Realtime: refresh tasks list + stats when anyone adds/changes a task.
+  useEffect(() => {
+    const channel = supabase
+      .channel("marketplace-tasks-live")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "tasks" },
+        () => {
+          refetch();
+          refetchStats();
+        },
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [refetch, refetchStats]);
+
   const tasks = data?.tasks ?? [];
 
   const mapPoints: MapPoint[] = (tasks as any[]).map((t) => ({
