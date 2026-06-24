@@ -11,6 +11,8 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { Loader2, MapPin, DollarSign, Calendar, Search, BadgeCheck, Camera, Video, ShieldCheck } from "lucide-react";
 import { StateCoverageMap } from "@/components/maps/StateCoverageMap";
+import { SampleTaskTemplateDialog, type SampleSummary } from "@/components/tasks/SampleTaskTemplateDialog";
+import { SAMPLE_TEMPLATES } from "@/lib/sample-task-templates";
 
 export const Route = createFileRoute("/tasks")({
   component: MarketplacePage,
@@ -34,6 +36,7 @@ const SAMPLE_TASKS = [
 
 function MarketplacePage() {
   const [q, setQ] = useState("");
+  const [previewSampleId, setPreviewSampleId] = useState<string | null>(null);
   const [signedIn, setSignedIn] = useState<boolean | null>(null);
   useEffect(() => {
     let cancelled = false;
@@ -277,23 +280,31 @@ function MarketplacePage() {
               </div>
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {SAMPLE_TASKS.map((s) => (
-                  <div key={s.id} className="relative rounded-2xl border border-dashed border-border/70 bg-card/30 p-5 opacity-90">
-                    <span className="absolute top-3 right-3 inline-flex items-center rounded-full bg-muted text-muted-foreground border border-border/60 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide">
+                  <button
+                    key={s.id}
+                    type="button"
+                    onClick={() => setPreviewSampleId(s.id)}
+                    aria-label={`Preview template for ${s.title}`}
+                    className="group relative text-left rounded-2xl border border-dashed border-border/70 bg-card/30 p-5 hover:border-primary/50 hover:bg-card/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring transition-colors"
+                  >
+                    <span className="absolute top-3 right-3 inline-flex items-center rounded-full bg-muted text-foreground/80 border border-border px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide">
                       Example task
                     </span>
                     <div className="flex items-start gap-2">
-                      <span className="inline-flex items-center rounded-full bg-primary/10 text-primary border border-primary/30 px-2 py-0.5 text-xs font-medium">
+                      <span className="inline-flex items-center rounded-full bg-primary/15 text-primary border border-primary/40 px-2.5 py-1 text-xs font-medium">
                         {s.task_type}
                       </span>
                     </div>
-                    <h3 className="mt-3 font-semibold">{s.title}</h3>
-                    <p className="mt-1 text-xs text-muted-foreground flex items-center gap-1"><MapPin className="size-3" /> {s.city}, {s.state}</p>
-                    <p className="mt-2 text-sm text-muted-foreground line-clamp-3">{s.desc}</p>
+                    <h3 className="mt-3 font-semibold text-base group-hover:text-primary">{s.title}</h3>
+                    <p className="mt-1 text-xs text-foreground/70 flex items-center gap-1"><MapPin className="size-3" /> {s.city}, {s.state}</p>
+                    <p className="mt-2 text-sm text-foreground/75 line-clamp-3">{s.desc}</p>
                     <div className="mt-4 flex items-center justify-between">
-                      <span className="text-xs text-muted-foreground inline-flex items-center gap-1"><s.icon className="size-3.5" /> Sample deliverable</span>
+                      <span className="text-xs text-primary inline-flex items-center gap-1 font-medium">
+                        <s.icon className="size-3.5" /> Tap to preview template →
+                      </span>
                       <span className="inline-flex items-center gap-1 font-bold text-primary"><DollarSign className="size-4" />{s.payout}</span>
                     </div>
-                  </div>
+                  </button>
                 ))}
               </div>
             </div>
@@ -344,6 +355,18 @@ function MarketplacePage() {
           </div>
         )}
       </main>
+      <SampleTaskTemplateDialog
+        open={!!previewSampleId}
+        onOpenChange={(o) => { if (!o) setPreviewSampleId(null); }}
+        sample={(() => {
+          const s = SAMPLE_TASKS.find((x) => x.id === previewSampleId);
+          return s ? { task_type: s.task_type, title: s.title, city: s.city, state: s.state, payout: s.payout } satisfies SampleSummary : null;
+        })()}
+        template={(() => {
+          const s = SAMPLE_TASKS.find((x) => x.id === previewSampleId);
+          return s ? (SAMPLE_TEMPLATES[s.task_type] ?? null) : null;
+        })()}
+      />
     </div>
   );
 }
