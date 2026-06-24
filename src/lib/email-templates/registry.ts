@@ -6,6 +6,7 @@ import { template as welcomeRunner } from './welcome-runner'
 import { template as welcomeInvestor } from './welcome-investor'
 import { template as weeklyDigest } from './weekly-digest'
 import { template as reEngagement } from './re-engagement'
+import { template as newTaskAvailable } from './new-task-available'
 
 export interface TemplateEntry {
   component: ComponentType<any>
@@ -32,4 +33,5 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   welcome_investor: welcomeInvestor,
   weekly_digest: weeklyDigest,
   re_engagement: reEngagement,
+  new_task_available: newTaskAvailable,
 }
