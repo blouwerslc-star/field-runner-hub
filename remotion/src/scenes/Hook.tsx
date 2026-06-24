@@ -31,10 +31,10 @@ export const Hook: React.FC = () => {
         style={{
           position: "absolute",
           left: 110,
-          top: 260,
+          top: 220,
           fontFamily: displayFamily,
           fontWeight: 900,
-          fontSize: 220,
+          fontSize: 200,
           color: COLORS.text,
           lineHeight: 0.95,
           letterSpacing: -6,
