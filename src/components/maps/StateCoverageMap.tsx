@@ -151,7 +151,7 @@ export function StateCoverageMap({
             f.properties.abbr = abbr;
             f.properties.runners = row?.count ?? 0;
           });
-          map.addSource("us-states", { type: "geojson", data: geo, promoteId: undefined });
+          map.addSource("us-states", { type: "geojson", data: geo });
 
           map.addLayer({
             id: "state-fill",
