@@ -18,6 +18,12 @@ export const Route = createFileRoute("/api/public/hooks/email-nurture")({
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
         const { sendTransactionalEmail } = await import("@/lib/email-sender.server");
 
+        // Per-run caps so a single sweep can never exceed what the queue
+        // can drain inside the TTL window (~600/min × 180min ≈ 100k cap,
+        // but we stay far below to leave headroom for auth emails).
+        const MAX_SENDS_PER_RUN = 400;
+        let sentThisRun = 0;
+
         const now = Date.now();
         const days = (n: number) => new Date(now - n * 86_400_000).toISOString();
 
@@ -44,9 +50,11 @@ export const Route = createFileRoute("/api/public/hooks/email-nurture")({
 
         async function send(template: string, email: string, data: Record<string, unknown>, suppressWindowDays = 7) {
           if (!email) { counts.skipped++; return; }
+          if (sentThisRun >= MAX_SENDS_PER_RUN) { counts.skipped++; return; }
           const since = days(suppressWindowDays);
           if (await alreadySent(email, template, since)) { counts.skipped++; return; }
           await sendTransactionalEmail({ templateName: template, recipientEmail: email, templateData: data });
+          sentThisRun++;
           (counts as Record<string, number>)[template] = ((counts as Record<string, number>)[template] ?? 0) + 1;
         }
 
@@ -56,7 +64,7 @@ export const Route = createFileRoute("/api/public/hooks/email-nurture")({
           .select("user_id, email, full_name, created_at")
           .gte("created_at", days(2))
           .not("email", "is", null)
-          .limit(500);
+          .limit(100);
         for (const p of newProfiles ?? []) {
           if (!p.email) continue;
           const { data: roles } = await supabaseAdmin
@@ -76,7 +84,7 @@ export const Route = createFileRoute("/api/public/hooks/email-nurture")({
           .gte("created_at", days(4))
           .neq("status", "converted")
           .not("email", "is", null)
-          .limit(500);
+          .limit(100);
         for (const a of stalledApps ?? []) {
           if (!a.email) continue;
           await send(
@@ -99,7 +107,7 @@ export const Route = createFileRoute("/api/public/hooks/email-nurture")({
           .lte("last_active_at", days(14))
           .gte("last_active_at", days(60))
           .not("email", "is", null)
-          .limit(500);
+          .limit(100);
         for (const d of dormant ?? []) {
           if (!d.email || !d.last_active_at) continue;
           const daysAway = Math.floor((now - new Date(d.last_active_at).getTime()) / 86_400_000);
@@ -114,7 +122,7 @@ export const Route = createFileRoute("/api/public/hooks/email-nurture")({
             .select("user_id, email, full_name")
             .gte("last_active_at", days(30))
             .not("email", "is", null)
-            .limit(1000);
+            .limit(200);
           for (const u of active ?? []) {
             if (!u.email) continue;
             // Per-user weekly stats
