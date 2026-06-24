@@ -8,7 +8,7 @@ export const Route = createFileRoute("/api/public/hooks/dispatch-sms")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const expectedKey = process.env.SUPABASE_PUBLISHABLE_KEY;
+        const expectedKey = process.env.HOOK_SECRET;
         const apikey = request.headers.get("apikey") ?? request.headers.get("x-api-key");
         if (!expectedKey || apikey !== expectedKey) {
           return new Response("Unauthorized", { status: 401 });

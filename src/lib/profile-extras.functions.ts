@@ -116,11 +116,13 @@ export const listMyFavorites = createServerFn({ method: "GET" })
 /* ----------------------- Availability date blocks ------------------------ */
 
 export const listAvailabilityBlocks = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((i: unknown) => z.object({ runnerId: z.string().uuid() }).parse(i))
-  .handler(async ({ data }) => {
+  .handler(async ({ context, data }) => {
+    const { supabase } = context;
     const since = new Date();
     since.setHours(0, 0, 0, 0);
-    const { data: rows, error } = await supabaseAdmin
+    const { data: rows, error } = await supabase
       .from("runner_availability_blocks")
       .select("id, blocked_date, reason")
       .eq("runner_id", data.runnerId)
