@@ -48,6 +48,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { listActivity } from "@/lib/activity.functions";
 import { getPublicStats } from "@/lib/public-stats.functions";
+import { getStateCoverage } from "@/lib/public-stats.functions";
 import { StateCoverageMap } from "@/components/maps/StateCoverageMap";
 import { TestimonialsSection } from "@/components/landing/TestimonialsSection";
 import { SampleDeliverablesSection } from "@/components/landing/SampleDeliverablesSection";
@@ -58,6 +59,8 @@ import {
   PAYMENT_FLOW_EXAMPLES,
   TRUST_BADGE_EXAMPLES,
   VETTING_STEP_EXAMPLES,
+  EXAMPLE_TASK_EXAMPLES,
+  BENEFIT_EXAMPLES,
 } from "@/lib/landing-section-examples";
 import { MobileDrawer } from "@/components/navigation/MobileDrawer";
 import explainerVideo from "@/assets/reirunner-explainer.mp4.asset.json";
@@ -128,19 +131,6 @@ export const Route = createFileRoute("/")({
     ],
   }),
 });
-
-const MARKETS = [
-  "Detroit", "Atlanta", "Dallas", "Phoenix",
-  "Tampa", "Indianapolis", "Cleveland", "Chicago",
-];
-
-// Beta status items — no fabricated metrics. Replace with real DB-backed numbers when available.
-const BETA_STATUS = [
-  { icon: Users, label: "Founding Runner Applications", value: "Open" },
-  { icon: Building2, label: "Investor Applications", value: "Open" },
-  { icon: MapPin, label: "Market Coverage", value: "Expanding" },
-  { icon: Zap, label: "Marketplace", value: "Early Access" },
-];
 
 // Example field-task catalog with payouts, turnaround, and deliverables
 const EXAMPLE_TASKS = [
@@ -250,14 +240,6 @@ const VETTING_STEPS = [
 ];
 
 // What every task includes — operational standards.
-const TASK_STANDARDS = [
-  { icon: MapPin, title: "Address verification" },
-  { icon: ClipboardList, title: "Required deliverables" },
-  { icon: Clock, title: "Timestamped uploads" },
-  { icon: FileText, title: "Task documentation" },
-  { icon: CheckCircle2, title: "Completion tracking" },
-];
-
 // What runners may NOT do — legal safety rules.
 const RUNNER_RESTRICTIONS = [
   "Enter occupied properties without authorization",
@@ -321,50 +303,6 @@ function MarketplaceUpdatesTicker() {
   );
 }
 
-function BetaStatusBoard() {
-  return _BetaStatusBoardImpl();
-}
-
-function PlatformStatsStrip() {
-  const fetchStats = useServerFn(getPublicStats);
-  const { data } = useQuery({
-    queryKey: ["home-public-stats"],
-    queryFn: () => fetchStats(),
-    staleTime: 5 * 60_000,
-    retry: false,
-  });
-  const stats = [
-    { label: "Registered investors", value: data?.investors ?? 0 },
-    { label: "Approved runners", value: data?.runners ?? 0 },
-    { label: "Tasks posted", value: data?.tasks_total ?? 0 },
-    { label: "Tasks completed", value: data?.tasks_completed ?? 0 },
-    { label: "Active cities", value: data?.cities_active ?? 0 },
-    { label: "Avg. rating", value: data?.reviews_count ? `${data.avg_rating} / 5` : "—" },
-  ];
-  return (
-    <section aria-label="Platform stats" className="mx-auto max-w-7xl px-5 pt-8 md:pt-10">
-      <div className="rounded-2xl border border-border bg-card/40 backdrop-blur p-5 md:p-6">
-        <div className="flex items-center justify-between mb-4">
-          <div className="text-xs font-mono uppercase tracking-widest text-primary">Live numbers</div>
-          <div className="text-[11px] text-muted-foreground">Updated in real time — no inflated metrics.</div>
-        </div>
-        <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
-          {stats.map((s) => (
-            <div key={s.label} className="rounded-xl border border-border/60 bg-background/40 p-3">
-              <div className="text-2xl font-bold tabular-nums">{s.value}</div>
-              <div className="mt-1 text-[11px] text-muted-foreground leading-snug">{s.label}</div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function _BetaStatusBoardImpl() {
-  return _BetaImplInner();
-}
-
 function CoverageMapSection() {
   return (
     <section aria-label="Market coverage" className="mx-auto max-w-7xl px-5 pt-8 md:pt-10">
@@ -376,32 +314,92 @@ function CoverageMapSection() {
   );
 }
 
-function _BetaImplInner() {
+function WhereWeAreToday() {
+  const fetchStats = useServerFn(getPublicStats);
+  const fetchCoverage = useServerFn(getStateCoverage);
+  const { data: stats } = useQuery({
+    queryKey: ["home-public-stats"],
+    queryFn: () => fetchStats(),
+    staleTime: 5 * 60_000,
+    retry: false,
+  });
+  const { data: coverage } = useQuery({
+    queryKey: ["home-state-coverage"],
+    queryFn: () => fetchCoverage(),
+    staleTime: 5 * 60_000,
+    retry: false,
+  });
+
+  const statItems = [
+    { label: "Registered investors", value: stats?.investors ?? 0 },
+    { label: "Approved runners", value: stats?.runners ?? 0 },
+    { label: "Tasks posted", value: stats?.tasks_total ?? 0 },
+    { label: "Tasks completed", value: stats?.tasks_completed ?? 0 },
+    { label: "Active cities", value: stats?.cities_active ?? 0 },
+    { label: "Avg. rating", value: stats?.reviews_count ? `${stats.avg_rating} / 5` : "—" },
+  ];
+
+  const liveStates = (coverage?.states ?? [])
+    .filter((s) => s.count > 0)
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 12);
+
   return (
-    <section className="mx-auto max-w-7xl px-5 pt-10 md:pt-14">
-      <div className="rounded-2xl border border-border bg-card/60 backdrop-blur p-5 md:p-7 shadow-card">
-        <div className="flex items-center justify-between mb-5">
-          <div className="flex items-center gap-2">
-            <Sparkles className="size-4 text-primary" />
-            <span className="text-xs font-mono uppercase tracking-widest text-primary">Beta Status</span>
+    <Section id="markets">
+      <SectionHeader
+        eyebrow="Where We Are Today"
+        title="Our progress, in real numbers"
+        subtitle="Live counts from the marketplace — no inflated metrics, no fabricated activity."
+      />
+      <div className="grid lg:grid-cols-5 gap-6">
+        {/* Stats */}
+        <div className="lg:col-span-3 rounded-2xl border border-border bg-card/60 backdrop-blur p-5 md:p-6">
+          <div className="flex items-center justify-between mb-4">
+            <div className="text-xs font-mono uppercase tracking-widest text-primary">Live numbers</div>
+            <div className="text-[11px] text-muted-foreground">Updated in real time</div>
           </div>
-          <span className="text-[11px] text-muted-foreground hidden sm:inline">Early-access marketplace</span>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            {statItems.map((s) => (
+              <div key={s.label} className="rounded-xl border border-border/60 bg-background/40 p-3">
+                <div className="text-2xl font-bold tabular-nums">{s.value}</div>
+                <div className="mt-1 text-[11px] text-muted-foreground leading-snug">{s.label}</div>
+              </div>
+            ))}
+          </div>
+          <div className="mt-4 text-[11px] text-muted-foreground">
+            REI Runner is in active beta — applications open in every market we serve.
+          </div>
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-          {BETA_STATUS.map((it) => (
-            <div key={it.label} className="flex items-start gap-3">
-              <div className="size-10 rounded-xl bg-primary/10 grid place-items-center shrink-0">
-                <it.icon className="size-5 text-primary" />
-              </div>
-              <div className="min-w-0">
-                <div className="text-lg md:text-xl font-semibold leading-tight">{it.value}</div>
-                <div className="text-xs text-muted-foreground mt-1 leading-tight">{it.label}</div>
-              </div>
+        {/* Live state list */}
+        <div className="lg:col-span-2 rounded-2xl border border-border bg-card/60 backdrop-blur p-5 md:p-6">
+          <div className="flex items-center justify-between mb-4">
+            <div className="text-xs font-mono uppercase tracking-widest text-primary">Live coverage</div>
+            <Link to="/coverage" className="text-[11px] text-primary hover:underline">Full map →</Link>
+          </div>
+          {liveStates.length === 0 ? (
+            <div className="text-sm text-muted-foreground">
+              We're onboarding our first runners. <Link to="/runners" className="text-primary hover:underline">Apply to be founding</Link> in your city.
             </div>
-          ))}
+          ) : (
+            <ul className="grid grid-cols-2 gap-2">
+              {liveStates.map((s) => (
+                <li key={s.state} className="flex items-center justify-between rounded-lg border border-border/60 bg-background/40 px-3 py-2">
+                  <span className="inline-flex items-center gap-1.5 text-sm font-medium">
+                    <MapPin className="size-3.5 text-primary" /> {s.state}
+                  </span>
+                  <span className="text-xs text-muted-foreground tabular-nums">
+                    {s.count} runner{s.count === 1 ? "" : "s"}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+          <p className="mt-3 text-[11px] text-muted-foreground">
+            Coverage depends on approved runner availability in each market.
+          </p>
         </div>
       </div>
-    </section>
+    </Section>
   );
 }
 
@@ -676,11 +674,8 @@ function Index() {
       {/* LIVE ACTIVITY TICKER */}
       <MarketplaceUpdatesTicker />
 
-      {/* BETA STATUS BOARD */}
-      <BetaStatusBoard />
-
-      {/* LIVE PLATFORM STATS */}
-      <PlatformStatsStrip />
+      {/* WHERE WE ARE TODAY — live stats + active states */}
+      <WhereWeAreToday />
 
       {/* MARKET COVERAGE MAP */}
       <CoverageMapSection />
@@ -707,25 +702,6 @@ function Index() {
         </div>
       </section>
 
-      {/* SERVICE QUALITY STANDARDS */}
-      <Section id="standards">
-        <SectionHeader
-          eyebrow="Every Task Includes"
-          title="Operational Standards on Every Job"
-          subtitle="REI Runner tasks follow a consistent structure so investors know exactly what they are getting."
-        />
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-          {TASK_STANDARDS.map((s) => (
-            <div key={s.title} className="rounded-2xl border border-border bg-card/60 backdrop-blur p-5 text-center">
-              <div className="size-10 rounded-xl bg-primary/10 grid place-items-center mx-auto mb-3">
-                <s.icon className="size-5 text-primary" />
-              </div>
-              <div className="text-sm font-medium">{s.title}</div>
-            </div>
-          ))}
-        </div>
-      </Section>
-
       {/* EXAMPLE FIELD TASKS */}
       <Section id="example-tasks">
         <SectionHeader
@@ -735,40 +711,43 @@ function Index() {
         />
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {EXAMPLE_TASKS.map((t) => (
-            <div
+            <LandingExamplePopover
               key={t.title}
-              className="relative rounded-2xl border border-border bg-card/60 backdrop-blur p-6 shadow-card hover:border-primary/50 hover:-translate-y-1 transition-all duration-300 flex flex-col"
+              example={EXAMPLE_TASK_EXAMPLES[t.title] ?? { title: t.title, body: t.deliverables.join(" · ") }}
             >
-              {t.tag && (
-                <span className="absolute top-4 right-4 text-[10px] font-mono uppercase tracking-widest px-2 py-1 rounded-full border border-primary/40 bg-primary/10 text-primary">
-                  {t.tag}
-                </span>
-              )}
-              <div className="size-11 rounded-xl bg-primary/10 grid place-items-center mb-4">
-                <t.icon className="size-5 text-primary" />
-              </div>
-              <h3 className="text-lg font-semibold">{t.title}</h3>
-              <div className="mt-3 flex items-center gap-4 text-sm">
-                <div className="inline-flex items-center gap-1.5 text-foreground">
-                  <DollarSign className="size-4 text-primary" />
-                  <span className="font-semibold tabular-nums">{t.payout}</span>
+              <div className="relative h-full rounded-2xl border border-border bg-card/60 backdrop-blur p-6 shadow-card hover:border-primary/50 transition-colors duration-300 flex flex-col">
+                {t.tag && (
+                  <span className="absolute top-4 right-4 text-[10px] font-mono uppercase tracking-widest px-2 py-1 rounded-full border border-primary/40 bg-primary/10 text-primary">
+                    {t.tag}
+                  </span>
+                )}
+                <div className="size-11 rounded-xl bg-primary/10 grid place-items-center mb-4">
+                  <t.icon className="size-5 text-primary" />
                 </div>
-                <div className="inline-flex items-center gap-1.5 text-muted-foreground">
-                  <Clock className="size-4" />
-                  <span>{t.eta}</span>
+                <h3 className="text-lg font-semibold">{t.title}</h3>
+                <div className="mt-3 flex items-center gap-4 text-sm">
+                  <div className="inline-flex items-center gap-1.5 text-foreground">
+                    <DollarSign className="size-4 text-primary" />
+                    <span className="font-semibold tabular-nums">{t.payout}</span>
+                  </div>
+                  <div className="inline-flex items-center gap-1.5 text-muted-foreground">
+                    <Clock className="size-4" />
+                    <span>{t.eta}</span>
+                  </div>
                 </div>
+                <div className="my-4 h-px bg-border/70" />
+                <div className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground mb-2">Deliverables</div>
+                <ul className="space-y-1.5 text-sm text-muted-foreground">
+                  {t.deliverables.map((d) => (
+                    <li key={d} className="flex items-start gap-2">
+                      <CheckCircle2 className="size-4 text-primary mt-0.5 shrink-0" />
+                      <span>{d}</span>
+                    </li>
+                  ))}
+                </ul>
+                <p className="mt-3 text-xs font-medium text-primary/80">Preview example →</p>
               </div>
-              <div className="my-4 h-px bg-border/70" />
-              <div className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground mb-2">Deliverables</div>
-              <ul className="space-y-1.5 text-sm text-muted-foreground">
-                {t.deliverables.map((d) => (
-                  <li key={d} className="flex items-start gap-2">
-                    <CheckCircle2 className="size-4 text-primary mt-0.5 shrink-0" />
-                    <span>{d}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
+            </LandingExamplePopover>
           ))}
         </div>
         <p className="text-center text-xs text-muted-foreground mt-8">
@@ -891,13 +870,19 @@ function Index() {
         <SectionHeader eyebrow="Why Runners Join" title="Flexible Field Work, Per-Task Pay" subtitle="Built for independent contractors who want to earn on their own schedule." />
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {BENEFITS.map((b) => (
-            <div key={b.title} className="rounded-2xl border border-border bg-card/60 backdrop-blur p-6 shadow-card hover:border-primary/40 hover:-translate-y-1 transition-all duration-300">
-              <div className="size-11 rounded-xl bg-primary/10 grid place-items-center mb-4">
-                <b.icon className="size-5 text-primary" />
+            <LandingExamplePopover
+              key={b.title}
+              example={BENEFIT_EXAMPLES[b.title] ?? { title: b.title, body: b.body }}
+            >
+              <div className="h-full rounded-2xl border border-border bg-card/60 backdrop-blur p-6 shadow-card hover:border-primary/40 transition-colors duration-300">
+                <div className="size-11 rounded-xl bg-primary/10 grid place-items-center mb-4">
+                  <b.icon className="size-5 text-primary" />
+                </div>
+                <h3 className="text-lg font-semibold mb-1">{b.title}</h3>
+                <p className="text-sm text-muted-foreground">{b.body}</p>
+                <p className="mt-3 text-xs font-medium text-primary/80">Preview example →</p>
               </div>
-              <h3 className="text-lg font-semibold mb-1">{b.title}</h3>
-              <p className="text-sm text-muted-foreground">{b.body}</p>
-            </div>
+            </LandingExamplePopover>
           ))}
         </div>
       </Section>
@@ -919,22 +904,6 @@ function Index() {
             </ServiceExamplePopover>
           ))}
         </div>
-      </Section>
-
-      {/* MARKETS */}
-      <Section id="markets">
-        <SectionHeader eyebrow="Expanding Coverage" title="Launching Market-by-Market" subtitle="Starting in 8 priority investor markets and building local coverage city-by-city. Don't see your city? Apply anyway — new markets open as runner coverage grows." />
-        <div className="flex flex-wrap justify-center gap-3 max-w-3xl mx-auto">
-          {MARKETS.map((m) => (
-            <div key={m} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-border bg-card/60 backdrop-blur text-sm hover:border-primary/60 hover:shadow-glow transition">
-              <MapPin className="size-3.5 text-primary" />
-              {m}
-            </div>
-          ))}
-        </div>
-        <p className="mt-6 text-center text-xs text-muted-foreground max-w-2xl mx-auto">
-          Coverage depends on approved runner availability in each market.
-        </p>
       </Section>
 
       {/* ABOUT */}

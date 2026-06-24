@@ -48,6 +48,92 @@ export const HOW_IT_WORKS_EXAMPLES: Record<string, LandingExample> = {
   },
 };
 
+/** Example field tasks — keyed by task title. */
+export const EXAMPLE_TASK_EXAMPLES: Record<string, LandingExample> = {
+  "Property Photo Set": {
+    eyebrow: "Example",
+    title: "Property Photo Set",
+    body: "Investor needs a full exterior + interior photo set on a Memphis SFR before making an offer.",
+    bullets: ["20+ geotagged photos", "Interior + exterior coverage", "Uploaded same visit"],
+    footer: "Typical payout $45–$85",
+  },
+  "Walkthrough Video": {
+    eyebrow: "Example",
+    title: "Walkthrough Video",
+    body: "Out-of-state investor wants a narrated interior walkthrough to underwrite a rehab remotely.",
+    bullets: ["HD vertical or horizontal", "Narrated condition notes", "Room-by-room coverage"],
+    footer: "Typical payout $75–$150",
+  },
+  "Occupancy Check": {
+    eyebrow: "Example",
+    title: "Occupancy Check",
+    body: "Lender or wholesaler needs to confirm whether a target property is vacant, occupied, or abandoned.",
+    bullets: ["Status: vacant / occupied / abandoned", "Exterior photos", "Short written observation"],
+    footer: "Typical payout $25–$50",
+  },
+  "Drive-By Report": {
+    eyebrow: "Example",
+    title: "Drive-By Report",
+    body: "Investor evaluating a portfolio wants a quick curbside check before scheduling a full visit.",
+    bullets: ["4–6 exterior photos", "Curbside condition notes", "Neighborhood snapshot"],
+    footer: "Typical payout $20–$40",
+  },
+  "Lockbox Install": {
+    eyebrow: "Example",
+    title: "Lockbox Install",
+    body: "Investor needs a lockbox placed so an inspector or contractor can access the property tomorrow.",
+    bullets: ["Lockbox placed at agreed location", "Photo confirmation", "Code delivered securely"],
+    footer: "Typical payout $30–$60",
+  },
+  "Yard Sign Placement": {
+    eyebrow: "Example",
+    title: "Yard Sign Placement",
+    body: "Wholesaler wants a 'For Sale by Owner' sign installed with optional rider before the weekend.",
+    bullets: ["Sign installed & photographed", "Geotagged proof", "Optional rider attached"],
+    footer: "Typical payout $20–$35",
+  },
+};
+
+/** Runner benefits — keyed by title. */
+export const BENEFIT_EXAMPLES: Record<string, LandingExample> = {
+  "Get paid per task": {
+    eyebrow: "Why runners join",
+    title: "Per-task pay",
+    body: "Every task has a posted payout. Accept what's worth your time, skip the rest.",
+    bullets: ["Payout visible before accepting", "No hidden quotas", "Paid on approval"],
+  },
+  "Work on your schedule": {
+    eyebrow: "Why runners join",
+    title: "Your schedule",
+    body: "Tasks are independent jobs — no shifts, no managers, no on-call windows.",
+    bullets: ["Accept only when available", "Decline freely", "Stack tasks in one trip"],
+  },
+  "No license required": {
+    eyebrow: "Why runners join",
+    title: "No license required",
+    body: "Photos, videos, drive-bys, and occupancy checks are non-licensed field work.",
+    bullets: ["No real estate license needed", "No contracting license needed", "Just reliable on-site execution"],
+  },
+  "Repeat investor clients": {
+    eyebrow: "Why runners join",
+    title: "Repeat clients",
+    body: "Active investors post recurring tasks. Strong runners get first dibs from saved-runner lists.",
+    bullets: ["Investors can favorite you", "Direct-assign tasks", "Build a local book of business"],
+  },
+  "Everything in one place": {
+    eyebrow: "Why runners join",
+    title: "One app",
+    body: "Accept jobs, upload deliverables, message investors, and get paid in one mobile-friendly app.",
+    bullets: ["In-app uploads", "Push notifications", "Payout history"],
+  },
+  "Expanding market-by-market": {
+    eyebrow: "Why runners join",
+    title: "Growing coverage",
+    body: "We onboard runners market-by-market so each city has real demand before we open it.",
+    bullets: ["Founding runner status in new markets", "Priority task routing early", "Apply even if your city isn't live yet"],
+  },
+};
+
 /** Payment Flow steps — keyed by step "01"…"04". */
 export const PAYMENT_FLOW_EXAMPLES: Record<string, LandingExample> = {
   "01": {
