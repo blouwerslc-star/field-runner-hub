@@ -690,15 +690,18 @@ function Index() {
         <div className="rounded-2xl border border-border bg-card/40 backdrop-blur p-5 md:p-6">
           <div className="grid grid-cols-2 md:grid-cols-5 gap-5">
             {TRUST_BADGES.map((b) => (
-              <div key={b.label} className="flex items-start gap-3">
-                <div className="size-9 rounded-lg bg-primary/10 grid place-items-center shrink-0">
-                  <b.icon className="size-4 text-primary" />
+              <LandingExamplePopover key={b.label} example={TRUST_BADGE_EXAMPLES[b.label] ?? { title: b.label, body: b.detail }}>
+                <div className="flex items-start gap-3 hover:opacity-90 transition">
+                  <div className="size-9 rounded-lg bg-primary/10 grid place-items-center shrink-0">
+                    <b.icon className="size-4 text-primary" />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="text-sm font-semibold leading-tight">{b.label}</div>
+                    <div className="mt-1 text-[11px] text-muted-foreground leading-snug">{b.detail}</div>
+                    <div className="mt-1 text-[10px] font-medium text-primary/80">Preview →</div>
+                  </div>
                 </div>
-                <div className="min-w-0">
-                  <div className="text-sm font-semibold leading-tight">{b.label}</div>
-                  <div className="mt-1 text-[11px] text-muted-foreground leading-snug">{b.detail}</div>
-                </div>
-              </div>
+              </LandingExamplePopover>
             ))}
           </div>
         </div>
