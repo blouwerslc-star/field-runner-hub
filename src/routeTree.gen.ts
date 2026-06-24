@@ -107,6 +107,7 @@ import { Route as ApiPublicHooksProfileCompletionRemindersRouteImport } from './
 import { Route as ApiPublicHooksEmailNurtureRouteImport } from './routes/api/public/hooks/email-nurture'
 import { Route as ApiPublicHooksDispatchSmsRouteImport } from './routes/api/public/hooks/dispatch-sms'
 import { Route as AuthenticatedTasksTaskIdTrackingRouteImport } from './routes/_authenticated/tasks.$taskId.tracking'
+import { Route as AuthenticatedTasksTaskIdRunRouteImport } from './routes/_authenticated/tasks.$taskId.run'
 import { Route as AuthenticatedAcademyCourseSlugQuizRouteImport } from './routes/_authenticated/academy.$courseSlug.quiz'
 import { Route as AuthenticatedAcademyCourseSlugCertificateRouteImport } from './routes/_authenticated/academy.$courseSlug.certificate'
 import { Route as AuthenticatedAcademyCourseSlugLessonSlugRouteImport } from './routes/_authenticated/academy.$courseSlug.$lessonSlug'
@@ -656,6 +657,12 @@ const AuthenticatedTasksTaskIdTrackingRoute =
     path: '/tasks/$taskId/tracking',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const AuthenticatedTasksTaskIdRunRoute =
+  AuthenticatedTasksTaskIdRunRouteImport.update({
+    id: '/tasks/$taskId/run',
+    path: '/tasks/$taskId/run',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedAcademyCourseSlugQuizRoute =
   AuthenticatedAcademyCourseSlugQuizRouteImport.update({
     id: '/quiz',
@@ -763,6 +770,7 @@ export interface FileRoutesByFullPath {
   '/academy/$courseSlug/$lessonSlug': typeof AuthenticatedAcademyCourseSlugLessonSlugRoute
   '/academy/$courseSlug/certificate': typeof AuthenticatedAcademyCourseSlugCertificateRoute
   '/academy/$courseSlug/quiz': typeof AuthenticatedAcademyCourseSlugQuizRoute
+  '/tasks/$taskId/run': typeof AuthenticatedTasksTaskIdRunRoute
   '/tasks/$taskId/tracking': typeof AuthenticatedTasksTaskIdTrackingRoute
   '/api/public/hooks/dispatch-sms': typeof ApiPublicHooksDispatchSmsRoute
   '/api/public/hooks/email-nurture': typeof ApiPublicHooksEmailNurtureRoute
@@ -860,6 +868,7 @@ export interface FileRoutesByTo {
   '/academy/$courseSlug/$lessonSlug': typeof AuthenticatedAcademyCourseSlugLessonSlugRoute
   '/academy/$courseSlug/certificate': typeof AuthenticatedAcademyCourseSlugCertificateRoute
   '/academy/$courseSlug/quiz': typeof AuthenticatedAcademyCourseSlugQuizRoute
+  '/tasks/$taskId/run': typeof AuthenticatedTasksTaskIdRunRoute
   '/tasks/$taskId/tracking': typeof AuthenticatedTasksTaskIdTrackingRoute
   '/api/public/hooks/dispatch-sms': typeof ApiPublicHooksDispatchSmsRoute
   '/api/public/hooks/email-nurture': typeof ApiPublicHooksEmailNurtureRoute
@@ -964,6 +973,7 @@ export interface FileRoutesById {
   '/_authenticated/academy/$courseSlug/$lessonSlug': typeof AuthenticatedAcademyCourseSlugLessonSlugRoute
   '/_authenticated/academy/$courseSlug/certificate': typeof AuthenticatedAcademyCourseSlugCertificateRoute
   '/_authenticated/academy/$courseSlug/quiz': typeof AuthenticatedAcademyCourseSlugQuizRoute
+  '/_authenticated/tasks/$taskId/run': typeof AuthenticatedTasksTaskIdRunRoute
   '/_authenticated/tasks/$taskId/tracking': typeof AuthenticatedTasksTaskIdTrackingRoute
   '/api/public/hooks/dispatch-sms': typeof ApiPublicHooksDispatchSmsRoute
   '/api/public/hooks/email-nurture': typeof ApiPublicHooksEmailNurtureRoute
@@ -1068,6 +1078,7 @@ export interface FileRouteTypes {
     | '/academy/$courseSlug/$lessonSlug'
     | '/academy/$courseSlug/certificate'
     | '/academy/$courseSlug/quiz'
+    | '/tasks/$taskId/run'
     | '/tasks/$taskId/tracking'
     | '/api/public/hooks/dispatch-sms'
     | '/api/public/hooks/email-nurture'
@@ -1165,6 +1176,7 @@ export interface FileRouteTypes {
     | '/academy/$courseSlug/$lessonSlug'
     | '/academy/$courseSlug/certificate'
     | '/academy/$courseSlug/quiz'
+    | '/tasks/$taskId/run'
     | '/tasks/$taskId/tracking'
     | '/api/public/hooks/dispatch-sms'
     | '/api/public/hooks/email-nurture'
@@ -1268,6 +1280,7 @@ export interface FileRouteTypes {
     | '/_authenticated/academy/$courseSlug/$lessonSlug'
     | '/_authenticated/academy/$courseSlug/certificate'
     | '/_authenticated/academy/$courseSlug/quiz'
+    | '/_authenticated/tasks/$taskId/run'
     | '/_authenticated/tasks/$taskId/tracking'
     | '/api/public/hooks/dispatch-sms'
     | '/api/public/hooks/email-nurture'
@@ -2012,6 +2025,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedTasksTaskIdTrackingRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/tasks/$taskId/run': {
+      id: '/_authenticated/tasks/$taskId/run'
+      path: '/tasks/$taskId/run'
+      fullPath: '/tasks/$taskId/run'
+      preLoaderRoute: typeof AuthenticatedTasksTaskIdRunRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/academy/$courseSlug/quiz': {
       id: '/_authenticated/academy/$courseSlug/quiz'
       path: '/quiz'
@@ -2193,6 +2213,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedProfileIdVerificationRoute: typeof AuthenticatedProfileIdVerificationRoute
   AuthenticatedProfileVerificationRoute: typeof AuthenticatedProfileVerificationRoute
   AuthenticatedDashboardIndexRoute: typeof AuthenticatedDashboardIndexRoute
+  AuthenticatedTasksTaskIdRunRoute: typeof AuthenticatedTasksTaskIdRunRoute
   AuthenticatedTasksTaskIdTrackingRoute: typeof AuthenticatedTasksTaskIdTrackingRoute
 }
 
@@ -2225,6 +2246,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
     AuthenticatedProfileIdVerificationRoute,
   AuthenticatedProfileVerificationRoute: AuthenticatedProfileVerificationRoute,
   AuthenticatedDashboardIndexRoute: AuthenticatedDashboardIndexRoute,
+  AuthenticatedTasksTaskIdRunRoute: AuthenticatedTasksTaskIdRunRoute,
   AuthenticatedTasksTaskIdTrackingRoute: AuthenticatedTasksTaskIdTrackingRoute,
 }
 
