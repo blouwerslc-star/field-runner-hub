@@ -111,27 +111,31 @@ export function DashboardShell({
           <Link to="/dashboard" aria-label="REI Runner home">
             <BrandLogo />
           </Link>
-          {/* Desktop nav (xl+) */}
-          <div className="hidden xl:flex items-center gap-1">
-            {navItems.map((item) => (
-              <Button key={item.to} asChild variant="ghost" size="sm" className="relative">
-                <Link to={item.to}>
-                  <item.icon className={`size-4 mr-1.5 ${item.to === "/admin" ? "text-primary" : ""}`} /> {item.label}
-                  {item.to === "/messages" && unreadTotal > 0 && (
-                    <span className="ml-1.5 size-5 rounded-full bg-primary text-[10px] font-bold text-primary-foreground grid place-items-center">
-                      {unreadTotal > 9 ? "9+" : unreadTotal}
-                    </span>
-                  )}
-                </Link>
+          {/* Desktop nav (lg+) */}
+          <div className="hidden lg:flex items-center gap-1 min-w-0 flex-1 justify-end">
+            <div className="flex items-center gap-1 min-w-0 overflow-x-auto no-scrollbar">
+              {navItems.map((item) => (
+                <Button key={item.to} asChild variant="ghost" size="sm" className="relative shrink-0">
+                  <Link to={item.to}>
+                    <item.icon className={`size-4 mr-1.5 ${item.to === "/admin" ? "text-primary" : ""}`} /> {item.label}
+                    {item.to === "/messages" && unreadTotal > 0 && (
+                      <span className="ml-1.5 size-5 rounded-full bg-primary text-[10px] font-bold text-primary-foreground grid place-items-center">
+                        {unreadTotal > 9 ? "9+" : unreadTotal}
+                      </span>
+                    )}
+                  </Link>
+                </Button>
+              ))}
+            </div>
+            <div className="flex items-center gap-1 shrink-0 pl-2 ml-1 border-l border-border/60">
+              <NotificationBell />
+              <Button variant="ghost" size="sm" onClick={signOut} aria-label="Sign out">
+                <LogOut className="size-4 mr-1.5" /> Sign out
               </Button>
-            ))}
-            <NotificationBell />
-            <Button variant="ghost" size="sm" onClick={signOut}>
-              <LogOut className="size-4 mr-1.5" /> Sign out
-            </Button>
+            </div>
           </div>
-          {/* Mobile + tablet nav (<xl) */}
-          <div className="flex xl:hidden items-center gap-1">
+          {/* Mobile + tablet nav (<lg) */}
+          <div className="flex lg:hidden items-center gap-1">
             <Button asChild variant="ghost" size="icon" className="relative min-h-11 min-w-11">
               <Link to="/messages" aria-label="Messages">
                 <MessageSquare className="size-5" />
