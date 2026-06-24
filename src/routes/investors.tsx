@@ -171,7 +171,7 @@ function InvestorsPage() {
         ]}
       />
 
-      <section className="mx-auto max-w-5xl px-5 py-14 md:py-20">
+      <main className="mx-auto max-w-5xl px-5 py-14 md:py-20">
         <div className="text-center mb-12 max-w-3xl mx-auto">
           <div className="text-xs font-semibold tracking-widest text-primary uppercase">For Investors</div>
           <h1 className="mt-3 text-3xl md:text-5xl font-bold tracking-tight">Nationwide boots-on-the-ground for real estate investors</h1>
@@ -274,7 +274,7 @@ function InvestorsPage() {
             <Link to="/tasks" className="inline-flex items-center gap-1 text-foreground hover:text-primary underline-offset-4 hover:underline"><MapPinned className="size-3.5" /> See the live marketplace</Link>
           </p>
         </div>
-      </section>
+      </main>
     </div>
   );
 }

@@ -199,13 +199,13 @@ export function StateCoverageMap({
                     "group relative rounded-lg border text-left px-2 py-1.5 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                     count > 0
                       ? "border-primary/50 bg-primary/15 text-foreground hover:border-primary hover:bg-primary/25 cursor-pointer"
-                      : "border-border/45 bg-muted/25 text-muted-foreground/60 cursor-default",
+                      : "border-border/60 bg-muted/40 text-foreground/70 cursor-default",
                     selected ? "ring-2 ring-primary border-primary" : "",
                   ].join(" ")}
                   style={{
                     gridRow: state.row,
                     gridColumn: state.col,
-                    opacity: count > 0 ? 0.62 + coverageLevel * 0.38 : 1,
+                    opacity: count > 0 ? 0.85 + coverageLevel * 0.15 : 1,
                   }}
                   aria-label={`${state.name}: ${count} runner${count === 1 ? "" : "s"}`}
                 >

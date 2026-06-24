@@ -70,7 +70,7 @@ function RunnersPage() {
         </div>
       </header>
 
-      <section className="mx-auto max-w-3xl px-5 py-14 md:py-20">
+      <main className="mx-auto max-w-3xl px-5 py-14 md:py-20">
         <div className="text-center mb-10">
           <div className="text-xs font-semibold tracking-widest text-primary uppercase">For Runners</div>
           <h1 className="mt-3 text-3xl md:text-5xl font-bold">Get Paid to Complete Local Real Estate Tasks</h1>
@@ -116,7 +116,7 @@ function RunnersPage() {
         <p className="text-xs text-muted-foreground text-center mt-6">
           Questions? See our <Link to="/trust" className="underline hover:text-foreground">Trust &amp; Safety standards</Link> or <Link to="/pricing" className="underline hover:text-foreground">task pricing</Link>.
         </p>
-      </section>
+      </main>
     </div>
   );
 }
