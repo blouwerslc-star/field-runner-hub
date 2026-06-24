@@ -5,7 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { listPublicProfiles, listAcademyCertOptions } from "@/lib/profiles.functions";
 import { ProfileCard, type PublicProfile } from "@/components/profiles/ProfileCard";
 import { BrandLogo } from "@/components/brand/BrandLogo";
-import { MarketplaceMap, type MapPoint } from "@/components/maps/MarketplaceMap";
+import { StateCoverageMap } from "@/components/maps/StateCoverageMap";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
@@ -39,6 +39,7 @@ function ProfilesDirectory() {
   const [role, setRole] = useState<"all" | "runner" | "investor">("all");
   const [city, setCity] = useState("");
   const [state, setState] = useState("");
+  const [zip, setZip] = useState("");
   const [service, setService] = useState("");
   const [availability, setAvailability] = useState<"all" | "available" | "busy" | "unavailable">("all");
   const [sort, setSort] = useState<"featured" | "rating" | "completed" | "newest">("featured");
@@ -56,6 +57,7 @@ function ProfilesDirectory() {
     role: role === "all" ? undefined : role,
     city: city || undefined,
     state: state || undefined,
+    zip: zip || undefined,
     service: service || undefined,
     availability: availability === "all" ? undefined : availability,
     sort,
@@ -80,16 +82,15 @@ function ProfilesDirectory() {
     profiles.map((p: any) => [p.city, p.state].filter(Boolean).join(", ")).filter(Boolean)
   ).size;
 
-  const mapPoints: MapPoint[] = profiles.map((p: any) => ({
-    id: p.user_id,
-    kind: "runner",
-    title: p.full_name ?? "Runner",
-    subtitle: [p.city, p.state].filter(Boolean).join(", ") || p.headline || null,
-    href: p.profile_slug ? `/profile/${p.profile_slug}` : null,
-    city: p.city,
-    state: p.state,
-    badge: p.top_runner ? "Top Runner" : p.availability_status === "available" ? "Available" : null,
-  }));
+  function handleStateClick(stateAbbr: string) {
+    setState(stateAbbr);
+    setCity("");
+    setZip("");
+    // Scroll to results list
+    requestAnimationFrame(() => {
+      document.getElementById("profiles-search")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  }
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -162,14 +163,11 @@ function ProfilesDirectory() {
         </div>
 
         <div className="mb-6">
-          <MarketplaceMap
-            points={mapPoints}
-            title="Runners on the map"
-            emptyMessage="No runner locations available for these filters."
-          />
+          <StateCoverageMap onStateClick={handleStateClick} selectedState={state} />
         </div>
 
         <form
+          id="profiles-search"
           className="grid gap-3 md:grid-cols-6 mb-6"
           onSubmit={(e) => { e.preventDefault(); void refetch(); }}
         >
@@ -187,6 +185,7 @@ function ProfilesDirectory() {
           </Select>
           <Input aria-label="Filter by city" placeholder="City" value={city} onChange={(e) => setCity(e.target.value)} />
           <Input aria-label="Filter by state" placeholder="State" value={state} onChange={(e) => setState(e.target.value)} />
+          <Input aria-label="Filter by ZIP code" placeholder="ZIP" inputMode="numeric" maxLength={5} value={zip} onChange={(e) => setZip(e.target.value.replace(/[^0-9]/g, ""))} />
           <Input aria-label="Filter by service offered" placeholder="Service" value={service} onChange={(e) => setService(e.target.value)} />
           <Select value={availability} onValueChange={(v) => setAvailability(v as typeof availability)}>
             <SelectTrigger aria-label="Filter by availability"><SelectValue /></SelectTrigger>
