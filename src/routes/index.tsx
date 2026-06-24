@@ -240,14 +240,6 @@ const VETTING_STEPS = [
 ];
 
 // What every task includes — operational standards.
-const TASK_STANDARDS = [
-  { icon: MapPin, title: "Address verification" },
-  { icon: ClipboardList, title: "Required deliverables" },
-  { icon: Clock, title: "Timestamped uploads" },
-  { icon: FileText, title: "Task documentation" },
-  { icon: CheckCircle2, title: "Completion tracking" },
-];
-
 // What runners may NOT do — legal safety rules.
 const RUNNER_RESTRICTIONS = [
   "Enter occupied properties without authorization",
