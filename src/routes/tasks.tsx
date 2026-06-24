@@ -200,24 +200,32 @@ function MarketplacePage() {
         </div>
 
         <div className="mb-6">
-          <MarketplaceMap
-            points={mapPoints}
-            title="Open tasks on the map"
-            emptyMessage="No task locations available for these filters."
+          <StateCoverageMap
+            selectedState={state}
+            onStateClick={(abbr) => {
+              setState(abbr);
+              setCity("");
+              setZip("");
+              requestAnimationFrame(() => {
+                document.getElementById("tasks-search")?.scrollIntoView({ behavior: "smooth", block: "start" });
+              });
+            }}
           />
         </div>
 
         <form
+          id="tasks-search"
           onSubmit={(e) => { e.preventDefault(); refetch(); }}
           className="mb-8 rounded-2xl border border-border/60 bg-card/40 p-3 space-y-2"
         >
-          <div className="grid md:grid-cols-[1fr_160px_120px_180px_auto] gap-2">
+          <div className="grid md:grid-cols-[1fr_160px_120px_110px_180px_auto] gap-2">
             <div className="relative">
               <Search className="size-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
               <Input aria-label="Search tasks by title or description" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search title or description" className="pl-9" />
             </div>
             <Input aria-label="Filter tasks by city" value={city} onChange={(e) => setCity(e.target.value)} placeholder="City" />
             <Input aria-label="Filter tasks by state" value={state} onChange={(e) => setState(e.target.value)} placeholder="State" />
+            <Input aria-label="Filter tasks by ZIP" inputMode="numeric" maxLength={5} value={zip} onChange={(e) => setZip(e.target.value.replace(/[^0-9]/g, ""))} placeholder="ZIP" />
             <Select value={sort} onValueChange={(v) => setSort(v as any)}>
               <SelectTrigger aria-label="Sort tasks"><SelectValue /></SelectTrigger>
               <SelectContent>
