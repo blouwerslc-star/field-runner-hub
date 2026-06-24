@@ -27,6 +27,21 @@ export type StartOptions = {
 
 export type Tracker = { stop: () => Promise<void> };
 
+/** Lazily-created singleton for the native background plugin. */
+function nativeBg(): BackgroundGeolocationPlugin {
+  return registerPlugin<BackgroundGeolocationPlugin>("BackgroundGeolocation");
+}
+
+/** Open the native app's OS settings page (native only). */
+export async function openLocationSettings(): Promise<void> {
+  if (!isNative()) return;
+  try {
+    await nativeBg().openSettings();
+  } catch {
+    // ignore
+  }
+}
+
 const isNative = () => Capacitor.isNativePlatform();
 
 /** Ask the OS for foreground + background location permission (native only). */
@@ -114,9 +129,7 @@ export async function getCurrentLocation(): Promise<Fix> {
 /** Start a continuous tracker. Web = foreground only; native = background-capable. */
 export async function startTracker(opts: StartOptions): Promise<Tracker> {
   if (isNative()) {
-    const BackgroundGeolocation = registerPlugin<BackgroundGeolocationPlugin>(
-      "BackgroundGeolocation",
-    );
+    const BackgroundGeolocation = nativeBg();
     const watcherId = await BackgroundGeolocation.addWatcher(
       {
         backgroundMessage: "REI Runner is verifying you're on-site for this task.",
