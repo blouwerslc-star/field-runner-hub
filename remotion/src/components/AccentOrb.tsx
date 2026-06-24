@@ -2,7 +2,7 @@ import { AbsoluteFill, useCurrentFrame, interpolate } from "remotion";
 
 export const AccentOrb: React.FC = () => {
   const frame = useCurrentFrame();
-  const x = interpolate(frame, [0, 900], [-200, 1920], { extrapolateRight: "clamp" });
+  const x = interpolate(frame, [0, 1040], [-200, 1920], { extrapolateRight: "clamp" });
   const y = 700 + Math.sin(frame / 60) * 120;
   return (
     <AbsoluteFill style={{ pointerEvents: "none" }}>
