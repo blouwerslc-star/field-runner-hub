@@ -311,7 +311,7 @@ export const sendMessage = createServerFn({ method: "POST" })
           notifyUserByEmail({
             userId: uid,
             title: `New message from ${senderName}`,
-            body: data.body.slice(0, 200),
+            body: scrubContactInfo(data.body).slice(0, 200),
             link: `/messages/${data.conversationId}`,
             ctaLabel: "View message",
           }),
