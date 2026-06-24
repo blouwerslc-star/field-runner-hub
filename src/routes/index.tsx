@@ -1181,6 +1181,7 @@ function Index() {
         </div>
       </div>
       <div className="md:hidden h-24" aria-hidden />
+      </main>
     </div>
   );
 }
