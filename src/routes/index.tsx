@@ -379,6 +379,95 @@ function CoverageMapSection() {
   );
 }
 
+function WhereWeAreToday() {
+  const fetchStats = useServerFn(getPublicStats);
+  const fetchCoverage = useServerFn(getStateCoverage);
+  const { data: stats } = useQuery({
+    queryKey: ["home-public-stats"],
+    queryFn: () => fetchStats(),
+    staleTime: 5 * 60_000,
+    retry: false,
+  });
+  const { data: coverage } = useQuery({
+    queryKey: ["home-state-coverage"],
+    queryFn: () => fetchCoverage(),
+    staleTime: 5 * 60_000,
+    retry: false,
+  });
+
+  const statItems = [
+    { label: "Registered investors", value: stats?.investors ?? 0 },
+    { label: "Approved runners", value: stats?.runners ?? 0 },
+    { label: "Tasks posted", value: stats?.tasks_total ?? 0 },
+    { label: "Tasks completed", value: stats?.tasks_completed ?? 0 },
+    { label: "Active cities", value: stats?.cities_active ?? 0 },
+    { label: "Avg. rating", value: stats?.reviews_count ? `${stats.avg_rating} / 5` : "—" },
+  ];
+
+  const liveStates = (coverage?.states ?? [])
+    .filter((s) => s.count > 0)
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 12);
+
+  return (
+    <Section id="markets">
+      <SectionHeader
+        eyebrow="Where We Are Today"
+        title="Our progress, in real numbers"
+        subtitle="Live counts from the marketplace — no inflated metrics, no fabricated activity."
+      />
+      <div className="grid lg:grid-cols-5 gap-6">
+        {/* Stats */}
+        <div className="lg:col-span-3 rounded-2xl border border-border bg-card/60 backdrop-blur p-5 md:p-6">
+          <div className="flex items-center justify-between mb-4">
+            <div className="text-xs font-mono uppercase tracking-widest text-primary">Live numbers</div>
+            <div className="text-[11px] text-muted-foreground">Updated in real time</div>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            {statItems.map((s) => (
+              <div key={s.label} className="rounded-xl border border-border/60 bg-background/40 p-3">
+                <div className="text-2xl font-bold tabular-nums">{s.value}</div>
+                <div className="mt-1 text-[11px] text-muted-foreground leading-snug">{s.label}</div>
+              </div>
+            ))}
+          </div>
+          <div className="mt-4 text-[11px] text-muted-foreground">
+            REI Runner is in active beta — applications open in every market we serve.
+          </div>
+        </div>
+        {/* Live state list */}
+        <div className="lg:col-span-2 rounded-2xl border border-border bg-card/60 backdrop-blur p-5 md:p-6">
+          <div className="flex items-center justify-between mb-4">
+            <div className="text-xs font-mono uppercase tracking-widest text-primary">Live coverage</div>
+            <Link to="/coverage" className="text-[11px] text-primary hover:underline">Full map →</Link>
+          </div>
+          {liveStates.length === 0 ? (
+            <div className="text-sm text-muted-foreground">
+              We're onboarding our first runners. <Link to="/runners" className="text-primary hover:underline">Apply to be founding</Link> in your city.
+            </div>
+          ) : (
+            <ul className="grid grid-cols-2 gap-2">
+              {liveStates.map((s) => (
+                <li key={s.state} className="flex items-center justify-between rounded-lg border border-border/60 bg-background/40 px-3 py-2">
+                  <span className="inline-flex items-center gap-1.5 text-sm font-medium">
+                    <MapPin className="size-3.5 text-primary" /> {s.state}
+                  </span>
+                  <span className="text-xs text-muted-foreground tabular-nums">
+                    {s.count} runner{s.count === 1 ? "" : "s"}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+          <p className="mt-3 text-[11px] text-muted-foreground">
+            Coverage depends on approved runner availability in each market.
+          </p>
+        </div>
+      </div>
+    </Section>
+  );
+}
+
 function _BetaImplInner() {
   return (
     <section className="mx-auto max-w-7xl px-5 pt-10 md:pt-14">
