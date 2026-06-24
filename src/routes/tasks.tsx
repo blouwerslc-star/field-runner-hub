@@ -120,7 +120,7 @@ function MarketplacePage() {
     <div className="min-h-screen bg-background text-foreground">
       <PublicHeader
         maxWidth="max-w-6xl"
-        signedIn={signedIn}
+        signedIn={!!signedIn}
         links={[
           { to: "/profiles", label: "Browse runners" },
           { to: "/investors", label: "Hire a Runner" },
