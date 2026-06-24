@@ -785,17 +785,20 @@ function Index() {
         />
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
           {PAYMENT_FLOW.map((p, i) => (
-            <div key={p.step} className="relative rounded-2xl border border-border bg-card/60 backdrop-blur p-6 shadow-card">
-              <div className="text-xs font-mono text-primary mb-3">STEP {p.step}</div>
-              <div className="size-11 rounded-xl bg-primary/10 grid place-items-center mb-4">
-                <p.icon className="size-5 text-primary" />
+            <LandingExamplePopover key={p.step} example={PAYMENT_FLOW_EXAMPLES[p.step] ?? { title: p.title, body: p.body }}>
+              <div className="relative rounded-2xl border border-border bg-card/60 backdrop-blur p-6 shadow-card hover:border-primary/40 transition-colors">
+                <div className="text-xs font-mono text-primary mb-3">STEP {p.step}</div>
+                <div className="size-11 rounded-xl bg-primary/10 grid place-items-center mb-4">
+                  <p.icon className="size-5 text-primary" />
+                </div>
+                <h3 className="text-lg font-semibold mb-1">{p.title}</h3>
+                <p className="text-sm text-muted-foreground">{p.body}</p>
+                <p className="mt-3 text-xs font-medium text-primary/80">Preview example →</p>
+                {i < PAYMENT_FLOW.length - 1 && (
+                  <ArrowRight className="hidden lg:block absolute -right-4 top-1/2 -translate-y-1/2 size-4 text-primary/60" />
+                )}
               </div>
-              <h3 className="text-lg font-semibold mb-1">{p.title}</h3>
-              <p className="text-sm text-muted-foreground">{p.body}</p>
-              {i < PAYMENT_FLOW.length - 1 && (
-                <ArrowRight className="hidden lg:block absolute -right-4 top-1/2 -translate-y-1/2 size-4 text-primary/60" />
-              )}
-            </div>
+            </LandingExamplePopover>
           ))}
         </div>
         <div className="mt-8 max-w-3xl mx-auto rounded-xl border border-border bg-muted/30 p-5 text-xs md:text-sm text-muted-foreground leading-relaxed text-center">
