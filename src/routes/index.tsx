@@ -580,7 +580,6 @@ function Index() {
               autoPlay
               muted
               playsInline
-              loop
               controls
               preload="auto"
               className="w-full aspect-video bg-black"
