@@ -130,35 +130,35 @@ function MarketplacePage() {
         {stats && (
           <div className="mb-6 sm:mb-8 rounded-2xl border border-border/60 bg-card/40 p-3 sm:p-4">
             <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2 text-[11px] sm:text-xs uppercase tracking-wider text-muted-foreground">
+              <div className="flex items-center gap-2 text-xs uppercase tracking-wider text-foreground/80">
                 <span className="inline-block size-2 rounded-full bg-emerald-400 animate-pulse" />
                 Live platform activity
               </div>
-              <span className="hidden sm:inline text-[10px] text-muted-foreground">Updates in real time</span>
+              <span className="hidden sm:inline text-xs text-muted-foreground">Updates in real time</span>
             </div>
             <dl className="grid grid-cols-3 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4 text-sm">
               <div>
-                <dt className="text-muted-foreground text-[10px] sm:text-xs uppercase tracking-wide">Runners</dt>
+                <dt className="text-foreground/70 text-xs uppercase tracking-wide">Runners</dt>
                 <dd className="text-xl sm:text-2xl font-bold tabular-nums">{stats.runners}</dd>
               </div>
               <div className="hidden sm:block">
-                <dt className="text-muted-foreground text-[10px] sm:text-xs uppercase tracking-wide">Investors</dt>
+                <dt className="text-foreground/70 text-xs uppercase tracking-wide">Investors</dt>
                 <dd className="text-xl sm:text-2xl font-bold tabular-nums">{stats.investors}</dd>
               </div>
               <div>
-                <dt className="text-muted-foreground text-[10px] sm:text-xs uppercase tracking-wide">Tasks</dt>
+                <dt className="text-foreground/70 text-xs uppercase tracking-wide">Tasks</dt>
                 <dd className="text-xl sm:text-2xl font-bold tabular-nums">{stats.tasks_total}</dd>
               </div>
               <div className="hidden sm:block">
-                <dt className="text-muted-foreground text-[10px] sm:text-xs uppercase tracking-wide">Completed</dt>
+                <dt className="text-foreground/70 text-xs uppercase tracking-wide">Completed</dt>
                 <dd className="text-xl sm:text-2xl font-bold tabular-nums">{stats.tasks_completed}</dd>
               </div>
               <div>
-                <dt className="text-muted-foreground text-[10px] sm:text-xs uppercase tracking-wide">Markets</dt>
+                <dt className="text-foreground/70 text-xs uppercase tracking-wide">Markets</dt>
                 <dd className="text-xl sm:text-2xl font-bold tabular-nums">{stats.cities_active}</dd>
               </div>
               <div className="hidden sm:block">
-                <dt className="text-muted-foreground text-[10px] sm:text-xs uppercase tracking-wide">Avg rating</dt>
+                <dt className="text-foreground/70 text-xs uppercase tracking-wide">Avg rating</dt>
                 <dd className="text-xl sm:text-2xl font-bold tabular-nums">
                   {stats.reviews_count > 0 ? stats.avg_rating.toFixed(1) : "—"}
                 </dd>
@@ -210,11 +210,11 @@ function MarketplacePage() {
         <form
           id="tasks-search"
           onSubmit={(e) => { e.preventDefault(); refetch(); }}
-          className="mb-8 rounded-2xl border border-border/60 bg-card/40 p-3 space-y-2"
+          className="mb-8 rounded-2xl border border-border bg-card/40 p-3 sm:p-4 space-y-3"
         >
-          <div className="grid md:grid-cols-[1fr_160px_120px_110px_180px_auto] gap-2">
+          <div className="grid md:grid-cols-[1fr_160px_120px_110px_180px_auto] gap-2 [&_input]:h-11 [&_input]:text-base sm:[&_input]:h-9 sm:[&_input]:text-sm [&_button[role=combobox]]:h-11 sm:[&_button[role=combobox]]:h-9">
             <div className="relative">
-              <Search className="size-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+              <Search className="size-4 absolute left-3 top-1/2 -translate-y-1/2 text-foreground/60" />
               <Input aria-label="Search tasks by title or description" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search title or description" className="pl-9" />
             </div>
             <Input aria-label="Filter tasks by city" value={city} onChange={(e) => setCity(e.target.value)} placeholder="City" />
@@ -228,13 +228,13 @@ function MarketplacePage() {
                 <SelectItem value="due">Soonest due</SelectItem>
               </SelectContent>
             </Select>
-            <Button type="submit" disabled={isFetching}>
+            <Button type="submit" disabled={isFetching} className="h-11 sm:h-9 text-base sm:text-sm">
               {isFetching && <Loader2 className="size-4 mr-2 animate-spin" />} Search
             </Button>
           </div>
-          <div className="grid md:grid-cols-[200px_140px_140px_180px_auto] gap-2">
+          <div className="grid grid-cols-2 md:grid-cols-[200px_140px_140px_180px_auto] gap-2 [&_input]:h-11 [&_input]:text-base sm:[&_input]:h-9 sm:[&_input]:text-sm [&_button[role=combobox]]:h-11 sm:[&_button[role=combobox]]:h-9">
             <Select value={taskType} onValueChange={setTaskType}>
-              <SelectTrigger aria-label="Filter by task type"><SelectValue placeholder="Task type" /></SelectTrigger>
+              <SelectTrigger aria-label="Filter by task type" className="col-span-2 md:col-span-1"><SelectValue placeholder="Task type" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All task types</SelectItem>
                 <SelectItem value="property_photos">Property photos</SelectItem>
@@ -250,8 +250,8 @@ function MarketplacePage() {
             </Select>
             <Input aria-label="Minimum payout in dollars" type="number" min={0} value={minPayout} onChange={(e) => setMinPayout(e.target.value)} placeholder="Min $" />
             <Input aria-label="Maximum payout in dollars" type="number" min={0} value={maxPayout} onChange={(e) => setMaxPayout(e.target.value)} placeholder="Max $" />
-            <Input aria-label="Due before date" type="date" value={beforeDue} onChange={(e) => setBeforeDue(e.target.value)} placeholder="Due before" />
-            <Button type="button" variant="ghost" onClick={reset}>Reset</Button>
+            <Input aria-label="Due before date" type="date" value={beforeDue} onChange={(e) => setBeforeDue(e.target.value)} placeholder="Due before" className="col-span-2 md:col-span-1" />
+            <Button type="button" variant="ghost" onClick={reset} className="h-11 sm:h-9 text-base sm:text-sm col-span-2 md:col-span-1">Reset</Button>
           </div>
         </form>
 
@@ -307,36 +307,36 @@ function MarketplacePage() {
                 params={{ taskId: t.id }}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="rounded-2xl border border-border bg-card/50 p-5 hover:border-primary/40 transition-colors group"
+                className="rounded-2xl border border-border bg-card/50 p-5 hover:border-primary/40 active:bg-card transition-colors group min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
                 <div className="flex items-start justify-between gap-2">
-                  <span className="inline-flex items-center rounded-full bg-primary/10 text-primary border border-primary/30 px-2 py-0.5 text-xs font-medium">
+                  <span className="inline-flex items-center rounded-full bg-primary/15 text-primary border border-primary/40 px-2.5 py-1 text-xs font-medium">
                     {t.task_type}
                   </span>
                   {t.payout_amount != null && (
-                    <span className="inline-flex items-center gap-1 font-bold text-primary">
+                    <span className="inline-flex items-center gap-1 font-bold text-primary text-base">
                       <DollarSign className="size-4" />{Number(t.payout_amount).toFixed(0)}
                     </span>
                   )}
                 </div>
                 {t.requires_interior_access && (
-                  <span className="mt-2 inline-flex items-center gap-1 rounded-full border border-primary/40 bg-primary/5 px-2 py-0.5 text-[10px] font-medium text-primary">
+                  <span className="mt-2 inline-flex items-center gap-1 rounded-full border border-primary/40 bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
                     Background check required
                   </span>
                 )}
-                <h3 className="mt-3 font-semibold group-hover:text-primary line-clamp-2">{t.title}</h3>
-                <p className="mt-1 text-xs text-muted-foreground flex items-center gap-1">
-                  <MapPin className="size-3" /> {[t.city, t.state].filter(Boolean).join(", ")}
+                <h3 className="mt-3 font-semibold text-base sm:text-[15px] group-hover:text-primary line-clamp-2">{t.title}</h3>
+                <p className="mt-1.5 text-sm text-foreground/70 flex items-center gap-1.5">
+                  <MapPin className="size-3.5" /> {[t.city, t.state].filter(Boolean).join(", ")}
                 </p>
                 {t.description && (
-                  <p className="mt-2 text-sm text-muted-foreground line-clamp-2">{t.description}</p>
+                  <p className="mt-2 text-sm text-foreground/75 line-clamp-2">{t.description}</p>
                 )}
-                <div className="mt-4 flex items-center justify-between text-xs text-muted-foreground">
+                <div className="mt-4 flex items-center justify-between text-xs text-foreground/70">
                   {t.due_date ? (
-                    <span className="inline-flex items-center gap-1"><Calendar className="size-3" /> Due {new Date(t.due_date).toLocaleDateString()}</span>
+                    <span className="inline-flex items-center gap-1.5"><Calendar className="size-3.5" /> Due {new Date(t.due_date).toLocaleDateString()}</span>
                   ) : <span />}
                   {t.investor?.verified && (
-                    <span className="inline-flex items-center gap-1 text-emerald-300"><BadgeCheck className="size-3" /> Verified</span>
+                    <span className="inline-flex items-center gap-1.5 text-emerald-300"><BadgeCheck className="size-3.5" /> Verified</span>
                   )}
                 </div>
               </Link>
