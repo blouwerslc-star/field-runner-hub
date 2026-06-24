@@ -35,8 +35,8 @@ export function PublicHeader({
   return (
     <>
       <header className="sticky top-0 z-40 backdrop-blur bg-background/70 border-b border-border/60">
-        <div className={`mx-auto ${maxWidth} px-4 sm:px-5 h-16 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3`}>
-          <Link to="/" aria-label="REI Runner home" className="min-w-0 inline-flex items-center">
+        <div className={`mx-auto ${maxWidth} px-4 sm:px-5 h-16 flex items-center justify-between gap-3`}>
+          <Link to="/" aria-label="REI Runner home" className="inline-flex items-center min-w-0 shrink-0">
             <BrandLogo />
           </Link>
           <nav className="hidden md:flex items-center gap-4 text-sm">
@@ -56,7 +56,7 @@ export function PublicHeader({
             aria-expanded={open}
             aria-controls="public-header-drawer"
             onClick={() => setOpen(true)}
-            className="md:hidden inline-flex items-center justify-center size-10 -mr-1 rounded-md text-foreground/80 hover:text-foreground hover:bg-card/60 active:scale-95 transition shrink-0"
+            className="md:hidden inline-flex items-center justify-center size-10 -mr-2 rounded-md text-foreground/80 hover:text-foreground hover:bg-card/60 active:scale-95 transition shrink-0"
           >
             <Menu className="size-5" />
           </button>
