@@ -22,7 +22,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { BrandLogo } from "@/components/brand/BrandLogo";
+import { PublicHeader } from "@/components/layout/PublicHeader";
 import { Toaster } from "@/components/ui/sonner";
 import { ProForm } from "@/components/landing/ApplicationForms";
 
@@ -163,20 +163,14 @@ function InvestorsPage() {
     <div className="min-h-screen bg-background text-foreground">
       <Toaster richColors closeButton position="top-center" theme="dark" />
 
-      <header className="sticky top-0 z-40 backdrop-blur bg-background/70 border-b border-border/60">
-        <div className="mx-auto max-w-6xl px-5 h-16 flex items-center justify-between">
-          <Link to="/" aria-label="REI Runner home">
-            <BrandLogo />
-          </Link>
-          <div className="flex items-center gap-4 text-sm">
-            <Link to="/tasks" className="text-muted-foreground hover:text-foreground transition">Browse marketplace</Link>
-            <Link to="/runners" className="text-muted-foreground hover:text-foreground transition">For runners</Link>
-            <Link to="/" className="inline-flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition">
-              <ArrowLeft className="size-4" /> Back
-            </Link>
-          </div>
-        </div>
-      </header>
+      <PublicHeader
+        maxWidth="max-w-6xl"
+        links={[
+          { to: "/tasks", label: "Browse marketplace" },
+          { to: "/runners", label: "For runners" },
+          { to: "/", label: "Home" },
+        ]}
+      />
 
       <section className="mx-auto max-w-5xl px-5 py-14 md:py-20">
         <div className="text-center mb-12 max-w-3xl mx-auto">
