@@ -433,6 +433,173 @@ export type Database = {
         }
         Relationships: []
       }
+      background_check_audit: {
+        Row: {
+          action: string
+          actor_id: string | null
+          created_at: string
+          id: string
+          ip: string | null
+          metadata: Json
+          subject_user_id: string
+          submission_id: string | null
+        }
+        Insert: {
+          action: string
+          actor_id?: string | null
+          created_at?: string
+          id?: string
+          ip?: string | null
+          metadata?: Json
+          subject_user_id: string
+          submission_id?: string | null
+        }
+        Update: {
+          action?: string
+          actor_id?: string | null
+          created_at?: string
+          id?: string
+          ip?: string | null
+          metadata?: Json
+          subject_user_id?: string
+          submission_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "background_check_audit_submission_id_fkey"
+            columns: ["submission_id"]
+            isOneToOne: false
+            referencedRelation: "background_check_submissions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      background_check_submissions: {
+        Row: {
+          admin_notes: string | null
+          background_check_consent: boolean
+          created_at: string
+          current_address_line1: string
+          current_address_line2: string | null
+          current_address_since: string | null
+          current_city: string
+          current_state: string
+          current_zip: string
+          date_of_birth: string
+          drivers_license_expiration: string | null
+          drivers_license_number: string | null
+          drivers_license_state: string | null
+          email: string
+          fcra_consent: boolean
+          id: string
+          id_back_path: string | null
+          id_front_path: string | null
+          info_truthful_consent: boolean
+          legal_first_name: string
+          legal_last_name: string
+          legal_middle_name: string | null
+          name_suffix: string | null
+          needs_info_reason: string | null
+          other_names: Json
+          phone: string
+          prior_addresses: Json
+          reviewed_at: string | null
+          reviewed_by: string | null
+          selfie_path: string | null
+          signature_full_name: string
+          signature_ip: string | null
+          signed_at: string
+          ssn_full_encrypted: string | null
+          ssn_last4: string
+          status: string
+          submitted_at: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          background_check_consent?: boolean
+          created_at?: string
+          current_address_line1: string
+          current_address_line2?: string | null
+          current_address_since?: string | null
+          current_city: string
+          current_state: string
+          current_zip: string
+          date_of_birth: string
+          drivers_license_expiration?: string | null
+          drivers_license_number?: string | null
+          drivers_license_state?: string | null
+          email: string
+          fcra_consent?: boolean
+          id?: string
+          id_back_path?: string | null
+          id_front_path?: string | null
+          info_truthful_consent?: boolean
+          legal_first_name: string
+          legal_last_name: string
+          legal_middle_name?: string | null
+          name_suffix?: string | null
+          needs_info_reason?: string | null
+          other_names?: Json
+          phone: string
+          prior_addresses?: Json
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          selfie_path?: string | null
+          signature_full_name: string
+          signature_ip?: string | null
+          signed_at?: string
+          ssn_full_encrypted?: string | null
+          ssn_last4: string
+          status?: string
+          submitted_at?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          admin_notes?: string | null
+          background_check_consent?: boolean
+          created_at?: string
+          current_address_line1?: string
+          current_address_line2?: string | null
+          current_address_since?: string | null
+          current_city?: string
+          current_state?: string
+          current_zip?: string
+          date_of_birth?: string
+          drivers_license_expiration?: string | null
+          drivers_license_number?: string | null
+          drivers_license_state?: string | null
+          email?: string
+          fcra_consent?: boolean
+          id?: string
+          id_back_path?: string | null
+          id_front_path?: string | null
+          info_truthful_consent?: boolean
+          legal_first_name?: string
+          legal_last_name?: string
+          legal_middle_name?: string | null
+          name_suffix?: string | null
+          needs_info_reason?: string | null
+          other_names?: Json
+          phone?: string
+          prior_addresses?: Json
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          selfie_path?: string | null
+          signature_full_name?: string
+          signature_ip?: string | null
+          signed_at?: string
+          ssn_full_encrypted?: string | null
+          ssn_last4?: string
+          status?: string
+          submitted_at?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       broadcast_sends: {
         Row: {
           audience: string
@@ -2970,6 +3137,11 @@ export type Database = {
         Args: { _reason: string; _task_id: string }
         Returns: undefined
       }
+      bg_decrypt_ssn: {
+        Args: { _key: string; _submission_id: string }
+        Returns: string
+      }
+      bg_encrypt_ssn: { Args: { _key: string; _ssn: string }; Returns: string }
       delete_email: {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
