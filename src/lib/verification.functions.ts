@@ -214,7 +214,7 @@ export const adminDecideVerification = createServerFn({ method: "POST" })
 // ============================================================
 
 const bgListSchema = z.object({
-  status: z.enum(["pending", "passed", "failed", "all"]).default("pending"),
+  status: z.enum(["awaiting_info", "submitted", "in_review", "needs_info", "passed", "failed", "all"]).default("submitted"),
 });
 
 export const adminListBackgroundChecks = createServerFn({ method: "POST" })
@@ -225,27 +225,69 @@ export const adminListBackgroundChecks = createServerFn({ method: "POST" })
     const { data: isAdmin } = await supabaseAdmin.rpc("has_role", { _user_id: userId, _role: "admin" });
     if (!isAdmin) throw new Error("Admins only");
 
+    // "awaiting_info" = paid but no submission yet
+    if (data.status === "awaiting_info") {
+      const { data: subs } = await supabaseAdmin
+        .from("background_check_submissions")
+        .select("user_id");
+      const submittedIds = new Set((subs ?? []).map((s: any) => s.user_id));
+      const { data: paid } = await supabaseAdmin
+        .from("profiles")
+        .select(
+          "user_id, full_name, email, phone, city, state, profile_photo_url, background_check_paid_at, background_check_verified",
+        )
+        .not("background_check_paid_at", "is", null)
+        .eq("background_check_verified", false)
+        .order("background_check_paid_at", { ascending: false })
+        .limit(200);
+      const awaiting = (paid ?? []).filter((p: any) => !submittedIds.has(p.user_id));
+      return {
+        submissions: awaiting.map((p: any) => ({
+          id: null,
+          user_id: p.user_id,
+          status: "awaiting_info",
+          submitted_at: null,
+          legal_first_name: p.full_name?.split(" ")[0] ?? null,
+          legal_last_name: p.full_name?.split(" ").slice(1).join(" ") || null,
+          current_city: p.city,
+          current_state: p.state,
+          profile: p,
+          background_check_paid_at: p.background_check_paid_at,
+        })),
+      };
+    }
+
     let q = supabaseAdmin
-      .from("profiles")
-      .select(
-        "user_id, full_name, email, phone, city, state, profile_photo_url, background_check_paid_at, background_check_verified, checkr_status, verification_level",
-      )
-      .not("background_check_paid_at", "is", null)
-      .order("background_check_paid_at", { ascending: false })
+      .from("background_check_submissions")
+      .select("*")
+      .order("submitted_at", { ascending: false })
       .limit(200);
-
-    if (data.status === "pending") q = q.eq("checkr_status", "pending");
-    else if (data.status === "passed") q = q.eq("checkr_status", "passed");
-    else if (data.status === "failed") q = q.eq("checkr_status", "failed");
-
+    if (data.status !== "all") q = q.eq("status", data.status);
     const { data: rows, error } = await q;
     if (error) throw new Error(error.message);
-    return { profiles: rows ?? [] };
+
+    const userIds = Array.from(new Set((rows ?? []).map((r: any) => r.user_id)));
+    const { data: profiles } = userIds.length
+      ? await supabaseAdmin
+          .from("profiles")
+          .select(
+            "user_id, full_name, email, phone, city, state, profile_photo_url, background_check_paid_at, background_check_verified",
+          )
+          .in("user_id", userIds)
+      : { data: [] as any[] };
+    const byUser = new Map((profiles ?? []).map((p: any) => [p.user_id, p]));
+    return {
+      submissions: (rows ?? []).map((r: any) => ({
+        ...r,
+        ssn_full_encrypted: r.ssn_full_encrypted ? true : false, // boolean: was encrypted SSN stored?
+        profile: byUser.get(r.user_id) ?? null,
+      })),
+    };
   });
 
 const bgDecideSchema = z.object({
   user_id: z.string().uuid(),
-  status: z.enum(["pending", "passed", "failed"]),
+  status: z.enum(["in_review", "needs_info", "passed", "failed"]),
   admin_notes: z.string().trim().max(2000).optional().nullable(),
 });
 
@@ -258,8 +300,35 @@ export const adminSetBackgroundCheckStatus = createServerFn({ method: "POST" })
     if (!isAdmin) throw new Error("Admins only");
 
     const now = new Date().toISOString();
+
+    // Update submission row first
+    const { data: sub } = await supabaseAdmin
+      .from("background_check_submissions")
+      .select("id")
+      .eq("user_id", data.user_id)
+      .maybeSingle();
+    if (sub) {
+      await supabaseAdmin
+        .from("background_check_submissions")
+        .update({
+          status: data.status,
+          admin_notes: data.admin_notes ?? null,
+          needs_info_reason: data.status === "needs_info" ? data.admin_notes ?? null : null,
+          reviewed_at: now,
+          reviewed_by: userId,
+        })
+        .eq("id", sub.id);
+      await supabaseAdmin.from("background_check_audit").insert({
+        submission_id: sub.id,
+        subject_user_id: data.user_id,
+        actor_id: userId,
+        action: data.status === "needs_info" ? "request_more_info" : "status_change",
+        metadata: { to: data.status, note: data.admin_notes ?? null },
+      });
+    }
+
     const patch: Record<string, any> = {
-      checkr_status: data.status,
+      checkr_status: data.status === "in_review" ? "pending" : data.status,
       verification_reviewed_at: now,
       verification_reviewed_by: userId,
       verification_notes: data.admin_notes ?? null,
@@ -288,7 +357,9 @@ export const adminSetBackgroundCheckStatus = createServerFn({ method: "POST" })
         ? "Background check passed — you're Verified!"
         : data.status === "failed"
           ? "Background check did not pass"
-          : "Background check is being reviewed";
+          : data.status === "needs_info"
+            ? "We need more info for your background check"
+            : "Background check is being reviewed";
     await supabaseAdmin.from("notifications").insert({
       user_id: data.user_id,
       type: `background_check_${data.status}`,
@@ -298,4 +369,85 @@ export const adminSetBackgroundCheckStatus = createServerFn({ method: "POST" })
     });
 
     return { ok: true };
+  });
+
+// =====================================================================
+// Admin: full submission detail (logs a 'view' audit row)
+// =====================================================================
+
+export const adminGetBackgroundCheckSubmission = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i: unknown) => z.object({ submission_id: z.string().uuid() }).parse(i))
+  .handler(async ({ context, data }) => {
+    const { userId } = context;
+    const { data: isAdmin } = await supabaseAdmin.rpc("has_role", { _user_id: userId, _role: "admin" });
+    if (!isAdmin) throw new Error("Admins only");
+
+    const { data: row, error } = await supabaseAdmin
+      .from("background_check_submissions")
+      .select("*")
+      .eq("id", data.submission_id)
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    if (!row) throw new Error("Submission not found");
+
+    // Signed URLs for ID photos
+    const sign = async (p: string | null) => {
+      if (!p) return null;
+      const { data: s } = await supabaseAdmin.storage.from("runner-ids").createSignedUrl(p, 300);
+      return s?.signedUrl ?? null;
+    };
+    const idFrontUrl = await sign(row.id_front_path);
+    const idBackUrl = await sign(row.id_back_path);
+    const selfieUrl = await sign(row.selfie_path);
+
+    await supabaseAdmin.from("background_check_audit").insert({
+      submission_id: row.id,
+      subject_user_id: row.user_id,
+      actor_id: userId,
+      action: "view",
+      metadata: {},
+    });
+
+    const { ssn_full_encrypted: _omit, ...safe } = row as any;
+    return {
+      submission: { ...safe, has_full_ssn: !!_omit },
+      idFrontUrl,
+      idBackUrl,
+      selfieUrl,
+    };
+  });
+
+export const adminRevealSsn = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i: unknown) => z.object({ submission_id: z.string().uuid() }).parse(i))
+  .handler(async ({ context, data }) => {
+    const { userId } = context;
+    const { data: isAdmin } = await supabaseAdmin.rpc("has_role", { _user_id: userId, _role: "admin" });
+    if (!isAdmin) throw new Error("Admins only");
+    const key = process.env.BG_CHECK_ENCRYPTION_KEY;
+    if (!key) throw new Error("Encryption key is not configured");
+
+    const { data: row } = await supabaseAdmin
+      .from("background_check_submissions")
+      .select("id, user_id, ssn_full_encrypted")
+      .eq("id", data.submission_id)
+      .maybeSingle();
+    if (!row) throw new Error("Submission not found");
+    if (!row.ssn_full_encrypted) return { ssn: null };
+
+    const { data: ssn, error } = await supabaseAdmin.rpc("bg_decrypt_ssn", {
+      _submission_id: row.id,
+      _key: key,
+    });
+    if (error) throw new Error(error.message);
+
+    await supabaseAdmin.from("background_check_audit").insert({
+      submission_id: row.id,
+      subject_user_id: row.user_id,
+      actor_id: userId,
+      action: "reveal_ssn",
+      metadata: {},
+    });
+    return { ssn: ssn as string | null };
   });
