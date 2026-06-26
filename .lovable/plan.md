@@ -1,89 +1,47 @@
 ## Goal
-Replace the Checkr-based background check flow with a secure manual intake form. Runner pays the $13.99 fee, fills a detailed encrypted intake form, and you (admin) run the check externally and post the result back. Nothing changes about pricing or the Verified badge logic.
 
-## What's wrong today
-- `/profile/background-check` only shows a Stripe checkout. After payment we just wait for a Checkr webhook that will never fire — runners get stuck on "in progress" forever.
-- No structured PII (legal name, DOB, SSN, address history, license) is ever captured.
-- Admin page links to dashboard.checkr.com and has no way to see the submitted info.
+When a visitor browses `/profiles`, applies filters (state, service, role, etc.), opens a profile, and presses Back (browser or Android hardware back), they should return to the same filtered results — not a reset list. Also replace the free-text State and Service inputs with proper dropdowns.
 
-## New flow
+## Changes
 
-```text
-Runner side                          Admin side
------------                          ----------
-1. Pay $13.99 (existing Stripe)
-2. Fill secure intake form  ───►     3. See submission in admin queue
-                                     4. Run check externally (LLC of your choice)
-5. See "In review" status     ◄───   6. Mark Passed / Failed + notes
-7. Verified badge appears
-```
+### 1. Move filter state into the URL (search params)
 
-## Intake form fields (collected AFTER payment, on a new step)
+Currently `src/routes/profiles.tsx` keeps `q`, `role`, `city`, `state`, `zip`, `service`, `availability`, `sort`, `certs` in local `useState`. When the user navigates to `/profile/:slug` and returns, React re-mounts the route with empty state.
 
-Required:
-- Legal first / middle / last name, suffix
-- Other names used (aliases / maiden) — repeatable
-- Date of birth
-- SSN (last 4 by default; full SSN optional, stored encrypted)
-- Driver's license number + issuing state + expiration
-- Current address (street, unit, city, state, zip, since-date)
-- Prior addresses (last 7 years) — repeatable
-- Phone (re-confirmed) + email
-- ID photo upload (front + back) → private `runner-ids` bucket (already exists)
-- Selfie holding ID → same bucket
+Fix: store all filters as TanStack Router search params on `/profiles`.
 
-Consent block (must check all):
-- FCRA disclosure & authorization
-- Consent to background check
-- Certification that info is true
-- E-signature (typed full name) + IP + timestamp captured server-side
+- Add `validateSearch` with a Zod schema using `fallback(...).default(...)` for each filter (per `tanstack-search-params` rules).
+- Replace `useState` with `Route.useSearch()` for reads and `navigate({ search: prev => ({ ...prev, ... }) })` for writes (debounced for text inputs so we don't spam history).
+- Use `replace: true` on filter updates so the history entry for `/profiles` is a single, latest-filters entry — pressing Back from a profile detail returns to those exact filters.
+- Use `react-query`'s queryKey derived from search params (already keyed by `filters` — will still work).
 
-## Security model
-- New table `background_check_submissions` — service-role only, RLS denies everyone; runner inserts/reads their own row via server functions, admin reads via `has_role('admin')` server fn.
-- SSN full value stored encrypted using `pgcrypto` `pgp_sym_encrypt` keyed by a new `BG_CHECK_ENCRYPTION_KEY` secret. The intake server fn encrypts on insert; admin server fn decrypts on demand and never returns SSN in list views (only on a "Reveal SSN" action that's audit-logged).
-- All file uploads go to existing private `runner-ids` bucket under `bg-check/<user_id>/...` — signed URLs only, 5-min expiry, generated server-side for admin.
-- Audit log: every admin view / reveal / status change writes to a new `background_check_audit` table.
-- Rate-limit: one active submission per runner; resubmission only allowed if admin marks "needs more info".
+Result: Back from `/profile/$slug` → browser restores `/profiles?state=TX&service=...` and the page renders the same filtered grid + scroll position (scroll restoration is already enabled per `tanstack-navigation`).
 
-## Status state machine
-`paid → awaiting_info → submitted → in_review → passed | failed | needs_info`
+### 2. Replace text inputs with dropdowns
 
-`background_check_verified=true` only when status=`passed` (existing logic preserved). Drop reliance on `checkr_status`; keep the column but treat `submission.status` as source of truth.
+**State dropdown**: use a `Select` populated from the existing US-state list already used by `StateCoverageMap` (will import/extract the list it uses, or fall back to a constant of 50 states + DC). Include an "All states" option.
 
-## UI changes
+**Service dropdown**: use the existing service catalog. Source priority:
+1. `src/lib/landing-service-examples.ts` / `src/lib/sample-task-templates.ts` if they already enumerate services
+2. Otherwise the canonical list in `src/lib/profile-constants.ts`
 
-`/profile/background-check`:
-- Renamed sub-steps in a stepper: **Pay → Submit Info → Review → Result**
-- After payment, show the secure intake form (multi-section, autosaves draft locally only — never localStorage for SSN).
-- After submit, show "In review — typically 1–3 business days" with timestamp and what was submitted (masked SSN, address summary).
-- "Needs info" state shows admin's note + reopens the form.
+I'll pick whichever already represents the runner service taxonomy so the dropdown matches what profiles list. Include "All services".
 
-`/admin/background-checks`:
-- Replace Checkr CTA with internal review panel.
-- Card shows: identity summary, masked SSN, address history, ID photo thumbnails (signed URLs), consent record, e-signature, IP, submitted-at.
-- Buttons: Reveal SSN (audited), Download ID, Mark Passed / Failed / Needs Info + note → runner gets notified.
-- Tabs: Awaiting Info, Submitted, In Review, Passed, Failed.
+Both selects will be searchable using the existing `Command`-based combobox pattern (shadcn `Popover` + `Command`) so long lists stay usable on mobile — same pattern used elsewhere in the app where applicable; otherwise plain `Select`.
 
-## Files / migrations
+### 3. Keep other behavior intact
 
-New migration:
-- `background_check_submissions` (with GRANTs + RLS deny-all + service_role full).
-- `background_check_audit` (admin-read via `has_role`).
-- Enable `pgcrypto`; add helper SQL functions `bg_encrypt_ssn(text)` / `bg_decrypt_ssn(bytea)` (SECURITY DEFINER, restricted).
+- Clearing filters resets search params to defaults (and strips defaults from URL via `stripSearchParams` middleware so the URL stays clean).
+- The `StateCoverageMap` click handler updates the `state` search param instead of local state.
+- Cert chips also move into search params (`certs` as array).
 
-New / edited code:
-- `src/lib/background-check.functions.ts` — add `submitBackgroundCheckIntake`, `getMyBackgroundCheckSubmission`, `requestMoreInfo`.
-- `src/lib/verification.functions.ts` — update `adminListBackgroundChecks` / `adminSetBackgroundCheckStatus` to read submission table + write audit rows; add `adminRevealSsn`, `adminGetIdPhotoUrls`.
-- `src/components/profiles/BackgroundCheckIntakeForm.tsx` — new multi-section zod-validated form (react-hook-form), with file upload via existing storage helpers.
-- `src/routes/_authenticated/profile.background-check.tsx` — wire stepper + intake form + state-machine UI.
-- `src/routes/_authenticated/admin.background-checks.tsx` — new review panel.
+## Files to edit
 
-Secret to add: `BG_CHECK_ENCRYPTION_KEY` (random 64-char, generated, not user-provided).
+- `src/routes/profiles.tsx` — add `validateSearch`, swap `useState`→`useSearch`/`navigate`, replace State + Service `Input`s with dropdown components, replace local handlers.
+- (Possibly) `src/lib/profile-constants.ts` — export `US_STATES` and `RUNNER_SERVICES` constants if not already present, for the dropdown options.
 
-## Out of scope (intentionally)
-- Automatic background check vendor integration (Checkr deferred; columns kept for later).
-- Cross-state monitoring / continuous checks.
-- Re-running the check after Passed (would be a separate "renew" flow later).
+## Out of scope
 
-## Open question
-Default capture is **SSN last 4 only**, with an optional toggle to provide full SSN encrypted. Want me to require full SSN for everyone, or keep last-4 as the default and only ask for full SSN if you mark a submission "Needs info"?
+- Changing the profile detail page itself.
+- Changing the back button component (`BackButton.tsx`) — native browser/Android back already works once filters live in the URL.
+- Persisting filters across full browser sessions (URL-based restore is enough for the reported issue).
