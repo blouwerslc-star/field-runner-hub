@@ -26,17 +26,17 @@ export const Route = createFileRoute("/pricing")({
   component: PricingPage,
   head: () => ({
     meta: [
-      { title: "Pricing — REI Runner Field Services" },
+      { title: "Property Field Services Pricing — Flat Per-Task | REI Runner" },
       {
         name: "description",
         content:
-          "Starting prices for drive-bys, occupancy checks, property photos, walkthrough videos, lockbox installs, and investor assistant services on REI Runner.",
+          "Flat per-task pricing for property preservation & inspection services — drive-bys, vacancy checks, photo sets, walkthrough videos, and lockbox installs. No platform fee on top of your task price.",
       },
-      { property: "og:title", content: "Pricing — REI Runner" },
+      { property: "og:title", content: "Property Field Services Pricing — Flat Per-Task | REI Runner" },
       {
         property: "og:description",
         content:
-          "Transparent starting prices for every REI Runner field service. Final pricing varies by market, complexity, and turnaround.",
+          "Transparent flat per-task pricing for every property field service. Final pricing varies by market, complexity, and turnaround.",
       },
       { property: "og:url", content: "https://reirunner.com/pricing" },
     ],
