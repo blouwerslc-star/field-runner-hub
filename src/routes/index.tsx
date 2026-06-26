@@ -73,17 +73,17 @@ export const Route = createFileRoute("/")({
   component: Index,
   head: () => ({
     meta: [
-      { title: "REI Runner | On-Demand Real Estate Field Services" },
+      { title: "On-Demand Property Field Services & Inspections | REI Runner" },
       {
         name: "description",
         content:
-          "Hire local runners for property photos, walkthrough videos, occupancy checks, drive-bys, and sign placement — on demand, market-by-market across the U.S.",
+          "On-demand property preservation and inspection services — hire vetted local runners for photos, walkthrough video, drive-bys, vacancy checks, and lockbox installs across the U.S.",
       },
-      { property: "og:title", content: "REI Runner | On-Demand Real Estate Field Services" },
+      { property: "og:title", content: "On-Demand Property Field Services & Inspections | REI Runner" },
       {
         property: "og:description",
         content:
-          "Hire local boots-on-the-ground for photos, videos, walkthroughs, and property checks — or get paid completing tasks in your city.",
+          "On-demand property preservation & inspection services — hire vetted local runners, or get paid completing property field tasks in your city.",
       },
       { property: "og:url", content: "https://reirunner.com/" },
     ],
