@@ -27,7 +27,8 @@ import {
 import { toast } from "sonner";
 
 // Set this to a real YouTube/Vimeo embed URL when the pitch video is ready.
-const INVESTOR_VIDEO_EMBED_URL: string | null = null;
+const INVESTOR_VIDEO_EMBED_URL: string | null =
+  "https://www.youtube.com/embed/BiLrthGn_UE";
 
 const CARDS = [
   {
