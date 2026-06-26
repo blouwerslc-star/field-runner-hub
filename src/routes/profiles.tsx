@@ -56,7 +56,7 @@ function ProfilesDirectory() {
   const navigate = useNavigate({ from: Route.fullPath });
   const { q, role, city, state, zip, service, availability, sort, certs } = search;
   const updateSearch = (patch: Partial<typeof search>) => {
-    void navigate({ search: (prev) => ({ ...prev, ...patch }), replace: true });
+    void navigate({ search: (prev: typeof search) => ({ ...prev, ...patch }), replace: true });
   };
   // Local-buffered text inputs so typing doesn't push a history entry per keystroke.
   const [qLocal, setQLocal] = useState(q);
@@ -260,7 +260,7 @@ function ProfilesDirectory() {
                   onClick={() =>
                     updateSearch({
                       certs: certs.includes(c.slug)
-                        ? certs.filter((s) => s !== c.slug)
+                        ? certs.filter((s: string) => s !== c.slug)
                         : [...certs, c.slug],
                     })
                   }
