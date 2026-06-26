@@ -5,7 +5,7 @@ import { ArrowLeft, Target, Compass, ShieldCheck, MapPin, HeartHandshake, Zap, B
 export const Route = createFileRoute("/about")({
   head: () => ({
     meta: [
-      { title: "About REI Runner — The Uber for Real Estate Field Services" },
+      { title: "About REI Runner — Property Field Services Marketplace" },
       {
         name: "description",
         content:
