@@ -1,5 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
+import { useNavigate } from "@tanstack/react-router";
+import { zodValidator, fallback } from "@tanstack/zod-adapter";
+import { z } from "zod";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { listPublicProfiles, listAcademyCertOptions } from "@/lib/profiles.functions";
@@ -11,8 +14,22 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Button } from "@/components/ui/button";
 import { Loader2, Search, BadgeCheck, Star, Trophy, Lock, ShieldCheck, MapPinned, GraduationCap } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { US_STATES, SPECIALTY_OPTIONS } from "@/lib/profile-constants";
+
+const searchSchema = z.object({
+  q: fallback(z.string(), "").default(""),
+  role: fallback(z.enum(["all", "runner", "investor"]), "all").default("all"),
+  city: fallback(z.string(), "").default(""),
+  state: fallback(z.string(), "").default(""),
+  zip: fallback(z.string(), "").default(""),
+  service: fallback(z.string(), "").default(""),
+  availability: fallback(z.enum(["all", "available", "busy", "unavailable"]), "all").default("all"),
+  sort: fallback(z.enum(["featured", "rating", "completed", "newest"]), "featured").default("featured"),
+  certs: fallback(z.array(z.string()), []).default([]),
+});
 
 export const Route = createFileRoute("/profiles")({
+  validateSearch: zodValidator(searchSchema),
   component: ProfilesDirectory,
   head: () => ({
     meta: [
@@ -35,15 +52,19 @@ function ProfilesDirectory() {
     const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => setAuthed(!!s));
     return () => sub.subscription.unsubscribe();
   }, []);
-  const [q, setQ] = useState("");
-  const [role, setRole] = useState<"all" | "runner" | "investor">("all");
-  const [city, setCity] = useState("");
-  const [state, setState] = useState("");
-  const [zip, setZip] = useState("");
-  const [service, setService] = useState("");
-  const [availability, setAvailability] = useState<"all" | "available" | "busy" | "unavailable">("all");
-  const [sort, setSort] = useState<"featured" | "rating" | "completed" | "newest">("featured");
-  const [certs, setCerts] = useState<string[]>([]);
+  const search = Route.useSearch();
+  const navigate = useNavigate({ from: Route.fullPath });
+  const { q, role, city, state, zip, service, availability, sort, certs } = search;
+  const updateSearch = (patch: Partial<typeof search>) => {
+    void navigate({ search: (prev) => ({ ...prev, ...patch }), replace: true });
+  };
+  // Local-buffered text inputs so typing doesn't push a history entry per keystroke.
+  const [qLocal, setQLocal] = useState(q);
+  const [cityLocal, setCityLocal] = useState(city);
+  const [zipLocal, setZipLocal] = useState(zip);
+  useEffect(() => { setQLocal(q); }, [q]);
+  useEffect(() => { setCityLocal(city); }, [city]);
+  useEffect(() => { setZipLocal(zip); }, [zip]);
 
   const certOptsFn = useServerFn(listAcademyCertOptions);
   const { data: certOpts } = useQuery({
@@ -83,9 +104,9 @@ function ProfilesDirectory() {
   ).size;
 
   function handleStateClick(stateAbbr: string) {
-    setState(stateAbbr);
-    setCity("");
-    setZip("");
+    updateSearch({ state: stateAbbr, city: "", zip: "" });
+    setCityLocal("");
+    setZipLocal("");
     // Scroll to results list
     requestAnimationFrame(() => {
       document.getElementById("profiles-search")?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -162,13 +183,17 @@ function ProfilesDirectory() {
         <form
           id="profiles-search"
           className="grid gap-3 md:grid-cols-6 mb-6"
-          onSubmit={(e) => { e.preventDefault(); void refetch(); }}
+          onSubmit={(e) => {
+            e.preventDefault();
+            updateSearch({ q: qLocal, city: cityLocal, zip: zipLocal });
+            void refetch();
+          }}
         >
           <div className="md:col-span-2 relative">
             <Search className="size-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-            <Input aria-label="Search profiles by name or headline" placeholder="Search name or headline" value={q} onChange={(e) => setQ(e.target.value)} className="pl-9" />
+            <Input aria-label="Search profiles by name or headline" placeholder="Search name or headline" value={qLocal} onChange={(e) => setQLocal(e.target.value)} className="pl-9" />
           </div>
-          <Select value={role} onValueChange={(v) => setRole(v as typeof role)}>
+          <Select value={role} onValueChange={(v) => updateSearch({ role: v as typeof role })}>
             <SelectTrigger aria-label="Filter by role"><SelectValue placeholder="Role" /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All roles</SelectItem>
@@ -176,11 +201,27 @@ function ProfilesDirectory() {
               <SelectItem value="investor">Investors</SelectItem>
             </SelectContent>
           </Select>
-          <Input aria-label="Filter by city" placeholder="City" value={city} onChange={(e) => setCity(e.target.value)} />
-          <Input aria-label="Filter by state" placeholder="State" value={state} onChange={(e) => setState(e.target.value)} />
-          <Input aria-label="Filter by ZIP code" placeholder="ZIP" inputMode="numeric" maxLength={5} value={zip} onChange={(e) => setZip(e.target.value.replace(/[^0-9]/g, ""))} />
-          <Input aria-label="Filter by service offered" placeholder="Service" value={service} onChange={(e) => setService(e.target.value)} />
-          <Select value={availability} onValueChange={(v) => setAvailability(v as typeof availability)}>
+          <Input aria-label="Filter by city" placeholder="City" value={cityLocal} onChange={(e) => setCityLocal(e.target.value)} onBlur={() => updateSearch({ city: cityLocal })} />
+          <Select value={state || "all"} onValueChange={(v) => updateSearch({ state: v === "all" ? "" : v })}>
+            <SelectTrigger aria-label="Filter by state"><SelectValue placeholder="State" /></SelectTrigger>
+            <SelectContent className="max-h-72">
+              <SelectItem value="all">All states</SelectItem>
+              {US_STATES.map((s) => (
+                <SelectItem key={s.abbr} value={s.abbr}>{s.name} ({s.abbr})</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Input aria-label="Filter by ZIP code" placeholder="ZIP" inputMode="numeric" maxLength={5} value={zipLocal} onChange={(e) => setZipLocal(e.target.value.replace(/[^0-9]/g, ""))} onBlur={() => updateSearch({ zip: zipLocal })} />
+          <Select value={service || "all"} onValueChange={(v) => updateSearch({ service: v === "all" ? "" : v })}>
+            <SelectTrigger aria-label="Filter by service offered"><SelectValue placeholder="Service" /></SelectTrigger>
+            <SelectContent className="max-h-72">
+              <SelectItem value="all">All services</SelectItem>
+              {SPECIALTY_OPTIONS.map((s) => (
+                <SelectItem key={s} value={s}>{s}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select value={availability} onValueChange={(v) => updateSearch({ availability: v as typeof availability })}>
             <SelectTrigger aria-label="Filter by availability"><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Any availability</SelectItem>
@@ -189,7 +230,7 @@ function ProfilesDirectory() {
               <SelectItem value="unavailable">Unavailable</SelectItem>
             </SelectContent>
           </Select>
-          <Select value={sort} onValueChange={(v) => setSort(v as typeof sort)}>
+          <Select value={sort} onValueChange={(v) => updateSearch({ sort: v as typeof sort })}>
             <SelectTrigger aria-label="Sort profiles"><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="featured">Featured first</SelectItem>
@@ -217,9 +258,11 @@ function ProfilesDirectory() {
                   key={c.slug}
                   type="button"
                   onClick={() =>
-                    setCerts((prev) =>
-                      prev.includes(c.slug) ? prev.filter((s) => s !== c.slug) : [...prev, c.slug],
-                    )
+                    updateSearch({
+                      certs: certs.includes(c.slug)
+                        ? certs.filter((s) => s !== c.slug)
+                        : [...certs, c.slug],
+                    })
                   }
                   className={
                     "rounded-full border px-3 py-1 text-xs transition " +
@@ -236,7 +279,7 @@ function ProfilesDirectory() {
             {certs.length > 0 && (
               <button
                 type="button"
-                onClick={() => setCerts([])}
+                onClick={() => updateSearch({ certs: [] })}
                 className="text-xs text-muted-foreground hover:text-foreground underline ml-1"
               >
                 Clear
@@ -256,15 +299,8 @@ function ProfilesDirectory() {
               size="sm"
               className="mt-4"
               onClick={() => {
-                setQ("");
-                setRole("all");
-                setCity("");
-                setState("");
-                setZip("");
-                setService("");
-                setAvailability("all");
-                setSort("featured");
-                setCerts([]);
+                setQLocal(""); setCityLocal(""); setZipLocal("");
+                void navigate({ search: {} as never, replace: true });
               }}
             >
               Clear filters
