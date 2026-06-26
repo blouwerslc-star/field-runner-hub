@@ -38,6 +38,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as TasksTaskIdRouteImport } from './routes/tasks.$taskId'
 import { Route as ProfileSlugRouteImport } from './routes/profile.$slug'
 import { Route as PricingCatalogRouteImport } from './routes/pricing.catalog'
+import { Route as MarketsCityRouteImport } from './routes/markets.$city'
 import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
 import { Route as CheckoutReturnRouteImport } from './routes/checkout.return'
 import { Route as BlogComparisonWegolookRouteImport } from './routes/blog.comparison-wegolook'
@@ -263,6 +264,11 @@ const PricingCatalogRoute = PricingCatalogRouteImport.update({
   id: '/catalog',
   path: '/catalog',
   getParentRoute: () => PricingRoute,
+} as any)
+const MarketsCityRoute = MarketsCityRouteImport.update({
+  id: '/markets/$city',
+  path: '/markets/$city',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const EmailUnsubscribeRoute = EmailUnsubscribeRouteImport.update({
   id: '/email/unsubscribe',
@@ -761,6 +767,7 @@ export interface FileRoutesByFullPath {
   '/blog/comparison-wegolook': typeof BlogComparisonWegolookRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
+  '/markets/$city': typeof MarketsCityRoute
   '/pricing/catalog': typeof PricingCatalogRoute
   '/profile/$slug': typeof ProfileSlugRoute
   '/tasks/$taskId': typeof TasksTaskIdRoute
@@ -865,6 +872,7 @@ export interface FileRoutesByTo {
   '/blog/comparison-wegolook': typeof BlogComparisonWegolookRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
+  '/markets/$city': typeof MarketsCityRoute
   '/pricing/catalog': typeof PricingCatalogRoute
   '/profile/$slug': typeof ProfileSlugRoute
   '/tasks/$taskId': typeof TasksTaskIdRoute
@@ -974,6 +982,7 @@ export interface FileRoutesById {
   '/blog/comparison-wegolook': typeof BlogComparisonWegolookRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
+  '/markets/$city': typeof MarketsCityRoute
   '/pricing/catalog': typeof PricingCatalogRoute
   '/profile/$slug': typeof ProfileSlugRoute
   '/tasks/$taskId': typeof TasksTaskIdRoute
@@ -1084,6 +1093,7 @@ export interface FileRouteTypes {
     | '/blog/comparison-wegolook'
     | '/checkout/return'
     | '/email/unsubscribe'
+    | '/markets/$city'
     | '/pricing/catalog'
     | '/profile/$slug'
     | '/tasks/$taskId'
@@ -1188,6 +1198,7 @@ export interface FileRouteTypes {
     | '/blog/comparison-wegolook'
     | '/checkout/return'
     | '/email/unsubscribe'
+    | '/markets/$city'
     | '/pricing/catalog'
     | '/profile/$slug'
     | '/tasks/$taskId'
@@ -1296,6 +1307,7 @@ export interface FileRouteTypes {
     | '/blog/comparison-wegolook'
     | '/checkout/return'
     | '/email/unsubscribe'
+    | '/markets/$city'
     | '/pricing/catalog'
     | '/profile/$slug'
     | '/tasks/$taskId'
@@ -1390,6 +1402,7 @@ export interface RootRouteChildren {
   BlogComparisonWegolookRoute: typeof BlogComparisonWegolookRoute
   CheckoutReturnRoute: typeof CheckoutReturnRoute
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
+  MarketsCityRoute: typeof MarketsCityRoute
   ProfileSlugRoute: typeof ProfileSlugRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
   ApiPublicHooksDispatchSmsRoute: typeof ApiPublicHooksDispatchSmsRoute
@@ -1609,6 +1622,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/pricing/catalog'
       preLoaderRoute: typeof PricingCatalogRouteImport
       parentRoute: typeof PricingRoute
+    }
+    '/markets/$city': {
+      id: '/markets/$city'
+      path: '/markets/$city'
+      fullPath: '/markets/$city'
+      preLoaderRoute: typeof MarketsCityRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/email/unsubscribe': {
       id: '/email/unsubscribe'
@@ -2411,6 +2431,7 @@ const rootRouteChildren: RootRouteChildren = {
   BlogComparisonWegolookRoute: BlogComparisonWegolookRoute,
   CheckoutReturnRoute: CheckoutReturnRoute,
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
+  MarketsCityRoute: MarketsCityRoute,
   ProfileSlugRoute: ProfileSlugRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
   ApiPublicHooksDispatchSmsRoute: ApiPublicHooksDispatchSmsRoute,

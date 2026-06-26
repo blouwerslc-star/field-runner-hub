@@ -31,6 +31,17 @@ export const Route = createFileRoute("/sitemap.xml")({
           { path: "/privacy", changefreq: "yearly", priority: "0.3" },
           { path: "/terms", changefreq: "yearly", priority: "0.3" },
           { path: "/blog/comparison-wegolook", changefreq: "monthly", priority: "0.7" },
+          { path: "/property-preservation-services", changefreq: "monthly", priority: "0.9" },
+          { path: "/property-inspection-service", changefreq: "monthly", priority: "0.9" },
+          { path: "/property-preservation-jobs", changefreq: "monthly", priority: "0.9" },
+          { path: "/markets/detroit", changefreq: "monthly", priority: "0.7" },
+          { path: "/markets/atlanta", changefreq: "monthly", priority: "0.7" },
+          { path: "/markets/dallas", changefreq: "monthly", priority: "0.7" },
+          { path: "/markets/phoenix", changefreq: "monthly", priority: "0.7" },
+          { path: "/markets/tampa", changefreq: "monthly", priority: "0.7" },
+          { path: "/markets/indianapolis", changefreq: "monthly", priority: "0.7" },
+          { path: "/markets/cleveland", changefreq: "monthly", priority: "0.7" },
+          { path: "/markets/chicago", changefreq: "monthly", priority: "0.7" },
         ];
 
         const urls = entries.map((e) =>
