@@ -7,13 +7,13 @@ import { FieldRunnerForm } from "@/components/landing/ApplicationForms";
 export const Route = createFileRoute("/runners")({
   head: () => ({
     meta: [
-      { title: "Become a Runner — REI Runner" },
+      { title: "Property Preservation Jobs & Field Runner Gigs — REI Runner" },
       {
         name: "description",
         content:
-          "Earn money completing local real estate field tasks: drive-bys, photos, walkthroughs, lockbox installs, and sign placements. Apply to become a vetted REI Runner.",
+          "Earn per task completing local property preservation jobs and real estate field gigs — drive-bys, vacancy checks, photos, walkthroughs, and lockbox installs. Apply to become a vetted REI Runner.",
       },
-      { property: "og:title", content: "Become a Runner — REI Runner" },
+      { property: "og:title", content: "Property Preservation Jobs & Field Runner Gigs — REI Runner" },
       {
         property: "og:description",
         content:
@@ -73,9 +73,9 @@ function RunnersPage() {
       <main className="mx-auto max-w-3xl px-5 py-14 md:py-20">
         <div className="text-center mb-10">
           <div className="text-xs font-semibold tracking-widest text-primary uppercase">For Runners</div>
-          <h1 className="mt-3 text-3xl md:text-5xl font-bold">Get Paid to Complete Local Real Estate Tasks</h1>
+          <h1 className="mt-3 text-3xl md:text-5xl font-bold">Property Preservation Jobs & Field Runner Gigs Near You</h1>
           <p className="mt-4 text-muted-foreground text-base md:text-lg">
-            Short, scheduled field jobs in your city — photos, videos, drive-bys, occupancy checks, lockbox installs. Set your own availability.
+            Short, scheduled property preservation jobs in your city — photos, videos, drive-bys, vacancy checks, lockbox installs. Per-task pay, set your own availability.
           </p>
         </div>
 
