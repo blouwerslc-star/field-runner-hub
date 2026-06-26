@@ -32,7 +32,7 @@ export const Route = createFileRoute("/investors")({
       {
         name: "description",
         content:
-          "Get eyes on any property in the U.S. Post a task, a vetted local runner delivers photos, video, drive-bys, or occupancy checks, and funds release only when you approve.",
+          "Post a property task — a vetted local runner delivers photos, video, drive-bys, or occupancy checks. Funds release only when you approve.",
       },
       { property: "og:title", content: "Hire Local Runners for Real Estate Tasks — REI Runner" },
       {
