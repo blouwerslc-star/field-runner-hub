@@ -37,6 +37,7 @@ import { Route as ProfileSlugRouteImport } from './routes/profile.$slug'
 import { Route as PricingCatalogRouteImport } from './routes/pricing.catalog'
 import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
 import { Route as CheckoutReturnRouteImport } from './routes/checkout.return'
+import { Route as BlogComparisonWegolookRouteImport } from './routes/blog.comparison-wegolook'
 import { Route as AuthenticatedTemplatesRouteImport } from './routes/_authenticated/templates'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedRunnerRatesRouteImport } from './routes/_authenticated/runner-rates'
@@ -250,6 +251,11 @@ const EmailUnsubscribeRoute = EmailUnsubscribeRouteImport.update({
 const CheckoutReturnRoute = CheckoutReturnRouteImport.update({
   id: '/checkout/return',
   path: '/checkout/return',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BlogComparisonWegolookRoute = BlogComparisonWegolookRouteImport.update({
+  id: '/blog/comparison-wegolook',
+  path: '/blog/comparison-wegolook',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedTemplatesRoute = AuthenticatedTemplatesRouteImport.update({
@@ -728,6 +734,7 @@ export interface FileRoutesByFullPath {
   '/runner-rates': typeof AuthenticatedRunnerRatesRoute
   '/settings': typeof AuthenticatedSettingsRouteWithChildren
   '/templates': typeof AuthenticatedTemplatesRoute
+  '/blog/comparison-wegolook': typeof BlogComparisonWegolookRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/pricing/catalog': typeof PricingCatalogRoute
@@ -828,6 +835,7 @@ export interface FileRoutesByTo {
   '/runner-dashboard': typeof AuthenticatedRunnerDashboardRoute
   '/runner-rates': typeof AuthenticatedRunnerRatesRoute
   '/templates': typeof AuthenticatedTemplatesRoute
+  '/blog/comparison-wegolook': typeof BlogComparisonWegolookRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/pricing/catalog': typeof PricingCatalogRoute
@@ -933,6 +941,7 @@ export interface FileRoutesById {
   '/_authenticated/runner-rates': typeof AuthenticatedRunnerRatesRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRouteWithChildren
   '/_authenticated/templates': typeof AuthenticatedTemplatesRoute
+  '/blog/comparison-wegolook': typeof BlogComparisonWegolookRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/pricing/catalog': typeof PricingCatalogRoute
@@ -1039,6 +1048,7 @@ export interface FileRouteTypes {
     | '/runner-rates'
     | '/settings'
     | '/templates'
+    | '/blog/comparison-wegolook'
     | '/checkout/return'
     | '/email/unsubscribe'
     | '/pricing/catalog'
@@ -1139,6 +1149,7 @@ export interface FileRouteTypes {
     | '/runner-dashboard'
     | '/runner-rates'
     | '/templates'
+    | '/blog/comparison-wegolook'
     | '/checkout/return'
     | '/email/unsubscribe'
     | '/pricing/catalog'
@@ -1243,6 +1254,7 @@ export interface FileRouteTypes {
     | '/_authenticated/runner-rates'
     | '/_authenticated/settings'
     | '/_authenticated/templates'
+    | '/blog/comparison-wegolook'
     | '/checkout/return'
     | '/email/unsubscribe'
     | '/pricing/catalog'
@@ -1333,6 +1345,7 @@ export interface RootRouteChildren {
   TermsRoute: typeof TermsRoute
   TrustRoute: typeof TrustRoute
   WaitlistRoute: typeof WaitlistRoute
+  BlogComparisonWegolookRoute: typeof BlogComparisonWegolookRoute
   CheckoutReturnRoute: typeof CheckoutReturnRoute
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
   ProfileSlugRoute: typeof ProfileSlugRoute
@@ -1546,6 +1559,13 @@ declare module '@tanstack/react-router' {
       path: '/checkout/return'
       fullPath: '/checkout/return'
       preLoaderRoute: typeof CheckoutReturnRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/blog/comparison-wegolook': {
+      id: '/blog/comparison-wegolook'
+      path: '/blog/comparison-wegolook'
+      fullPath: '/blog/comparison-wegolook'
+      preLoaderRoute: typeof BlogComparisonWegolookRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/templates': {
@@ -2322,6 +2342,7 @@ const rootRouteChildren: RootRouteChildren = {
   TermsRoute: TermsRoute,
   TrustRoute: TrustRoute,
   WaitlistRoute: WaitlistRoute,
+  BlogComparisonWegolookRoute: BlogComparisonWegolookRoute,
   CheckoutReturnRoute: CheckoutReturnRoute,
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
   ProfileSlugRoute: ProfileSlugRoute,
