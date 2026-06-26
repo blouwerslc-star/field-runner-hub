@@ -626,7 +626,7 @@ function Index() {
             <span className="text-gradient">for Real Estate Investors</span>
           </h1>
           <p className="mt-6 max-w-2xl mx-auto text-base md:text-lg text-muted-foreground animate-fade-up" style={{ animationDelay: "0.2s" }}>
-            REI Runner is the nationwide boots-on-the-ground network for real estate investors. Post a task, a vetted local runner gets eyes on the property, and funds only release when you approve the work.
+            REI Runner is the nationwide on-demand network for property preservation and inspection services. Post a task, a vetted local runner gets eyes on the property, and funds only release when you approve the work.
           </p>
           <div className="mt-9 flex flex-col sm:flex-row gap-3 justify-center animate-fade-up" style={{ animationDelay: "0.3s" }}>
             <Button type="button" size="lg" onClick={goHire} className="bg-gradient-primary shadow-glow text-base h-14 px-8">
