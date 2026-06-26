@@ -1009,6 +1009,51 @@ export type Database = {
         }
         Relationships: []
       }
+      investor_inquiries: {
+        Row: {
+          accredited_status: string | null
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          interest_type: string | null
+          investment_range: string | null
+          ip_hash: string | null
+          message: string | null
+          phone: string | null
+          source: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          accredited_status?: string | null
+          created_at?: string
+          email: string
+          full_name: string
+          id?: string
+          interest_type?: string | null
+          investment_range?: string | null
+          ip_hash?: string | null
+          message?: string | null
+          phone?: string | null
+          source?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          accredited_status?: string | null
+          created_at?: string
+          email?: string
+          full_name?: string
+          id?: string
+          interest_type?: string | null
+          investment_range?: string | null
+          ip_hash?: string | null
+          message?: string | null
+          phone?: string | null
+          source?: string | null
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
       invoices: {
         Row: {
           amount_cents: number
