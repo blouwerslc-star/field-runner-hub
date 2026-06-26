@@ -13,17 +13,17 @@ export const Route = createFileRoute("/apply")({
   }),
   head: () => ({
     meta: [
-      { title: "Apply — REI Runner" },
+      { title: "Apply: Property Preservation Contractor & Runner Jobs — REI Runner" },
       {
         name: "description",
         content:
-          "Apply to REI Runner as a Field Runner or as an Investor. Your application creates your account.",
+          "Apply to become a property preservation contractor / field runner — or join as an investor to hire vetted local runners. Your application creates your REI Runner account.",
       },
-      { property: "og:title", content: "Apply — REI Runner" },
+      { property: "og:title", content: "Apply: Property Preservation Contractor & Runner Jobs — REI Runner" },
       {
         property: "og:description",
         content:
-          "Choose Runner or Investor and apply. Your application creates your REI Runner account.",
+          "Become a property preservation contractor / field runner, or join as an investor. Your application creates your REI Runner account.",
       },
       { property: "og:url", content: "https://reirunner.com/apply" },
     ],
