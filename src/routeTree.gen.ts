@@ -19,6 +19,7 @@ import { Route as SignupRouteImport } from './routes/signup'
 import { Route as RunnersRouteImport } from './routes/runners'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as PropertyPreservationServicesRouteImport } from './routes/property-preservation-services'
+import { Route as PropertyInspectionServiceRouteImport } from './routes/property-inspection-service'
 import { Route as ProfilesRouteImport } from './routes/profiles'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as PricingRouteImport } from './routes/pricing'
@@ -164,6 +165,12 @@ const PropertyPreservationServicesRoute =
   PropertyPreservationServicesRouteImport.update({
     id: '/property-preservation-services',
     path: '/property-preservation-services',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const PropertyInspectionServiceRoute =
+  PropertyInspectionServiceRouteImport.update({
+    id: '/property-inspection-service',
+    path: '/property-inspection-service',
     getParentRoute: () => rootRouteImport,
   } as any)
 const ProfilesRoute = ProfilesRouteImport.update({
@@ -716,6 +723,7 @@ export interface FileRoutesByFullPath {
   '/pricing': typeof PricingRouteWithChildren
   '/privacy': typeof PrivacyRoute
   '/profiles': typeof ProfilesRoute
+  '/property-inspection-service': typeof PropertyInspectionServiceRoute
   '/property-preservation-services': typeof PropertyPreservationServicesRoute
   '/reset-password': typeof ResetPasswordRoute
   '/runners': typeof RunnersRoute
@@ -822,6 +830,7 @@ export interface FileRoutesByTo {
   '/pricing': typeof PricingRouteWithChildren
   '/privacy': typeof PrivacyRoute
   '/profiles': typeof ProfilesRoute
+  '/property-inspection-service': typeof PropertyInspectionServiceRoute
   '/property-preservation-services': typeof PropertyPreservationServicesRoute
   '/reset-password': typeof ResetPasswordRoute
   '/runners': typeof RunnersRoute
@@ -925,6 +934,7 @@ export interface FileRoutesById {
   '/pricing': typeof PricingRouteWithChildren
   '/privacy': typeof PrivacyRoute
   '/profiles': typeof ProfilesRoute
+  '/property-inspection-service': typeof PropertyInspectionServiceRoute
   '/property-preservation-services': typeof PropertyPreservationServicesRoute
   '/reset-password': typeof ResetPasswordRoute
   '/runners': typeof RunnersRoute
@@ -1033,6 +1043,7 @@ export interface FileRouteTypes {
     | '/pricing'
     | '/privacy'
     | '/profiles'
+    | '/property-inspection-service'
     | '/property-preservation-services'
     | '/reset-password'
     | '/runners'
@@ -1139,6 +1150,7 @@ export interface FileRouteTypes {
     | '/pricing'
     | '/privacy'
     | '/profiles'
+    | '/property-inspection-service'
     | '/property-preservation-services'
     | '/reset-password'
     | '/runners'
@@ -1241,6 +1253,7 @@ export interface FileRouteTypes {
     | '/pricing'
     | '/privacy'
     | '/profiles'
+    | '/property-inspection-service'
     | '/property-preservation-services'
     | '/reset-password'
     | '/runners'
@@ -1349,6 +1362,7 @@ export interface RootRouteChildren {
   PricingRoute: typeof PricingRouteWithChildren
   PrivacyRoute: typeof PrivacyRoute
   ProfilesRoute: typeof ProfilesRoute
+  PropertyInspectionServiceRoute: typeof PropertyInspectionServiceRoute
   PropertyPreservationServicesRoute: typeof PropertyPreservationServicesRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   RunnersRoute: typeof RunnersRoute
@@ -1447,6 +1461,13 @@ declare module '@tanstack/react-router' {
       path: '/property-preservation-services'
       fullPath: '/property-preservation-services'
       preLoaderRoute: typeof PropertyPreservationServicesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/property-inspection-service': {
+      id: '/property-inspection-service'
+      path: '/property-inspection-service'
+      fullPath: '/property-inspection-service'
+      preLoaderRoute: typeof PropertyInspectionServiceRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/profiles': {
@@ -2354,6 +2375,7 @@ const rootRouteChildren: RootRouteChildren = {
   PricingRoute: PricingRouteWithChildren,
   PrivacyRoute: PrivacyRoute,
   ProfilesRoute: ProfilesRoute,
+  PropertyInspectionServiceRoute: PropertyInspectionServiceRoute,
   PropertyPreservationServicesRoute: PropertyPreservationServicesRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   RunnersRoute: RunnersRoute,
