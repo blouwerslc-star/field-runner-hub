@@ -28,13 +28,13 @@ import { ProForm } from "@/components/landing/ApplicationForms";
 export const Route = createFileRoute("/investors")({
   head: () => ({
     meta: [
-      { title: "Hire Local Runners for Real Estate Tasks — REI Runner" },
+      { title: "Hire Local Runners for Property Field Services — REI Runner" },
       {
         name: "description",
         content:
-          "Post a property task — a vetted local runner delivers photos, video, drive-bys, or occupancy checks. Funds release only when you approve.",
+          "Hire vetted local runners for property preservation & inspection tasks — photos, video, drive-bys, vacancy checks, lockbox installs. Funds release only when you approve.",
       },
-      { property: "og:title", content: "Hire Local Runners for Real Estate Tasks — REI Runner" },
+      { property: "og:title", content: "Hire Local Runners for Property Field Services — REI Runner" },
       {
         property: "og:description",
         content:
@@ -174,9 +174,9 @@ function InvestorsPage() {
       <main className="mx-auto max-w-5xl px-5 py-14 md:py-20">
         <div className="text-center mb-12 max-w-3xl mx-auto">
           <div className="text-xs font-semibold tracking-widest text-primary uppercase">For Investors</div>
-          <h1 className="mt-3 text-3xl md:text-5xl font-bold tracking-tight">Nationwide boots-on-the-ground for real estate investors</h1>
+          <h1 className="mt-3 text-3xl md:text-5xl font-bold tracking-tight">Hire Local Runners for Property Preservation & Inspection Tasks</h1>
           <p className="mt-4 text-muted-foreground text-base md:text-lg">
-            Post a task in any U.S. market. A vetted local runner gets eyes on the property, uploads the deliverables, and you only release funds once you've approved the work.
+            Nationwide boots-on-the-ground for real estate investors. Post a property task in any U.S. market — vacancy checks, drive-bys, walkthroughs, lockbox installs — a vetted local runner uploads the deliverables, and you only release funds once you've approved the work.
           </p>
         </div>
 
