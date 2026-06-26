@@ -24,6 +24,7 @@ import {
   CalendarClock,
   Loader2,
   ExternalLink,
+  Heart,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -33,6 +34,10 @@ const INVESTOR_VIDEO_EMBED_URL: string | null =
 
 // Public Wefunder campaign — primary investment path.
 const WEFUNDER_URL = "https://wefunder.com/rei.runner.4";
+
+// Public GoFundMe campaign — community supporter path.
+const GOFUNDME_URL =
+  "https://www.gofundme.com/f/rei-runner-real-estate-field-services";
 
 const CARDS = [
   {
@@ -181,6 +186,17 @@ export function InvestorFundingSection() {
               <ExternalLink className="size-3.5 opacity-70" />
             </a>
           </Button>
+          <Button asChild size="lg" variant="outline">
+            <a
+              href={GOFUNDME_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Support on GoFundMe (opens in new tab)"
+            >
+              <Heart className="size-4" /> Support on GoFundMe
+              <ExternalLink className="size-3.5 opacity-70" />
+            </a>
+          </Button>
           <Button onClick={scrollToVideo} size="lg" variant="default">
             <PlayCircle className="size-4" /> Watch Investor Video
           </Button>
@@ -233,6 +249,38 @@ export function InvestorFundingSection() {
               </p>
               <span className="mt-2 inline-flex items-center gap-1.5 text-sm font-medium text-primary group-hover:underline">
                 View Campaign on Wefunder <ExternalLink className="size-3.5" />
+              </span>
+            </div>
+          </div>
+        </a>
+
+        {/* GoFundMe callout */}
+        <a
+          href={GOFUNDME_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-4 group block rounded-2xl border border-border bg-background/60 hover:bg-background/80 transition-colors p-5 md:p-6 shadow-card"
+        >
+          <div className="flex items-start gap-4">
+            <div className="size-10 rounded-lg bg-primary/10 grid place-items-center shrink-0">
+              <Heart className="size-5 text-primary" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <h3 className="text-base md:text-lg font-bold tracking-tight">
+                  Support our community fundraiser
+                </h3>
+                <span className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground border border-border rounded px-1.5 py-0.5">
+                  Donation
+                </span>
+              </div>
+              <p className="mt-1 text-sm text-muted-foreground leading-relaxed">
+                Not an investor? You can still help us grow the runner network
+                with a contribution on GoFundMe. Donations are not investments
+                and do not provide equity or financial return.
+              </p>
+              <span className="mt-2 inline-flex items-center gap-1.5 text-sm font-medium text-primary group-hover:underline">
+                View Fundraiser on GoFundMe <ExternalLink className="size-3.5" />
               </span>
             </div>
           </div>
