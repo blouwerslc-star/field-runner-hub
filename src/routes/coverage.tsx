@@ -20,13 +20,13 @@ export const Route = createFileRoute("/coverage")({
   component: CoveragePage,
   head: () => ({
     meta: [
-      { title: "Nationwide Coverage Map — REI Runner" },
+      { title: "Nationwide Property Field Service Coverage Map — REI Runner" },
       {
         name: "description",
         content:
-          "Live coverage map of REI Runner: verified runners, active investors, and tasks completed across U.S. cities and states.",
+          "Live nationwide property field service coverage map — verified runners, active investors, and tasks completed across U.S. cities and states.",
       },
-      { property: "og:title", content: "Nationwide Coverage Map — REI Runner" },
+      { property: "og:title", content: "Nationwide Property Field Service Coverage Map — REI Runner" },
       {
         property: "og:description",
         content:
@@ -137,6 +137,30 @@ function CoveragePage() {
 
       {/* Map */}
       <section className="mx-auto max-w-6xl px-5 py-10">
+        <div className="mb-8">
+          <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Priority markets</h2>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {[
+              { slug: "detroit", label: "Detroit, MI" },
+              { slug: "atlanta", label: "Atlanta, GA" },
+              { slug: "dallas", label: "Dallas, TX" },
+              { slug: "phoenix", label: "Phoenix, AZ" },
+              { slug: "tampa", label: "Tampa, FL" },
+              { slug: "indianapolis", label: "Indianapolis, IN" },
+              { slug: "cleveland", label: "Cleveland, OH" },
+              { slug: "chicago", label: "Chicago, IL" },
+            ].map((m) => (
+              <Link
+                key={m.slug}
+                to="/markets/$city"
+                params={{ city: m.slug }}
+                className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card/40 px-3 py-1.5 text-xs font-medium hover:border-primary/60 hover:text-foreground transition"
+              >
+                <MapPin className="size-3.5 text-primary" /> {m.label}
+              </Link>
+            ))}
+          </div>
+        </div>
         <StateCoverageMap height={480} />
         <div className="mt-3 text-xs text-muted-foreground">
           State counts show registered runner coverage. City-level demand is summarized below —

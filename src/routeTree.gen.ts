@@ -18,6 +18,9 @@ import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as RunnersRouteImport } from './routes/runners'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as PropertyPreservationServicesRouteImport } from './routes/property-preservation-services'
+import { Route as PropertyPreservationJobsRouteImport } from './routes/property-preservation-jobs'
+import { Route as PropertyInspectionServiceRouteImport } from './routes/property-inspection-service'
 import { Route as ProfilesRouteImport } from './routes/profiles'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as PricingRouteImport } from './routes/pricing'
@@ -35,6 +38,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as TasksTaskIdRouteImport } from './routes/tasks.$taskId'
 import { Route as ProfileSlugRouteImport } from './routes/profile.$slug'
 import { Route as PricingCatalogRouteImport } from './routes/pricing.catalog'
+import { Route as MarketsCityRouteImport } from './routes/markets.$city'
 import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
 import { Route as CheckoutReturnRouteImport } from './routes/checkout.return'
 import { Route as BlogComparisonWegolookRouteImport } from './routes/blog.comparison-wegolook'
@@ -159,6 +163,24 @@ const ResetPasswordRoute = ResetPasswordRouteImport.update({
   path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PropertyPreservationServicesRoute =
+  PropertyPreservationServicesRouteImport.update({
+    id: '/property-preservation-services',
+    path: '/property-preservation-services',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const PropertyPreservationJobsRoute =
+  PropertyPreservationJobsRouteImport.update({
+    id: '/property-preservation-jobs',
+    path: '/property-preservation-jobs',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const PropertyInspectionServiceRoute =
+  PropertyInspectionServiceRouteImport.update({
+    id: '/property-inspection-service',
+    path: '/property-inspection-service',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ProfilesRoute = ProfilesRouteImport.update({
   id: '/profiles',
   path: '/profiles',
@@ -242,6 +264,11 @@ const PricingCatalogRoute = PricingCatalogRouteImport.update({
   id: '/catalog',
   path: '/catalog',
   getParentRoute: () => PricingRoute,
+} as any)
+const MarketsCityRoute = MarketsCityRouteImport.update({
+  id: '/markets/$city',
+  path: '/markets/$city',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const EmailUnsubscribeRoute = EmailUnsubscribeRouteImport.update({
   id: '/email/unsubscribe',
@@ -709,6 +736,9 @@ export interface FileRoutesByFullPath {
   '/pricing': typeof PricingRouteWithChildren
   '/privacy': typeof PrivacyRoute
   '/profiles': typeof ProfilesRoute
+  '/property-inspection-service': typeof PropertyInspectionServiceRoute
+  '/property-preservation-jobs': typeof PropertyPreservationJobsRoute
+  '/property-preservation-services': typeof PropertyPreservationServicesRoute
   '/reset-password': typeof ResetPasswordRoute
   '/runners': typeof RunnersRoute
   '/signup': typeof SignupRoute
@@ -737,6 +767,7 @@ export interface FileRoutesByFullPath {
   '/blog/comparison-wegolook': typeof BlogComparisonWegolookRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
+  '/markets/$city': typeof MarketsCityRoute
   '/pricing/catalog': typeof PricingCatalogRoute
   '/profile/$slug': typeof ProfileSlugRoute
   '/tasks/$taskId': typeof TasksTaskIdRoute
@@ -814,6 +845,9 @@ export interface FileRoutesByTo {
   '/pricing': typeof PricingRouteWithChildren
   '/privacy': typeof PrivacyRoute
   '/profiles': typeof ProfilesRoute
+  '/property-inspection-service': typeof PropertyInspectionServiceRoute
+  '/property-preservation-jobs': typeof PropertyPreservationJobsRoute
+  '/property-preservation-services': typeof PropertyPreservationServicesRoute
   '/reset-password': typeof ResetPasswordRoute
   '/runners': typeof RunnersRoute
   '/signup': typeof SignupRoute
@@ -838,6 +872,7 @@ export interface FileRoutesByTo {
   '/blog/comparison-wegolook': typeof BlogComparisonWegolookRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
+  '/markets/$city': typeof MarketsCityRoute
   '/pricing/catalog': typeof PricingCatalogRoute
   '/profile/$slug': typeof ProfileSlugRoute
   '/tasks/$taskId': typeof TasksTaskIdRoute
@@ -916,6 +951,9 @@ export interface FileRoutesById {
   '/pricing': typeof PricingRouteWithChildren
   '/privacy': typeof PrivacyRoute
   '/profiles': typeof ProfilesRoute
+  '/property-inspection-service': typeof PropertyInspectionServiceRoute
+  '/property-preservation-jobs': typeof PropertyPreservationJobsRoute
+  '/property-preservation-services': typeof PropertyPreservationServicesRoute
   '/reset-password': typeof ResetPasswordRoute
   '/runners': typeof RunnersRoute
   '/signup': typeof SignupRoute
@@ -944,6 +982,7 @@ export interface FileRoutesById {
   '/blog/comparison-wegolook': typeof BlogComparisonWegolookRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
+  '/markets/$city': typeof MarketsCityRoute
   '/pricing/catalog': typeof PricingCatalogRoute
   '/profile/$slug': typeof ProfileSlugRoute
   '/tasks/$taskId': typeof TasksTaskIdRoute
@@ -1023,6 +1062,9 @@ export interface FileRouteTypes {
     | '/pricing'
     | '/privacy'
     | '/profiles'
+    | '/property-inspection-service'
+    | '/property-preservation-jobs'
+    | '/property-preservation-services'
     | '/reset-password'
     | '/runners'
     | '/signup'
@@ -1051,6 +1093,7 @@ export interface FileRouteTypes {
     | '/blog/comparison-wegolook'
     | '/checkout/return'
     | '/email/unsubscribe'
+    | '/markets/$city'
     | '/pricing/catalog'
     | '/profile/$slug'
     | '/tasks/$taskId'
@@ -1128,6 +1171,9 @@ export interface FileRouteTypes {
     | '/pricing'
     | '/privacy'
     | '/profiles'
+    | '/property-inspection-service'
+    | '/property-preservation-jobs'
+    | '/property-preservation-services'
     | '/reset-password'
     | '/runners'
     | '/signup'
@@ -1152,6 +1198,7 @@ export interface FileRouteTypes {
     | '/blog/comparison-wegolook'
     | '/checkout/return'
     | '/email/unsubscribe'
+    | '/markets/$city'
     | '/pricing/catalog'
     | '/profile/$slug'
     | '/tasks/$taskId'
@@ -1229,6 +1276,9 @@ export interface FileRouteTypes {
     | '/pricing'
     | '/privacy'
     | '/profiles'
+    | '/property-inspection-service'
+    | '/property-preservation-jobs'
+    | '/property-preservation-services'
     | '/reset-password'
     | '/runners'
     | '/signup'
@@ -1257,6 +1307,7 @@ export interface FileRouteTypes {
     | '/blog/comparison-wegolook'
     | '/checkout/return'
     | '/email/unsubscribe'
+    | '/markets/$city'
     | '/pricing/catalog'
     | '/profile/$slug'
     | '/tasks/$taskId'
@@ -1336,6 +1387,9 @@ export interface RootRouteChildren {
   PricingRoute: typeof PricingRouteWithChildren
   PrivacyRoute: typeof PrivacyRoute
   ProfilesRoute: typeof ProfilesRoute
+  PropertyInspectionServiceRoute: typeof PropertyInspectionServiceRoute
+  PropertyPreservationJobsRoute: typeof PropertyPreservationJobsRoute
+  PropertyPreservationServicesRoute: typeof PropertyPreservationServicesRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   RunnersRoute: typeof RunnersRoute
   SignupRoute: typeof SignupRoute
@@ -1348,6 +1402,7 @@ export interface RootRouteChildren {
   BlogComparisonWegolookRoute: typeof BlogComparisonWegolookRoute
   CheckoutReturnRoute: typeof CheckoutReturnRoute
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
+  MarketsCityRoute: typeof MarketsCityRoute
   ProfileSlugRoute: typeof ProfileSlugRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
   ApiPublicHooksDispatchSmsRoute: typeof ApiPublicHooksDispatchSmsRoute
@@ -1426,6 +1481,27 @@ declare module '@tanstack/react-router' {
       path: '/reset-password'
       fullPath: '/reset-password'
       preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/property-preservation-services': {
+      id: '/property-preservation-services'
+      path: '/property-preservation-services'
+      fullPath: '/property-preservation-services'
+      preLoaderRoute: typeof PropertyPreservationServicesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/property-preservation-jobs': {
+      id: '/property-preservation-jobs'
+      path: '/property-preservation-jobs'
+      fullPath: '/property-preservation-jobs'
+      preLoaderRoute: typeof PropertyPreservationJobsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/property-inspection-service': {
+      id: '/property-inspection-service'
+      path: '/property-inspection-service'
+      fullPath: '/property-inspection-service'
+      preLoaderRoute: typeof PropertyInspectionServiceRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/profiles': {
@@ -1546,6 +1622,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/pricing/catalog'
       preLoaderRoute: typeof PricingCatalogRouteImport
       parentRoute: typeof PricingRoute
+    }
+    '/markets/$city': {
+      id: '/markets/$city'
+      path: '/markets/$city'
+      fullPath: '/markets/$city'
+      preLoaderRoute: typeof MarketsCityRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/email/unsubscribe': {
       id: '/email/unsubscribe'
@@ -2333,6 +2416,9 @@ const rootRouteChildren: RootRouteChildren = {
   PricingRoute: PricingRouteWithChildren,
   PrivacyRoute: PrivacyRoute,
   ProfilesRoute: ProfilesRoute,
+  PropertyInspectionServiceRoute: PropertyInspectionServiceRoute,
+  PropertyPreservationJobsRoute: PropertyPreservationJobsRoute,
+  PropertyPreservationServicesRoute: PropertyPreservationServicesRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   RunnersRoute: RunnersRoute,
   SignupRoute: SignupRoute,
@@ -2345,6 +2431,7 @@ const rootRouteChildren: RootRouteChildren = {
   BlogComparisonWegolookRoute: BlogComparisonWegolookRoute,
   CheckoutReturnRoute: CheckoutReturnRoute,
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
+  MarketsCityRoute: MarketsCityRoute,
   ProfileSlugRoute: ProfileSlugRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
   ApiPublicHooksDispatchSmsRoute: ApiPublicHooksDispatchSmsRoute,

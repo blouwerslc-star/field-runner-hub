@@ -1,36 +1,72 @@
-## Connect Wefunder to the investor section
+## Goal
 
-Add the Wefunder campaign (`https://wefunder.com/rei.runner.4`) as the primary public investment path in the homepage investor section, while keeping the existing interest form for direct/accredited conversations.
+Translate Semrush keyword research into real, on-page SEO changes: refresh titles/descriptions/H1s on existing pages around the highest-intent terms, add 3 new keyword-targeted landing pages (2 investor-side, 1 runner-side), and stand up 8 priority-market city pages.
 
-### What the user will see
+## Target keywords (from Semrush, US database)
 
-In `src/components/landing/InvestorFundingSection.tsx`:
+**Investor / hirer side** (warm to hot intent)
+- `property preservation services` — 880/mo, KD low
+- `property preservation` — 1,600/mo, KD 12 (very easy)
+- `property preservation company / companies` — 1,300/mo combined
+- `property inspection service` — 320/mo, KD 37
+- `property management vendors` — 170/mo
+- `banks looking for property preservation vendors` — 210/mo
+- Long-tail: `what is property preservation` — 210/mo (question intent)
 
-1. **New primary CTA — "Invest on Wefunder"**
-   - Added as the first button in the CTA row (currently: Watch Video, Request Deck, Schedule Call).
-   - Opens `https://wefunder.com/rei.runner.4` in a new tab (`target="_blank"`, `rel="noopener noreferrer"`).
-   - Styled as the prominent action; existing buttons remain as secondary options.
+**Runner / supply side** (high volume, fills network)
+- `property preservation jobs` — 720/mo, KD 19
+- `property preservation work` — 590/mo
+- `property preservation jobs near me` — 140/mo
+- `property preservation contractor` — 260/mo
+- `how to become a property preservation contractor` — 70/mo
+- `how to start a property preservation company` — 50/mo
 
-2. **New Wefunder callout card** (between the CTAs and the Problem/Solution/Opportunity cards):
-   - Short headline: "Now raising on Wefunder"
-   - One-line subtext explaining Wefunder hosts the regulated offering and handles all investment paperwork and compliance.
-   - Secondary "View Campaign" link → same Wefunder URL, new tab.
-   - Visually distinct (bordered card, Rocket/ExternalLink icon) so it reads as the official channel.
+**Branded comparison** (already done) — `WeGoLook alternative` lives on the new `/blog/comparison-wegolook`.
 
-3. **Disclaimer update**
-   - Append one sentence to the existing legal disclaimer clarifying that any actual investment is processed through Wefunder under its Reg CF/Reg D framework, not through this site.
-   - The "no payment/checkout on this site" rule stays — all transactions stay on Wefunder.
+## What we'll change
 
-4. **Form framing tweak**
-   - Add a small helper line above the Investor Interest Form: "Prefer to invest directly? Use the Wefunder link above. Use this form for accredited conversations, partnership inquiries, or to request the deck."
-   - No field changes, no backend changes.
+### 1. New landing pages (3)
+- `/property-preservation-services` — investor pillar page; targets "property preservation services", "property preservation company". Sections: what it is, what's included, how REI Runner delivers it on-demand with escrowed payments + geotagged proof, CTA to `/investors`.
+- `/property-inspection-service` — investor secondary; targets "property inspection service", "property inspection". Sections: drive-bys, walkthrough video, vacancy verification, occupancy checks; CTA to `/investors`.
+- `/property-preservation-jobs` — runner-side; targets "property preservation jobs / work / contractor". Sections: how runner gigs work, payout flow, REI Runner Academy, "how to become a property preservation contractor" answer; CTA to `/apply`.
 
-### Constants
+Each page ships with: route-specific `head()` (title, description, og:title, og:description, og:url, canonical), Article/Service + BreadcrumbList JSON-LD, and FAQPage JSON-LD answering 3–4 top question keywords.
 
-- Add `const WEFUNDER_URL = "https://wefunder.com/rei.runner.4";` at the top of the file alongside `INVESTOR_VIDEO_EMBED_URL` so the URL is easy to update later.
+### 2. City landing pages (priority markets)
+Add a dynamic route `/markets/$city` rendering pages for the 8 markets already on `/about`: Detroit, Atlanta, Dallas, Phoenix, Tampa, Indianapolis, Cleveland, Chicago. Content is templated but per-city: H1 "Real Estate Field Services in {City}", a paragraph mentioning local task types (drive-bys, vacancy checks, lockbox installs, contractor meetups), local CTAs to `/investors` and `/apply`. Each city emits its own canonical, og:url, and LocalBusiness JSON-LD with `areaServed`.
 
-### Out of scope
+### 3. Metadata + H1 refresh on existing pages
+No body-copy rewrites; only the visible H1/intro line and head() tags.
 
-- No new route, no embedded Wefunder iframe (Wefunder doesn't support reliable embeds and it would hurt page performance / trust signals).
-- No backend, schema, server-function, or routing changes.
-- No edits to other pages (header, footer, /investors route) in this pass — can be a follow-up if you want the Wefunder link surfaced site-wide.
+| Route | New title (≤60 chars) | New H1 / intro tweak | Primary keyword |
+|---|---|---|---|
+| `/` (index) | "On-Demand Property Field Services & Inspections" | keep hero; tweak subhead to mention "property preservation & inspection services" | property field services |
+| `/investors` | "Hire Local Property Runners for Field Services" | Add "property preservation & inspection tasks" in intro line | property inspection service |
+| `/runners` | "Property Preservation Jobs & Field Runner Gigs" | H1 mentions "property preservation jobs" | property preservation jobs |
+| `/apply` | "Apply: Property Preservation Contractor & Runner Jobs" | intro line mentions "become a property preservation contractor" | property preservation contractor |
+| `/pricing` | "Property Field Services Pricing — Flat Per-Task" | unchanged H1, refresh meta only | property field services pricing |
+| `/coverage` | "Nationwide Property Field Service Coverage Map" | unchanged H1, refresh meta only | property field services coverage |
+| `/about` | "About REI Runner — Property Field Services Marketplace" | minor intro tweak | property field services marketplace |
+
+### 4. Sitemap
+Add the 3 new landing pages + 8 city URLs to `src/routes/sitemap[.]xml.ts`.
+
+### 5. Internal linking
+- Add a "Services" link block in the public header dropdown (or footer if header is full) linking to the 3 new landing pages.
+- Add a "Coverage" list of the 8 city pages on `/coverage` (the existing map page).
+- Cross-link investor landing pages → `/pricing` and `/investors`; runner page → `/apply` and `/runners`.
+
+## Out of scope (intentionally)
+- Body-copy rewrites of `/investors`, `/runners`, `/about` etc. (only H1 + intro + head tags).
+- All-50-states programmatic pages — high thin-content risk; revisit after the 8 markets prove out.
+- New blog posts beyond `/blog/comparison-wegolook` (already shipped).
+- Backlink outreach / off-page SEO.
+
+## Technical notes
+- All new routes follow the existing TanStack pattern (file-based, `createFileRoute`, per-route `head()` with canonical on leaf only, JSON-LD via `scripts`).
+- City route is one file: `src/routes/markets.$city.tsx` with a hardcoded city map (slug → display name, state, blurb). Unknown slugs throw `notFound()`.
+- No backend, no schema, no auth changes.
+- After publish, you'll need to re-crawl in Google Search Console and resubmit `/sitemap.xml` for the new URLs to get picked up faster.
+
+## Rollout
+One batch: create 3 service pages + 1 dynamic city route + sitemap update + metadata/H1 refresh on 7 existing routes + header link addition. Single publish.
