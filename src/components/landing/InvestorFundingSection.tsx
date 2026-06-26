@@ -23,12 +23,16 @@ import {
   FileText,
   CalendarClock,
   Loader2,
+  ExternalLink,
 } from "lucide-react";
 import { toast } from "sonner";
 
 // Set this to a real YouTube/Vimeo embed URL when the pitch video is ready.
 const INVESTOR_VIDEO_EMBED_URL: string | null =
   "https://www.youtube.com/embed/BiLrthGn_UE";
+
+// Public Wefunder campaign — primary investment path.
+const WEFUNDER_URL = "https://wefunder.com/rei.runner.4";
 
 const CARDS = [
   {
@@ -166,6 +170,17 @@ export function InvestorFundingSection() {
 
         {/* CTAs */}
         <div className="mt-6 flex flex-wrap gap-3">
+          <Button asChild size="lg" variant="default">
+            <a
+              href={WEFUNDER_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Invest on Wefunder (opens in new tab)"
+            >
+              <Rocket className="size-4" /> Invest on Wefunder
+              <ExternalLink className="size-3.5 opacity-70" />
+            </a>
+          </Button>
           <Button onClick={scrollToVideo} size="lg" variant="default">
             <PlayCircle className="size-4" /> Watch Investor Video
           </Button>
@@ -190,6 +205,38 @@ export function InvestorFundingSection() {
             <CalendarClock className="size-4" /> Schedule Investor Call
           </Button>
         </div>
+
+        {/* Wefunder callout */}
+        <a
+          href={WEFUNDER_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-6 group block rounded-2xl border border-primary/40 bg-primary/5 hover:bg-primary/10 transition-colors p-5 md:p-6 shadow-card"
+        >
+          <div className="flex items-start gap-4">
+            <div className="size-10 rounded-lg bg-primary/15 grid place-items-center shrink-0">
+              <Rocket className="size-5 text-primary" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <h3 className="text-base md:text-lg font-bold tracking-tight">
+                  Now raising on Wefunder
+                </h3>
+                <span className="text-[10px] font-mono uppercase tracking-widest text-primary border border-primary/40 rounded px-1.5 py-0.5">
+                  Official Channel
+                </span>
+              </div>
+              <p className="mt-1 text-sm text-muted-foreground leading-relaxed">
+                Our regulated offering is hosted on Wefunder, which handles all
+                investment paperwork, compliance, and funds processing. View the
+                campaign and invest directly from the Wefunder page.
+              </p>
+              <span className="mt-2 inline-flex items-center gap-1.5 text-sm font-medium text-primary group-hover:underline">
+                View Campaign on Wefunder <ExternalLink className="size-3.5" />
+              </span>
+            </div>
+          </div>
+        </a>
 
         {/* Problem / Solution / Opportunity */}
         <div className="mt-12 grid gap-4 md:grid-cols-3">
@@ -228,6 +275,11 @@ export function InvestorFundingSection() {
               </h3>
               <p className="mt-1 text-sm text-muted-foreground">
                 Share a few details and we'll follow up with the right next step.
+              </p>
+              <p className="mt-2 text-xs text-muted-foreground">
+                Prefer to invest directly? Use the Wefunder link above. Use this
+                form for accredited conversations, partnership inquiries, or to
+                request the deck.
               </p>
             </div>
           </div>
@@ -365,7 +417,9 @@ export function InvestorFundingSection() {
           This page is for informational purposes only and does not constitute an
           offer to sell securities or a solicitation to buy securities. Investment
           opportunities, if available, will be handled through the appropriate
-          legal and compliance process.
+          legal and compliance process. Any actual investment in REI Runner is
+          processed through our Wefunder campaign under its Reg CF / Reg D
+          framework — no transactions occur on this site.
         </p>
       </div>
     </section>
