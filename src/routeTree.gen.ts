@@ -18,6 +18,7 @@ import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as RunnersRouteImport } from './routes/runners'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as PropertyPreservationServicesRouteImport } from './routes/property-preservation-services'
 import { Route as ProfilesRouteImport } from './routes/profiles'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as PricingRouteImport } from './routes/pricing'
@@ -159,6 +160,12 @@ const ResetPasswordRoute = ResetPasswordRouteImport.update({
   path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PropertyPreservationServicesRoute =
+  PropertyPreservationServicesRouteImport.update({
+    id: '/property-preservation-services',
+    path: '/property-preservation-services',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ProfilesRoute = ProfilesRouteImport.update({
   id: '/profiles',
   path: '/profiles',
@@ -709,6 +716,7 @@ export interface FileRoutesByFullPath {
   '/pricing': typeof PricingRouteWithChildren
   '/privacy': typeof PrivacyRoute
   '/profiles': typeof ProfilesRoute
+  '/property-preservation-services': typeof PropertyPreservationServicesRoute
   '/reset-password': typeof ResetPasswordRoute
   '/runners': typeof RunnersRoute
   '/signup': typeof SignupRoute
@@ -814,6 +822,7 @@ export interface FileRoutesByTo {
   '/pricing': typeof PricingRouteWithChildren
   '/privacy': typeof PrivacyRoute
   '/profiles': typeof ProfilesRoute
+  '/property-preservation-services': typeof PropertyPreservationServicesRoute
   '/reset-password': typeof ResetPasswordRoute
   '/runners': typeof RunnersRoute
   '/signup': typeof SignupRoute
@@ -916,6 +925,7 @@ export interface FileRoutesById {
   '/pricing': typeof PricingRouteWithChildren
   '/privacy': typeof PrivacyRoute
   '/profiles': typeof ProfilesRoute
+  '/property-preservation-services': typeof PropertyPreservationServicesRoute
   '/reset-password': typeof ResetPasswordRoute
   '/runners': typeof RunnersRoute
   '/signup': typeof SignupRoute
@@ -1023,6 +1033,7 @@ export interface FileRouteTypes {
     | '/pricing'
     | '/privacy'
     | '/profiles'
+    | '/property-preservation-services'
     | '/reset-password'
     | '/runners'
     | '/signup'
@@ -1128,6 +1139,7 @@ export interface FileRouteTypes {
     | '/pricing'
     | '/privacy'
     | '/profiles'
+    | '/property-preservation-services'
     | '/reset-password'
     | '/runners'
     | '/signup'
@@ -1229,6 +1241,7 @@ export interface FileRouteTypes {
     | '/pricing'
     | '/privacy'
     | '/profiles'
+    | '/property-preservation-services'
     | '/reset-password'
     | '/runners'
     | '/signup'
@@ -1336,6 +1349,7 @@ export interface RootRouteChildren {
   PricingRoute: typeof PricingRouteWithChildren
   PrivacyRoute: typeof PrivacyRoute
   ProfilesRoute: typeof ProfilesRoute
+  PropertyPreservationServicesRoute: typeof PropertyPreservationServicesRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   RunnersRoute: typeof RunnersRoute
   SignupRoute: typeof SignupRoute
@@ -1426,6 +1440,13 @@ declare module '@tanstack/react-router' {
       path: '/reset-password'
       fullPath: '/reset-password'
       preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/property-preservation-services': {
+      id: '/property-preservation-services'
+      path: '/property-preservation-services'
+      fullPath: '/property-preservation-services'
+      preLoaderRoute: typeof PropertyPreservationServicesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/profiles': {
@@ -2333,6 +2354,7 @@ const rootRouteChildren: RootRouteChildren = {
   PricingRoute: PricingRouteWithChildren,
   PrivacyRoute: PrivacyRoute,
   ProfilesRoute: ProfilesRoute,
+  PropertyPreservationServicesRoute: PropertyPreservationServicesRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   RunnersRoute: RunnersRoute,
   SignupRoute: SignupRoute,
