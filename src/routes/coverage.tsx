@@ -20,13 +20,13 @@ export const Route = createFileRoute("/coverage")({
   component: CoveragePage,
   head: () => ({
     meta: [
-      { title: "Nationwide Coverage Map — REI Runner" },
+      { title: "Nationwide Property Field Service Coverage Map — REI Runner" },
       {
         name: "description",
         content:
-          "Live coverage map of REI Runner: verified runners, active investors, and tasks completed across U.S. cities and states.",
+          "Live nationwide property field service coverage map — verified runners, active investors, and tasks completed across U.S. cities and states.",
       },
-      { property: "og:title", content: "Nationwide Coverage Map — REI Runner" },
+      { property: "og:title", content: "Nationwide Property Field Service Coverage Map — REI Runner" },
       {
         property: "og:description",
         content:
