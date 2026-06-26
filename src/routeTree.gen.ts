@@ -19,6 +19,7 @@ import { Route as SignupRouteImport } from './routes/signup'
 import { Route as RunnersRouteImport } from './routes/runners'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as PropertyPreservationServicesRouteImport } from './routes/property-preservation-services'
+import { Route as PropertyPreservationJobsRouteImport } from './routes/property-preservation-jobs'
 import { Route as PropertyInspectionServiceRouteImport } from './routes/property-inspection-service'
 import { Route as ProfilesRouteImport } from './routes/profiles'
 import { Route as PrivacyRouteImport } from './routes/privacy'
@@ -165,6 +166,12 @@ const PropertyPreservationServicesRoute =
   PropertyPreservationServicesRouteImport.update({
     id: '/property-preservation-services',
     path: '/property-preservation-services',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const PropertyPreservationJobsRoute =
+  PropertyPreservationJobsRouteImport.update({
+    id: '/property-preservation-jobs',
+    path: '/property-preservation-jobs',
     getParentRoute: () => rootRouteImport,
   } as any)
 const PropertyInspectionServiceRoute =
@@ -724,6 +731,7 @@ export interface FileRoutesByFullPath {
   '/privacy': typeof PrivacyRoute
   '/profiles': typeof ProfilesRoute
   '/property-inspection-service': typeof PropertyInspectionServiceRoute
+  '/property-preservation-jobs': typeof PropertyPreservationJobsRoute
   '/property-preservation-services': typeof PropertyPreservationServicesRoute
   '/reset-password': typeof ResetPasswordRoute
   '/runners': typeof RunnersRoute
@@ -831,6 +839,7 @@ export interface FileRoutesByTo {
   '/privacy': typeof PrivacyRoute
   '/profiles': typeof ProfilesRoute
   '/property-inspection-service': typeof PropertyInspectionServiceRoute
+  '/property-preservation-jobs': typeof PropertyPreservationJobsRoute
   '/property-preservation-services': typeof PropertyPreservationServicesRoute
   '/reset-password': typeof ResetPasswordRoute
   '/runners': typeof RunnersRoute
@@ -935,6 +944,7 @@ export interface FileRoutesById {
   '/privacy': typeof PrivacyRoute
   '/profiles': typeof ProfilesRoute
   '/property-inspection-service': typeof PropertyInspectionServiceRoute
+  '/property-preservation-jobs': typeof PropertyPreservationJobsRoute
   '/property-preservation-services': typeof PropertyPreservationServicesRoute
   '/reset-password': typeof ResetPasswordRoute
   '/runners': typeof RunnersRoute
@@ -1044,6 +1054,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/profiles'
     | '/property-inspection-service'
+    | '/property-preservation-jobs'
     | '/property-preservation-services'
     | '/reset-password'
     | '/runners'
@@ -1151,6 +1162,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/profiles'
     | '/property-inspection-service'
+    | '/property-preservation-jobs'
     | '/property-preservation-services'
     | '/reset-password'
     | '/runners'
@@ -1254,6 +1266,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/profiles'
     | '/property-inspection-service'
+    | '/property-preservation-jobs'
     | '/property-preservation-services'
     | '/reset-password'
     | '/runners'
@@ -1363,6 +1376,7 @@ export interface RootRouteChildren {
   PrivacyRoute: typeof PrivacyRoute
   ProfilesRoute: typeof ProfilesRoute
   PropertyInspectionServiceRoute: typeof PropertyInspectionServiceRoute
+  PropertyPreservationJobsRoute: typeof PropertyPreservationJobsRoute
   PropertyPreservationServicesRoute: typeof PropertyPreservationServicesRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   RunnersRoute: typeof RunnersRoute
@@ -1461,6 +1475,13 @@ declare module '@tanstack/react-router' {
       path: '/property-preservation-services'
       fullPath: '/property-preservation-services'
       preLoaderRoute: typeof PropertyPreservationServicesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/property-preservation-jobs': {
+      id: '/property-preservation-jobs'
+      path: '/property-preservation-jobs'
+      fullPath: '/property-preservation-jobs'
+      preLoaderRoute: typeof PropertyPreservationJobsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/property-inspection-service': {
@@ -2376,6 +2397,7 @@ const rootRouteChildren: RootRouteChildren = {
   PrivacyRoute: PrivacyRoute,
   ProfilesRoute: ProfilesRoute,
   PropertyInspectionServiceRoute: PropertyInspectionServiceRoute,
+  PropertyPreservationJobsRoute: PropertyPreservationJobsRoute,
   PropertyPreservationServicesRoute: PropertyPreservationServicesRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   RunnersRoute: RunnersRoute,
