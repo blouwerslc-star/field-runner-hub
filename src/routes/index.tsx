@@ -52,6 +52,7 @@ import { getStateCoverage } from "@/lib/public-stats.functions";
 import { StateCoverageMap } from "@/components/maps/StateCoverageMap";
 import { TestimonialsSection } from "@/components/landing/TestimonialsSection";
 import { SampleDeliverablesSection } from "@/components/landing/SampleDeliverablesSection";
+import { InvestorFundingSection } from "@/components/landing/InvestorFundingSection";
 import { ServiceExamplePopover, LandingExamplePopover } from "@/components/landing/ServiceExamplePopover";
 import { LANDING_SERVICE_EXAMPLES } from "@/lib/landing-service-examples";
 import {
@@ -673,6 +674,9 @@ function Index() {
 
       {/* LIVE ACTIVITY TICKER */}
       <MarketplaceUpdatesTicker />
+
+      {/* INVESTOR FUNDING — pre-seed */}
+      <InvestorFundingSection />
 
       {/* WHERE WE ARE TODAY — live stats + active states */}
       <WhereWeAreToday />
