@@ -193,10 +193,22 @@ export const markPayoutPaid = createServerFn({ method: "POST" })
 
     const { data: payment, error: pErr } = await supabase
       .from("payments")
-      .select("task_id")
+      .select("task_id, status, kind, runner_payout_cents")
       .eq("id", data.paymentId)
       .maybeSingle();
     if (pErr) throw new Error(pErr.message);
+    if (!payment) throw new Error("Payment not found");
+    // Only released escrow or tips are eligible to be marked paid out.
+    // Blocks accidentally paying a 'funded' (still in escrow), 'paid',
+    // or 'refunded' row twice.
+    if (!["released"].includes(payment.status)) {
+      throw new Error(
+        `Payment cannot be marked paid from status "${payment.status}". Only released payouts are payable.`,
+      );
+    }
+    if (!payment.runner_payout_cents || payment.runner_payout_cents <= 0) {
+      throw new Error("Payment has no runner payout amount.");
+    }
 
     const { error } = await supabase
       .from("payments")
@@ -207,10 +219,13 @@ export const markPayoutPaid = createServerFn({ method: "POST" })
         paid_at: new Date().toISOString(),
         paid_by: userId,
       })
-      .eq("id", data.paymentId);
+      .eq("id", data.paymentId)
+      .eq("status", "released");
     if (error) throw new Error(error.message);
 
-    if (payment?.task_id) {
+    // Only flip the task to "paid" for task escrow payouts — tip payouts
+    // shouldn't change the task's lifecycle status.
+    if (payment?.task_id && payment.kind === "task") {
       await supabase.from("tasks").update({ status: "paid" }).eq("id", payment.task_id);
     }
     return { ok: true };
@@ -243,8 +258,11 @@ export const createTaskTipCheckout = createServerFn({ method: "POST" })
       if (!task) throw new Error("Task not found");
       if (task.investor_id !== userId) throw new Error("Not your task");
       if (!task.runner_id) throw new Error("No runner assigned to this task");
-      if (!["approved", "paid", "submitted"].includes(task.status ?? "")) {
-        throw new Error("Tip can only be added after the runner has submitted work");
+      // Tips are only available once the investor has approved the
+      // submitted work (or after payout). "submitted" is still pending
+      // review and tipping then would muddy the approval decision.
+      if (!["approved", "paid"].includes(task.status ?? "")) {
+        throw new Error("Tip can only be added after you approve the runner's work.");
       }
 
       const stripe = createStripeClient(data.environment as StripeEnv);
