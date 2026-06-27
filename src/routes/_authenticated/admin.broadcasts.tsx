@@ -13,7 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
-import { Loader2, Send, ArrowLeft } from "lucide-react";
+import { Loader2, Send, ArrowLeft, Save, RotateCcw } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -25,6 +25,9 @@ import {
   listApplicants,
   sendBroadcast,
   listBroadcastHistory,
+  listTemplateOverrides,
+  saveTemplateOverride,
+  resetTemplateOverride,
 } from "@/lib/broadcasts.functions";
 
 export const Route = createFileRoute("/_authenticated/admin/broadcasts")({
@@ -39,6 +42,7 @@ type TemplateKey =
   | "signup_reminder"
   | "second_reminder"
   | "final_reminder"
+  | "launch_countdown"
   | "market_launch_update"
   | "platform_update"
   | "new_features_update";
