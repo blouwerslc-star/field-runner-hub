@@ -113,6 +113,7 @@ import { Route as ApiPublicHooksProfileCompletionRemindersRouteImport } from './
 import { Route as ApiPublicHooksEmailNurtureRouteImport } from './routes/api/public/hooks/email-nurture'
 import { Route as ApiPublicHooksEligibilityRemindersRouteImport } from './routes/api/public/hooks/eligibility-reminders'
 import { Route as ApiPublicHooksDispatchSmsRouteImport } from './routes/api/public/hooks/dispatch-sms'
+import { Route as ApiPublicHooksAdminDailyDigestRouteImport } from './routes/api/public/hooks/admin-daily-digest'
 import { Route as AuthenticatedTasksTaskIdTrackingRouteImport } from './routes/_authenticated/tasks.$taskId.tracking'
 import { Route as AuthenticatedTasksTaskIdRunRouteImport } from './routes/_authenticated/tasks.$taskId.run'
 import { Route as AuthenticatedAcademyCourseSlugQuizRouteImport } from './routes/_authenticated/academy.$courseSlug.quiz'
@@ -698,6 +699,12 @@ const ApiPublicHooksDispatchSmsRoute =
     path: '/api/public/hooks/dispatch-sms',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksAdminDailyDigestRoute =
+  ApiPublicHooksAdminDailyDigestRouteImport.update({
+    id: '/api/public/hooks/admin-daily-digest',
+    path: '/api/public/hooks/admin-daily-digest',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const AuthenticatedTasksTaskIdTrackingRoute =
   AuthenticatedTasksTaskIdTrackingRouteImport.update({
     id: '/tasks/$taskId/tracking',
@@ -825,6 +832,7 @@ export interface FileRoutesByFullPath {
   '/academy/$courseSlug/quiz': typeof AuthenticatedAcademyCourseSlugQuizRoute
   '/tasks/$taskId/run': typeof AuthenticatedTasksTaskIdRunRoute
   '/tasks/$taskId/tracking': typeof AuthenticatedTasksTaskIdTrackingRoute
+  '/api/public/hooks/admin-daily-digest': typeof ApiPublicHooksAdminDailyDigestRoute
   '/api/public/hooks/dispatch-sms': typeof ApiPublicHooksDispatchSmsRoute
   '/api/public/hooks/eligibility-reminders': typeof ApiPublicHooksEligibilityRemindersRoute
   '/api/public/hooks/email-nurture': typeof ApiPublicHooksEmailNurtureRoute
@@ -930,6 +938,7 @@ export interface FileRoutesByTo {
   '/academy/$courseSlug/quiz': typeof AuthenticatedAcademyCourseSlugQuizRoute
   '/tasks/$taskId/run': typeof AuthenticatedTasksTaskIdRunRoute
   '/tasks/$taskId/tracking': typeof AuthenticatedTasksTaskIdTrackingRoute
+  '/api/public/hooks/admin-daily-digest': typeof ApiPublicHooksAdminDailyDigestRoute
   '/api/public/hooks/dispatch-sms': typeof ApiPublicHooksDispatchSmsRoute
   '/api/public/hooks/eligibility-reminders': typeof ApiPublicHooksEligibilityRemindersRoute
   '/api/public/hooks/email-nurture': typeof ApiPublicHooksEmailNurtureRoute
@@ -1042,6 +1051,7 @@ export interface FileRoutesById {
   '/_authenticated/academy/$courseSlug/quiz': typeof AuthenticatedAcademyCourseSlugQuizRoute
   '/_authenticated/tasks/$taskId/run': typeof AuthenticatedTasksTaskIdRunRoute
   '/_authenticated/tasks/$taskId/tracking': typeof AuthenticatedTasksTaskIdTrackingRoute
+  '/api/public/hooks/admin-daily-digest': typeof ApiPublicHooksAdminDailyDigestRoute
   '/api/public/hooks/dispatch-sms': typeof ApiPublicHooksDispatchSmsRoute
   '/api/public/hooks/eligibility-reminders': typeof ApiPublicHooksEligibilityRemindersRoute
   '/api/public/hooks/email-nurture': typeof ApiPublicHooksEmailNurtureRoute
@@ -1154,6 +1164,7 @@ export interface FileRouteTypes {
     | '/academy/$courseSlug/quiz'
     | '/tasks/$taskId/run'
     | '/tasks/$taskId/tracking'
+    | '/api/public/hooks/admin-daily-digest'
     | '/api/public/hooks/dispatch-sms'
     | '/api/public/hooks/eligibility-reminders'
     | '/api/public/hooks/email-nurture'
@@ -1259,6 +1270,7 @@ export interface FileRouteTypes {
     | '/academy/$courseSlug/quiz'
     | '/tasks/$taskId/run'
     | '/tasks/$taskId/tracking'
+    | '/api/public/hooks/admin-daily-digest'
     | '/api/public/hooks/dispatch-sms'
     | '/api/public/hooks/eligibility-reminders'
     | '/api/public/hooks/email-nurture'
@@ -1370,6 +1382,7 @@ export interface FileRouteTypes {
     | '/_authenticated/academy/$courseSlug/quiz'
     | '/_authenticated/tasks/$taskId/run'
     | '/_authenticated/tasks/$taskId/tracking'
+    | '/api/public/hooks/admin-daily-digest'
     | '/api/public/hooks/dispatch-sms'
     | '/api/public/hooks/eligibility-reminders'
     | '/api/public/hooks/email-nurture'
@@ -1418,6 +1431,7 @@ export interface RootRouteChildren {
   MarketsCityRoute: typeof MarketsCityRoute
   ProfileSlugRoute: typeof ProfileSlugRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
+  ApiPublicHooksAdminDailyDigestRoute: typeof ApiPublicHooksAdminDailyDigestRoute
   ApiPublicHooksDispatchSmsRoute: typeof ApiPublicHooksDispatchSmsRoute
   ApiPublicHooksEligibilityRemindersRoute: typeof ApiPublicHooksEligibilityRemindersRoute
   ApiPublicHooksEmailNurtureRoute: typeof ApiPublicHooksEmailNurtureRoute
@@ -2162,6 +2176,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksDispatchSmsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/admin-daily-digest': {
+      id: '/api/public/hooks/admin-daily-digest'
+      path: '/api/public/hooks/admin-daily-digest'
+      fullPath: '/api/public/hooks/admin-daily-digest'
+      preLoaderRoute: typeof ApiPublicHooksAdminDailyDigestRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/tasks/$taskId/tracking': {
       id: '/_authenticated/tasks/$taskId/tracking'
       path: '/tasks/$taskId/tracking'
@@ -2455,6 +2476,7 @@ const rootRouteChildren: RootRouteChildren = {
   MarketsCityRoute: MarketsCityRoute,
   ProfileSlugRoute: ProfileSlugRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
+  ApiPublicHooksAdminDailyDigestRoute: ApiPublicHooksAdminDailyDigestRoute,
   ApiPublicHooksDispatchSmsRoute: ApiPublicHooksDispatchSmsRoute,
   ApiPublicHooksEligibilityRemindersRoute:
     ApiPublicHooksEligibilityRemindersRoute,
