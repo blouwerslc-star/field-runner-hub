@@ -1,79 +1,45 @@
+# Closing the 8-point gap to 100/100
 
-# REI Runner — Full QA Loop to Production-Ready
+These are the issues I deferred or noted during the QA passes. None are launch blockers individually, but together they're the gap between "production-ready" and "polished."
 
-## Approach
+## 1. Observability & operational safety (3 pts)
 
-I'll run a **test → fix → retest** loop until no new blocker/major bugs surface for a full pass. Each pass uses headless Playwright against the live preview, plus database/RLS/security checks, plus build/typecheck. I'll fix anything obviously broken automatically and log everything else as a recommendation.
+- **Stripe webhook idempotency log**: today the unique index prevents duplicate rows, but we silently swallow conflict errors. Add a `webhook_events` table (event_id PK) so retries are observable and we can replay failures.
+- **Background job error surfacing**: cron hooks (`sweep-tracking`, `email-nurture`, `recurring-tasks`, `admin-daily-digest`, `eligibility-reminders`) log to stdout only. Wire failures into the `notifications` table for admins, or a lightweight `job_runs` table with status + last error.
+- **Server-function error normalization**: a handful of server functions still throw raw `Error` (caught by TanStack's global middleware → generic 500). Standardize on `{ error: string }` returns for user-facing failures so the UI shows real messages.
 
-Heads up: this is a large effort. Expect **many turns**, dozens of file edits, and meaningful credit usage. I'll pause and check in after each full pass so you can stop early if the readiness score is good enough.
+## 2. Security hardening (2 pts)
 
-## Pass Structure (repeats until clean)
+- **11 linter warnings** from the security scan (mostly `SECURITY DEFINER` functions without explicit `search_path` on a few, and the one permissive `USING (true)` policy on `app_settings`). Audit and tighten or document each.
+- **Rate limiting** on public surfaces: signup, password reset, `applyToTask`, `createReview`, OTP request. Today nothing throttles a script.
+- **File upload validation**: `task-deliverables` and `runner-ids` buckets accept any mime/size from the client. Add server-side size + mime checks before issuing signed upload URLs.
 
-Each pass runs these phases in order:
+## 3. Data integrity & edge cases (2 pts)
 
-### Phase 1 — Static & backend audit
-- Run security scan, Supabase linter, slow-query check
-- Verify RLS + GRANTs on every public table; flag tables missing policies
-- Check storage bucket policies (avatars, runner-ids, task-deliverables, etc.)
-- Audit server functions: missing `requireSupabaseAuth`, admin client at module scope, missing input validation
-- Scan for console errors, broken `<Link>` targets, missing routes, dead imports
-- Verify all email templates render (registry coverage)
+- **Refund / cancellation flow**: investor cancels a funded task → today the payment row stays `funded` and money is stuck. Add a Stripe refund path + payment status transition.
+- **Dispute → payout interaction**: `disputes` table exists but doesn't freeze the payment. A runner could request payout on a disputed task.
+- **Tip before approval edge**: now fixed to require `approved`/`paid`, but the UI on `/dashboard/investor` still shows the Tip button on `submitted` tasks. Hide it in the UI to match.
+- **Email unsubscribe enforcement**: `suppressed_emails` table exists; verify every transactional and broadcast sender checks it before sending.
 
-### Phase 2 — Visitor (logged-out) testing
-Routes: `/`, `/about`, `/pricing`, `/runners`, `/investors`, `/coverage`, `/faq`, `/trust`, `/privacy`, `/terms`, `/story`, `/blog/*`, `/markets/*`, `/profiles`, `/profile/$slug`, `/property-*`, `/waitlist`, `/apply`, `/login`, `/signup`, `/forgot-password`, `/reset-password`, `/sitemap.xml`
-- Each page: 200 status, no console errors, H1 + meta tags + OG + canonical, responsive at 411px and 1280px, no broken images
-- Forms: blank submit, invalid email, oversized input, XSS payload, duplicate-account attempt
-- Sitemap + robots + manifest valid; favicons load; service worker registers cleanly
+## 4. UX & accessibility polish (1 pt)
 
-### Phase 3 — Runner role
-Create fresh runner account → onboarding → profile completion → background check intake → ID upload → academy → task browse → apply → accept → en-route → arrived → in-progress → complete → payout request → messaging → notifications → settings → logout
-- Permission edge: try accessing investor/admin routes (should redirect)
-- Empty states: no tasks, no messages, no notifications, no payouts
-- Refresh mid-flow; tab close + reopen; expired session
+- **Form-level loading states**: a few admin mutation buttons (broadcasts, pricing) don't disable during the request — double-click risk.
+- **Empty states**: marketplace, runner dashboard, and admin lists render bare when empty. Add CTAs.
+- **Keyboard / a11y audit**: tab order on the multi-step signup, focus traps on modals, missing `aria-label` on icon-only buttons.
+- **Mobile review** at 411px (current viewport): a few admin tables overflow horizontally without a scroll hint.
 
-### Phase 4 — Investor role
-Create fresh investor account → onboarding → post task wizard (every field, validation, attachments) → fund task (Stripe sandbox) → discover runners → invite → review submission → approve/reject → tip → review → re-post → cancel → saved runners → analytics
-- Try accessing runner/admin routes
-- Edit task, change due date, dispute flow, report user
+## What this plan delivers
 
-### Phase 5 — Admin role
-Promote one account to admin via migration → broadcasts (template editor incl. new market-update template) → user management → task overrides → task type requests → background check review → payout approvals → email queue → eligibility reminders cron → admin daily digest → security findings
-- Verify admin-only RLS gates hold
+Pick any subset:
+- Subset A (security + integrity, ~6 pts): items 2 + 3 — what most launch reviewers would flag.
+- Subset B (observability, ~3 pts): item 1 — pays off post-launch when something goes wrong.
+- Subset C (polish, ~1 pt): item 4 — visible to users.
 
-### Phase 6 — Cross-role flows
-Runner ↔ investor messaging, task lifecycle end-to-end with real Stripe sandbox payment + webhook, GPS tracking ping with geofence inside/outside, dispute escalation, referral attribution, eligibility reminder send
+I'd recommend **A first, then B**, leaving C as an ongoing backlog.
 
-### Phase 7 — Fix + retest
-For each bug found in phases 1–6:
-1. Root-cause it
-2. Apply minimal fix (code, migration, RLS, template, copy)
-3. Re-run the specific failing test
-4. Note in pass log
+## Technical notes
 
-### Phase 8 — Pass report
-Bugs found, fixed, deferred. Readiness score 0–100 with rubric (security 25, core flows 25, polish 15, perf 10, SEO 10, accessibility 10, mobile 5). Stop when score ≥ 90 for two consecutive passes with zero new blockers, or when you tell me to stop.
-
-## Test infrastructure I'll create once
-
-- `/tmp/browser/qa/` — Playwright scripts per role, screenshots
-- One-time SQL migration to seed a known admin role on a test account I create
-- A `qa-report-passN.md` artifact per pass (kept in `/mnt/documents/`, not the repo)
-
-## What I will NOT do without asking
-
-- Charge real money (Stripe stays in sandbox)
-- Send real emails to real users (test sends only to `blouwerslc@gmail.com` and synthetic addresses)
-- Delete production data
-- Touch managed integration files (`supabase/client.ts`, auth-middleware, types.ts, etc.)
-- Redesign UI — only fix broken/inconsistent states
-- Add new features beyond fixing what's broken
-
-## Stop conditions
-
-- Readiness ≥ 90 two passes in a row, OR
-- You say stop, OR
-- Three consecutive passes with no new auto-fixable bugs
-
-## First turn after approval
-
-Pass 1, Phase 1 + Phase 2 (static audit + visitor pass). I'll report findings, apply fixes, and continue to Phase 3 in the next turn so you can see progress and abort if needed.
+- New tables (`webhook_events`, optional `job_runs`) — migrations with RLS + GRANTs per project conventions.
+- Rate limiting: simple `signup_attempts`-style table already exists; extend the pattern to other endpoints rather than adding a new dependency.
+- Refund flow: add `refundTask` server function that calls `stripe.refunds.create`, updates `payments.status = 'refunded'`, sets `tasks.funded = false`, notifies the investor.
+- No new third-party services needed.
