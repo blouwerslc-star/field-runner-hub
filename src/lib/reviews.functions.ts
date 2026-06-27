@@ -81,6 +81,36 @@ export const createReview = createServerFn({ method: "POST" })
   )
   .handler(async ({ context, data }) => {
     const { supabase, userId } = context;
+    // Verify the reviewer participated in this task, the direction matches
+    // their role, the counterparty is the actual other party, and the task
+    // is in a reviewable state. Without these checks a user could fabricate
+    // ratings about anyone.
+    const { data: task, error: tErr } = await supabase
+      .from("tasks")
+      .select("id, investor_id, runner_id, status")
+      .eq("id", data.taskId)
+      .maybeSingle();
+    if (tErr) throw new Error(tErr.message);
+    if (!task) throw new Error("Task not found");
+    if (!reviewableStatuses.includes(task.status ?? "")) {
+      throw new Error("This task isn't ready to be reviewed yet.");
+    }
+    const isInvestor = task.investor_id === userId;
+    const isRunner = task.runner_id === userId;
+    if (!isInvestor && !isRunner) {
+      throw new Error("Only the task's investor or runner can leave a review.");
+    }
+    const expectedDirection = isInvestor ? "investor_to_runner" : "runner_to_investor";
+    if (data.direction !== expectedDirection) {
+      throw new Error("Invalid review direction.");
+    }
+    const counterparty = isInvestor ? task.runner_id : task.investor_id;
+    if (!counterparty || counterparty !== data.revieweeId) {
+      throw new Error("Reviewee must be the other party on the task.");
+    }
+    if (data.revieweeId === userId) {
+      throw new Error("You cannot review yourself.");
+    }
     const { data: row, error } = await supabase
       .from("reviews")
       .insert({
@@ -93,6 +123,11 @@ export const createReview = createServerFn({ method: "POST" })
       })
       .select("*")
       .single();
-    if (error) throw new Error(error.message);
+    if (error) {
+      if ((error as any).code === "23505") {
+        throw new Error("You have already reviewed this task.");
+      }
+      throw new Error(error.message);
+    }
     return { review: row };
   });
