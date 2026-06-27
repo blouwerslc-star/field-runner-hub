@@ -10,6 +10,7 @@ import { template as newTaskAvailable } from './new-task-available'
 import { template as verificationReminder } from './verification-reminder'
 import { template as academyReminder } from './academy-reminder'
 import { template as marketUpdateLaunch } from './market-update-launch'
+import { template as adminDailyDigest } from './admin-daily-digest'
 
 export interface TemplateEntry {
   component: ComponentType<any>
@@ -40,4 +41,5 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   verification_reminder: verificationReminder,
   academy_reminder: academyReminder,
   market_update_launch: marketUpdateLaunch,
+  admin_daily_digest: adminDailyDigest,
 }
