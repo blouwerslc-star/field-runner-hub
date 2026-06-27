@@ -111,6 +111,7 @@ import { Route as ApiPublicHooksSweepTrackingRouteImport } from './routes/api/pu
 import { Route as ApiPublicHooksRecurringTasksRouteImport } from './routes/api/public/hooks/recurring-tasks'
 import { Route as ApiPublicHooksProfileCompletionRemindersRouteImport } from './routes/api/public/hooks/profile-completion-reminders'
 import { Route as ApiPublicHooksEmailNurtureRouteImport } from './routes/api/public/hooks/email-nurture'
+import { Route as ApiPublicHooksEligibilityRemindersRouteImport } from './routes/api/public/hooks/eligibility-reminders'
 import { Route as ApiPublicHooksDispatchSmsRouteImport } from './routes/api/public/hooks/dispatch-sms'
 import { Route as AuthenticatedTasksTaskIdTrackingRouteImport } from './routes/_authenticated/tasks.$taskId.tracking'
 import { Route as AuthenticatedTasksTaskIdRunRouteImport } from './routes/_authenticated/tasks.$taskId.run'
@@ -685,6 +686,12 @@ const ApiPublicHooksEmailNurtureRoute =
     path: '/api/public/hooks/email-nurture',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksEligibilityRemindersRoute =
+  ApiPublicHooksEligibilityRemindersRouteImport.update({
+    id: '/api/public/hooks/eligibility-reminders',
+    path: '/api/public/hooks/eligibility-reminders',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicHooksDispatchSmsRoute =
   ApiPublicHooksDispatchSmsRouteImport.update({
     id: '/api/public/hooks/dispatch-sms',
@@ -819,6 +826,7 @@ export interface FileRoutesByFullPath {
   '/tasks/$taskId/run': typeof AuthenticatedTasksTaskIdRunRoute
   '/tasks/$taskId/tracking': typeof AuthenticatedTasksTaskIdTrackingRoute
   '/api/public/hooks/dispatch-sms': typeof ApiPublicHooksDispatchSmsRoute
+  '/api/public/hooks/eligibility-reminders': typeof ApiPublicHooksEligibilityRemindersRoute
   '/api/public/hooks/email-nurture': typeof ApiPublicHooksEmailNurtureRoute
   '/api/public/hooks/profile-completion-reminders': typeof ApiPublicHooksProfileCompletionRemindersRoute
   '/api/public/hooks/recurring-tasks': typeof ApiPublicHooksRecurringTasksRoute
@@ -923,6 +931,7 @@ export interface FileRoutesByTo {
   '/tasks/$taskId/run': typeof AuthenticatedTasksTaskIdRunRoute
   '/tasks/$taskId/tracking': typeof AuthenticatedTasksTaskIdTrackingRoute
   '/api/public/hooks/dispatch-sms': typeof ApiPublicHooksDispatchSmsRoute
+  '/api/public/hooks/eligibility-reminders': typeof ApiPublicHooksEligibilityRemindersRoute
   '/api/public/hooks/email-nurture': typeof ApiPublicHooksEmailNurtureRoute
   '/api/public/hooks/profile-completion-reminders': typeof ApiPublicHooksProfileCompletionRemindersRoute
   '/api/public/hooks/recurring-tasks': typeof ApiPublicHooksRecurringTasksRoute
@@ -1034,6 +1043,7 @@ export interface FileRoutesById {
   '/_authenticated/tasks/$taskId/run': typeof AuthenticatedTasksTaskIdRunRoute
   '/_authenticated/tasks/$taskId/tracking': typeof AuthenticatedTasksTaskIdTrackingRoute
   '/api/public/hooks/dispatch-sms': typeof ApiPublicHooksDispatchSmsRoute
+  '/api/public/hooks/eligibility-reminders': typeof ApiPublicHooksEligibilityRemindersRoute
   '/api/public/hooks/email-nurture': typeof ApiPublicHooksEmailNurtureRoute
   '/api/public/hooks/profile-completion-reminders': typeof ApiPublicHooksProfileCompletionRemindersRoute
   '/api/public/hooks/recurring-tasks': typeof ApiPublicHooksRecurringTasksRoute
@@ -1145,6 +1155,7 @@ export interface FileRouteTypes {
     | '/tasks/$taskId/run'
     | '/tasks/$taskId/tracking'
     | '/api/public/hooks/dispatch-sms'
+    | '/api/public/hooks/eligibility-reminders'
     | '/api/public/hooks/email-nurture'
     | '/api/public/hooks/profile-completion-reminders'
     | '/api/public/hooks/recurring-tasks'
@@ -1249,6 +1260,7 @@ export interface FileRouteTypes {
     | '/tasks/$taskId/run'
     | '/tasks/$taskId/tracking'
     | '/api/public/hooks/dispatch-sms'
+    | '/api/public/hooks/eligibility-reminders'
     | '/api/public/hooks/email-nurture'
     | '/api/public/hooks/profile-completion-reminders'
     | '/api/public/hooks/recurring-tasks'
@@ -1359,6 +1371,7 @@ export interface FileRouteTypes {
     | '/_authenticated/tasks/$taskId/run'
     | '/_authenticated/tasks/$taskId/tracking'
     | '/api/public/hooks/dispatch-sms'
+    | '/api/public/hooks/eligibility-reminders'
     | '/api/public/hooks/email-nurture'
     | '/api/public/hooks/profile-completion-reminders'
     | '/api/public/hooks/recurring-tasks'
@@ -1406,6 +1419,7 @@ export interface RootRouteChildren {
   ProfileSlugRoute: typeof ProfileSlugRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
   ApiPublicHooksDispatchSmsRoute: typeof ApiPublicHooksDispatchSmsRoute
+  ApiPublicHooksEligibilityRemindersRoute: typeof ApiPublicHooksEligibilityRemindersRoute
   ApiPublicHooksEmailNurtureRoute: typeof ApiPublicHooksEmailNurtureRoute
   ApiPublicHooksProfileCompletionRemindersRoute: typeof ApiPublicHooksProfileCompletionRemindersRoute
   ApiPublicHooksRecurringTasksRoute: typeof ApiPublicHooksRecurringTasksRoute
@@ -2134,6 +2148,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksEmailNurtureRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/eligibility-reminders': {
+      id: '/api/public/hooks/eligibility-reminders'
+      path: '/api/public/hooks/eligibility-reminders'
+      fullPath: '/api/public/hooks/eligibility-reminders'
+      preLoaderRoute: typeof ApiPublicHooksEligibilityRemindersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/dispatch-sms': {
       id: '/api/public/hooks/dispatch-sms'
       path: '/api/public/hooks/dispatch-sms'
@@ -2435,6 +2456,8 @@ const rootRouteChildren: RootRouteChildren = {
   ProfileSlugRoute: ProfileSlugRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
   ApiPublicHooksDispatchSmsRoute: ApiPublicHooksDispatchSmsRoute,
+  ApiPublicHooksEligibilityRemindersRoute:
+    ApiPublicHooksEligibilityRemindersRoute,
   ApiPublicHooksEmailNurtureRoute: ApiPublicHooksEmailNurtureRoute,
   ApiPublicHooksProfileCompletionRemindersRoute:
     ApiPublicHooksProfileCompletionRemindersRoute,
