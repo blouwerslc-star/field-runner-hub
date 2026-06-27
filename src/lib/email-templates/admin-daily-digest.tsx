@@ -39,14 +39,14 @@ export function AdminDailyDigest({
   return (
     <Html>
       <Head />
-      <Preview>REI Runner daily digest — {totalEvents} new event{totalEvents === 1 ? '' : 's'}</Preview>
+      <Preview>{`REI Runner daily digest — ${totalEvents} new event${totalEvents === 1 ? '' : 's'}`}</Preview>
       <Body style={{ backgroundColor: bg, color: text, fontFamily: '-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Arial, sans-serif', margin: 0, padding: 0 }}>
         <Container style={{ maxWidth: 600, margin: '0 auto', padding: '32px 20px' }}>
           <Section style={{ marginBottom: 20 }}>
             <Text style={{ color: brand, fontWeight: 800, letterSpacing: 3, fontSize: 12, margin: 0 }}>REI RUNNER · ADMIN DIGEST</Text>
             <Heading style={{ color: text, fontSize: 24, margin: '8px 0 4px' }}>{dateLabel}</Heading>
             <Text style={{ color: muted, fontSize: 14, margin: 0 }}>
-              {totalEvents} new event{totalEvents === 1 ? '' : 's'} in the last 24 hours
+              {`${totalEvents} new event${totalEvents === 1 ? '' : 's'} in the last 24 hours`}
             </Text>
           </Section>
 
