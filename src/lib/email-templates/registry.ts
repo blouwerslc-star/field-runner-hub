@@ -7,6 +7,8 @@ import { template as welcomeInvestor } from './welcome-investor'
 import { template as weeklyDigest } from './weekly-digest'
 import { template as reEngagement } from './re-engagement'
 import { template as newTaskAvailable } from './new-task-available'
+import { template as verificationReminder } from './verification-reminder'
+import { template as academyReminder } from './academy-reminder'
 
 export interface TemplateEntry {
   component: ComponentType<any>
@@ -34,4 +36,6 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   weekly_digest: weeklyDigest,
   re_engagement: reEngagement,
   new_task_available: newTaskAvailable,
+  verification_reminder: verificationReminder,
+  academy_reminder: academyReminder,
 }
