@@ -9,6 +9,8 @@ export const Route = createFileRoute("/api/public/hooks/email-nurture")({
   server: {
     handlers: {
       POST: async ({ request }) => {
+        const { recordJobRun } = await import("@/lib/job-runs.server");
+        return recordJobRun("email-nurture", async () => {
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
         const { sendTransactionalEmail } = await import("@/lib/email-sender.server");
 
@@ -148,6 +150,7 @@ export const Route = createFileRoute("/api/public/hooks/email-nurture")({
           status: 200,
           headers: { "content-type": "application/json" },
         });
+      });
       },
     },
   },

@@ -23,6 +23,8 @@ export const Route = createFileRoute('/api/public/hooks/recurring-tasks')({
   server: {
     handlers: {
       POST: async () => {
+        const { recordJobRun } = await import("@/lib/job-runs.server");
+        return recordJobRun("recurring-tasks", async () => {
         const now = new Date().toISOString()
         const { data: due, error } = await supabaseAdmin
           .from('tasks')
@@ -86,6 +88,7 @@ export const Route = createFileRoute('/api/public/hooks/recurring-tasks')({
         }
 
         return Response.json({ ok: true, examined: due?.length ?? 0, created, errors })
+      });
       },
     },
   },

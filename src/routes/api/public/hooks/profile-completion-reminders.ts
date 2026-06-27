@@ -49,6 +49,8 @@ export const Route = createFileRoute('/api/public/hooks/profile-completion-remin
   server: {
     handlers: {
       POST: async () => {
+        const { recordJobRun } = await import("@/lib/job-runs.server");
+        return recordJobRun("profile-completion-reminders", async () => {
         const now = Date.now()
         const day = 24 * 60 * 60 * 1000
         const stage1WindowStart = new Date(now - 14 * day).toISOString()
@@ -123,6 +125,7 @@ export const Route = createFileRoute('/api/public/hooks/profile-completion-remin
           stage2_candidates: firstNudges?.length ?? 0,
           stage2_sent: stage2Sent.length,
         })
+      });
       },
     },
   },

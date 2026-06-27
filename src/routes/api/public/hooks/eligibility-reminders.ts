@@ -21,6 +21,8 @@ export const Route = createFileRoute('/api/public/hooks/eligibility-reminders')(
   server: {
     handlers: {
       POST: async () => {
+        const { recordJobRun } = await import("@/lib/job-runs.server");
+        return recordJobRun("eligibility-reminders", async () => {
         const now = Date.now()
         const firstEligibleBefore = new Date(now - FIRST_DELAY_MS).toISOString()
 
@@ -93,6 +95,7 @@ export const Route = createFileRoute('/api/public/hooks/eligibility-reminders')(
           verification_sent: verificationSent,
           academy_sent: academySent,
         })
+      });
       },
     },
   },

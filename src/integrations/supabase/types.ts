@@ -1933,6 +1933,27 @@ export type Database = {
         }
         Relationships: []
       }
+      rate_limits: {
+        Row: {
+          action: string
+          id: number
+          identifier: string
+          occurred_at: string
+        }
+        Insert: {
+          action: string
+          id?: number
+          identifier: string
+          occurred_at?: string
+        }
+        Update: {
+          action?: string
+          id?: number
+          identifier?: string
+          occurred_at?: string
+        }
+        Relationships: []
+      }
       real_estate_pro_applications: {
         Row: {
           budget: string | null
@@ -3310,6 +3331,15 @@ export type Database = {
         Returns: string
       }
       bg_encrypt_ssn: { Args: { _key: string; _ssn: string }; Returns: string }
+      check_rate_limit: {
+        Args: {
+          _action: string
+          _identifier: string
+          _max: number
+          _window_seconds: number
+        }
+        Returns: boolean
+      }
       delete_email: {
         Args: { message_id: number; queue_name: string }
         Returns: boolean

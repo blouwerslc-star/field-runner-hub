@@ -17,6 +17,9 @@ export const requestPhoneVerification = createServerFn({ method: "POST" })
   .inputValidator((i: unknown) => z.object({ phone: z.string().trim().min(7).max(20) }).parse(i))
   .handler(async ({ context, data }) => {
     const { supabase, userId } = context;
+    // Hard cap: 5 SMS verification codes per user per hour (prevents SMS-bombing abuse).
+    const { enforceRateLimit } = await import("@/lib/rate-limit.server");
+    await enforceRateLimit("requestPhoneVerification", userId, 5, 3600);
     const { normalizeE164, sendSms } = await import("./sms.server");
     const phone = normalizeE164(data.phone);
     if (!phone) throw new Error("Invalid phone number");
