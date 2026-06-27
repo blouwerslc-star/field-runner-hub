@@ -88,6 +88,17 @@ const TEMPLATES: Record<Audience, Record<TemplateKey, TemplateDef>> = {
 <p>No hard feelings if now isn't the right time — just reply and let us know.</p>
 <p>— The REI Runner Team</p>`,
     },
+    launch_countdown: {
+      label: "Launch countdown — 1-2 months out",
+      category: "Update",
+      subject: "Live tasks are 1-2 months away, {{firstName}} — finish verification now",
+      html: `<p>Hi {{firstName}},</p>
+<p>Quick heads-up: REI Runner is about <strong>1-2 months away</strong> from going live with paid tasks in your area.</p>
+<p>Runners <strong>must</strong> finish the verification process before then — unverified accounts will <em>not</em> be able to claim tasks at launch.</p>
+<p><a href="https://reirunner.com/dashboard/runner/verification" style="display:inline-block;background:#16a34a;color:#fff;padding:12px 20px;border-radius:8px;text-decoration:none;font-weight:600">Finish verification</a></p>
+<p>It takes just a few minutes. Get it out of the way now so you're first in line when tasks start hitting your market.</p>
+<p>— The REI Runner Team</p>`,
+    },
     market_launch_update: {
       label: "Market launch update",
       category: "Update",
@@ -155,6 +166,16 @@ const TEMPLATES: Record<Audience, Record<TemplateKey, TemplateDef>> = {
       html: `<p>Hi {{firstName}},</p>
 <p>We're tightening our early-access list this week. If REI Runner still fits your workflow, this is the moment to claim your spot — otherwise we'll release it.</p>
 <p><a href="https://reirunner.com/signup?role=investor" style="display:inline-block;background:#dc2626;color:#fff;padding:12px 20px;border-radius:8px;text-decoration:none;font-weight:600">Keep my Investor spot</a></p>
+<p>— The REI Runner Team</p>`,
+    },
+    launch_countdown: {
+      label: "Launch countdown — 1-2 months out",
+      category: "Update",
+      subject: "{{firstName}}, REI Runner goes live in 1-2 months",
+      html: `<p>Hi {{firstName}},</p>
+<p>Quick update: REI Runner is about <strong>1-2 months away</strong> from running paid tasks at full scale in your markets.</p>
+<p>Now's a great moment to finish setting up your investor account so you can post your first jobs the moment vetted runners go live in your area.</p>
+<p><a href="https://reirunner.com/signup?role=investor" style="display:inline-block;background:#16a34a;color:#fff;padding:12px 20px;border-radius:8px;text-decoration:none;font-weight:600">Finish my investor setup</a></p>
 <p>— The REI Runner Team</p>`,
     },
     market_launch_update: {
@@ -232,6 +253,19 @@ const TEMPLATES: Record<Audience, Record<TemplateKey, TemplateDef>> = {
 <p>We're cleaning up our early-access list this week. If REI Runner still sounds useful, create your free account so we can hold your spot.</p>
 <p><a href="https://reirunner.com/signup" style="display:inline-block;background:#dc2626;color:#fff;padding:12px 20px;border-radius:8px;text-decoration:none;font-weight:600">Claim my spot</a></p>
 <p>If you've changed your mind, no need to reply — we'll quietly drop you from the list.</p>
+<p>— The REI Runner Team</p>`,
+    },
+    launch_countdown: {
+      label: "Launch countdown — 1-2 months out",
+      category: "Update",
+      subject: "REI Runner goes live in 1-2 months, {{firstName}}",
+      html: `<p>Hi {{firstName}},</p>
+<p>Heads-up — REI Runner is <strong>1-2 months away</strong> from live, paid tasks at scale. If you've been on the fence, now's the time to grab your free account so you don't miss launch in your market.</p>
+<p style="margin:20px 0">
+  <a href="https://reirunner.com/signup?role=runner" style="display:inline-block;background:#16a34a;color:#fff;padding:12px 20px;border-radius:8px;text-decoration:none;font-weight:600;margin-right:8px">I'm a Runner</a>
+  <a href="https://reirunner.com/signup?role=investor" style="display:inline-block;background:#0f172a;color:#fff;padding:12px 20px;border-radius:8px;text-decoration:none;font-weight:600;border:1px solid #16a34a">I'm an Investor</a>
+</p>
+<p>Runners — finish your verification before launch or you won't be able to claim tasks.</p>
 <p>— The REI Runner Team</p>`,
     },
     market_launch_update: {
