@@ -333,6 +333,29 @@ function BroadcastsPage() {
   const list = useServerFn(listApplicants);
   const send = useServerFn(sendBroadcast);
   const history = useServerFn(listBroadcastHistory);
+  const listOverrides = useServerFn(listTemplateOverrides);
+  const saveOverride = useServerFn(saveTemplateOverride);
+  const resetOverride = useServerFn(resetTemplateOverride);
+
+  const overridesQ = useQuery({
+    queryKey: ["broadcast-template-overrides"],
+    queryFn: () => listOverrides(),
+  });
+
+  const overrideMap = useMemo(() => {
+    const m = new Map<string, { subject: string; html: string }>();
+    for (const o of overridesQ.data?.overrides ?? []) {
+      m.set(`${o.audience}:${o.template_key}`, { subject: o.subject, html: o.html });
+    }
+    return m;
+  }, [overridesQ.data]);
+
+  const currentOverride = overrideMap.get(`${audience}:${templateKey}`);
+  const defaultTpl = TEMPLATES[audience][templateKey];
+  const isDirty =
+    subject !== (currentOverride?.subject ?? defaultTpl.subject) ||
+    html !== (currentOverride?.html ?? defaultTpl.html);
+  const [savingTpl, setSavingTpl] = useState(false);
 
   const applicantsQ = useQuery({
     queryKey: ["broadcast-applicants", audience],
@@ -357,8 +380,9 @@ function BroadcastsPage() {
   function switchAudience(a: Audience) {
     setAudience(a);
     setTemplateKey(DEFAULT_TEMPLATE);
-    setSubject(TEMPLATES[a][DEFAULT_TEMPLATE].subject);
-    setHtml(TEMPLATES[a][DEFAULT_TEMPLATE].html);
+    const ov = overrideMap.get(`${a}:${DEFAULT_TEMPLATE}`);
+    setSubject(ov?.subject ?? TEMPLATES[a][DEFAULT_TEMPLATE].subject);
+    setHtml(ov?.html ?? TEMPLATES[a][DEFAULT_TEMPLATE].html);
     setSelected({});
     setLastResult(null);
   }
@@ -366,8 +390,45 @@ function BroadcastsPage() {
   function applyTemplate(key: TemplateKey) {
     setTemplateKey(key);
     const tpl = TEMPLATES[audience][key];
-    setSubject(tpl.subject);
-    setHtml(tpl.html);
+    const ov = overrideMap.get(`${audience}:${key}`);
+    setSubject(ov?.subject ?? tpl.subject);
+    setHtml(ov?.html ?? tpl.html);
+  }
+
+  async function handleSaveTemplate() {
+    setSavingTpl(true);
+    try {
+      await saveOverride({ data: { audience, templateKey, subject, html } });
+      toast.success("Template saved");
+      await overridesQ.refetch();
+    } catch (e: any) {
+      toast.error(e?.message ?? "Failed to save template");
+    } finally {
+      setSavingTpl(false);
+    }
+  }
+
+  async function handleResetTemplate() {
+    if (!currentOverride) {
+      const tpl = TEMPLATES[audience][templateKey];
+      setSubject(tpl.subject);
+      setHtml(tpl.html);
+      return;
+    }
+    if (!confirm("Reset this template to the built-in default? Your saved edits will be discarded.")) return;
+    setSavingTpl(true);
+    try {
+      await resetOverride({ data: { audience, templateKey } });
+      const tpl = TEMPLATES[audience][templateKey];
+      setSubject(tpl.subject);
+      setHtml(tpl.html);
+      toast.success("Template reset to default");
+      await overridesQ.refetch();
+    } catch (e: any) {
+      toast.error(e?.message ?? "Failed to reset template");
+    } finally {
+      setSavingTpl(false);
+    }
   }
 
   function toggleAll(checked: boolean) {
@@ -503,6 +564,40 @@ function BroadcastsPage() {
                 <p className="text-xs text-muted-foreground mt-1">
                   Use <code>{"{{firstName}}"}</code> for personalization.
                 </p>
+              </div>
+              <div className="flex items-center justify-between gap-2 pt-2 border-t border-border/60">
+                <div className="text-xs text-muted-foreground">
+                  {currentOverride ? (
+                    <span className="text-emerald-400">Custom version saved</span>
+                  ) : (
+                    <span>Using built-in default</span>
+                  )}
+                  {isDirty && <span className="ml-2 text-yellow-400">• Unsaved changes</span>}
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={handleResetTemplate}
+                    disabled={savingTpl}
+                  >
+                    <RotateCcw className="size-4 mr-1" /> Reset
+                  </Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    onClick={handleSaveTemplate}
+                    disabled={savingTpl || !isDirty}
+                  >
+                    {savingTpl ? (
+                      <Loader2 className="size-4 mr-1 animate-spin" />
+                    ) : (
+                      <Save className="size-4 mr-1" />
+                    )}
+                    Save template
+                  </Button>
+                </div>
               </div>
             </div>
 
