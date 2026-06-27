@@ -105,6 +105,9 @@ export const applyToTask = createServerFn({ method: "POST" })
   )
   .handler(async ({ context, data }) => {
     const { supabase, userId } = context;
+    // Rate limit: 20 applications per runner per hour.
+    const { enforceRateLimit } = await import("@/lib/rate-limit.server");
+    await enforceRateLimit("applyToTask", userId, 20, 3600);
     // Gate: must be a Certified Runner (Academy Level 1+) before applying to paid tasks.
     const { data: rp } = await supabase
       .from("runner_profiles")
