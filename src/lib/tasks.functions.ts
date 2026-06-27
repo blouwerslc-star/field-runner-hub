@@ -285,12 +285,15 @@ export const startTask = createServerFn({ method: "POST" })
   .inputValidator((i: unknown) => z.object({ taskId: z.string().uuid() }).parse(i))
   .handler(async ({ context, data }) => {
     const { supabase, userId } = context;
-    const { error } = await supabase
+    const { data: updated, error } = await supabase
       .from("tasks")
       .update({ status: "in_progress" })
       .eq("id", data.taskId)
-      .eq("runner_id", userId);
+      .eq("runner_id", userId)
+      .in("status", ["assigned", "revision_requested"])
+      .select("id");
     if (error) throw new Error(error.message);
+    if (!updated?.length) throw new Error("Task cannot be started in its current state.");
     return { ok: true };
   });
 
@@ -308,6 +311,9 @@ export const submitTaskWork = createServerFn({ method: "POST" })
       .maybeSingle();
     if (tErr) throw new Error(tErr.message);
     if (!task || task.runner_id !== userId) throw new Error("Not assigned to this task");
+    if (!["assigned", "in_progress", "revision_requested"].includes(task.status ?? "")) {
+      throw new Error("Task is not in a state that accepts a submission.");
+    }
 
     const { data: sub, error } = await supabase
       .from("task_submissions")
@@ -345,6 +351,23 @@ export const reviewSubmission = createServerFn({ method: "POST" })
       .maybeSingle();
     if (sErr) throw new Error(sErr.message);
     if (!sub) throw new Error("Submission not found");
+    if (sub.status !== "pending") {
+      throw new Error("This submission has already been reviewed.");
+    }
+    // Authorization: only the task's investor (or an admin) can approve/reject.
+    const { data: parentTask, error: ptErr } = await supabase
+      .from("tasks")
+      .select("investor_id, runner_id, payout_amount, funded")
+      .eq("id", sub.task_id)
+      .maybeSingle();
+    if (ptErr) throw new Error(ptErr.message);
+    if (!parentTask) throw new Error("Task not found");
+    const { data: roleRows } = await supabase
+      .from("user_roles").select("role").eq("user_id", userId);
+    const isAdmin = (roleRows ?? []).some((r) => r.role === "admin");
+    if (parentTask.investor_id !== userId && !isAdmin) {
+      throw new Error("Only the task owner can review this submission.");
+    }
 
     const newStatus = data.action === "approve" ? "approved" : "rejected";
     const { error } = await supabase
@@ -360,23 +383,39 @@ export const reviewSubmission = createServerFn({ method: "POST" })
 
     if (data.action === "approve") {
       await supabase.from("tasks").update({ status: "approved" }).eq("id", sub.task_id);
-      const { data: task } = await supabase
-        .from("tasks")
-        .select("payout_amount, investor_id, runner_id")
-        .eq("id", sub.task_id)
-        .maybeSingle();
-      if (task && task.payout_amount) {
-        const cents = Math.round(Number(task.payout_amount) * 100);
+      // Release the funded escrow row to the runner, OR — for legacy/unfunded
+      // tasks — create a single pending payout row. Avoid creating a duplicate
+      // payment for the same task (the funding row already exists when the
+      // investor paid through Stripe).
+      if (parentTask.payout_amount) {
+        const cents = Math.round(Number(parentTask.payout_amount) * 100);
         const fee = Math.round(cents * 0.2);
-        await supabase.from("payments").insert({
-          task_id: sub.task_id,
-          investor_id: task.investor_id,
-          runner_id: task.runner_id,
-          amount_cents: cents,
-          platform_fee_cents: fee,
-          runner_payout_cents: cents - fee,
-          status: "released",
-        });
+        const runnerId = parentTask.runner_id;
+        const { data: fundingRow } = await supabase
+          .from("payments")
+          .select("id")
+          .eq("task_id", sub.task_id)
+          .eq("kind", "task")
+          .order("created_at", { ascending: true })
+          .limit(1)
+          .maybeSingle();
+        if (fundingRow?.id) {
+          await supabase
+            .from("payments")
+            .update({ status: "released", runner_id: runnerId })
+            .eq("id", fundingRow.id);
+        } else if (runnerId) {
+          await supabase.from("payments").insert({
+            task_id: sub.task_id,
+            investor_id: parentTask.investor_id,
+            runner_id: runnerId,
+            amount_cents: cents,
+            platform_fee_cents: fee,
+            runner_payout_cents: cents - fee,
+            status: "released",
+            kind: "task",
+          });
+        }
       }
     } else {
       await supabase

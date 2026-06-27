@@ -114,12 +114,19 @@ export const applyToTask = createServerFn({ method: "POST" })
     if (!rp || ((rp as any).certification_level ?? 0) < 1) {
       throw new Error("Complete REI Runner Academy certification before applying to tasks.");
     }
-    // Gate: tasks that require interior property access need a verified background check.
+    // Gate: task must exist, be open, unassigned, and not posted by the applicant.
     const { data: taskRow } = await supabase
       .from("tasks")
-      .select("requires_interior_access")
+      .select("requires_interior_access, status, runner_id, investor_id")
       .eq("id", data.taskId)
       .maybeSingle();
+    if (!taskRow) throw new Error("Task not found");
+    if ((taskRow as any).investor_id === userId) {
+      throw new Error("You cannot apply to your own task.");
+    }
+    if ((taskRow as any).status !== "open" || (taskRow as any).runner_id) {
+      throw new Error("This task is no longer accepting applications.");
+    }
     if ((taskRow as any)?.requires_interior_access) {
       const { data: prof } = await supabase
         .from("profiles")
@@ -135,7 +142,12 @@ export const applyToTask = createServerFn({ method: "POST" })
     const { error } = await supabase
       .from("task_applications")
       .insert({ task_id: data.taskId, runner_id: userId, message: data.message ?? null });
-    if (error) throw new Error(error.message);
+    if (error) {
+      if ((error as any).code === "23505") {
+        throw new Error("You have already applied to this task.");
+      }
+      throw new Error(error.message);
+    }
     return { ok: true };
   });
 
