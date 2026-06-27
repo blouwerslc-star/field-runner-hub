@@ -9,6 +9,7 @@ import { template as reEngagement } from './re-engagement'
 import { template as newTaskAvailable } from './new-task-available'
 import { template as verificationReminder } from './verification-reminder'
 import { template as academyReminder } from './academy-reminder'
+import { template as marketUpdateLaunch } from './market-update-launch'
 
 export interface TemplateEntry {
   component: ComponentType<any>
@@ -38,4 +39,5 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   new_task_available: newTaskAvailable,
   verification_reminder: verificationReminder,
   academy_reminder: academyReminder,
+  market_update_launch: marketUpdateLaunch,
 }
