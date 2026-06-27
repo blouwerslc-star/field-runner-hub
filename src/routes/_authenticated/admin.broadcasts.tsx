@@ -13,7 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
-import { Loader2, Send, ArrowLeft } from "lucide-react";
+import { Loader2, Send, ArrowLeft, Save, RotateCcw } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -25,6 +25,9 @@ import {
   listApplicants,
   sendBroadcast,
   listBroadcastHistory,
+  listTemplateOverrides,
+  saveTemplateOverride,
+  resetTemplateOverride,
 } from "@/lib/broadcasts.functions";
 
 export const Route = createFileRoute("/_authenticated/admin/broadcasts")({
@@ -39,6 +42,7 @@ type TemplateKey =
   | "signup_reminder"
   | "second_reminder"
   | "final_reminder"
+  | "launch_countdown"
   | "market_launch_update"
   | "platform_update"
   | "new_features_update";
@@ -82,6 +86,17 @@ const TEMPLATES: Record<Audience, Record<TemplateKey, TemplateDef>> = {
 <p>We're cleaning up our runner waitlist this week. If you'd still like a spot, this is the time to finish setting up your account — otherwise we'll release your slot to the next applicant in your market.</p>
 <p><a href="https://reirunner.com/signup?role=runner" style="display:inline-block;background:#dc2626;color:#fff;padding:12px 20px;border-radius:8px;text-decoration:none;font-weight:600">Claim my Runner spot</a></p>
 <p>No hard feelings if now isn't the right time — just reply and let us know.</p>
+<p>— The REI Runner Team</p>`,
+    },
+    launch_countdown: {
+      label: "Launch countdown — 1-2 months out",
+      category: "Update",
+      subject: "Live tasks are 1-2 months away, {{firstName}} — finish verification now",
+      html: `<p>Hi {{firstName}},</p>
+<p>Quick heads-up: REI Runner is about <strong>1-2 months away</strong> from going live with paid tasks in your area.</p>
+<p>Runners <strong>must</strong> finish the verification process before then — unverified accounts will <em>not</em> be able to claim tasks at launch.</p>
+<p><a href="https://reirunner.com/dashboard/runner/verification" style="display:inline-block;background:#16a34a;color:#fff;padding:12px 20px;border-radius:8px;text-decoration:none;font-weight:600">Finish verification</a></p>
+<p>It takes just a few minutes. Get it out of the way now so you're first in line when tasks start hitting your market.</p>
 <p>— The REI Runner Team</p>`,
     },
     market_launch_update: {
@@ -151,6 +166,16 @@ const TEMPLATES: Record<Audience, Record<TemplateKey, TemplateDef>> = {
       html: `<p>Hi {{firstName}},</p>
 <p>We're tightening our early-access list this week. If REI Runner still fits your workflow, this is the moment to claim your spot — otherwise we'll release it.</p>
 <p><a href="https://reirunner.com/signup?role=investor" style="display:inline-block;background:#dc2626;color:#fff;padding:12px 20px;border-radius:8px;text-decoration:none;font-weight:600">Keep my Investor spot</a></p>
+<p>— The REI Runner Team</p>`,
+    },
+    launch_countdown: {
+      label: "Launch countdown — 1-2 months out",
+      category: "Update",
+      subject: "{{firstName}}, REI Runner goes live in 1-2 months",
+      html: `<p>Hi {{firstName}},</p>
+<p>Quick update: REI Runner is about <strong>1-2 months away</strong> from running paid tasks at full scale in your markets.</p>
+<p>Now's a great moment to finish setting up your investor account so you can post your first jobs the moment vetted runners go live in your area.</p>
+<p><a href="https://reirunner.com/signup?role=investor" style="display:inline-block;background:#16a34a;color:#fff;padding:12px 20px;border-radius:8px;text-decoration:none;font-weight:600">Finish my investor setup</a></p>
 <p>— The REI Runner Team</p>`,
     },
     market_launch_update: {
@@ -230,6 +255,19 @@ const TEMPLATES: Record<Audience, Record<TemplateKey, TemplateDef>> = {
 <p>If you've changed your mind, no need to reply — we'll quietly drop you from the list.</p>
 <p>— The REI Runner Team</p>`,
     },
+    launch_countdown: {
+      label: "Launch countdown — 1-2 months out",
+      category: "Update",
+      subject: "REI Runner goes live in 1-2 months, {{firstName}}",
+      html: `<p>Hi {{firstName}},</p>
+<p>Heads-up — REI Runner is <strong>1-2 months away</strong> from live, paid tasks at scale. If you've been on the fence, now's the time to grab your free account so you don't miss launch in your market.</p>
+<p style="margin:20px 0">
+  <a href="https://reirunner.com/signup?role=runner" style="display:inline-block;background:#16a34a;color:#fff;padding:12px 20px;border-radius:8px;text-decoration:none;font-weight:600;margin-right:8px">I'm a Runner</a>
+  <a href="https://reirunner.com/signup?role=investor" style="display:inline-block;background:#0f172a;color:#fff;padding:12px 20px;border-radius:8px;text-decoration:none;font-weight:600;border:1px solid #16a34a">I'm an Investor</a>
+</p>
+<p>Runners — finish your verification before launch or you won't be able to claim tasks.</p>
+<p>— The REI Runner Team</p>`,
+    },
     market_launch_update: {
       label: "Market launch update",
       category: "Update",
@@ -295,6 +333,29 @@ function BroadcastsPage() {
   const list = useServerFn(listApplicants);
   const send = useServerFn(sendBroadcast);
   const history = useServerFn(listBroadcastHistory);
+  const listOverrides = useServerFn(listTemplateOverrides);
+  const saveOverride = useServerFn(saveTemplateOverride);
+  const resetOverride = useServerFn(resetTemplateOverride);
+
+  const overridesQ = useQuery({
+    queryKey: ["broadcast-template-overrides"],
+    queryFn: () => listOverrides(),
+  });
+
+  const overrideMap = useMemo(() => {
+    const m = new Map<string, { subject: string; html: string }>();
+    for (const o of overridesQ.data?.overrides ?? []) {
+      m.set(`${o.audience}:${o.template_key}`, { subject: o.subject, html: o.html });
+    }
+    return m;
+  }, [overridesQ.data]);
+
+  const currentOverride = overrideMap.get(`${audience}:${templateKey}`);
+  const defaultTpl = TEMPLATES[audience][templateKey];
+  const isDirty =
+    subject !== (currentOverride?.subject ?? defaultTpl.subject) ||
+    html !== (currentOverride?.html ?? defaultTpl.html);
+  const [savingTpl, setSavingTpl] = useState(false);
 
   const applicantsQ = useQuery({
     queryKey: ["broadcast-applicants", audience],
@@ -319,8 +380,9 @@ function BroadcastsPage() {
   function switchAudience(a: Audience) {
     setAudience(a);
     setTemplateKey(DEFAULT_TEMPLATE);
-    setSubject(TEMPLATES[a][DEFAULT_TEMPLATE].subject);
-    setHtml(TEMPLATES[a][DEFAULT_TEMPLATE].html);
+    const ov = overrideMap.get(`${a}:${DEFAULT_TEMPLATE}`);
+    setSubject(ov?.subject ?? TEMPLATES[a][DEFAULT_TEMPLATE].subject);
+    setHtml(ov?.html ?? TEMPLATES[a][DEFAULT_TEMPLATE].html);
     setSelected({});
     setLastResult(null);
   }
@@ -328,8 +390,45 @@ function BroadcastsPage() {
   function applyTemplate(key: TemplateKey) {
     setTemplateKey(key);
     const tpl = TEMPLATES[audience][key];
-    setSubject(tpl.subject);
-    setHtml(tpl.html);
+    const ov = overrideMap.get(`${audience}:${key}`);
+    setSubject(ov?.subject ?? tpl.subject);
+    setHtml(ov?.html ?? tpl.html);
+  }
+
+  async function handleSaveTemplate() {
+    setSavingTpl(true);
+    try {
+      await saveOverride({ data: { audience, templateKey, subject, html } });
+      toast.success("Template saved");
+      await overridesQ.refetch();
+    } catch (e: any) {
+      toast.error(e?.message ?? "Failed to save template");
+    } finally {
+      setSavingTpl(false);
+    }
+  }
+
+  async function handleResetTemplate() {
+    if (!currentOverride) {
+      const tpl = TEMPLATES[audience][templateKey];
+      setSubject(tpl.subject);
+      setHtml(tpl.html);
+      return;
+    }
+    if (!confirm("Reset this template to the built-in default? Your saved edits will be discarded.")) return;
+    setSavingTpl(true);
+    try {
+      await resetOverride({ data: { audience, templateKey } });
+      const tpl = TEMPLATES[audience][templateKey];
+      setSubject(tpl.subject);
+      setHtml(tpl.html);
+      toast.success("Template reset to default");
+      await overridesQ.refetch();
+    } catch (e: any) {
+      toast.error(e?.message ?? "Failed to reset template");
+    } finally {
+      setSavingTpl(false);
+    }
   }
 
   function toggleAll(checked: boolean) {
@@ -465,6 +564,40 @@ function BroadcastsPage() {
                 <p className="text-xs text-muted-foreground mt-1">
                   Use <code>{"{{firstName}}"}</code> for personalization.
                 </p>
+              </div>
+              <div className="flex items-center justify-between gap-2 pt-2 border-t border-border/60">
+                <div className="text-xs text-muted-foreground">
+                  {currentOverride ? (
+                    <span className="text-emerald-400">Custom version saved</span>
+                  ) : (
+                    <span>Using built-in default</span>
+                  )}
+                  {isDirty && <span className="ml-2 text-yellow-400">• Unsaved changes</span>}
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={handleResetTemplate}
+                    disabled={savingTpl}
+                  >
+                    <RotateCcw className="size-4 mr-1" /> Reset
+                  </Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    onClick={handleSaveTemplate}
+                    disabled={savingTpl || !isDirty}
+                  >
+                    {savingTpl ? (
+                      <Loader2 className="size-4 mr-1 animate-spin" />
+                    ) : (
+                      <Save className="size-4 mr-1" />
+                    )}
+                    Save template
+                  </Button>
+                </div>
               </div>
             </div>
 

@@ -639,6 +639,39 @@ export type Database = {
         }
         Relationships: []
       }
+      broadcast_template_overrides: {
+        Row: {
+          audience: string
+          created_at: string
+          html: string
+          id: string
+          subject: string
+          template_key: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          audience: string
+          created_at?: string
+          html: string
+          id?: string
+          subject: string
+          template_key: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          audience?: string
+          created_at?: string
+          html?: string
+          id?: string
+          subject?: string
+          template_key?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       conversation_participants: {
         Row: {
           conversation_id: string

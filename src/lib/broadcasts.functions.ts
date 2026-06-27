@@ -339,3 +339,64 @@ export const listBroadcastHistory = createServerFn({ method: "GET" })
     if (error) throw new Error(error.message);
     return { sends: data ?? [] };
   });
+
+const audienceEnum = z.enum(["runner", "investor", "lead"]);
+
+export const listTemplateOverrides = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAdmin(context.supabase, context.userId);
+    const { data, error } = await supabaseAdmin
+      .from("broadcast_template_overrides")
+      .select("audience, template_key, subject, html, updated_at");
+    if (error) throw new Error(error.message);
+    return { overrides: data ?? [] };
+  });
+
+export const saveTemplateOverride = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z
+      .object({
+        audience: audienceEnum,
+        templateKey: z.string().min(1).max(100),
+        subject: z.string().min(1).max(300),
+        html: z.string().min(1).max(100_000),
+      })
+      .parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context.supabase, context.userId);
+    const { error } = await supabaseAdmin
+      .from("broadcast_template_overrides")
+      .upsert(
+        {
+          audience: data.audience,
+          template_key: data.templateKey,
+          subject: data.subject,
+          html: data.html,
+          updated_by: context.userId,
+        },
+        { onConflict: "audience,template_key" },
+      );
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const resetTemplateOverride = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z
+      .object({ audience: audienceEnum, templateKey: z.string().min(1).max(100) })
+      .parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context.supabase, context.userId);
+    const { error } = await supabaseAdmin
+      .from("broadcast_template_overrides")
+      .delete()
+      .eq("audience", data.audience)
+      .eq("template_key", data.templateKey);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
