@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate, redirect as routerRedirect } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
 import { finalizeSignupProfile, ensureUserSetup } from "@/lib/signup.functions";
@@ -61,6 +61,8 @@ function SignupPage() {
   const [formError, setFormError] = useState<FriendlyError | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const [debug, setDebug] = useState<{ authUserId: string; email: string; role: RoleParam; profileStatus: string } | null>(null);
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
 
   const dashboardFor = (r: RoleParam) => (r === "investor" ? "/dashboard/investor" : "/dashboard/runner");
   const postSignupRedirect = activeRole ? (redirect ?? dashboardFor(activeRole)) : (redirect ?? "/dashboard");
@@ -208,7 +210,7 @@ function SignupPage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground grid place-items-center px-5 py-12">
-      <Toaster richColors closeButton position="top-center" theme="dark" />
+      {mounted && <Toaster richColors closeButton position="top-center" theme="dark" />}
       <div className="w-full max-w-2xl">
         <Link to="/" aria-label="REI Runner home" className="flex justify-center mb-8">
           <BrandLogo size="md" />
