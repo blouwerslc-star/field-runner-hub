@@ -81,6 +81,9 @@ export const createReview = createServerFn({ method: "POST" })
   )
   .handler(async ({ context, data }) => {
     const { supabase, userId } = context;
+    // Rate limit: 10 reviews per user per hour (prevents bulk review spam).
+    const { enforceRateLimit } = await import("@/lib/rate-limit.server");
+    await enforceRateLimit("createReview", userId, 10, 3600);
     // Verify the reviewer participated in this task, the direction matches
     // their role, the counterparty is the actual other party, and the task
     // is in a reviewable state. Without these checks a user could fabricate
