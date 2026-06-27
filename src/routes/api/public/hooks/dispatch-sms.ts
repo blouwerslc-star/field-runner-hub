@@ -8,6 +8,8 @@ export const Route = createFileRoute("/api/public/hooks/dispatch-sms")({
   server: {
     handlers: {
       POST: async ({ request }) => {
+        const { recordJobRun } = await import("@/lib/job-runs.server");
+        return recordJobRun("dispatch-sms", async () => {
         let body: Body = {};
         try { body = (await request.json()) as Body; } catch { /* ignore */ }
         const notificationId = body.notification_id;
@@ -72,6 +74,7 @@ export const Route = createFileRoute("/api/public/hooks/dispatch-sms")({
           status: 200,
           headers: { "content-type": "application/json" },
         });
+      });
       },
     },
   },

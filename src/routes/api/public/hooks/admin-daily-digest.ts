@@ -37,6 +37,8 @@ export const Route = createFileRoute('/api/public/hooks/admin-daily-digest')({
   server: {
     handlers: {
       POST: async () => {
+        const { recordJobRun } = await import("@/lib/job-runs.server");
+        return recordJobRun("admin-daily-digest", async () => {
         const now = Date.now()
         const sinceIso = new Date(now - 24 * 60 * 60 * 1000).toISOString()
         const sb = supabaseAdmin as any
@@ -281,6 +283,7 @@ export const Route = createFileRoute('/api/public/hooks/admin-daily-digest')({
           reason: result.reason,
           sections: sections.map((s) => ({ title: s.title, count: s.count })),
         })
+      });
       },
     },
   },
