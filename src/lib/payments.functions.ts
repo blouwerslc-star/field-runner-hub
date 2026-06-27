@@ -297,8 +297,9 @@ export const refundTaskFunding = createServerFn({ method: "POST" })
         .eq("id", payment.id);
 
       if (payment.task_id) {
-        const taskUpdate: Record<string, unknown> = { funded: false };
-        if (data.cancelTask) taskUpdate.status = "cancelled";
+        const taskUpdate = data.cancelTask
+          ? { funded: false, status: "cancelled" as const }
+          : { funded: false };
         await supabase.from("tasks").update(taskUpdate).eq("id", payment.task_id);
 
         // Notify the runner if one was assigned
