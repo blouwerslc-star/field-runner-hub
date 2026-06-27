@@ -181,11 +181,22 @@ export const decideApplication = createServerFn({ method: "POST" })
     if (!app) throw new Error("Application not found");
     const { data: task, error: tErr } = await supabase
       .from("tasks")
-      .select("id, investor_id, status")
+      .select("id, investor_id, status, funded, payout_amount")
       .eq("id", app.task_id)
       .maybeSingle();
     if (tErr) throw new Error(tErr.message);
     if (!task || task.investor_id !== userId) throw new Error("Not authorized");
+    if (data.decision === "approved") {
+      const payout = Number((task as any).payout_amount ?? 0);
+      // Require escrow funding before assigning a runner to a paid task.
+      // Free tasks (no payout) can be assigned without funding.
+      if (payout > 0 && !(task as any).funded) {
+        throw new Error("Fund this task before approving a runner.");
+      }
+      if (task.status !== "open") {
+        throw new Error("This task is no longer open.");
+      }
+    }
 
     const { error: uErr } = await supabase
       .from("task_applications")
