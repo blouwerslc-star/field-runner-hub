@@ -56,7 +56,7 @@ export function AdminDailyDigest({
               style={{ backgroundColor: card, border: `1px solid ${border}`, borderRadius: 12, padding: '20px 22px', marginBottom: 14 }}
             >
               <Text style={{ color: text, fontSize: 16, fontWeight: 700, margin: '0 0 4px' }}>
-                {s.title} <span style={{ color: muted, fontWeight: 500 }}>· {s.count}</span>
+                {`${s.title} · ${s.count}`}
               </Text>
               {s.items && s.items.length > 0 && (
                 <>
@@ -78,7 +78,7 @@ export function AdminDailyDigest({
                   ))}
                   {s.count > 10 && (
                     <Text style={{ color: muted, fontSize: 12, margin: '6px 0 0', fontStyle: 'italic' }}>
-                      …and {s.count - 10} more
+                      {`…and ${s.count - 10} more`}
                     </Text>
                   )}
                 </>
