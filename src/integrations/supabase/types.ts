@@ -2079,6 +2079,30 @@ export type Database = {
         }
         Relationships: []
       }
+      runner_eligibility_reminders: {
+        Row: {
+          id: string
+          kind: string
+          last_sent_at: string
+          send_count: number
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          kind: string
+          last_sent_at?: string
+          send_count?: number
+          user_id: string
+        }
+        Update: {
+          id?: string
+          kind?: string
+          last_sent_at?: string
+          send_count?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       runner_id_documents: {
         Row: {
           bucket: string
