@@ -232,6 +232,97 @@ export const markPayoutPaid = createServerFn({ method: "POST" })
   });
 
 // ============================================================================
+// Refunds — investor cancels a funded task before payout, OR admin refunds a
+// disputed payment. Issues a Stripe refund on the original PaymentIntent and
+// flips the payment to 'refunded' + task.funded=false.
+// ============================================================================
+
+export const refundTaskFunding = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i: unknown) =>
+    z.object({
+      paymentId: z.string().uuid(),
+      reason: z.string().trim().max(500).optional(),
+      cancelTask: z.boolean().default(true),
+      environment: ENV_SCHEMA,
+    }).parse(i),
+  )
+  .handler(async ({ context, data }) => {
+    try {
+      const { supabase, userId } = context;
+      const { data: payment, error: pErr } = await supabase
+        .from("payments")
+        .select("id, task_id, investor_id, status, kind, amount_cents, stripe_payment_intent_id")
+        .eq("id", data.paymentId)
+        .maybeSingle();
+      if (pErr) throw new Error(pErr.message);
+      if (!payment) throw new Error("Payment not found");
+
+      const { data: roles } = await supabase
+        .from("user_roles").select("role").eq("user_id", userId);
+      const isAdmin = (roles ?? []).some((r) => r.role === "admin");
+      const isOwningInvestor = payment.investor_id === userId;
+      if (!isAdmin && !isOwningInvestor) throw new Error("Not authorized to refund this payment");
+
+      // Investors can only self-cancel funded escrow before approval.
+      // Disputed/released states require admin.
+      if (!isAdmin && payment.status !== "funded") {
+        throw new Error(`Cannot refund a payment in status "${payment.status}". Contact support.`);
+      }
+      if (!["funded", "disputed"].includes(payment.status)) {
+        throw new Error(`Payment cannot be refunded from status "${payment.status}".`);
+      }
+      if (payment.kind !== "task") {
+        throw new Error("Only task escrow payments can be refunded here.");
+      }
+      if (!payment.stripe_payment_intent_id) {
+        throw new Error("Payment has no Stripe PaymentIntent on file.");
+      }
+
+      const stripe = createStripeClient(data.environment as StripeEnv);
+      const refund = await stripe.refunds.create({
+        payment_intent: payment.stripe_payment_intent_id,
+        reason: "requested_by_customer",
+        metadata: {
+          task_id: payment.task_id ?? "",
+          payment_id: payment.id,
+          refunded_by: userId,
+          note: data.reason ?? "",
+        },
+      });
+
+      await supabase
+        .from("payments")
+        .update({ status: "refunded", updated_at: new Date().toISOString() })
+        .eq("id", payment.id);
+
+      if (payment.task_id) {
+        const taskUpdate = data.cancelTask
+          ? { funded: false, status: "cancelled" as const }
+          : { funded: false };
+        await supabase.from("tasks").update(taskUpdate).eq("id", payment.task_id);
+
+        // Notify the runner if one was assigned
+        const { data: task } = await supabase
+          .from("tasks").select("runner_id, title").eq("id", payment.task_id).maybeSingle();
+        if (task?.runner_id) {
+          await supabase.from("notifications").insert({
+            user_id: task.runner_id,
+            type: "task_cancelled_refunded",
+            title: "Task cancelled and refunded",
+            body: `"${task.title ?? "A task"}" has been cancelled and the investor was refunded.`,
+            link: "/dashboard/runner",
+          });
+        }
+      }
+
+      return { ok: true, refundId: refund.id };
+    } catch (error) {
+      return { ok: false, error: getStripeErrorMessage(error) };
+    }
+  });
+
+// ============================================================================
 // Tipping — investors can leave a tip for the runner after task completion.
 // Tips pass 100% to the runner (no platform fee).
 // ============================================================================

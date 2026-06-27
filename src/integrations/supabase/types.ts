@@ -1132,6 +1132,36 @@ export type Database = {
         }
         Relationships: []
       }
+      job_runs: {
+        Row: {
+          error_message: string | null
+          finished_at: string | null
+          id: string
+          job_name: string
+          result: Json | null
+          started_at: string
+          status: string
+        }
+        Insert: {
+          error_message?: string | null
+          finished_at?: string | null
+          id?: string
+          job_name: string
+          result?: Json | null
+          started_at?: string
+          status?: string
+        }
+        Update: {
+          error_message?: string | null
+          finished_at?: string | null
+          id?: string
+          job_name?: string
+          result?: Json | null
+          started_at?: string
+          status?: string
+        }
+        Relationships: []
+      }
       message_attachments: {
         Row: {
           bucket: string
@@ -3129,6 +3159,42 @@ export type Database = {
         }
         Relationships: []
       }
+      webhook_events: {
+        Row: {
+          environment: string | null
+          error_message: string | null
+          event_id: string
+          event_type: string
+          id: string
+          payload: Json | null
+          processed_at: string
+          source: string
+          status: string
+        }
+        Insert: {
+          environment?: string | null
+          error_message?: string | null
+          event_id: string
+          event_type: string
+          id?: string
+          payload?: Json | null
+          processed_at?: string
+          source: string
+          status?: string
+        }
+        Update: {
+          environment?: string | null
+          error_message?: string | null
+          event_id?: string
+          event_type?: string
+          id?: string
+          payload?: Json | null
+          processed_at?: string
+          source?: string
+          status?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       public_profiles: {
@@ -3292,6 +3358,16 @@ export type Database = {
           msg_id: number
           read_ct: number
         }[]
+      }
+      record_webhook_event: {
+        Args: {
+          _env: string
+          _event_id: string
+          _event_type: string
+          _payload: Json
+          _source: string
+        }
+        Returns: boolean
       }
       sweep_stale_tracking: { Args: { _minutes?: number }; Returns: number }
     }

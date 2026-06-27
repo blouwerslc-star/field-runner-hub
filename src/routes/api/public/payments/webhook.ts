@@ -169,6 +169,21 @@ export const Route = createFileRoute("/api/public/payments/webhook")({
         const env: StripeEnv = rawEnv;
         try {
           const event = await verifyWebhook(request, env);
+          // Idempotency: record_webhook_event returns false on unique
+          // violation (same Stripe event id already processed). Stripe
+          // retries up to 3 days — without this, a slow handler can
+          // double-process funding or tip rows.
+          const supabase = getSupabase() as any;
+          const { data: firstTime } = await supabase.rpc("record_webhook_event", {
+            _source: "stripe",
+            _event_id: (event as any).id,
+            _event_type: event.type,
+            _env: env,
+            _payload: event as any,
+          });
+          if (firstTime === false) {
+            return Response.json({ received: true, duplicate: true });
+          }
           if (event.type === "checkout.session.completed") {
             await handleCheckoutCompleted(event.data.object);
           }
