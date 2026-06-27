@@ -15,8 +15,18 @@ function getSupabase() {
 
 async function handleCheckoutCompleted(session: any) {
   // Route by metadata.kind; verification payments use the manual admin review flow.
-  if (session.metadata?.kind === "background_check") {
+  const kind = session.metadata?.kind;
+  if (kind === "background_check") {
     return handleBackgroundCheckPaid(session);
+  }
+  if (kind === "tip") {
+    return handleTipPaid(session);
+  }
+  // Default: task escrow funding. Require explicit kind="task" or absent
+  // kind (legacy sessions) to avoid mis-routing future payment kinds.
+  if (kind && kind !== "task") {
+    console.log("Ignoring unknown payment kind:", kind);
+    return;
   }
 
   const taskId = session.metadata?.task_id;
@@ -60,6 +70,45 @@ async function handleCheckoutCompleted(session: any) {
     .from("tasks")
     .update({ funded: true, funding_payment_id: paymentId })
     .eq("id", taskId);
+}
+
+async function handleTipPaid(session: any) {
+  const taskId = session.metadata?.task_id;
+  const investorId = session.metadata?.investor_id;
+  const runnerId = session.metadata?.runner_id;
+  const amountCents = Number(session.metadata?.amount_cents ?? 0);
+  if (!taskId || !investorId || !runnerId || amountCents <= 0) {
+    console.error("tip session missing required metadata", session.id);
+    return;
+  }
+  const supabase = getSupabase() as any;
+  // Idempotent: confirmTaskTip may have already inserted this row when
+  // the user returned to the success page. Unique index on
+  // stripe_checkout_session_id makes this a no-op on conflict.
+  const { data: existing } = await supabase
+    .from("payments")
+    .select("id")
+    .eq("stripe_checkout_session_id", session.id)
+    .maybeSingle();
+  if (existing) return;
+
+  const pi = typeof session.payment_intent === "string"
+    ? session.payment_intent
+    : null;
+
+  const { error } = await supabase.from("payments").insert({
+    task_id: taskId,
+    investor_id: investorId,
+    runner_id: runnerId,
+    amount_cents: amountCents,
+    platform_fee_cents: 0,
+    runner_payout_cents: amountCents,
+    status: "released",
+    kind: "tip",
+    stripe_checkout_session_id: session.id,
+    stripe_payment_intent_id: pi,
+  });
+  if (error) console.error("tip insert failed", error);
 }
 
 async function handleBackgroundCheckPaid(session: any) {
