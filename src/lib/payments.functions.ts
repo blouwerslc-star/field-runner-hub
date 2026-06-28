@@ -37,13 +37,65 @@ export const createTaskFundingCheckout = createServerFn({ method: "POST" })
       const platformFee = Math.round(totalCents * 0.2);
       const runnerPayoutCents = totalCents - platformFee;
 
+      // ---- Promo credit eligibility (First Task Free) -----------------
+      // Silently apply the credit if eligible. Stripe minimum charge is
+      // $0.50 — cap the discount so the investor still pays at least 50c.
+      let promoCreditId: string | null = null;
+      let promoAppliedCents = 0;
+      let chargeCents = totalCents;
+      try {
+        const { data: campaign } = await supabase
+          .from("promo_campaigns")
+          .select("id, enabled, expires_at")
+          .eq("code", "first_task_free")
+          .maybeSingle();
+        const campaignActive = campaign?.enabled
+          && (!campaign.expires_at || new Date(campaign.expires_at).getTime() > Date.now());
+        if (campaign && campaignActive) {
+          const { data: credit } = await supabase
+            .from("promo_credits")
+            .select("id, status, remaining_cents")
+            .eq("campaign_id", campaign.id)
+            .eq("user_id", userId)
+            .maybeSingle();
+          if (credit && credit.status === "available" && credit.remaining_cents > 0) {
+            // Confirm no prior completed task (server-side guard).
+            const { count: priorTasks } = await supabase
+              .from("tasks")
+              .select("id", { count: "exact", head: true })
+              .eq("investor_id", userId)
+              .in("status", ["approved", "paid", "completed"]);
+            if ((priorTasks ?? 0) === 0) {
+              let applied = Math.min(credit.remaining_cents, totalCents);
+              const remainingCharge = totalCents - applied;
+              if (remainingCharge > 0 && remainingCharge < 50) {
+                applied = totalCents - 50;
+              }
+              if (applied > 0) {
+                promoCreditId = credit.id;
+                promoAppliedCents = applied;
+                chargeCents = totalCents - applied;
+                await supabase
+                  .from("promo_credits")
+                  .update({ status: "reserved", task_id: data.taskId })
+                  .eq("id", credit.id)
+                  .eq("status", "available");
+              }
+            }
+          }
+        }
+      } catch (e) {
+        // Never let promo lookup block checkout
+        console.warn("promo lookup failed", e);
+      }
+
       const stripe = createStripeClient(data.environment as StripeEnv);
       const session = await stripe.checkout.sessions.create({
         line_items: [{
           price_data: {
             currency: "usd",
             product_data: { name: `Task escrow: ${task.title}` },
-            unit_amount: totalCents,
+            unit_amount: chargeCents,
           },
           quantity: 1,
         }],
@@ -57,10 +109,20 @@ export const createTaskFundingCheckout = createServerFn({ method: "POST" })
           payout_cents: String(runnerPayoutCents),
           platform_fee_cents: String(platformFee),
           total_cents: String(totalCents),
+          charge_cents: String(chargeCents),
+          promo_credit_cents: String(promoAppliedCents),
+          promo_credit_id: promoCreditId ?? "",
           kind: "task",
         },
       });
-      return { clientSecret: session.client_secret ?? "" };
+      return {
+        clientSecret: session.client_secret ?? "",
+        breakdown: {
+          totalCents,
+          promoAppliedCents,
+          chargeCents,
+        },
+      };
     } catch (error) {
       return { error: getStripeErrorMessage(error) };
     }
