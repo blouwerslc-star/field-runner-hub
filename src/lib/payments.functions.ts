@@ -5,7 +5,16 @@ import { createStripeClient, getStripeErrorMessage, type StripeEnv } from "@/lib
 
 const ENV_SCHEMA = z.enum(["sandbox", "live"]);
 
-type CheckoutResult = { clientSecret: string } | { error: string };
+type CheckoutResult =
+  | {
+      clientSecret: string;
+      breakdown?: {
+        totalCents: number;
+        promoAppliedCents: number;
+        chargeCents: number;
+      };
+    }
+  | { error: string };
 
 export const createTaskFundingCheckout = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
