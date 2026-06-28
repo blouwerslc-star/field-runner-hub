@@ -23,6 +23,7 @@ export const Route = createFileRoute("/signup")({
   validateSearch: (s: Record<string, unknown>) => ({
     role: (s.role === "investor" || s.role === "runner" ? s.role : undefined) as RoleParam | undefined,
     redirect: typeof s.redirect === "string" ? s.redirect : undefined,
+    promo: typeof s.promo === "string" ? s.promo : undefined,
   }),
   beforeLoad: async ({ search }) => {
     if (typeof window === "undefined") return;
