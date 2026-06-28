@@ -47,7 +47,7 @@ export const Route = createFileRoute("/signup")({
 });
 
 function SignupPage() {
-  const { role, redirect } = Route.useSearch();
+  const { role, redirect, promo } = Route.useSearch();
   const navigate = useNavigate();
   const finalizeProfile = useServerFn(finalizeSignupProfile);
   const ensureSetup = useServerFn(ensureUserSetup);
