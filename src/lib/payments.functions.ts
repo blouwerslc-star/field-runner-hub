@@ -158,6 +158,8 @@ export const confirmTaskFunding = createServerFn({ method: "POST" })
       const payoutCents = Number(session.metadata?.payout_cents ?? 0);
       const feeCents = Number(session.metadata?.platform_fee_cents ?? 0);
       const totalCents = Number(session.metadata?.total_cents ?? payoutCents + feeCents);
+      const promoCreditCents = Number(session.metadata?.promo_credit_cents ?? 0);
+      const promoCreditId = session.metadata?.promo_credit_id || null;
       if (!taskId || investorId !== userId) throw new Error("Invalid session");
 
       const pi = typeof session.payment_intent === "string"
@@ -197,6 +199,28 @@ export const confirmTaskFunding = createServerFn({ method: "POST" })
         .update({ funded: true, funding_payment_id: paymentId })
         .eq("id", taskId)
         .eq("investor_id", userId);
+
+      // Finalize promo credit (idempotent — webhook also runs this path).
+      if (promoCreditId && promoCreditCents > 0) {
+        const { data: credit } = await supabase
+          .from("promo_credits")
+          .select("id, remaining_cents, status, campaign_id")
+          .eq("id", promoCreditId)
+          .maybeSingle();
+        if (credit && credit.status !== "redeemed") {
+          const remaining = Math.max(0, (credit.remaining_cents ?? 0) - promoCreditCents);
+          await supabase
+            .from("promo_credits")
+            .update({
+              status: "redeemed",
+              remaining_cents: remaining,
+              task_id: taskId,
+              payment_id: paymentId,
+              redeemed_at: new Date().toISOString(),
+            })
+            .eq("id", credit.id);
+        }
+      }
 
       return { funded: true, taskId };
     } catch (error) {
