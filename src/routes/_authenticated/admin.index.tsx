@@ -24,7 +24,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Loader2, Users, ClipboardList, UserCog, Plus, ShieldCheck, Send, BarChart3, Activity, BadgeCheck, Mail, AlertTriangle, DollarSign, RefreshCw, FileSearch, MessageSquare, MapPin } from "lucide-react";
+import { Loader2, Users, ClipboardList, UserCog, Plus, ShieldCheck, Send, BarChart3, Activity, BadgeCheck, Mail, AlertTriangle, DollarSign, RefreshCw, FileSearch, MessageSquare, MapPin, Gift } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { listPayouts, markPayoutPaid } from "@/lib/payments.functions";
@@ -594,6 +594,7 @@ function AdminOverviewSection({
             <Button asChild size="sm" variant="outline" className="justify-start h-8 text-xs"><Link to="/admin/background-checks"><FileSearch className="size-3.5 mr-1.5" />BG checks</Link></Button>
             <Button asChild size="sm" variant="outline" className="justify-start h-8 text-xs"><Link to="/admin/email-monitor"><Mail className="size-3.5 mr-1.5" />Emails</Link></Button>
             <Button asChild size="sm" variant="outline" className="justify-start h-8 text-xs col-span-2"><Link to="/messages"><MessageSquare className="size-3.5 mr-1.5" />Open messages</Link></Button>
+            <Button asChild size="sm" variant="outline" className="justify-start h-8 text-xs col-span-2"><Link to="/admin/promotions"><Gift className="size-3.5 mr-1.5" />Promotions (First Task Free)</Link></Button>
           </div>
         </div>
       </div>
