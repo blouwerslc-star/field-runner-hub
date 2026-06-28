@@ -3,6 +3,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
+import { recordPromoEvent } from "@/lib/promo.functions";
 import { finalizeSignupProfile, ensureUserSetup } from "@/lib/signup.functions";
 import { logSignupFailure } from "@/lib/spam-protection.functions";
 import { friendlySignupError, errorCodeFor, type FriendlyError } from "@/lib/signup-errors";
@@ -23,6 +24,7 @@ export const Route = createFileRoute("/signup")({
   validateSearch: (s: Record<string, unknown>) => ({
     role: (s.role === "investor" || s.role === "runner" ? s.role : undefined) as RoleParam | undefined,
     redirect: typeof s.redirect === "string" ? s.redirect : undefined,
+    promo: typeof s.promo === "string" ? s.promo : undefined,
   }),
   beforeLoad: async ({ search }) => {
     if (typeof window === "undefined") return;
@@ -46,11 +48,12 @@ export const Route = createFileRoute("/signup")({
 });
 
 function SignupPage() {
-  const { role, redirect } = Route.useSearch();
+  const { role, redirect, promo } = Route.useSearch();
   const navigate = useNavigate();
   const finalizeProfile = useServerFn(finalizeSignupProfile);
   const ensureSetup = useServerFn(ensureUserSetup);
   const logFailure = useServerFn(logSignupFailure);
+  const recordPromo = useServerFn(recordPromoEvent);
   const [activeRole, setActiveRole] = useState<RoleParam | null>(role ?? null);
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -151,6 +154,13 @@ function SignupPage() {
       }
       setDebug({ authUserId: data.user.id, email: data.user.email ?? email, role: activeRole, profileStatus });
       trackSignup(activeRole);
+      if (promo === "first_task_free" && activeRole === "investor") {
+        recordPromo({ data: {
+          eventType: "signup",
+          campaignCode: "first_task_free",
+          metadata: { source: "homepage_banner" },
+        } }).catch(() => undefined);
+      }
       if (!data.session) {
         toast.success("Account created. Check your email to confirm, then sign in.");
         return;

@@ -90,6 +90,7 @@ import { Route as AuthenticatedAdminTaskTypeRequestsRouteImport } from './routes
 import { Route as AuthenticatedAdminSignupFailuresRouteImport } from './routes/_authenticated/admin.signup-failures'
 import { Route as AuthenticatedAdminRunnerApprovalsRouteImport } from './routes/_authenticated/admin.runner-approvals'
 import { Route as AuthenticatedAdminPushTestRouteImport } from './routes/_authenticated/admin.push-test'
+import { Route as AuthenticatedAdminPromotionsRouteImport } from './routes/_authenticated/admin.promotions'
 import { Route as AuthenticatedAdminProfilesRouteImport } from './routes/_authenticated/admin.profiles'
 import { Route as AuthenticatedAdminPricingRouteImport } from './routes/_authenticated/admin.pricing'
 import { Route as AuthenticatedAdminModerationRouteImport } from './routes/_authenticated/admin.moderation'
@@ -563,6 +564,12 @@ const AuthenticatedAdminPushTestRoute =
     path: '/push-test',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminPromotionsRoute =
+  AuthenticatedAdminPromotionsRouteImport.update({
+    id: '/promotions',
+    path: '/promotions',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminProfilesRoute =
   AuthenticatedAdminProfilesRouteImport.update({
     id: '/profiles',
@@ -795,6 +802,7 @@ export interface FileRoutesByFullPath {
   '/admin/moderation': typeof AuthenticatedAdminModerationRoute
   '/admin/pricing': typeof AuthenticatedAdminPricingRoute
   '/admin/profiles': typeof AuthenticatedAdminProfilesRoute
+  '/admin/promotions': typeof AuthenticatedAdminPromotionsRoute
   '/admin/push-test': typeof AuthenticatedAdminPushTestRoute
   '/admin/runner-approvals': typeof AuthenticatedAdminRunnerApprovalsRoute
   '/admin/signup-failures': typeof AuthenticatedAdminSignupFailuresRoute
@@ -901,6 +909,7 @@ export interface FileRoutesByTo {
   '/admin/moderation': typeof AuthenticatedAdminModerationRoute
   '/admin/pricing': typeof AuthenticatedAdminPricingRoute
   '/admin/profiles': typeof AuthenticatedAdminProfilesRoute
+  '/admin/promotions': typeof AuthenticatedAdminPromotionsRoute
   '/admin/push-test': typeof AuthenticatedAdminPushTestRoute
   '/admin/runner-approvals': typeof AuthenticatedAdminRunnerApprovalsRoute
   '/admin/signup-failures': typeof AuthenticatedAdminSignupFailuresRoute
@@ -1014,6 +1023,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/moderation': typeof AuthenticatedAdminModerationRoute
   '/_authenticated/admin/pricing': typeof AuthenticatedAdminPricingRoute
   '/_authenticated/admin/profiles': typeof AuthenticatedAdminProfilesRoute
+  '/_authenticated/admin/promotions': typeof AuthenticatedAdminPromotionsRoute
   '/_authenticated/admin/push-test': typeof AuthenticatedAdminPushTestRoute
   '/_authenticated/admin/runner-approvals': typeof AuthenticatedAdminRunnerApprovalsRoute
   '/_authenticated/admin/signup-failures': typeof AuthenticatedAdminSignupFailuresRoute
@@ -1127,6 +1137,7 @@ export interface FileRouteTypes {
     | '/admin/moderation'
     | '/admin/pricing'
     | '/admin/profiles'
+    | '/admin/promotions'
     | '/admin/push-test'
     | '/admin/runner-approvals'
     | '/admin/signup-failures'
@@ -1233,6 +1244,7 @@ export interface FileRouteTypes {
     | '/admin/moderation'
     | '/admin/pricing'
     | '/admin/profiles'
+    | '/admin/promotions'
     | '/admin/push-test'
     | '/admin/runner-approvals'
     | '/admin/signup-failures'
@@ -1345,6 +1357,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/moderation'
     | '/_authenticated/admin/pricing'
     | '/_authenticated/admin/profiles'
+    | '/_authenticated/admin/promotions'
     | '/_authenticated/admin/push-test'
     | '/_authenticated/admin/runner-approvals'
     | '/_authenticated/admin/signup-failures'
@@ -2015,6 +2028,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminPushTestRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/promotions': {
+      id: '/_authenticated/admin/promotions'
+      path: '/promotions'
+      fullPath: '/admin/promotions'
+      preLoaderRoute: typeof AuthenticatedAdminPromotionsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/profiles': {
       id: '/_authenticated/admin/profiles'
       path: '/profiles'
@@ -2269,6 +2289,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminModerationRoute: typeof AuthenticatedAdminModerationRoute
   AuthenticatedAdminPricingRoute: typeof AuthenticatedAdminPricingRoute
   AuthenticatedAdminProfilesRoute: typeof AuthenticatedAdminProfilesRoute
+  AuthenticatedAdminPromotionsRoute: typeof AuthenticatedAdminPromotionsRoute
   AuthenticatedAdminPushTestRoute: typeof AuthenticatedAdminPushTestRoute
   AuthenticatedAdminRunnerApprovalsRoute: typeof AuthenticatedAdminRunnerApprovalsRoute
   AuthenticatedAdminSignupFailuresRoute: typeof AuthenticatedAdminSignupFailuresRoute
@@ -2290,6 +2311,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminModerationRoute: AuthenticatedAdminModerationRoute,
   AuthenticatedAdminPricingRoute: AuthenticatedAdminPricingRoute,
   AuthenticatedAdminProfilesRoute: AuthenticatedAdminProfilesRoute,
+  AuthenticatedAdminPromotionsRoute: AuthenticatedAdminPromotionsRoute,
   AuthenticatedAdminPushTestRoute: AuthenticatedAdminPushTestRoute,
   AuthenticatedAdminRunnerApprovalsRoute:
     AuthenticatedAdminRunnerApprovalsRoute,

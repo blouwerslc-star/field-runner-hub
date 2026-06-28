@@ -153,6 +153,26 @@ export const createInvestorTask = createServerFn({ method: "POST" })
     } catch (e) {
       console.error("[createInvestorTask] notify failed", e);
     }
+    // First-task / repeat-task promo analytics (non-blocking).
+    try {
+      const { count } = await supabase
+        .from("tasks")
+        .select("id", { count: "exact", head: true })
+        .eq("investor_id", userId);
+      const { data: campaign } = await supabase
+        .from("promo_campaigns").select("id").eq("code", "first_task_free").maybeSingle();
+      if (campaign) {
+        const eventType = (count ?? 0) <= 1 ? "first_task_created" : "repeat_task";
+        await supabase.from("promo_events").insert({
+          campaign_id: campaign.id,
+          event_type: eventType,
+          user_id: userId,
+          metadata: { task_id: row.id, total_tasks: count ?? 1 },
+        });
+      }
+    } catch (e) {
+      console.warn("[createInvestorTask] promo event failed", e);
+    }
     return { task: row };
   });
 

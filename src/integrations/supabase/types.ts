@@ -1933,6 +1933,156 @@ export type Database = {
         }
         Relationships: []
       }
+      promo_campaigns: {
+        Row: {
+          code: string
+          created_at: string
+          credit_cents: number
+          enabled: boolean
+          expires_at: string | null
+          id: string
+          legal_disclaimer: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          credit_cents?: number
+          enabled?: boolean
+          expires_at?: string | null
+          id?: string
+          legal_disclaimer?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          credit_cents?: number
+          enabled?: boolean
+          expires_at?: string | null
+          id?: string
+          legal_disclaimer?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      promo_credits: {
+        Row: {
+          campaign_id: string
+          created_at: string
+          credit_cents: number
+          email: string | null
+          email_norm: string | null
+          id: string
+          issued_at: string
+          payment_fingerprint: string | null
+          payment_id: string | null
+          redeemed_at: string | null
+          remaining_cents: number
+          signup_ip: string | null
+          status: string
+          task_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          campaign_id: string
+          created_at?: string
+          credit_cents: number
+          email?: string | null
+          email_norm?: string | null
+          id?: string
+          issued_at?: string
+          payment_fingerprint?: string | null
+          payment_id?: string | null
+          redeemed_at?: string | null
+          remaining_cents: number
+          signup_ip?: string | null
+          status?: string
+          task_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          campaign_id?: string
+          created_at?: string
+          credit_cents?: number
+          email?: string | null
+          email_norm?: string | null
+          id?: string
+          issued_at?: string
+          payment_fingerprint?: string | null
+          payment_id?: string | null
+          redeemed_at?: string | null
+          remaining_cents?: number
+          signup_ip?: string | null
+          status?: string
+          task_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "promo_credits_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "promo_campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "promo_credits_payment_id_fkey"
+            columns: ["payment_id"]
+            isOneToOne: false
+            referencedRelation: "payments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "promo_credits_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      promo_events: {
+        Row: {
+          campaign_id: string
+          created_at: string
+          event_type: string
+          id: string
+          metadata: Json
+          user_id: string | null
+        }
+        Insert: {
+          campaign_id: string
+          created_at?: string
+          event_type: string
+          id?: string
+          metadata?: Json
+          user_id?: string | null
+        }
+        Update: {
+          campaign_id?: string
+          created_at?: string
+          event_type?: string
+          id?: string
+          metadata?: Json
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "promo_events_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "promo_campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       rate_limits: {
         Row: {
           action: string

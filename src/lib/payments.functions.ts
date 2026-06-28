@@ -5,7 +5,16 @@ import { createStripeClient, getStripeErrorMessage, type StripeEnv } from "@/lib
 
 const ENV_SCHEMA = z.enum(["sandbox", "live"]);
 
-type CheckoutResult = { clientSecret: string } | { error: string };
+type CheckoutResult =
+  | {
+      clientSecret: string;
+      breakdown?: {
+        totalCents: number;
+        promoAppliedCents: number;
+        chargeCents: number;
+      };
+    }
+  | { error: string };
 
 export const createTaskFundingCheckout = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -37,13 +46,65 @@ export const createTaskFundingCheckout = createServerFn({ method: "POST" })
       const platformFee = Math.round(totalCents * 0.2);
       const runnerPayoutCents = totalCents - platformFee;
 
+      // ---- Promo credit eligibility (First Task Free) -----------------
+      // Silently apply the credit if eligible. Stripe minimum charge is
+      // $0.50 — cap the discount so the investor still pays at least 50c.
+      let promoCreditId: string | null = null;
+      let promoAppliedCents = 0;
+      let chargeCents = totalCents;
+      try {
+        const { data: campaign } = await supabase
+          .from("promo_campaigns")
+          .select("id, enabled, expires_at")
+          .eq("code", "first_task_free")
+          .maybeSingle();
+        const campaignActive = campaign?.enabled
+          && (!campaign.expires_at || new Date(campaign.expires_at).getTime() > Date.now());
+        if (campaign && campaignActive) {
+          const { data: credit } = await supabase
+            .from("promo_credits")
+            .select("id, status, remaining_cents")
+            .eq("campaign_id", campaign.id)
+            .eq("user_id", userId)
+            .maybeSingle();
+          if (credit && credit.status === "available" && credit.remaining_cents > 0) {
+            // Confirm no prior completed task (server-side guard).
+            const { count: priorTasks } = await supabase
+              .from("tasks")
+              .select("id", { count: "exact", head: true })
+              .eq("investor_id", userId)
+              .in("status", ["approved", "paid", "completed"]);
+            if ((priorTasks ?? 0) === 0) {
+              let applied = Math.min(credit.remaining_cents, totalCents);
+              const remainingCharge = totalCents - applied;
+              if (remainingCharge > 0 && remainingCharge < 50) {
+                applied = totalCents - 50;
+              }
+              if (applied > 0) {
+                promoCreditId = credit.id;
+                promoAppliedCents = applied;
+                chargeCents = totalCents - applied;
+                await supabase
+                  .from("promo_credits")
+                  .update({ status: "reserved", task_id: data.taskId })
+                  .eq("id", credit.id)
+                  .eq("status", "available");
+              }
+            }
+          }
+        }
+      } catch (e) {
+        // Never let promo lookup block checkout
+        console.warn("promo lookup failed", e);
+      }
+
       const stripe = createStripeClient(data.environment as StripeEnv);
       const session = await stripe.checkout.sessions.create({
         line_items: [{
           price_data: {
             currency: "usd",
             product_data: { name: `Task escrow: ${task.title}` },
-            unit_amount: totalCents,
+            unit_amount: chargeCents,
           },
           quantity: 1,
         }],
@@ -57,10 +118,20 @@ export const createTaskFundingCheckout = createServerFn({ method: "POST" })
           payout_cents: String(runnerPayoutCents),
           platform_fee_cents: String(platformFee),
           total_cents: String(totalCents),
+          charge_cents: String(chargeCents),
+          promo_credit_cents: String(promoAppliedCents),
+          promo_credit_id: promoCreditId ?? "",
           kind: "task",
         },
       });
-      return { clientSecret: session.client_secret ?? "" };
+      return {
+        clientSecret: session.client_secret ?? "",
+        breakdown: {
+          totalCents,
+          promoAppliedCents,
+          chargeCents,
+        },
+      };
     } catch (error) {
       return { error: getStripeErrorMessage(error) };
     }
@@ -87,6 +158,8 @@ export const confirmTaskFunding = createServerFn({ method: "POST" })
       const payoutCents = Number(session.metadata?.payout_cents ?? 0);
       const feeCents = Number(session.metadata?.platform_fee_cents ?? 0);
       const totalCents = Number(session.metadata?.total_cents ?? payoutCents + feeCents);
+      const promoCreditCents = Number(session.metadata?.promo_credit_cents ?? 0);
+      const promoCreditId = session.metadata?.promo_credit_id || null;
       if (!taskId || investorId !== userId) throw new Error("Invalid session");
 
       const pi = typeof session.payment_intent === "string"
@@ -126,6 +199,28 @@ export const confirmTaskFunding = createServerFn({ method: "POST" })
         .update({ funded: true, funding_payment_id: paymentId })
         .eq("id", taskId)
         .eq("investor_id", userId);
+
+      // Finalize promo credit (idempotent — webhook also runs this path).
+      if (promoCreditId && promoCreditCents > 0) {
+        const { data: credit } = await supabase
+          .from("promo_credits")
+          .select("id, remaining_cents, status, campaign_id")
+          .eq("id", promoCreditId)
+          .maybeSingle();
+        if (credit && credit.status !== "redeemed") {
+          const remaining = Math.max(0, (credit.remaining_cents ?? 0) - promoCreditCents);
+          await supabase
+            .from("promo_credits")
+            .update({
+              status: "redeemed",
+              remaining_cents: remaining,
+              task_id: taskId,
+              payment_id: paymentId,
+              redeemed_at: new Date().toISOString(),
+            })
+            .eq("id", credit.id);
+        }
+      }
 
       return { funded: true, taskId };
     } catch (error) {
