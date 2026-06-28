@@ -53,6 +53,7 @@ import { StateCoverageMap } from "@/components/maps/StateCoverageMap";
 import { TestimonialsSection } from "@/components/landing/TestimonialsSection";
 import { SampleDeliverablesSection } from "@/components/landing/SampleDeliverablesSection";
 import { InvestorFundingSection } from "@/components/landing/InvestorFundingSection";
+import { FirstTaskFreeBanner } from "@/components/landing/FirstTaskFreeBanner";
 import { ServiceExamplePopover, LandingExamplePopover } from "@/components/landing/ServiceExamplePopover";
 import { LANDING_SERVICE_EXAMPLES } from "@/lib/landing-service-examples";
 import {
@@ -580,6 +581,7 @@ function Index() {
       </MobileDrawer>
 
       <main id="main-content">
+      <FirstTaskFreeBanner />
       {/* HERO — headline first so mobile users see value prop above the fold */}
       <section id="top" className="relative isolate overflow-hidden">
         <div aria-hidden className="absolute inset-0 -z-10 bg-hero" />
