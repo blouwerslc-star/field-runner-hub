@@ -85,6 +85,13 @@ function AdminSettings() {
         </p>
       </SettingsCard>
 
+      <SettingsCard title="Promotional campaigns">
+        <p className="text-sm text-muted-foreground">
+          Configure the First Task Free credit, view conversion analytics, and export campaign data from the{" "}
+          <Link to="/admin/promotions" className="underline">promotions admin</Link>.
+        </p>
+      </SettingsCard>
+
       <ComingSoon title="Default task statuses" description="Configure default lifecycle for new tasks." />
       <ComingSoon title="Support inbox" description="Review and respond to user support requests." />
       <ComingSoon title="System notifications" description="Send platform-wide announcements." />
