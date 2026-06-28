@@ -33,6 +33,9 @@ async function handleCheckoutCompleted(session: any) {
   const investorId = session.metadata?.investor_id;
   const payoutCents = Number(session.metadata?.payout_cents ?? 0);
   const feeCents = Number(session.metadata?.platform_fee_cents ?? 0);
+  const totalCents = Number(session.metadata?.total_cents ?? payoutCents + feeCents);
+  const promoCreditCents = Number(session.metadata?.promo_credit_cents ?? 0);
+  const promoCreditId = session.metadata?.promo_credit_id || null;
   if (!taskId || !investorId) return;
 
   const supabase = getSupabase() as any;
@@ -49,7 +52,7 @@ async function handleCheckoutCompleted(session: any) {
       .insert({
         task_id: taskId,
         investor_id: investorId,
-        amount_cents: payoutCents + feeCents,
+        amount_cents: totalCents,
         platform_fee_cents: feeCents,
         runner_payout_cents: payoutCents,
         status: "funded",
@@ -70,6 +73,35 @@ async function handleCheckoutCompleted(session: any) {
     .from("tasks")
     .update({ funded: true, funding_payment_id: paymentId })
     .eq("id", taskId);
+
+  // Finalize promo credit redemption — mark redeemed, decrement remaining,
+  // attach payment/task, and emit an analytics event.
+  if (promoCreditId && promoCreditCents > 0) {
+    const { data: credit } = await supabase
+      .from("promo_credits")
+      .select("id, remaining_cents, status, campaign_id")
+      .eq("id", promoCreditId)
+      .maybeSingle();
+    if (credit && credit.status !== "redeemed") {
+      const remaining = Math.max(0, (credit.remaining_cents ?? 0) - promoCreditCents);
+      await supabase
+        .from("promo_credits")
+        .update({
+          status: "redeemed",
+          remaining_cents: remaining,
+          task_id: taskId,
+          payment_id: paymentId,
+          redeemed_at: new Date().toISOString(),
+        })
+        .eq("id", credit.id);
+      await supabase.from("promo_events").insert({
+        campaign_id: credit.campaign_id,
+        event_type: "credit_redeemed",
+        user_id: investorId,
+        metadata: { task_id: taskId, payment_id: paymentId, applied_cents: promoCreditCents },
+      });
+    }
+  }
 }
 
 async function handleTipPaid(session: any) {
