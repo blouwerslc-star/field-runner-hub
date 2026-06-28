@@ -224,7 +224,7 @@ export const updatePromoCampaign = createServerFn({ method: "POST" })
     const { data: roles } = await supabase.from("user_roles").select("role").eq("user_id", userId);
     if (!(roles ?? []).some((r) => r.role === "admin")) throw new Error("Admins only");
 
-    const update: Record<string, unknown> = {};
+    const update: Database["public"]["Tables"]["promo_campaigns"]["Update"] = {};
     if (data.enabled !== undefined) update.enabled = data.enabled;
     if (data.creditCents !== undefined) update.credit_cents = data.creditCents;
     if (data.expiresAt !== undefined) update.expires_at = data.expiresAt;
