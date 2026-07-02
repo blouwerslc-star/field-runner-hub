@@ -13,6 +13,7 @@ import { PerformanceMetrics } from "@/components/profiles/PerformanceMetrics";
 import { PortfolioGallery } from "@/components/profiles/PortfolioGallery";
 import { ProfileReviewsList } from "@/components/profiles/ProfileReviewsList";
 import { ServiceAreaMap, parseRadius } from "@/components/profiles/ServiceAreaMap";
+import { PublicAvailabilityCard } from "@/components/profiles/PublicAvailabilityCard";
 import { Progress } from "@/components/ui/progress";
 import { SPECIALTY_OPTIONS, PRICING_SERVICES, EXPERIENCE_FIELDS, isOnline, trustScore } from "@/lib/profile-constants";
 import { Loader2, MessageSquare, Send, Heart, BookmarkPlus, CalendarDays, ShieldCheck, MapPin } from "lucide-react";
@@ -208,6 +209,12 @@ function PublicProfilePage() {
             {/* AVAILABILITY */}
             {isRunner && (
               <Section title="Availability">
+                <PublicAvailabilityCard
+                  runnerId={p.user_id as string}
+                  timezone={(p.timezone as string | null) ?? null}
+                  notes={(p.scheduling_notes as string | null) ?? null}
+                  blockedDates={(blocks ?? []).map((b: any) => b.blocked_date)}
+                />
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                   <AvailChip on={p.avail_today} label="Available today" />
                   <AvailChip on={p.avail_this_week} label="This week" />
