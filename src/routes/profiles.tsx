@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import { z } from "zod";
@@ -13,7 +13,8 @@ import { StateCoverageMap } from "@/components/maps/StateCoverageMap";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { Loader2, Search, BadgeCheck, Star, Trophy, Lock, ShieldCheck, MapPinned, GraduationCap } from "lucide-react";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Loader2, Search, BadgeCheck, Star, Trophy, Lock, ShieldCheck, MapPinned, GraduationCap, Sparkles, ClipboardList, CheckCircle2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { US_STATES, SPECIALTY_OPTIONS } from "@/lib/profile-constants";
 
@@ -27,6 +28,7 @@ const searchSchema = z.object({
   availability: fallback(z.enum(["all", "available", "busy", "unavailable"]), "all").default("all"),
   sort: fallback(z.enum(["featured", "rating", "completed", "newest"]), "featured").default("featured"),
   certs: fallback(z.array(z.string()), []).default([]),
+  showAll: fallback(z.boolean(), false).default(false),
 });
 
 export const Route = createFileRoute("/profiles")({
@@ -57,7 +59,7 @@ function ProfilesDirectory() {
   }, []);
   const search = Route.useSearch();
   const navigate = useNavigate({ from: Route.fullPath });
-  const { q, role, city, state, zip, service, availability, sort, certs } = search;
+  const { q, role, city, state, zip, service, availability, sort, certs, showAll } = search;
   const updateSearch = (patch: Partial<typeof search>) => {
     void navigate({ search: (prev: typeof search) => ({ ...prev, ...patch }), replace: true });
   };
@@ -76,6 +78,21 @@ function ProfilesDirectory() {
     staleTime: 60 * 60_000,
   });
 
+  const hasActiveFilters = useMemo(
+    () =>
+      Boolean(
+        q || city || zip ||
+        (state && state.length > 0) ||
+        (service && service.length > 0) ||
+        (role && role !== "all") ||
+        (availability && availability !== "all") ||
+        (sort && sort !== "featured") ||
+        (certs && certs.length > 0),
+      ),
+    [q, city, zip, state, service, role, availability, sort, certs],
+  );
+  const showFullDirectory = hasActiveFilters || showAll;
+
   const filters = {
     q: q || undefined,
     role: role === "all" ? undefined : role,
@@ -89,12 +106,25 @@ function ProfilesDirectory() {
     certifications: certs.length > 0 ? certs : undefined,
   };
 
+  // Full directory query — only runs when the investor searches / filters / clicks "Show all".
   const { data, isLoading, refetch, isFetching } = useQuery({
     queryKey: ["publicProfiles", filters],
     queryFn: () => fetchFn({ data: filters }),
+    enabled: showFullDirectory,
+    staleTime: 60_000,
+    placeholderData: (prev) => prev,
+  });
+
+  // Small featured strip shown before any search (top 6, ranked by featured/top runner/rating).
+  const { data: featuredData, isLoading: featuredLoading } = useQuery({
+    queryKey: ["publicProfiles", "featured", authed],
+    queryFn: () => fetchFn({ data: { sort: "featured", limit: 6, viewerLoggedIn: authed } }),
+    enabled: !showFullDirectory,
+    staleTime: 5 * 60_000,
   });
 
   const profiles = (data?.profiles ?? []) as unknown as PublicProfile[];
+  const featured = (featuredData?.profiles ?? []) as unknown as PublicProfile[];
 
   const verifiedCount = profiles.filter((p: any) => p.verified_status).length;
   const topRunners = profiles.filter((p: any) => p.top_runner).length;
@@ -139,18 +169,18 @@ function ProfilesDirectory() {
             </div>
           </div>
         )}
-        <div className="mb-8 flex flex-wrap items-end justify-between gap-6">
+        <div className="mb-6 flex flex-wrap items-end justify-between gap-6">
           <div>
-            <h1 className="text-3xl md:text-4xl font-bold tracking-tight">Browse the marketplace</h1>
-            <p className="mt-2 text-muted-foreground">
-              The nationwide boots-on-the-ground network for real estate investors.
-              {!isLoading && profiles.length > 0 && (() => {
+            <h1 className="text-3xl md:text-4xl font-bold tracking-tight">Hire a vetted real estate runner near you</h1>
+            <p className="mt-2 text-muted-foreground max-w-2xl">
+              Search verified field runners by city, state, or service. Pay only when the work is approved.
+              {showFullDirectory && !isLoading && profiles.length > 0 && (() => {
                 const totalPublic = (counts?.runners.public_visible ?? 0) + (counts?.investors.public_visible ?? 0);
                 return <> Showing <span className="text-foreground font-medium">{profiles.length}</span> of <span className="text-foreground font-medium">{totalPublic || profiles.length}</span> public profile{(totalPublic || profiles.length) === 1 ? "" : "s"} across <span className="text-foreground font-medium">{uniqueMarkets || 1}</span> market{uniqueMarkets === 1 ? "" : "s"}.</>;
               })()}
             </p>
           </div>
-          {!isLoading && profiles.length > 0 && (
+          {showFullDirectory && !isLoading && profiles.length > 0 && (
             <dl className="grid grid-cols-4 gap-6 text-sm">
               <div>
                 <dt className="text-muted-foreground text-xs uppercase tracking-wide">Profiles</dt>
@@ -178,10 +208,6 @@ function ProfilesDirectory() {
           <span className="inline-flex items-center gap-1.5"><ShieldCheck className="size-3.5 text-primary" /> Escrow-protected payments</span>
           <span className="inline-flex items-center gap-1.5"><MapPinned className="size-3.5 text-primary" /> Nationwide coverage</span>
           <span className="inline-flex items-center gap-1.5"><Star className="size-3.5 text-primary" /> Rated after every task</span>
-        </div>
-
-        <div className="mb-6">
-          <StateCoverageMap onStateClick={handleStateClick} selectedState={state} />
         </div>
 
         <form
@@ -249,8 +275,23 @@ function ProfilesDirectory() {
           </Button>
         </form>
 
-        {/* Academy certification filter chips */}
-        {(certOpts?.courses ?? []).length > 0 && (
+        {/* Browse-by-state map, collapsed by default so the fold stays fast + focused */}
+        <Accordion type="single" collapsible className="mb-6">
+          <AccordionItem value="map" className="border border-border/60 rounded-xl bg-card/40 backdrop-blur">
+            <AccordionTrigger className="px-4 py-3 hover:no-underline">
+              <span className="inline-flex items-center gap-2 text-sm font-medium">
+                <MapPinned className="size-4 text-primary" /> Browse by state
+                {state && <span className="ml-2 rounded-md bg-primary/15 text-primary px-2 py-0.5 text-xs">{state}</span>}
+              </span>
+            </AccordionTrigger>
+            <AccordionContent className="px-4 pb-4">
+              <StateCoverageMap onStateClick={handleStateClick} selectedState={state} />
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
+
+        {/* Academy certification filter chips — only surface once the investor is actively filtering */}
+        {showFullDirectory && (certOpts?.courses ?? []).length > 0 && (
           <div className="mb-6 flex flex-wrap items-center gap-2">
             <span className="inline-flex items-center gap-1.5 text-xs uppercase tracking-wider text-muted-foreground mr-1">
               <GraduationCap className="size-3.5 text-primary" /> Academy
@@ -292,7 +333,8 @@ function ProfilesDirectory() {
           </div>
         )}
 
-        {isLoading ? (
+        {showFullDirectory ? (
+          isLoading ? (
           <Loader2 className="size-6 animate-spin text-primary" />
         ) : profiles.length === 0 ? (
           <div className="rounded-xl border border-dashed border-border/60 p-12 text-center">
@@ -314,6 +356,59 @@ function ProfilesDirectory() {
           <div className="grid gap-3 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
             {profiles.map((p) => <ProfileCard key={p.user_id} p={p} viewerAuthenticated={authed} />)}
           </div>
+          )
+        ) : (
+          <>
+            {/* Featured runners strip */}
+            <section className="mb-8">
+              <div className="flex items-end justify-between mb-3">
+                <h2 className="text-lg font-semibold inline-flex items-center gap-2">
+                  <Sparkles className="size-4 text-primary" /> Featured runners
+                </h2>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => updateSearch({ showAll: true })}
+                >
+                  See all runners
+                </Button>
+              </div>
+              {featuredLoading ? (
+                <Loader2 className="size-5 animate-spin text-primary" />
+              ) : featured.length === 0 ? (
+                <div className="rounded-xl border border-dashed border-border/60 p-8 text-center text-sm text-muted-foreground">
+                  No runners to preview yet — try a search above.
+                </div>
+              ) : (
+                <div className="grid gap-3 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
+                  {featured.map((p) => <ProfileCard key={p.user_id} p={p} viewerAuthenticated={authed} />)}
+                </div>
+              )}
+            </section>
+
+            {/* How hiring works — investor-focused empty state */}
+            <section className="rounded-2xl border border-border/60 bg-card/40 backdrop-blur p-6 md:p-8">
+              <h2 className="text-lg font-semibold mb-4">How hiring works</h2>
+              <ol className="grid gap-4 md:grid-cols-3">
+                {[
+                  { icon: Search, t: "1. Search your market", b: "Filter by state, service, or availability to find local runners that fit the job." },
+                  { icon: ClipboardList, t: "2. Post the task", b: "Send a short brief with address, deliverables, and payout. Runners apply within minutes." },
+                  { icon: CheckCircle2, t: "3. Approve & pay", b: "Review photos or video, then release escrow. You only pay for work you accept." },
+                ].map((s) => (
+                  <li key={s.t} className="rounded-xl border border-border/40 bg-background/40 p-4">
+                    <s.icon className="size-5 text-primary" />
+                    <div className="mt-2 font-medium text-sm">{s.t}</div>
+                    <div className="mt-1 text-xs text-muted-foreground">{s.b}</div>
+                  </li>
+                ))}
+              </ol>
+              <div className="mt-6 flex flex-wrap gap-2">
+                <Button asChild size="sm"><Link to="/investors">Create investor account</Link></Button>
+                <Button asChild size="sm" variant="outline"><Link to="/pricing">See pricing</Link></Button>
+              </div>
+            </section>
+          </>
         )}
       </main>
     </div>
