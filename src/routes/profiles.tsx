@@ -144,9 +144,10 @@ function ProfilesDirectory() {
             <h1 className="text-3xl md:text-4xl font-bold tracking-tight">Browse the marketplace</h1>
             <p className="mt-2 text-muted-foreground">
               The nationwide boots-on-the-ground network for real estate investors.
-              {!isLoading && profiles.length > 0 && (
-                <> Showing <span className="text-foreground font-medium">{profiles.length}</span> of <span className="text-foreground font-medium">{counts?.total ?? profiles.length}</span> public profile{(counts?.total ?? profiles.length) === 1 ? "" : "s"} across <span className="text-foreground font-medium">{uniqueMarkets || 1}</span> market{uniqueMarkets === 1 ? "" : "s"}.</>
-              )}
+              {!isLoading && profiles.length > 0 && (() => {
+                const totalPublic = (counts?.runners.public_visible ?? 0) + (counts?.investors.public_visible ?? 0);
+                return <> Showing <span className="text-foreground font-medium">{profiles.length}</span> of <span className="text-foreground font-medium">{totalPublic || profiles.length}</span> public profile{(totalPublic || profiles.length) === 1 ? "" : "s"} across <span className="text-foreground font-medium">{uniqueMarkets || 1}</span> market{uniqueMarkets === 1 ? "" : "s"}.</>;
+              })()}
             </p>
           </div>
           {!isLoading && profiles.length > 0 && (
