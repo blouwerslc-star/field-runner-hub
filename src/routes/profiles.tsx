@@ -6,6 +6,7 @@ import { z } from "zod";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { listPublicProfiles, listAcademyCertOptions } from "@/lib/profiles.functions";
+import { getPublicDirectoryCounts } from "@/lib/profile-extras.functions";
 import { ProfileCard, type PublicProfile } from "@/components/profiles/ProfileCard";
 import { PublicHeader } from "@/components/layout/PublicHeader";
 import { StateCoverageMap } from "@/components/maps/StateCoverageMap";
@@ -46,6 +47,8 @@ export const Route = createFileRoute("/profiles")({
 
 function ProfilesDirectory() {
   const fetchFn = useServerFn(listPublicProfiles);
+  const countsFn = useServerFn(getPublicDirectoryCounts);
+  const { data: counts } = useQuery({ queryKey: ["publicDirectoryCounts"], queryFn: () => countsFn({}), staleTime: 60_000 });
   const [authed, setAuthed] = useState(false);
   useEffect(() => {
     supabase.auth.getSession().then(({ data: s }) => setAuthed(!!s.session));
@@ -141,9 +144,10 @@ function ProfilesDirectory() {
             <h1 className="text-3xl md:text-4xl font-bold tracking-tight">Browse the marketplace</h1>
             <p className="mt-2 text-muted-foreground">
               The nationwide boots-on-the-ground network for real estate investors.
-              {!isLoading && profiles.length > 0 && (
-                <> Showing <span className="text-foreground font-medium">{profiles.length}</span> profile{profiles.length === 1 ? "" : "s"} across <span className="text-foreground font-medium">{uniqueMarkets || 1}</span> market{uniqueMarkets === 1 ? "" : "s"}.</>
-              )}
+              {!isLoading && profiles.length > 0 && (() => {
+                const totalPublic = (counts?.runners.public_visible ?? 0) + (counts?.investors.public_visible ?? 0);
+                return <> Showing <span className="text-foreground font-medium">{profiles.length}</span> of <span className="text-foreground font-medium">{totalPublic || profiles.length}</span> public profile{(totalPublic || profiles.length) === 1 ? "" : "s"} across <span className="text-foreground font-medium">{uniqueMarkets || 1}</span> market{uniqueMarkets === 1 ? "" : "s"}.</>;
+              })()}
             </p>
           </div>
           {!isLoading && profiles.length > 0 && (

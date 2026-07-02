@@ -1,128 +1,83 @@
-# First Task Free Promotional Campaign
+## 1. Fix the runner/investor count mismatch
 
-A $50 (configurable) credit for new investors, auto-applied at task funding, with eligibility guards, an admin console, and analytics.
+**Root cause**
+- **Browse (`/profiles`)** counts only rows where `profiles.public_profile_enabled = true` AND `profiles.suspended = false`. If a runner never toggled their profile public, they don't appear or count.
+- **Admin analytics** counts everyone with the `runner` / `investor` role in `user_roles`, regardless of profile visibility.
 
-## 1. Database (single migration)
+Two different populations → the numbers will never match by design.
 
-**`promo_campaigns`** — admin-configurable campaigns (so the amount changes without code).
-- `id`, `code` (unique, default `first_task_free`), `name`, `enabled` (bool), `credit_cents` (int, default 5000), `expires_at` (nullable), `legal_disclaimer` (text), `created_at`, `updated_at`.
-- Seed one row: `first_task_free`, enabled, 5000.
+**Fix**
+- Add a new server fn `getPublicDirectoryCounts()` that returns:
+  - `total_runners` = users with role `runner` AND `public_profile_enabled=true` AND `suspended=false`
+  - `total_investors` = same for `investor`
+  - `hidden_runners` / `hidden_investors` = role holders whose profile is hidden (for admin visibility)
+- Browse page shows the visible counts (what's actually listable) with a tooltip: *"Verified & public profiles only."*
+- Admin analytics page shows **both** numbers side-by-side: "Runners: 42 total · 27 public" so it's obvious what each represents.
+- Add an admin-only reconciliation view at `/admin/analytics` listing role-holders who are hidden (so you can nudge them to publish).
+- Realtime: browse count already refetches on filter change; add `refetchInterval: 60_000` so it stays live.
 
-**`promo_credits`** — per-investor ledger (one row per redemption attempt).
-- `id`, `campaign_id`, `user_id` (unique with campaign_id), `email`, `email_norm` (lowercased+trimmed, unique with campaign_id), `payment_fingerprint` (Stripe PaymentMethod fingerprint, nullable, unique with campaign_id when set), `signup_ip` (nullable), `status` (`available` | `reserved` | `redeemed` | `void`), `credit_cents` (snapshot of campaign amount at issuance), `remaining_cents`, `task_id` (nullable), `payment_id` (nullable), `issued_at`, `redeemed_at`.
-- Issued automatically by a trigger on `profiles` insert when the user has the `investor` role and campaign is enabled — wrapped so it never blocks signup on conflict.
+## 2. Weekly recurring availability scheduler
 
-**`promo_events`** — analytics event log.
-- `id`, `event_type` (`banner_view` | `banner_click` | `signup` | `first_task_created` | `credit_redeemed` | `repeat_task`), `user_id` (nullable), `campaign_id`, `metadata` jsonb, `created_at`.
-- Indexed on `(campaign_id, event_type, created_at)`.
+Today runners only have a **block-out-a-date** picker (`AvailabilityBlockEditor`). We'll add a full weekly schedule on top, keep the date-blocker for exceptions.
 
-All three tables: standard `GRANT`s, RLS on, policies:
-- `promo_campaigns`: anon + authenticated SELECT (public read of enabled campaigns only); admin full.
-- `promo_credits`: user SELECT own row; admin full.
-- `promo_events`: anon + authenticated INSERT (rate-limited via existing `check_rate_limit`); admin SELECT.
+**New table `runner_availability_schedule`**
+- `runner_id uuid` (FK auth.users)
+- `weekday smallint` (0=Sun … 6=Sat)
+- `start_time time`, `end_time time`
+- `timezone text` (IANA, default from profile)
+- `label text nullable` (e.g. "Morning shift")
+- unique index `(runner_id, weekday, start_time, end_time)`
+- RLS: runner manages own; anon/authenticated can `SELECT` (needed for public "Next available" chip)
+- GRANTs to `authenticated`, `service_role`, and `SELECT` to `anon`
 
-## 2. Server functions (`src/lib/promo.functions.ts`)
+Also add `profiles.timezone text` if missing, and `profiles.scheduling_notes text` for a short freeform note ("48h notice preferred").
 
-- `getActivePromoCampaign()` — public, returns enabled `first_task_free` campaign or null.
-- `getMyPromoCredit()` — authenticated, returns the caller's credit row + remaining.
-- `recordPromoEvent({ eventType, metadata })` — public, rate-limited (`promo_event:<ip>` 60/min).
-- `getPromoAnalytics()` — admin, aggregates events: views, clicks, signups, first tasks, redemptions, total cost, downstream revenue, repeat-task rate.
-- `exportPromoAnalyticsCsv()` — admin, returns CSV string.
-- `updatePromoCampaign({ enabled, creditCents, expiresAt, legalDisclaimer })` — admin only.
+**New server fns** (in `profile-extras.functions.ts`)
+- `listAvailabilitySchedule({ runnerId })` — public read
+- `upsertAvailabilityWindow({ weekday, start, end, label })` — auth, runner only
+- `deleteAvailabilityWindow({ id })` — auth, runner only
+- `setSchedulingMeta({ timezone, notes })` — auth
+- `computeNextAvailableSlot({ runnerId })` — reads schedule + date blocks and returns the next 3 open windows (used on public profile card)
 
-## 3. Eligibility + duplicate-redemption guard
+**New component `WeeklyAvailabilityScheduler.tsx`** (settings → profile section for runners)
+- Header row: **timezone** dropdown (IANA list, defaults to browser tz), **scheduling notes** input, **Copy Mon → all weekdays** helper.
+- 7-column grid (Sun–Sat) — each column shows stacked time-window chips with hover **✕** to delete.
+- **"+ Add window"** per day opens a compact popover with two time inputs (15-min steps), optional label, quick presets: *Morning (8–12), Afternoon (12–5), Evening (5–9), All day (8–8)*.
+- Live validation: end > start, no overlap on same day (warn + block save).
+- **Preview strip** below the grid renders the *next 7 days* with green blocks pulled from schedule, red blocks for date-blocks — so runners visually confirm what investors will see.
+- Bulk actions: **Weekdays (Mon–Fri)**, **Weekends**, **Clear day**, **Clear all**.
+- Save is optimistic via `useMutation` + `invalidateQueries(['availability-schedule', runnerId])`.
+- Mobile: switches to a stacked accordion (one card per day) with the same popover editor.
 
-Centralized in `evaluatePromoEligibility(userId)` (server helper):
-1. Active campaign exists and not expired.
-2. User has `investor` role.
-3. User has a `promo_credits` row with `status='available'` and `remaining_cents > 0`.
-4. No prior completed task by this user (`tasks` count where `status in ('approved','paid','completed')`).
-5. Email_norm not already redeemed by another `user_id` (cross-account email dedupe).
-6. On checkout: Stripe PaymentMethod fingerprint not already used by another redemption.
+**Public profile display (`/profile/$slug`)**
+- New "Availability" card showing:
+  - Weekly grid mini-view (read-only, timezone-aware).
+  - "Next available: **Tue 9:00 AM CT**" chip powered by `computeNextAvailableSlot`.
+  - Scheduling notes below.
+- Investors see this before hiring; drives conversion.
 
-If any check fails, the credit silently does not apply (no error to user unless they explicitly tried to redeem).
+**Integration with existing block-out dates**
+- Keep `AvailabilityBlockEditor` — rename its section to **"Time off & blocked dates"**.
+- `computeNextAvailableSlot` subtracts blocked dates from the weekly schedule.
 
-## 4. Checkout integration (`src/lib/payments.functions.ts`)
+## 3. Files touched
 
-Modify `createTaskFundingCheckout`:
-- Before creating the Stripe Checkout Session, call `evaluatePromoEligibility`.
-- If eligible, compute `appliedCents = min(remaining_cents, taskCostCents)`.
-- Apply as a Stripe Coupon (one-time `amount_off` in cents) attached to the session, OR as `discounts: [{ coupon }]` created on the fly.
-- Mark credit `status='reserved'`, store `task_id` and intended applied amount.
-- On webhook `checkout.session.completed`: capture PaymentMethod fingerprint into `promo_credits.payment_fingerprint`. If fingerprint collides with another redemption, void this credit and refund the discount differential (edge case, log to admin).
-- On task `approved`/`paid` (already triggers existing flows): mark credit `status='redeemed'`, decrement `remaining_cents`, insert `credit_redeemed` event.
+- `supabase/migrations/*` — new `runner_availability_schedule` table + GRANTs + RLS + `profiles.timezone`/`scheduling_notes` columns
+- `src/lib/profile-extras.functions.ts` — 5 new server fns
+- `src/lib/profiles.functions.ts` — add `getPublicDirectoryCounts`
+- `src/components/profiles/WeeklyAvailabilityScheduler.tsx` — new
+- `src/components/profiles/PublicAvailabilityCard.tsx` — new
+- `src/routes/_authenticated/settings.profile.tsx` — mount scheduler for runners
+- `src/routes/profile.$slug.tsx` — mount public availability card
+- `src/routes/profiles.tsx` — swap in `getPublicDirectoryCounts`, add "public only" tooltip
+- `src/routes/_authenticated/admin.analytics.tsx` — show total vs public breakdown + hidden-role-holders panel
 
-Return DTO adds `{ promoApplied: { cents, remaining } | null }` so the UI can show the breakdown.
+## Technical notes
 
-## 5. UI
+- All schedule writes go through `createServerFn` with `requireSupabaseAuth`, so RLS acts as the runner.
+- Public `computeNextAvailableSlot` uses the server publishable client (narrow `TO anon` SELECT on the schedule table + safe column projection).
+- Time storage: `time` (no date) + separate IANA timezone → we convert to viewer's local tz on the client with `Intl.DateTimeFormat`.
+- No third-party scheduling libs needed — the grid is a light custom component using shadcn `Popover`, `Select`, `Input[type=time]`, and existing `Calendar`.
 
-**Homepage banner** (`src/components/landing/FirstTaskFreeBanner.tsx`)
-- Premium promotional banner above the fold (gradient using existing primary tokens, ShieldCheck/Gift icon).
-- Headline "We'll Fund Your First Task", subheadline with dynamic `$X` from campaign.
-- Primary CTA "Post Your First Task" → `/signup?role=investor&promo=first_task_free`.
-- Secondary CTA "Learn How It Works" → `/#how-it-works`.
-- Legal disclaimer line.
-- Fires `banner_view` on mount (IntersectionObserver, once per session) and `banner_click` on CTA.
-
-**Investor dashboard promo card** (`src/components/dashboard/investor/PromoCreditCard.tsx`)
-- Badge: "🎉 $X First Task Credit Available" when `status='available'`.
-- Shows remaining balance if partially used.
-- Hidden when redeemed/void or campaign disabled.
-- "Post Your First Task" → existing post-task wizard.
-- Mounted at the top of the investor dashboard.
-
-**Checkout** (`src/components/payments/TaskFundingCheckout.tsx`)
-- Above the Stripe embed, render a breakdown when promo applies:
-  ```
-  Task cost          $XX.XX
-  Promo credit       -$XX.XX
-  Amount due         $XX.XX
-  ```
-
-**Admin page** (`src/routes/_authenticated/admin.promotions.tsx`)
-- Toggle enable/disable.
-- Number input for credit amount (validated 0–500 USD).
-- Optional expiration date picker.
-- Editable legal disclaimer textarea.
-- Analytics summary cards (views, clicks, signups, first tasks, redemptions, cost, revenue, repeat rate).
-- "Export CSV" button.
-- Linked from existing admin settings nav.
-
-## 6. Analytics wiring
-
-- Banner view/click: from `FirstTaskFreeBanner`.
-- Signup: existing signup flow calls `recordPromoEvent('signup', { source })` when `promo=first_task_free` query param present.
-- First task created: hooked in `createTask` server fn when investor has no prior tasks.
-- Credit redeemed: from payments flow above.
-- Repeat task: hooked in `createTask` when investor previously redeemed and this is task #2+.
-- Revenue generated: derived in `getPromoAnalytics` by summing `payments.amount_cents` for redeemers' tasks beyond the first.
-
-## 7. Legal
-
-Disclaimer string lives on the campaign row (editable by admin). Default:
-> "Offer valid for new investor accounts only. Maximum promotional value of $50. REI Runner reserves the right to modify or discontinue this promotion at any time."
-
-Rendered under the banner, on the dashboard card, and in the checkout breakdown.
-
-## Files
-
-**New**
-- `supabase/migrations/<ts>_promo_campaign.sql`
-- `src/lib/promo.functions.ts`
-- `src/lib/promo.server.ts` (eligibility + Stripe coupon helper)
-- `src/components/landing/FirstTaskFreeBanner.tsx`
-- `src/components/dashboard/investor/PromoCreditCard.tsx`
-- `src/routes/_authenticated/admin.promotions.tsx`
-
-**Edited**
-- `src/routes/index.tsx` — mount banner.
-- `src/routes/_authenticated/dashboard.investor.tsx` (or current investor dashboard route) — mount promo card.
-- `src/lib/payments.functions.ts` — apply promo in checkout, finalize on success.
-- `src/routes/api/public/payments/webhook.ts` — capture payment fingerprint, finalize redemption.
-- `src/lib/tasks.functions.ts` — fire `first_task_created` / `repeat_task` events.
-- `src/routes/signup.tsx` — record `signup` event when `promo` query present.
-- Admin nav (settings sidebar) — link to `/admin/promotions`.
-
-## Out of scope
-- Multi-campaign stacking (campaign explicitly cannot combine with other discounts).
-- Per-market or per-task-type variants (campaign is global; structure allows adding later via `promo_campaigns.rules` jsonb if needed).
+## Out of scope for this pass
+- Investors booking specific time slots directly on a runner (would need reservations + task-linked holds). This plan gets the visual + data foundation in place; slot booking can layer on later.

@@ -219,11 +219,11 @@ export const getPlatformMetrics = createServerFn({ method: "GET" })
     const since30 = new Date(now - 30 * 86400_000).toISOString();
     const since7 = new Date(now - 7 * 86400_000).toISOString();
 
-    const [profilesAll, profiles30, profiles7, roles, tasksAll, tasksOpen, tasksDone, payments, apps, reviews, reports, disputes] = await Promise.all([
+    const [profilesAll, profiles30, profiles7, roles, tasksAll, tasksOpen, tasksDone, payments, apps, reviews, reports, disputes, visibleProfiles] = await Promise.all([
       supabaseAdmin.from("profiles").select("user_id", { head: true, count: "exact" }),
       supabaseAdmin.from("profiles").select("user_id", { head: true, count: "exact" }).gte("created_at", since30),
       supabaseAdmin.from("profiles").select("user_id", { head: true, count: "exact" }).gte("created_at", since7),
-      supabaseAdmin.from("user_roles").select("role"),
+      supabaseAdmin.from("user_roles").select("user_id, role"),
       supabaseAdmin.from("tasks").select("id, status, payout_amount, created_at"),
       supabaseAdmin.from("tasks").select("id", { head: true, count: "exact" }).eq("status", "open"),
       supabaseAdmin.from("tasks").select("id", { head: true, count: "exact" }).in("status", ["completed","approved","paid"]),
@@ -232,10 +232,22 @@ export const getPlatformMetrics = createServerFn({ method: "GET" })
       supabaseAdmin.from("reviews").select("rating"),
       supabaseAdmin.from("reports").select("id", { head: true, count: "exact" }).eq("status", "open"),
       supabaseAdmin.from("disputes").select("id", { head: true, count: "exact" }).in("status", ["open","under_review"]),
+      supabaseAdmin.from("profiles").select("user_id").eq("public_profile_enabled", true).eq("suspended", false),
     ]);
 
     const roleCounts: Record<string, number> = { admin: 0, investor: 0, runner: 0 };
-    for (const r of roles.data ?? []) roleCounts[(r as any).role] = (roleCounts[(r as any).role] ?? 0) + 1;
+    const roleByUser: Record<string, string[]> = {};
+    for (const r of (roles.data ?? []) as { user_id: string; role: string }[]) {
+      roleCounts[r.role] = (roleCounts[r.role] ?? 0) + 1;
+      (roleByUser[r.user_id] ||= []).push(r.role);
+    }
+    const visibleSet = new Set<string>(((visibleProfiles.data ?? []) as { user_id: string }[]).map((p) => p.user_id));
+    let publicRunners = 0, publicInvestors = 0;
+    for (const [uid, rs] of Object.entries(roleByUser)) {
+      if (!visibleSet.has(uid)) continue;
+      if (rs.includes("runner")) publicRunners++;
+      if (rs.includes("investor")) publicInvestors++;
+    }
 
     const allTasks = tasksAll.data ?? [];
     const gmvCents = (payments.data ?? []).filter((p: any) => p.status === "paid").reduce((s: number, p: any) => s + (p.amount_cents ?? 0), 0);
@@ -266,6 +278,8 @@ export const getPlatformMetrics = createServerFn({ method: "GET" })
         admins: roleCounts.admin,
         investors: roleCounts.investor,
         runners: roleCounts.runner,
+        runners_public: publicRunners,
+        investors_public: publicInvestors,
       },
       tasks: {
         total: allTasks.length,
