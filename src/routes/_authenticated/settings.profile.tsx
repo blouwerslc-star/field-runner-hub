@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/select";
 import { PhotoUploader } from "@/components/profiles/PhotoUploader";
 import { SettingsCard, SettingsHeader, ToggleRow } from "@/components/settings/SettingsSection";
+import { WeeklyAvailabilityScheduler } from "@/components/profiles/WeeklyAvailabilityScheduler";
 
 export const Route = createFileRoute("/_authenticated/settings/profile")({
   component: ProfileSettings,
@@ -28,6 +29,8 @@ function ProfileSettings() {
   const profile = (data?.profile ?? {}) as Record<string, unknown>;
   const userId = (profile.user_id as string) ?? "";
   const slug = (profile.profile_slug as string) ?? "";
+  const roles = (data?.roles as string[] | undefined) ?? [];
+  const isRunner = roles.includes("runner");
 
   const [form, setForm] = useState<Record<string, unknown>>({});
   useEffect(() => {
@@ -204,6 +207,15 @@ function ProfileSettings() {
           />
         </ToggleRow>
       </SettingsCard>
+
+      {isRunner && (
+        <SettingsCard
+          title="Weekly availability"
+          description="Set the hours you're generally available to take tasks. Investors see this on your public profile."
+        >
+          <WeeklyAvailabilityScheduler />
+        </SettingsCard>
+      )}
 
       <p className="text-xs text-muted-foreground">
         Need to edit company details, rates or experience?{" "}
