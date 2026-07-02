@@ -53,8 +53,8 @@ function AdminAnalytics() {
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
-        <Stat icon={Users} label="Runners" value={m.users.runners} />
-        <Stat icon={Users} label="Investors" value={m.users.investors} />
+        <Stat icon={Users} label="Runners" value={m.users.runners} sub={`${(m.users as any).runners_public ?? 0} visible in browse`} />
+        <Stat icon={Users} label="Investors" value={m.users.investors} sub={`${(m.users as any).investors_public ?? 0} visible in browse`} />
         <Stat icon={Star} label="Avg rating" value={m.reviews.count > 0 ? `${m.reviews.avg_rating.toFixed(2)}★` : "—"} sub={`${m.reviews.count} reviews`} />
         <Stat icon={ShieldAlert} label="Moderation" value={m.moderation.open_reports + m.moderation.open_disputes} sub={`${m.moderation.open_reports} reports · ${m.moderation.open_disputes} disputes`} />
       </div>
