@@ -1711,6 +1711,7 @@ export type Database = {
           response_time: string | null
           response_time_minutes: number | null
           review_count: number
+          scheduling_notes: string | null
           service_radius: string | null
           services_offered: string[]
           specialties: string[]
@@ -1809,6 +1810,7 @@ export type Database = {
           response_time?: string | null
           response_time_minutes?: number | null
           review_count?: number
+          scheduling_notes?: string | null
           service_radius?: string | null
           services_offered?: string[]
           specialties?: string[]
@@ -1907,6 +1909,7 @@ export type Database = {
           response_time?: string | null
           response_time_minutes?: number | null
           review_count?: number
+          scheduling_notes?: string | null
           service_radius?: string | null
           services_offered?: string[]
           specialties?: string[]
@@ -2310,6 +2313,39 @@ export type Database = {
           id?: string
           reason?: string | null
           runner_id?: string
+        }
+        Relationships: []
+      }
+      runner_availability_schedule: {
+        Row: {
+          created_at: string
+          end_time: string
+          id: string
+          label: string | null
+          runner_id: string
+          start_time: string
+          updated_at: string
+          weekday: number
+        }
+        Insert: {
+          created_at?: string
+          end_time: string
+          id?: string
+          label?: string | null
+          runner_id: string
+          start_time: string
+          updated_at?: string
+          weekday: number
+        }
+        Update: {
+          created_at?: string
+          end_time?: string
+          id?: string
+          label?: string | null
+          runner_id?: string
+          start_time?: string
+          updated_at?: string
+          weekday?: number
         }
         Relationships: []
       }
