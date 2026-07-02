@@ -280,7 +280,7 @@ export const setSchedulingMeta = createServerFn({ method: "POST" })
   )
   .handler(async ({ context, data }) => {
     const { supabase, userId } = context;
-    const patch: Record<string, unknown> = {};
+    const patch: { timezone?: string | null; scheduling_notes?: string | null } = {};
     if ("timezone" in data) patch.timezone = data.timezone || null;
     if ("scheduling_notes" in data) patch.scheduling_notes = data.scheduling_notes || null;
     const { error } = await supabase.from("profiles").update(patch).eq("user_id", userId);
