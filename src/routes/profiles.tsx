@@ -6,6 +6,7 @@ import { z } from "zod";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { listPublicProfiles, listAcademyCertOptions } from "@/lib/profiles.functions";
+import { getPublicDirectoryCounts } from "@/lib/profile-extras.functions";
 import { ProfileCard, type PublicProfile } from "@/components/profiles/ProfileCard";
 import { PublicHeader } from "@/components/layout/PublicHeader";
 import { StateCoverageMap } from "@/components/maps/StateCoverageMap";
@@ -46,6 +47,8 @@ export const Route = createFileRoute("/profiles")({
 
 function ProfilesDirectory() {
   const fetchFn = useServerFn(listPublicProfiles);
+  const countsFn = useServerFn(getPublicDirectoryCounts);
+  const { data: counts } = useQuery({ queryKey: ["publicDirectoryCounts"], queryFn: () => countsFn({}), staleTime: 60_000 });
   const [authed, setAuthed] = useState(false);
   useEffect(() => {
     supabase.auth.getSession().then(({ data: s }) => setAuthed(!!s.session));
