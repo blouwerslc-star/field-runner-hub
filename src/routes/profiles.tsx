@@ -145,7 +145,7 @@ function ProfilesDirectory() {
             <p className="mt-2 text-muted-foreground">
               The nationwide boots-on-the-ground network for real estate investors.
               {!isLoading && profiles.length > 0 && (
-                <> Showing <span className="text-foreground font-medium">{profiles.length}</span> profile{profiles.length === 1 ? "" : "s"} across <span className="text-foreground font-medium">{uniqueMarkets || 1}</span> market{uniqueMarkets === 1 ? "" : "s"}.</>
+                <> Showing <span className="text-foreground font-medium">{profiles.length}</span> of <span className="text-foreground font-medium">{counts?.total ?? profiles.length}</span> public profile{(counts?.total ?? profiles.length) === 1 ? "" : "s"} across <span className="text-foreground font-medium">{uniqueMarkets || 1}</span> market{uniqueMarkets === 1 ? "" : "s"}.</>
               )}
             </p>
           </div>
