@@ -223,7 +223,7 @@ export const getPlatformMetrics = createServerFn({ method: "GET" })
       supabaseAdmin.from("profiles").select("user_id", { head: true, count: "exact" }),
       supabaseAdmin.from("profiles").select("user_id", { head: true, count: "exact" }).gte("created_at", since30),
       supabaseAdmin.from("profiles").select("user_id", { head: true, count: "exact" }).gte("created_at", since7),
-      supabaseAdmin.from("user_roles").select("role"),
+      supabaseAdmin.from("user_roles").select("user_id, role"),
       supabaseAdmin.from("tasks").select("id, status, payout_amount, created_at"),
       supabaseAdmin.from("tasks").select("id", { head: true, count: "exact" }).eq("status", "open"),
       supabaseAdmin.from("tasks").select("id", { head: true, count: "exact" }).in("status", ["completed","approved","paid"]),
