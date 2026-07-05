@@ -1,22 +1,11 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { useServerFn } from "@tanstack/react-start";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import {
-  getMyVerification,
-  requestVerification,
-  VERIFICATION_LEVELS,
-} from "@/lib/verification.functions";
-import { DashboardShell } from "@/components/dashboard/DashboardShell";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
-import { CheckCircle2, Circle, Loader2, ShieldCheck, Sparkles, Star, Eye } from "lucide-react";
-import { useState } from "react";
-import { toast } from "sonner";
-import { VerificationLevelBadge, VerificationStatusPill } from "@/components/profiles/VerificationLevelBadge";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_authenticated/profile/verification")({
-  component: VerificationPage,
+  ssr: false,
+  beforeLoad: () => {
+    throw redirect({ to: "/onboarding", search: { step: "identity" } });
+  },
+  component: () => null,
   head: () => ({ meta: [{ title: "Get Verified — REI Runner" }] }),
 });
 
