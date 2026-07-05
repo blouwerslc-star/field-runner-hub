@@ -20,7 +20,7 @@ import { Loader2, Upload, FileImage, MapPin, Calendar, DollarSign, Repeat } from
 import { toast } from "sonner";
 import { listMyTasks, getTaskDetail, startTask, submitTaskWork } from "@/lib/tasks.functions";
 import { createUploadUrl, recordTaskFile } from "@/lib/storage.functions";
-import { RunnerVerificationCard } from "@/components/dashboard/RunnerVerificationCard";
+import { OnboardingProgressCard } from "@/components/dashboard/OnboardingProgressCard";
 import { ProfileCompletionBanner } from "@/components/dashboard/ProfileCompletionBanner";
 import { ReferralBanner } from "@/components/dashboard/ReferralBanner";
 import { DashboardLoadingSkeleton, RouteErrorState } from "@/components/dashboard/UiStates";
@@ -65,8 +65,8 @@ function RunnerDashboard() {
 
   return (
     <DashboardShell title="Runner Dashboard" subtitle="Your assigned tasks. Complete the work, upload deliverables, and get paid.">
+      <OnboardingProgressCard />
       <ProfileCompletionBanner role="runner" />
-      <RunnerVerificationCard />
       <ReferralBanner />
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
         <StatTile label="Assigned" value={buckets.assigned.length} />

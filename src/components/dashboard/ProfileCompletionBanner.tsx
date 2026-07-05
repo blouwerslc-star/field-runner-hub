@@ -31,12 +31,13 @@ export function ProfileCompletionBanner({ role }: { role: Role }) {
 
       const missing: { label: string; href: string }[] = []
       const editHref = '/profile/edit'
-      if (!p.profile_photo_url) missing.push({ label: 'Add a profile photo', href: editHref })
-      if (!p.city || !p.state) missing.push({ label: 'Add your city & state', href: editHref })
+      const onboardingHref = '/onboarding'
+      if (!p.profile_photo_url) missing.push({ label: 'Add a profile photo', href: role === 'runner' ? onboardingHref : editHref })
+      if (!p.city || !p.state) missing.push({ label: 'Add your city & state', href: role === 'runner' ? onboardingHref : editHref })
       if (role === 'runner') {
-        if (!p.bio) missing.push({ label: 'Write a short bio', href: editHref })
+        if (!p.bio) missing.push({ label: 'Write a short bio', href: onboardingHref })
         if ((p.verification_level ?? 0) < 1)
-          missing.push({ label: 'Complete identity verification', href: '/profile/verification' })
+          missing.push({ label: 'Complete identity verification', href: onboardingHref })
       } else {
         if (!p.company_name) missing.push({ label: 'Add your company name', href: editHref })
         if (!p.company_description)
