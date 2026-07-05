@@ -53,15 +53,16 @@ export const requestVerification = createServerFn({ method: "POST" })
   .handler(async ({ context, data }) => {
     const { supabase, userId } = context;
 
-    // Block if already an open request
+    // Idempotent: if an open request already exists, return it instead of throwing.
     const { data: existing } = await supabase
       .from("verification_requests")
-      .select("id, status, requested_level")
+      .select("*")
       .eq("user_id", userId)
       .in("status", ["pending_payment", "pending_review"])
+      .order("created_at", { ascending: false })
       .limit(1);
     if ((existing ?? []).length) {
-      throw new Error("You already have a verification request in review. Please wait for the decision.");
+      return { request: existing![0], alreadyPending: true as const };
     }
 
     const { data: req, error } = await supabase
