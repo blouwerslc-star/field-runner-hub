@@ -107,7 +107,50 @@ export const recordIdDocument = createServerFn({ method: "POST" })
       .select("*")
       .single();
     if (error) throw new Error(error.message);
-    return { document: row };
+
+    // Auto-submit for review once all three kinds are on file and no pending
+    // request exists. Runner never has to click a separate "Submit" button.
+    const { data: all } = await supabase
+      .from("runner_id_documents")
+      .select("kind")
+      .eq("user_id", userId);
+    const kinds = new Set((all ?? []).map((d: any) => d.kind));
+    const complete = ["front_id", "back_id", "selfie"].every((k) => kinds.has(k));
+    let autoSubmitted = false;
+    if (complete) {
+      const { data: prof } = await supabase
+        .from("profiles")
+        .select("verification_level, verification_status")
+        .eq("user_id", userId)
+        .maybeSingle();
+      const level = (prof as any)?.verification_level ?? 0;
+      const status = (prof as any)?.verification_status as string | null;
+      if (level < 1 && status !== "pending_review" && status !== "verified") {
+        const { data: openReq } = await supabase
+          .from("verification_requests")
+          .select("id")
+          .eq("user_id", userId)
+          .in("status", ["pending_payment", "pending_review"])
+          .limit(1);
+        if (!(openReq ?? []).length) {
+          await supabase.from("verification_requests").insert({
+            user_id: userId,
+            requested_level: 1,
+            status: "pending_review",
+            notes: "Auto-submitted after all 3 ID documents uploaded",
+          });
+          await supabase
+            .from("profiles")
+            .update({
+              verification_status: "pending_review",
+              verification_requested_at: new Date().toISOString(),
+            })
+            .eq("user_id", userId);
+          autoSubmitted = true;
+        }
+      }
+    }
+    return { document: row, autoSubmitted };
   });
 
 export const listMyIdDocuments = createServerFn({ method: "GET" })
