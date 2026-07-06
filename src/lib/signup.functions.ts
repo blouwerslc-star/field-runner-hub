@@ -36,11 +36,12 @@ export const finalizeSignupProfile = createServerFn({ method: "POST" })
     }
 
     // Runner signups are temporarily paused site-wide.
-    if (data.role === "runner") {
+    if ((data.role as string) === "runner") {
       throw new Error(
         "Runner signups are temporarily paused. Please join the waitlist at /waitlist and we'll notify you when we reopen.",
       );
     }
+    const roleValue: "runner" | "investor" = data.role;
 
     const profile = {
       user_id: context.userId,
@@ -49,12 +50,12 @@ export const finalizeSignupProfile = createServerFn({ method: "POST" })
       phone: emptyToNull(data.phone),
       city: emptyToNull(data.city),
       state: emptyToNull(data.state),
-      service_radius: data.role === "runner" ? emptyToNull(data.service_radius) : null,
-      transportation_available: data.role === "runner" ? data.transportation_available ?? null : null,
-      task_types: data.role === "runner" ? data.task_types : [],
-      company_name: data.role === "investor" ? emptyToNull(data.company_name) : null,
-      markets_served: data.role === "investor" ? emptyToNull(data.markets_served) : null,
-      monthly_deal_volume: data.role === "investor" ? emptyToNull(data.monthly_deal_volume) : null,
+      service_radius: roleValue === "runner" ? emptyToNull(data.service_radius) : null,
+      transportation_available: roleValue === "runner" ? data.transportation_available ?? null : null,
+      task_types: roleValue === "runner" ? data.task_types : [],
+      company_name: roleValue === "investor" ? emptyToNull(data.company_name) : null,
+      markets_served: roleValue === "investor" ? emptyToNull(data.markets_served) : null,
+      monthly_deal_volume: roleValue === "investor" ? emptyToNull(data.monthly_deal_volume) : null,
     };
 
     const { error: profileError } = await context.supabase
@@ -69,7 +70,7 @@ export const finalizeSignupProfile = createServerFn({ method: "POST" })
       .upsert({ user_id: context.userId, role: data.role }, { onConflict: "user_id,role" });
     if (roleError) throw new Error(`Role insert failed: ${roleError.message}`);
 
-    if (data.role === "runner") {
+    if (roleValue === "runner") {
       const { error: runnerError } = await supabaseAdmin
         .from("runner_profiles")
         .upsert({ user_id: context.userId }, { onConflict: "user_id" });
