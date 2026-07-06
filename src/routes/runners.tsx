@@ -1,8 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowLeft, Wallet, Clock, ShieldCheck, MapPin, BadgeCheck } from "lucide-react";
+import { ArrowLeft, Wallet, Clock, ShieldCheck, MapPin, BadgeCheck, PauseCircle, ArrowRight } from "lucide-react";
 import { BrandLogo } from "@/components/brand/BrandLogo";
 import { Toaster } from "@/components/ui/sonner";
-import { FieldRunnerForm } from "@/components/landing/ApplicationForms";
 
 export const Route = createFileRoute("/runners")({
   head: () => ({
@@ -109,8 +108,22 @@ function RunnersPage() {
           Background check required. We never share your home address or phone number publicly.
         </div>
 
-        <div className="rounded-2xl border border-border bg-card/60 backdrop-blur p-6 md:p-8 shadow-card">
-          <FieldRunnerForm />
+        <div className="rounded-2xl border border-amber-500/30 bg-amber-500/5 p-6 md:p-8 text-center shadow-card">
+          <div className="mx-auto size-12 rounded-full bg-amber-500/15 text-amber-300 grid place-items-center">
+            <PauseCircle className="size-6" />
+          </div>
+          <h2 className="mt-5 text-xl md:text-2xl font-bold">Runner signups are temporarily paused</h2>
+          <p className="mt-3 text-muted-foreground">
+            We're currently focused on onboarding investors so every new runner has paid tasks
+            waiting on day one. Join the waitlist and we'll email you the moment we reopen
+            signups in your city.
+          </p>
+          <Link
+            to="/waitlist"
+            className="mt-5 inline-flex items-center gap-2 rounded-md bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90 transition"
+          >
+            Join the runner waitlist <ArrowRight className="size-4" />
+          </Link>
         </div>
 
         <p className="text-xs text-muted-foreground text-center mt-6">
