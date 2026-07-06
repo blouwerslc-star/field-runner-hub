@@ -22,7 +22,8 @@ type RoleParam = "runner" | "investor";
 
 export const Route = createFileRoute("/signup")({
   validateSearch: (s: Record<string, unknown>) => ({
-    role: (s.role === "investor" || s.role === "runner" ? s.role : undefined) as RoleParam | undefined,
+    // Runner signups are paused — coerce runner to undefined so we show the picker.
+    role: (s.role === "investor" ? s.role : undefined) as RoleParam | undefined,
     redirect: typeof s.redirect === "string" ? s.redirect : undefined,
     promo: typeof s.promo === "string" ? s.promo : undefined,
   }),
@@ -54,7 +55,9 @@ function SignupPage() {
   const ensureSetup = useServerFn(ensureUserSetup);
   const logFailure = useServerFn(logSignupFailure);
   const recordPromo = useServerFn(recordPromoEvent);
-  const [activeRole, setActiveRole] = useState<RoleParam | null>(role ?? null);
+  const [activeRole, setActiveRole] = useState<RoleParam | null>(
+    role === "investor" ? "investor" : null,
+  );
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -232,29 +235,32 @@ function SignupPage() {
             <p className="mt-1 text-sm text-muted-foreground text-center">Choose one to continue. You can't create an account without picking a role.</p>
 
             <div className="mt-6 grid gap-4 md:grid-cols-2">
-              {([
-                {
-                  role: "runner" as const,
-                  title: "Become a Runner",
-                  desc: "Get paid completing property photos, walkthroughs, occupancy checks, and other field tasks.",
-                },
-                {
-                  role: "investor" as const,
-                  title: "Join as an Investor",
-                  desc: "Post property tasks and hire local runners in our active U.S. markets.",
-                },
-              ]).map((c) => (
-                <button
-                  key={c.role}
-                  type="button"
-                  onClick={() => setActiveRole(c.role)}
-                  className="text-left rounded-xl border border-border bg-background/60 p-5 hover:border-primary hover:shadow-glow transition group"
+              <button
+                type="button"
+                onClick={() => setActiveRole("investor")}
+                className="text-left rounded-xl border border-border bg-background/60 p-5 hover:border-primary hover:shadow-glow transition group"
+              >
+                <div className="text-lg font-semibold tracking-tight group-hover:text-primary">Join as an Investor</div>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  Post property tasks and hire local runners in our active U.S. markets.
+                </p>
+                <div className="mt-4 text-sm font-medium text-primary">Continue →</div>
+              </button>
+              <div className="text-left rounded-xl border border-dashed border-border/70 bg-background/30 p-5 opacity-90">
+                <div className="inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 text-[10px] font-semibold tracking-widest text-amber-300 uppercase">
+                  Paused
+                </div>
+                <div className="mt-2 text-lg font-semibold tracking-tight">Become a Runner</div>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  Runner signups are temporarily paused while we focus on onboarding investors and lining up paid tasks in every market.
+                </p>
+                <Link
+                  to="/waitlist"
+                  className="mt-4 inline-block text-sm font-medium text-primary hover:underline"
                 >
-                  <div className="text-lg font-semibold tracking-tight group-hover:text-primary">{c.title}</div>
-                  <p className="mt-2 text-sm text-muted-foreground">{c.desc}</p>
-                  <div className="mt-4 text-sm font-medium text-primary">Continue →</div>
-                </button>
-              ))}
+                  Join the runner waitlist →
+                </Link>
+              </div>
             </div>
 
             <p className="mt-6 text-sm text-muted-foreground text-center">
