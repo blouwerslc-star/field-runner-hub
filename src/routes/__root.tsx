@@ -22,6 +22,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { captureReferralFromUrl } from "@/lib/referral-tracking";
 import { InstallPrompt } from "@/components/pwa/InstallPrompt";
 import { TrackingActiveBanner } from "@/components/tracking/TrackingActiveBanner";
+import { AnnouncementBar } from "@/components/layout/AnnouncementBar";
 
 function NotFoundComponent() {
   return (
@@ -282,6 +283,7 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
+      <AnnouncementBar />
       <Outlet />
       <BackButton />
       <InstallPrompt />

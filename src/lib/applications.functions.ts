@@ -54,6 +54,11 @@ export const proSchema = z.object({
 export const submitFieldRunner = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => fieldRunnerSchema.parse(input))
   .handler(async ({ data }) => {
+    // Runner applications are temporarily paused site-wide.
+    throw new Error(
+      "Runner applications are temporarily paused. Please join the waitlist at /waitlist and we'll notify you when we reopen.",
+    );
+    // eslint-disable-next-line no-unreachable
     const { website: _hp, ...row } = data;
     const { error } = await supabaseAdmin
       .from("field_runner_applications")

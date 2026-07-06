@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { Flag, ArrowLeft, Sparkles, Clock, ShieldCheck, Zap, Briefcase, Footprints, ArrowRight } from "lucide-react";
+import { Flag, ArrowLeft, Sparkles, Clock, ShieldCheck, Zap, Briefcase, Footprints, ArrowRight, PauseCircle } from "lucide-react";
 import { BrandLogo } from "@/components/brand/BrandLogo";
 import { Toaster } from "@/components/ui/sonner";
 import { FieldRunnerForm, ProForm } from "@/components/landing/ApplicationForms";
@@ -100,6 +100,55 @@ function ApplyPage() {
   }
 
   const isRunner = role === "runner";
+
+  if (isRunner) {
+    return (
+      <div className="min-h-screen bg-background text-foreground">
+        <Toaster richColors closeButton position="top-center" theme="dark" />
+        <header className="sticky top-0 z-40 backdrop-blur bg-background/70 border-b border-border/60">
+          <div className="mx-auto max-w-7xl px-5 h-16 flex items-center justify-between">
+            <Link to="/" aria-label="REI Runner home"><BrandLogo /></Link>
+            <button
+              type="button"
+              onClick={() => navigate({ to: "/apply", search: {} })}
+              className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition"
+            >
+              <ArrowLeft className="size-4" /> Change path
+            </button>
+          </div>
+        </header>
+        <section className="mx-auto max-w-2xl px-5 py-14 md:py-20">
+          <div className="rounded-2xl border border-amber-500/30 bg-amber-500/5 p-6 md:p-10 text-center shadow-card">
+            <div className="mx-auto size-12 rounded-full bg-amber-500/15 text-amber-300 grid place-items-center">
+              <PauseCircle className="size-6" />
+            </div>
+            <h1 className="mt-5 text-2xl md:text-3xl font-bold">Runner applications are temporarily paused</h1>
+            <p className="mt-3 text-muted-foreground">
+              We're focused on onboarding investors right now so that every new runner has paid
+              tasks waiting the day they join. Add yourself to the waitlist and we'll email you
+              the moment runner signups reopen in your market.
+            </p>
+            <div className="mt-6 flex flex-wrap justify-center gap-3">
+              <Link
+                to="/waitlist"
+                className="inline-flex items-center gap-2 rounded-md bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90 transition"
+              >
+                Join the runner waitlist <ArrowRight className="size-4" />
+              </Link>
+              <button
+                type="button"
+                onClick={() => navigate({ to: "/apply", search: { role: "investor" } })}
+                className="inline-flex items-center gap-2 rounded-md border border-border bg-background px-5 py-2.5 text-sm font-semibold text-foreground hover:bg-accent transition"
+              >
+                Apply as an investor instead
+              </button>
+            </div>
+          </div>
+        </section>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Toaster richColors closeButton position="top-center" theme="dark" />
