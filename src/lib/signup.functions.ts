@@ -35,6 +35,13 @@ export const finalizeSignupProfile = createServerFn({ method: "POST" })
       throw new Error("Signup session does not match the created user.");
     }
 
+    // Runner signups are temporarily paused site-wide.
+    if (data.role === "runner") {
+      throw new Error(
+        "Runner signups are temporarily paused. Please join the waitlist at /waitlist and we'll notify you when we reopen.",
+      );
+    }
+
     const profile = {
       user_id: context.userId,
       email: data.email,
