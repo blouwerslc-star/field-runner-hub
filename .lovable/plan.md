@@ -1,33 +1,63 @@
-## Goal
-Temporarily close runner signups site-wide and clearly communicate that only investor signups are open.
 
-## Changes
+# Cross-Platform Parity Audit Plan
 
-### 1. Gate runner signup paths
-- **`src/routes/signup.tsx`**: If `role=runner` is in the URL, redirect to a new "Runners paused" info state (or force role to `investor` with a notice). Remove/disable the runner role toggle in the signup form. Default role becomes `investor`.
-- **`src/routes/apply.tsx`** (field runner application): Replace the form with a "Runner applications paused" notice + email capture (waitlist) or link to the investor side. Keep the Pro/Investor application intact.
-- **`src/routes/runners.tsx`**: Add a prominent banner at the top: "Runner signups are temporarily paused — join the waitlist." Keep informational content.
-- **`src/routes/login.tsx`**: Change the "New here?" link to default to `role=investor`.
+Goal: verify REI Runner behaves and looks the same across three surfaces — desktop web, mobile web, and the Capacitor iOS/Android app — and produce a prioritized fix list. No code changes in this pass; the deliverable is a written audit + issue log. Fixes ship in follow-up plans grouped by severity.
 
-### 2. Site-wide announcement bar
-- **New `src/components/layout/AnnouncementBar.tsx`**: Dismissible top banner: "Runner signups are temporarily paused. We're currently onboarding investors only. [Join the runner waitlist]."
-- Mount in **`src/routes/__root.tsx`** (or `PublicHeader.tsx`) so it appears across public pages.
-- Dismissal persisted in `localStorage` so it doesn't nag on every visit.
+## Scope
 
-### 3. Landing page CTAs
-- **`src/routes/index.tsx`** and **`src/components/landing/ApplicationForms.tsx`**: Any "Become a runner" / "Apply as a runner" CTAs → change label to "Join runner waitlist" and route to the waitlist page (or replace the runner form tab with a waitlist form). Investor CTAs stay unchanged and get slightly more prominence.
+In scope:
+- Public marketing routes (`/`, `/investors`, `/runners`, `/pricing`, `/apply`, `/waitlist`, `/coverage`, `/about`, `/faq`, `/trust`, `/story`, `/profiles`, `/profile/$slug`, blog + service pages)
+- Auth flows (`/signup`, `/login`, `/forgot-password`, `/reset-password`, Google OAuth)
+- Authenticated investor + runner dashboards, tasks, messaging, onboarding wizard, profile pages
+- Global chrome: `AnnouncementBar`, `PublicHeader`, `MobileDrawer`, `MobileBottomNav`, `BackButton`, `InstallPrompt`, `TrackingActiveBanner`
+- Native-only paths: deep links, Android hardware back, push notifications (OneSignal), camera/photo capture, Stripe/Checkr external browser handoff, splash + status bar
 
-### 4. Waitlist reuse
-- Point all runner CTAs to the existing **`src/routes/waitlist.tsx`** (add a `?role=runner` param if needed) so we still capture interest.
+Out of scope for this audit: backend logic changes, new features, redesigns, admin tools.
 
-### 5. Backend safeguard
-- **`src/lib/signup.functions.ts`** (`finalizeSignupProfile`): Server-side reject `role === "runner"` with a clear error ("Runner signups are temporarily paused"). Prevents anyone bypassing the UI.
-- **`src/lib/applications.functions.ts`** (`submitFieldRunner`): Same server-side rejection, or route submissions into a "waitlist" table/flag. Simplest: reject with a friendly message and instruct to join the waitlist.
+## Audit dimensions (checked on all three surfaces)
 
-### Out of scope
-- Existing runner accounts continue to work (login, onboarding, dashboard all untouched).
-- Admin ability to manually invite/create runners is unchanged.
-- No changes to onboarding wizard, availability scheduler, or profile pages.
+1. Rendering & layout — no overflow, safe-area insets respected, no clipped CTAs, drawer opens/closes cleanly, bottom nav doesn't overlap content.
+2. Navigation — every header/footer/drawer link resolves, back button behaves, deep links open the right route, no 404s on refresh.
+3. Auth — email + Google signup/login, session persistence across reload and app relaunch, logout clears state, redirect after login lands on the right dashboard.
+4. Forms — signup, waitlist, apply, post-task wizard, onboarding wizard, profile edit, messaging: keyboard behavior, validation, submit success, error states.
+5. External handoffs — Stripe Connect, Stripe Checkout, Checkr background check, external doc links open in in-app browser on native, new tab on web, and return correctly.
+6. Media capture — ID/selfie upload uses camera on native, file picker on web; portfolio + avatar upload paths.
+7. Notifications — OneSignal identity sync on login/logout, push permission prompt on native, in-app notification bell.
+8. Performance — first paint, route transitions, image loading, obvious jank on mid-tier Android.
+9. Announcement + gating — runner signup paused messaging visible and consistent; runner-role signup blocked everywhere (client + server).
+10. SEO/meta — titles, descriptions, og tags per route (web only; native N/A).
 
-## Copy (draft)
-> **Runner signups are temporarily paused.** We're focused on onboarding investors right now to make sure every new runner has paid tasks waiting. Interested in running? [Join the waitlist] and we'll notify you the moment signups reopen.
+## Method
+
+1. Route inventory — enumerate every route under `src/routes/` and every nav link in `PublicHeader`, `MobileDrawer`, `MobileBottomNav`, dashboard shells, and footers. Build one checklist reused across surfaces.
+2. Desktop web pass — Playwright at 1280x1800 against `http://localhost:8080`, walk the checklist, screenshot each route, capture console + network errors.
+3. Mobile web pass — Playwright at 390x844 (iPhone) and 360x800 (Android) against the same URL, repeat the checklist, focus on drawer, bottom nav, safe-area, form keyboard behavior.
+4. Authenticated pass — restore the injected Supabase session, repeat the checklist for investor and runner dashboards on desktop + mobile viewports.
+5. Native app pass — this sandbox can't run iOS/Android binaries, so native coverage is done by:
+   - Static review of `capacitor.config.ts`, `src/lib/native.ts`, `initNativeShell`, back-button handler, deep link handler, OneSignal init, camera helpers.
+   - Verifying every branch guarded by `isNative()` has a working web fallback and vice versa.
+   - Cross-referencing `docs/MOBILE_BUILD.md` against current code for drift.
+   - Listing anything that requires a physical device or TestFlight/Play internal build to verify, so the user can run those checks or hand them off.
+6. Findings log — one table per surface: route/area, symptom, severity (P0 broken, P1 degraded, P2 polish), suspected cause, proposed fix.
+7. Prioritized remediation plan — grouped follow-up plans, P0 first.
+
+## Deliverable
+
+A single audit report posted in chat containing:
+- Route inventory + coverage matrix (desktop / mobile web / native)
+- Screenshot evidence for each surface (stored under `/tmp/browser/audit/`)
+- Findings log with severity + proposed fixes
+- A short list of native-only checks the user needs to run on a real device
+
+## Technical notes
+
+- Playwright script lives at `/tmp/browser/audit/run.py`; screenshots at `/tmp/browser/audit/screenshots/`.
+- Session restore uses `LOVABLE_BROWSER_SUPABASE_*` env vars per project browser-use conventions.
+- Native review is source-only — do not attempt `npx cap run` in the sandbox.
+- No code, migrations, or config changes in this pass.
+
+## Out of scope / non-goals
+
+- Redesign, copy rewrites, new features.
+- Backend/RLS changes.
+- App Store / Play Store submission steps.
