@@ -105,7 +105,7 @@ function BackgroundCheckPage() {
       </div>
     );
     if (paid) return (
-      <div className="rounded-2xl border border-border bg-card/40 p-6">
+      <div id="intake-form" className="rounded-2xl border border-border bg-card/40 p-6">
         <h2 className="text-lg font-semibold mb-1">Secure intake form</h2>
         <p className="text-xs text-muted-foreground mb-5">
           We need a few details to run your background check. All sensitive fields are encrypted.
