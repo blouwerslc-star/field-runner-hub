@@ -1,6 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect } from "react";
+import { toast } from "sonner";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { BackgroundCheckCheckout } from "@/components/payments/BackgroundCheckCheckout";
 import { getBackgroundCheckStatus } from "@/lib/background-check.functions";
@@ -26,6 +28,20 @@ function BackgroundCheckPage() {
   const returnUrl = typeof window !== "undefined"
     ? `${window.location.origin}/profile/background-check?paid=1`
     : "/profile/background-check";
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("paid") === "1") {
+      toast.success("Payment received — finish the secure intake form below (~5 min).", { duration: 8000 });
+      params.delete("paid");
+      const qs = params.toString();
+      window.history.replaceState({}, "", window.location.pathname + (qs ? `?${qs}` : ""));
+      setTimeout(() => {
+        document.getElementById("intake-form")?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 300);
+    }
+  }, []);
 
   const subStatus = (sub?.status as string | null) ?? null;
   const paid = !!p.background_check_paid_at;
@@ -89,7 +105,7 @@ function BackgroundCheckPage() {
       </div>
     );
     if (paid) return (
-      <div className="rounded-2xl border border-border bg-card/40 p-6">
+      <div id="intake-form" className="rounded-2xl border border-border bg-card/40 p-6">
         <h2 className="text-lg font-semibold mb-1">Secure intake form</h2>
         <p className="text-xs text-muted-foreground mb-5">
           We need a few details to run your background check. All sensitive fields are encrypted.

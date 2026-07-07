@@ -1,63 +1,44 @@
+# Background check approval — what's actually happening
 
-# Cross-Platform Parity Audit Plan
+## Diagnosis
 
-Goal: verify REI Runner behaves and looks the same across three surfaces — desktop web, mobile web, and the Capacitor iOS/Android app — and produce a prioritized fix list. No code changes in this pass; the deliverable is a written audit + issue log. Fixes ship in follow-up plans grouped by severity.
+There are 3 runners who paid the $13.99 fee. **None of them have submitted the encrypted intake form.** That's why the Pass / Fail / Needs Info buttons on the admin page won't press — the card renders from the `profiles` row (payment record), but there's no `background_check_submissions` row to act on, so every action button is disabled (`disabled={!sub.id}`).
 
-## Scope
+Paid, no intake form on file:
+- Karl Duncan — kedmsd@att.net — paid Jul 6
+- Lakesha Actkinson — lakesha_actkinson@yahoo.com — paid Jul 6
+- Jason Richards — jrich1642@gmail.com — paid Jun 18 (already flagged verified manually)
 
-In scope:
-- Public marketing routes (`/`, `/investors`, `/runners`, `/pricing`, `/apply`, `/waitlist`, `/coverage`, `/about`, `/faq`, `/trust`, `/story`, `/profiles`, `/profile/$slug`, blog + service pages)
-- Auth flows (`/signup`, `/login`, `/forgot-password`, `/reset-password`, Google OAuth)
-- Authenticated investor + runner dashboards, tasks, messaging, onboarding wizard, profile pages
-- Global chrome: `AnnouncementBar`, `PublicHeader`, `MobileDrawer`, `MobileBottomNav`, `BackButton`, `InstallPrompt`, `TrackingActiveBanner`
-- Native-only paths: deep links, Android hardware back, push notifications (OneSignal), camera/photo capture, Stripe/Checkr external browser handoff, splash + status bar
+So there is **no encrypted form hiding somewhere** — they simply never filled it out after paying. They land on `/profile/background-check`, see the intake form, and drop off.
 
-Out of scope for this audit: backend logic changes, new features, redesigns, admin tools.
+## Plan
 
-## Audit dimensions (checked on all three surfaces)
+Two-part fix: unblock these three runners today, then prevent future dropoff.
 
-1. Rendering & layout — no overflow, safe-area insets respected, no clipped CTAs, drawer opens/closes cleanly, bottom nav doesn't overlap content.
-2. Navigation — every header/footer/drawer link resolves, back button behaves, deep links open the right route, no 404s on refresh.
-3. Auth — email + Google signup/login, session persistence across reload and app relaunch, logout clears state, redirect after login lands on the right dashboard.
-4. Forms — signup, waitlist, apply, post-task wizard, onboarding wizard, profile edit, messaging: keyboard behavior, validation, submit success, error states.
-5. External handoffs — Stripe Connect, Stripe Checkout, Checkr background check, external doc links open in in-app browser on native, new tab on web, and return correctly.
-6. Media capture — ID/selfie upload uses camera on native, file picker on web; portfolio + avatar upload paths.
-7. Notifications — OneSignal identity sync on login/logout, push permission prompt on native, in-app notification bell.
-8. Performance — first paint, route transitions, image loading, obvious jank on mid-tier Android.
-9. Announcement + gating — runner signup paused messaging visible and consistent; runner-role signup blocked everywhere (client + server).
-10. SEO/meta — titles, descriptions, og tags per route (web only; native N/A).
+### 1. Unblock the three current runners
+- Add an **"Email runner to finish intake"** button on every "Awaiting info" card (paid, no submission). Sends a templated reminder with a deep link back to `/profile/background-check`.
+- Add an **admin "Refund & cancel"** button on the same card (clears `background_check_paid_at`, records audit event) for cases where the runner has ghosted and we want to close the loop.
+- Keep Pass/Fail/Needs-info disabled on these cards — but replace the greyed buttons with a clear inline explainer: *"Runner paid but hasn't submitted the encrypted intake form yet. Nudge them below."* Right now it looks broken; it should look intentional.
 
-## Method
+### 2. Reduce dropoff after payment
+- On successful checkout return (`/profile/background-check?paid=1`), auto-scroll to the intake form and show a one-time toast: *"Payment received. Complete the secure intake form below to start your check (takes ~5 min)."*
+- Add an automated reminder: if `background_check_paid_at` is set and no submission exists after 24h / 72h / 7d, send an email nudge. Piggyback on the existing `runner_eligibility_reminders` / email queue infra.
+- Show a persistent banner on the runner dashboard: *"Finish your background check — $13.99 paid, intake form pending."*
 
-1. Route inventory — enumerate every route under `src/routes/` and every nav link in `PublicHeader`, `MobileDrawer`, `MobileBottomNav`, dashboard shells, and footers. Build one checklist reused across surfaces.
-2. Desktop web pass — Playwright at 1280x1800 against `http://localhost:8080`, walk the checklist, screenshot each route, capture console + network errors.
-3. Mobile web pass — Playwright at 390x844 (iPhone) and 360x800 (Android) against the same URL, repeat the checklist, focus on drawer, bottom nav, safe-area, form keyboard behavior.
-4. Authenticated pass — restore the injected Supabase session, repeat the checklist for investor and runner dashboards on desktop + mobile viewports.
-5. Native app pass — this sandbox can't run iOS/Android binaries, so native coverage is done by:
-   - Static review of `capacitor.config.ts`, `src/lib/native.ts`, `initNativeShell`, back-button handler, deep link handler, OneSignal init, camera helpers.
-   - Verifying every branch guarded by `isNative()` has a working web fallback and vice versa.
-   - Cross-referencing `docs/MOBILE_BUILD.md` against current code for drift.
-   - Listing anything that requires a physical device or TestFlight/Play internal build to verify, so the user can run those checks or hand them off.
-6. Findings log — one table per surface: route/area, symptom, severity (P0 broken, P1 degraded, P2 polish), suspected cause, proposed fix.
-7. Prioritized remediation plan — grouped follow-up plans, P0 first.
-
-## Deliverable
-
-A single audit report posted in chat containing:
-- Route inventory + coverage matrix (desktop / mobile web / native)
-- Screenshot evidence for each surface (stored under `/tmp/browser/audit/`)
-- Findings log with severity + proposed fixes
-- A short list of native-only checks the user needs to run on a real device
+### 3. Small admin UX cleanup
+- "Awaiting info" tab already exists but the empty/no-action state on paid-no-form cards is the confusing part. Reword the tab hint and card copy so it's obvious the ball is in the runner's court.
+- Show `submitted_at` vs `paid_at` more prominently so admins can tell at a glance which stage a runner is in.
 
 ## Technical notes
 
-- Playwright script lives at `/tmp/browser/audit/run.py`; screenshots at `/tmp/browser/audit/screenshots/`.
-- Session restore uses `LOVABLE_BROWSER_SUPABASE_*` env vars per project browser-use conventions.
-- Native review is source-only — do not attempt `npx cap run` in the sandbox.
-- No code, migrations, or config changes in this pass.
+- `src/routes/_authenticated/admin.background-checks.tsx` — add nudge/refund buttons + explainer block for `!sub.id` cards.
+- `src/lib/verification.functions.ts` — new server fns `adminNudgeBackgroundCheckIntake` and `adminRefundBackgroundCheck` (both `requireSupabaseAuth` + admin role check). Nudge writes a `notifications` row and enqueues an email; refund clears `background_check_paid_at` and writes an audit event (does **not** issue a Stripe refund — flagged for manual refund in Stripe with a link).
+- `src/lib/email-templates/` — add `background-check-intake-reminder.tsx`.
+- `src/routes/api/public/hooks/eligibility-reminders.ts` — extend to include paid-but-no-intake at 24h / 72h / 7d cadence.
+- Runner dashboard banner — reuse `ProfileCompletionBanner` pattern.
 
-## Out of scope / non-goals
+## Out of scope
 
-- Redesign, copy rewrites, new features.
-- Backend/RLS changes.
-- App Store / Play Store submission steps.
+- Automatic Stripe refunds (do those by hand in the Stripe dashboard — safer).
+- Changing the intake form itself.
+- Anything to do with the signup pause / investor-only flow.

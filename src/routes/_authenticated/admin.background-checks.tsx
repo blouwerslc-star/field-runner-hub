@@ -7,6 +7,8 @@ import {
   adminSetBackgroundCheckStatus,
   adminGetBackgroundCheckSubmission,
   adminRevealSsn,
+  adminNudgeBackgroundCheckIntake,
+  adminCancelBackgroundCheckPayment,
 } from "@/lib/verification.functions";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { RouteErrorState } from "@/components/dashboard/UiStates";
@@ -16,7 +18,7 @@ import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Loader2, CheckCircle2, XCircle, Clock, Mail, Phone, BadgeCheck, ShieldCheck, ArrowRight,
-  Eye, EyeOff, FileText, MessageCircleWarning, AlertCircle,
+  Eye, EyeOff, FileText, MessageCircleWarning, AlertCircle, BellRing, Trash2,
 } from "lucide-react";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger,
@@ -33,7 +35,7 @@ export const Route = createFileRoute("/_authenticated/admin/background-checks")(
 type Tab = "awaiting_info" | "submitted" | "in_review" | "needs_info" | "passed" | "failed" | "all";
 
 function AdminBackgroundChecksPage() {
-  const [tab, setTab] = useState<Tab>("submitted");
+  const [tab, setTab] = useState<Tab>("awaiting_info");
   const listFn = useServerFn(adminListBackgroundChecks);
   const setFn = useServerFn(adminSetBackgroundCheckStatus);
   const qc = useQueryClient();
@@ -150,6 +152,7 @@ function BgCheckCard({
   const fullName =
     [sub.legal_first_name, sub.legal_last_name].filter(Boolean).join(" ") ||
     profile.full_name || "Unknown";
+  const awaitingIntake = !sub.id;
   return (
     <div className="rounded-2xl border border-border bg-card/50 p-5 space-y-4">
       <div className="flex items-start justify-between gap-3">
@@ -172,56 +175,128 @@ function BgCheckCard({
 
       <div className="text-xs text-muted-foreground">
         {sub.submitted_at ? `Submitted ${new Date(sub.submitted_at).toLocaleString()}` : null}
-        {!sub.submitted_at && profile.background_check_paid_at
+        {!sub.submitted_at && (profile.background_check_paid_at || sub.background_check_paid_at)
           ? `Paid ${new Date(profile.background_check_paid_at).toLocaleString()} — awaiting intake form`
           : null}
       </div>
 
-      {sub.id && <SubmissionDetailsButton submissionId={sub.id} />}
+      {awaitingIntake ? (
+        <AwaitingIntakeActions userId={sub.user_id} name={fullName} />
+      ) : (
+        <>
+          <SubmissionDetailsButton submissionId={sub.id} />
+          <Textarea
+            placeholder="Internal note or message to the runner (optional)"
+            rows={2}
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+          />
+          <div className="flex flex-wrap gap-2">
+            <Button
+              size="sm"
+              disabled={pending}
+              onClick={() => onSet("passed", notes.trim() || undefined)}
+              className="bg-emerald-600 hover:bg-emerald-600/90"
+            >
+              <CheckCircle2 className="size-4 mr-1.5" /> Mark Passed
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              className="text-destructive border-destructive/40"
+              disabled={pending}
+              onClick={() => onSet("failed", notes.trim() || undefined)}
+            >
+              <XCircle className="size-4 mr-1.5" /> Mark Failed
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={pending}
+              onClick={() => onSet("needs_info", notes.trim() || undefined)}
+            >
+              <MessageCircleWarning className="size-4 mr-1.5" /> Request more info
+            </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              disabled={pending}
+              onClick={() => onSet("in_review", notes.trim() || undefined)}
+            >
+              <Clock className="size-4 mr-1.5" /> Mark in review
+            </Button>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
 
+function AwaitingIntakeActions({ userId, name }: { userId: string; name: string }) {
+  const qc = useQueryClient();
+  const nudgeFn = useServerFn(adminNudgeBackgroundCheckIntake);
+  const cancelFn = useServerFn(adminCancelBackgroundCheckPayment);
+  const [msg, setMsg] = useState("");
+
+  const nudge = useMutation({
+    mutationFn: () => nudgeFn({ data: { user_id: userId, message: msg.trim() || null } }),
+    onSuccess: (r: any) => {
+      toast.success(r?.emailedTo ? `Nudge sent to ${r.emailedTo}` : "Nudge sent");
+      setMsg("");
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const cancel = useMutation({
+    mutationFn: () => cancelFn({ data: { user_id: userId, reason: msg.trim() || null } }),
+    onSuccess: () => {
+      toast.success(`Cancelled ${name}'s background check request`);
+      qc.invalidateQueries({ queryKey: ["admin-bg-checks"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  return (
+    <>
+      <div className="rounded-lg border border-amber-500/30 bg-amber-500/5 p-3 text-xs text-amber-200 flex items-start gap-2">
+        <AlertCircle className="size-4 shrink-0 mt-0.5" />
+        <div>
+          <div className="font-medium">Runner paid but hasn't submitted the encrypted intake form yet.</div>
+          <div className="text-amber-200/70 mt-1">
+            Nothing to approve until they finish it. Nudge them below, or cancel if they've abandoned it (refund manually in Stripe).
+          </div>
+        </div>
+      </div>
       <Textarea
-        placeholder="Internal note or message to the runner (optional)"
+        placeholder="Optional message to the runner (nudge) or internal reason (cancel)"
         rows={2}
-        value={notes}
-        onChange={(e) => setNotes(e.target.value)}
+        value={msg}
+        onChange={(e) => setMsg(e.target.value)}
       />
-
       <div className="flex flex-wrap gap-2">
         <Button
           size="sm"
-          disabled={pending || !sub.id}
-          onClick={() => onSet("passed", notes.trim() || undefined)}
-          className="bg-emerald-600 hover:bg-emerald-600/90"
+          disabled={nudge.isPending || cancel.isPending}
+          onClick={() => nudge.mutate()}
+          className="bg-primary hover:bg-primary/90"
         >
-          <CheckCircle2 className="size-4 mr-1.5" /> Mark Passed
+          <BellRing className="size-4 mr-1.5" /> Email runner to finish intake
         </Button>
         <Button
           size="sm"
           variant="outline"
           className="text-destructive border-destructive/40"
-          disabled={pending || !sub.id}
-          onClick={() => onSet("failed", notes.trim() || undefined)}
+          disabled={nudge.isPending || cancel.isPending}
+          onClick={() => {
+            if (confirm(`Cancel ${name}'s background check request? Refund $13.99 manually in Stripe.`)) {
+              cancel.mutate();
+            }
+          }}
         >
-          <XCircle className="size-4 mr-1.5" /> Mark Failed
-        </Button>
-        <Button
-          size="sm"
-          variant="outline"
-          disabled={pending || !sub.id}
-          onClick={() => onSet("needs_info", notes.trim() || undefined)}
-        >
-          <MessageCircleWarning className="size-4 mr-1.5" /> Request more info
-        </Button>
-        <Button
-          size="sm"
-          variant="ghost"
-          disabled={pending || !sub.id}
-          onClick={() => onSet("in_review", notes.trim() || undefined)}
-        >
-          <Clock className="size-4 mr-1.5" /> Mark in review
+          <Trash2 className="size-4 mr-1.5" /> Cancel request
         </Button>
       </div>
-    </div>
+    </>
   );
 }
 
