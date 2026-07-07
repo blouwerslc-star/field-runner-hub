@@ -35,7 +35,7 @@ export const Route = createFileRoute("/_authenticated/admin/background-checks")(
 type Tab = "awaiting_info" | "submitted" | "in_review" | "needs_info" | "passed" | "failed" | "all";
 
 function AdminBackgroundChecksPage() {
-  const [tab, setTab] = useState<Tab>("submitted");
+  const [tab, setTab] = useState<Tab>("awaiting_info");
   const listFn = useServerFn(adminListBackgroundChecks);
   const setFn = useServerFn(adminSetBackgroundCheckStatus);
   const qc = useQueryClient();
