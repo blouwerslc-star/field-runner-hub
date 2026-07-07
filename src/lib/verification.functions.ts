@@ -531,8 +531,12 @@ export const adminCancelBackgroundCheckPayment = createServerFn({ method: "POST"
       submission_id: null,
       subject_user_id: data.user_id,
       actor_id: userId,
-      action: "admin_cancel_payment",
-      metadata: { reason: data.reason ?? null, prior_paid_at: profile.background_check_paid_at },
+      action: "status_change",
+      metadata: {
+        event: "admin_cancel_payment",
+        reason: data.reason ?? null,
+        prior_paid_at: profile.background_check_paid_at,
+      },
     });
 
     await supabaseAdmin.from("notifications").insert({
