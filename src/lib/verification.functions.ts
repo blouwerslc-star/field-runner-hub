@@ -452,3 +452,98 @@ export const adminRevealSsn = createServerFn({ method: "POST" })
     });
     return { ssn: ssn as string | null };
   });
+
+// =====================================================================
+// Admin: nudge a runner who paid but hasn't filled the intake form
+// =====================================================================
+
+const nudgeSchema = z.object({
+  user_id: z.string().uuid(),
+  message: z.string().trim().max(500).optional().nullable(),
+});
+
+export const adminNudgeBackgroundCheckIntake = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i: unknown) => nudgeSchema.parse(i))
+  .handler(async ({ context, data }) => {
+    const { userId } = context;
+    const { data: isAdmin } = await supabaseAdmin.rpc("has_role", { _user_id: userId, _role: "admin" });
+    if (!isAdmin) throw new Error("Admins only");
+
+    const { data: profile } = await supabaseAdmin
+      .from("profiles")
+      .select("user_id, full_name, email, background_check_paid_at, background_check_verified")
+      .eq("user_id", data.user_id)
+      .maybeSingle();
+    if (!profile) throw new Error("Runner not found");
+    if (!profile.background_check_paid_at) throw new Error("Runner hasn't paid yet");
+    if (profile.background_check_verified) throw new Error("Runner is already verified");
+
+    const body =
+      data.message?.trim() ||
+      "You've already paid for your background check — please finish the secure intake form (takes ~5 min) so we can run your check and unlock your Verified badge.";
+
+    await supabaseAdmin.from("notifications").insert({
+      user_id: data.user_id,
+      type: "background_check_intake_reminder",
+      title: "Finish your background check intake form",
+      body,
+      link: "/profile/background-check",
+    });
+
+    return { ok: true, emailedTo: profile.email ?? null };
+  });
+
+// =====================================================================
+// Admin: cancel a paid-but-abandoned background check
+// (Clears the paid flag so the card falls off the "Awaiting info" list.
+//  Does NOT issue a Stripe refund — do that manually in the dashboard.)
+// =====================================================================
+
+const cancelSchema = z.object({
+  user_id: z.string().uuid(),
+  reason: z.string().trim().max(500).optional().nullable(),
+});
+
+export const adminCancelBackgroundCheckPayment = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i: unknown) => cancelSchema.parse(i))
+  .handler(async ({ context, data }) => {
+    const { userId } = context;
+    const { data: isAdmin } = await supabaseAdmin.rpc("has_role", { _user_id: userId, _role: "admin" });
+    if (!isAdmin) throw new Error("Admins only");
+
+    const { data: profile } = await supabaseAdmin
+      .from("profiles")
+      .select("user_id, background_check_paid_at, background_check_verified")
+      .eq("user_id", data.user_id)
+      .maybeSingle();
+    if (!profile) throw new Error("Runner not found");
+    if (profile.background_check_verified) throw new Error("Cannot cancel — runner is already verified");
+
+    const { error } = await supabaseAdmin
+      .from("profiles")
+      .update({ background_check_paid_at: null, checkr_status: null })
+      .eq("user_id", data.user_id);
+    if (error) throw new Error(error.message);
+
+    await supabaseAdmin.from("background_check_audit").insert({
+      submission_id: null,
+      subject_user_id: data.user_id,
+      actor_id: userId,
+      action: "admin_cancel_payment",
+      metadata: { reason: data.reason ?? null, prior_paid_at: profile.background_check_paid_at },
+    });
+
+    await supabaseAdmin.from("notifications").insert({
+      user_id: data.user_id,
+      type: "background_check_cancelled",
+      title: "Background check request cancelled",
+      body:
+        data.reason?.trim() ||
+        "Your background check request was cancelled by our team. Contact support if you'd like to restart it.",
+      link: "/help",
+    });
+
+    return { ok: true };
+  });
