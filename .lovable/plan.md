@@ -1,44 +1,32 @@
-# Background check approval — what's actually happening
+## Problem
 
-## Diagnosis
+`/waitlist` currently renders only a "You're on the waitlist" confirmation screen — there's no form. Anyone clicking "Join the runner waitlist" from the announcement bar, the `/apply?role=runner` paused screen, or elsewhere lands on a thank-you page without ever submitting anything, so no waitlist entries are captured.
 
-There are 3 runners who paid the $13.99 fee. **None of them have submitted the encrypted intake form.** That's why the Pass / Fail / Needs Info buttons on the admin page won't press — the card renders from the `profiles` row (payment record), but there's no `background_check_submissions` row to act on, so every action button is disabled (`disabled={!sub.id}`).
+## Fix
 
-Paid, no intake form on file:
-- Karl Duncan — kedmsd@att.net — paid Jul 6
-- Lakesha Actkinson — lakesha_actkinson@yahoo.com — paid Jul 6
-- Jason Richards — jrich1642@gmail.com — paid Jun 18 (already flagged verified manually)
+Turn `/waitlist` into a real form-first page, and move the existing thank-you UI to a `?submitted=1` success state on the same route.
 
-So there is **no encrypted form hiding somewhere** — they simply never filled it out after paying. They land on `/profile/background-check`, see the intake form, and drop off.
+### 1. Storage
+Add a `runner_waitlist` table (Lovable Cloud migration):
+- `id uuid pk`, `created_at timestamptz`, `full_name text`, `email citext unique`, `phone text`, `city text`, `state text`, `market text`, `notes text`, `source text` (defaults to `waitlist_page`), `user_agent text`, `referrer text`.
+- GRANTs: `INSERT` to `anon` + `authenticated` (public form), `ALL` to `service_role`. RLS enabled; policy allows anon insert only. No public SELECT.
 
-## Plan
+### 2. Server function
+`joinRunnerWaitlist` in `src/lib/waitlist.functions.ts`:
+- Public (no auth middleware), Zod-validated payload.
+- Uses server publishable client for insert; handles duplicate-email as a soft success ("already on the list").
+- Fires an admin notification email (reuse `email-sender.server.ts` + a lightweight template) and a confirmation email to the applicant (reuse existing `applicant-welcome` styling for brand consistency).
 
-Two-part fix: unblock these three runners today, then prevent future dropoff.
+### 3. Route UI (`src/routes/waitlist.tsx`)
+- Default view: hero + short-form with Name, Email, Phone (optional), City, State, Market focus (optional), "Anything we should know?" textarea. Submits via the server fn, then navigates to `/waitlist?submitted=1`.
+- `?submitted=1` view: current "You're on the waitlist" confirmation card, unchanged copy.
+- Reuses existing form primitives (`Input`, `Button`, `Textarea`, `toast`) and matches the dark theme used on `/apply`.
+- Keeps `noindex` meta.
 
-### 1. Unblock the three current runners
-- Add an **"Email runner to finish intake"** button on every "Awaiting info" card (paid, no submission). Sends a templated reminder with a deep link back to `/profile/background-check`.
-- Add an **admin "Refund & cancel"** button on the same card (clears `background_check_paid_at`, records audit event) for cases where the runner has ghosted and we want to close the loop.
-- Keep Pass/Fail/Needs-info disabled on these cards — but replace the greyed buttons with a clear inline explainer: *"Runner paid but hasn't submitted the encrypted intake form yet. Nudge them below."* Right now it looks broken; it should look intentional.
-
-### 2. Reduce dropoff after payment
-- On successful checkout return (`/profile/background-check?paid=1`), auto-scroll to the intake form and show a one-time toast: *"Payment received. Complete the secure intake form below to start your check (takes ~5 min)."*
-- Add an automated reminder: if `background_check_paid_at` is set and no submission exists after 24h / 72h / 7d, send an email nudge. Piggyback on the existing `runner_eligibility_reminders` / email queue infra.
-- Show a persistent banner on the runner dashboard: *"Finish your background check — $13.99 paid, intake form pending."*
-
-### 3. Small admin UX cleanup
-- "Awaiting info" tab already exists but the empty/no-action state on paid-no-form cards is the confusing part. Reword the tab hint and card copy so it's obvious the ball is in the runner's court.
-- Show `submitted_at` vs `paid_at` more prominently so admins can tell at a glance which stage a runner is in.
-
-## Technical notes
-
-- `src/routes/_authenticated/admin.background-checks.tsx` — add nudge/refund buttons + explainer block for `!sub.id` cards.
-- `src/lib/verification.functions.ts` — new server fns `adminNudgeBackgroundCheckIntake` and `adminRefundBackgroundCheck` (both `requireSupabaseAuth` + admin role check). Nudge writes a `notifications` row and enqueues an email; refund clears `background_check_paid_at` and writes an audit event (does **not** issue a Stripe refund — flagged for manual refund in Stripe with a link).
-- `src/lib/email-templates/` — add `background-check-intake-reminder.tsx`.
-- `src/routes/api/public/hooks/eligibility-reminders.ts` — extend to include paid-but-no-intake at 24h / 72h / 7d cadence.
-- Runner dashboard banner — reuse `ProfileCompletionBanner` pattern.
+### 4. Wire-up
+- `AnnouncementBar`, `/apply?role=runner` paused card, `/runners`, home hero, and `PublicHeader` "Runner Waitlist" already link to `/waitlist` — no changes needed once the form is on that route.
 
 ## Out of scope
-
-- Automatic Stripe refunds (do those by hand in the Stripe dashboard — safer).
-- Changing the intake form itself.
-- Anything to do with the signup pause / investor-only flow.
+- Investor waitlist (investors are still open for signup).
+- Admin dashboard view of waitlist entries (query the table directly for now; can add UI later).
+- Automated "we're reopening" broadcast (will hook into `broadcasts.functions.ts` when signups reopen).
