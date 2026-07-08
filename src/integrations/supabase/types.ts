@@ -2466,6 +2466,54 @@ export type Database = {
         }
         Relationships: []
       }
+      runner_waitlist: {
+        Row: {
+          city: string | null
+          created_at: string
+          email: string
+          email_norm: string | null
+          full_name: string
+          id: string
+          market: string | null
+          notes: string | null
+          phone: string | null
+          referrer: string | null
+          source: string
+          state: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          city?: string | null
+          created_at?: string
+          email: string
+          email_norm?: string | null
+          full_name: string
+          id?: string
+          market?: string | null
+          notes?: string | null
+          phone?: string | null
+          referrer?: string | null
+          source?: string
+          state?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          city?: string | null
+          created_at?: string
+          email?: string
+          email_norm?: string | null
+          full_name?: string
+          id?: string
+          market?: string | null
+          notes?: string | null
+          phone?: string | null
+          referrer?: string | null
+          source?: string
+          state?: string | null
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
       saved_tasks: {
         Row: {
           created_at: string
