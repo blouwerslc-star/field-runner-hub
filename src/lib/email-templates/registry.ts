@@ -11,6 +11,7 @@ import { template as verificationReminder } from './verification-reminder'
 import { template as academyReminder } from './academy-reminder'
 import { template as marketUpdateLaunch } from './market-update-launch'
 import { template as adminDailyDigest } from './admin-daily-digest'
+import { template as promoCreditReminder } from './promo-credit-reminder'
 
 export interface TemplateEntry {
   component: ComponentType<any>
@@ -42,4 +43,5 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   academy_reminder: academyReminder,
   market_update_launch: marketUpdateLaunch,
   admin_daily_digest: adminDailyDigest,
+  promo_credit_reminder: promoCreditReminder,
 }
