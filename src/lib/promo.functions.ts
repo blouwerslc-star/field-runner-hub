@@ -237,3 +237,72 @@ export const updatePromoCampaign = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true };
   });
+
+/**
+ * Admin-only: send the promo-credit reminder email to every investor who
+ * currently holds an unredeemed First Task Free credit. Returns per-recipient
+ * results so the admin dashboard can display a summary.
+ */
+export const adminSendPromoCreditReminder = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i: unknown) =>
+    z.object({
+      campaignCode: z.string().min(1).max(64).default("first_task_free"),
+      dryRun: z.boolean().optional().default(false),
+    }).parse(i),
+  )
+  .handler(async ({ context, data }) => {
+    const { supabase, userId } = context;
+    const { data: roles } = await supabase.from("user_roles").select("role").eq("user_id", userId);
+    if (!(roles ?? []).some((r) => r.role === "admin")) throw new Error("Admins only");
+
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { sendTransactionalEmail } = await import("@/lib/email-sender.server");
+
+    const { data: credits, error } = await supabaseAdmin
+      .from("promo_credits")
+      .select("id, user_id, email, credit_cents, remaining_cents, status")
+      .eq("status", "available")
+      .gt("remaining_cents", 0);
+    if (error) throw new Error(error.message);
+
+    const results: Array<{ email: string; ok: boolean; reason?: string }> = [];
+    for (const c of credits ?? []) {
+      const email = (c.email ?? "").trim();
+      if (!email) {
+        results.push({ email: "(missing)", ok: false, reason: "missing_email" });
+        continue;
+      }
+      let recipientName: string | undefined;
+      if (c.user_id) {
+        const { data: prof } = await supabaseAdmin
+          .from("profiles")
+          .select("full_name")
+          .eq("user_id", c.user_id)
+          .maybeSingle();
+        recipientName = prof?.full_name ?? undefined;
+      }
+      if (data.dryRun) {
+        results.push({ email, ok: true, reason: "dry_run" });
+        continue;
+      }
+      const res = await sendTransactionalEmail({
+        templateName: "promo_credit_reminder",
+        recipientEmail: email,
+        templateData: {
+          recipientName: recipientName ?? "there",
+          creditAmount: `$${Math.round((c.remaining_cents ?? c.credit_cents ?? 5000) / 100)}`,
+        },
+      });
+      results.push({ email, ok: res.ok, reason: res.reason });
+    }
+
+    return {
+      ok: true,
+      total: results.length,
+      sent: results.filter((r) => r.ok && r.reason !== "dry_run").length,
+      dryRun: results.filter((r) => r.reason === "dry_run").length,
+      failed: results.filter((r) => !r.ok).length,
+      results,
+    };
+  });
