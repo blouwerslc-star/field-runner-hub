@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Loader2, Download, Gift, ToggleLeft } from "lucide-react";
+import { Loader2, Download, Gift, ToggleLeft, Mail } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { Button } from "@/components/ui/button";
@@ -15,6 +15,7 @@ import {
   getPromoAnalytics,
   updatePromoCampaign,
   exportPromoAnalyticsCsv,
+  adminSendPromoCreditReminder,
 } from "@/lib/promo.functions";
 
 export const Route = createFileRoute("/_authenticated/admin/promotions")({
@@ -36,6 +37,7 @@ function AdminPromotions() {
   const fetchAnalytics = useServerFn(getPromoAnalytics);
   const save = useServerFn(updatePromoCampaign);
   const exportCsv = useServerFn(exportPromoAnalyticsCsv);
+  const sendReminders = useServerFn(adminSendPromoCreditReminder);
   const qc = useQueryClient();
 
   const { data, isLoading } = useQuery({
@@ -69,6 +71,14 @@ function AdminPromotions() {
       qc.invalidateQueries({ queryKey: ["promo-analytics"] });
       qc.invalidateQueries({ queryKey: ["promo-campaign-active"] });
       qc.invalidateQueries({ queryKey: ["my-promo-credit"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const remind = useMutation({
+    mutationFn: () => sendReminders({ data: { campaignCode: "first_task_free", dryRun: false } }),
+    onSuccess: (r) => {
+      toast.success(`Sent ${r.sent}/${r.total} reminders${r.failed ? ` (${r.failed} failed)` : ""}`);
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -156,6 +166,10 @@ function AdminPromotions() {
           </Button>
           <Button variant="outline" onClick={handleExport}>
             <Download className="size-4 mr-1.5" /> Export analytics CSV
+          </Button>
+          <Button variant="outline" onClick={() => remind.mutate()} disabled={remind.isPending}>
+            {remind.isPending ? <Loader2 className="size-3.5 mr-1.5 animate-spin" /> : <Mail className="size-4 mr-1.5" />}
+            Send reminder to unredeemed credits
           </Button>
         </div>
       </div>
